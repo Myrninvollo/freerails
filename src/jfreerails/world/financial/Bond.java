@@ -1,6 +1,6 @@
 package jfreerails.world.financial;
 
-import jfreerails.misc.GameTime;
+import jfreerails.world.GameTime;
 
 /**
  * Represents ...

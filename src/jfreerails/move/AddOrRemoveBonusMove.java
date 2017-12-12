@@ -1,7 +1,7 @@
 package jfreerails.move;
 
-import jfreerails.misc.Money;
-import jfreerails.type.CargoType;
+import jfreerails.world.type.CargoType;
+import jfreerails.world.financial.Money;
 import jfreerails.world.station.StationModelPrivate;
 
 /**

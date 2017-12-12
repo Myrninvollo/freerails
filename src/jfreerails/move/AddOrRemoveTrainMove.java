@@ -3,7 +3,7 @@ package jfreerails.move;
 
 
 import java.awt.Point;
-import jfreerails.type.EngineType;
+import jfreerails.world.type.EngineType;
 
 /**
  * Represents ...

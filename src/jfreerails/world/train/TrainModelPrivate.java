@@ -1,6 +1,6 @@
 package jfreerails.world.train;
 
-import jfreerails.misc.GameTime;
+import jfreerails.world.GameTime;
 import jfreerails.world.station.StationModel;
 /**
  * Represents ...

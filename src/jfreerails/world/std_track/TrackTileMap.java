@@ -8,7 +8,7 @@ package jfreerails.world.std_track;
 import java.awt.Dimension;
 import java.awt.Point;
 
-import jfreerails.list.TrackRuleList;
+import jfreerails.world.TrackRuleList;
 import jfreerails.world.tilemap.TileMap;
 /**
  *

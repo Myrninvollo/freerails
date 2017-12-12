@@ -1,7 +1,7 @@
 
 package jfreerails.world.flat;
 
-import experimental.FreerailsSerializable;
+import jfreerails.lib.FreerailsSerializable;
 
 public interface FlatTrackTemplate extends FreerailsSerializable {
     FlatTrackTemplate getRotatedInstance(Rotation r);

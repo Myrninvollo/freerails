@@ -3,7 +3,7 @@ package jfreerails.world.std_cargo;
 import java.util.Iterator;
 import java.util.Vector;
 
-import jfreerails.type.CargoType;
+import jfreerails.world.type.CargoType;
 import jfreerails.world.cargo.CargoBundle;
 
 public class EmptyCargoBundle implements CargoBundle {

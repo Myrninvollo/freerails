@@ -109,7 +109,7 @@ public class TrainView {
 					defaultConfiguration.createCompatibleImage(
 						30,
 						30,
-						Transparency.OPAQUE);
+						Transparency.TRANSLUCENT);
 				Graphics g = trains[column][row].getGraphics();
 				row++;
 				this.setDirection(vectors[i]);

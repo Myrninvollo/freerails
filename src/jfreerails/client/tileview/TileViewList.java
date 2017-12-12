@@ -1,7 +1,7 @@
 package jfreerails.client.tileview;
 import java.util.Iterator;
 
-import jfreerails.list.TerrainTileTypesList;
+import jfreerails.world.TerrainTileTypesList;
 
 /**
 *  Description of the Interface

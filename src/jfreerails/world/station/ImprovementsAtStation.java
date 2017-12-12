@@ -1,8 +1,8 @@
 package jfreerails.world.station;
 
-import jfreerails.type.EngineShop;
-import jfreerails.type.MaintenanceShop;
-import jfreerails.type.SwitchingYard;
+import jfreerails.world.type.EngineShop;
+import jfreerails.world.type.MaintenanceShop;
+import jfreerails.world.type.SwitchingYard;
 final public class ImprovementsAtStation {
 	public MaintenanceShop getMaintenanceShop() {
 		return maintenanceShop;

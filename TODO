@@ -1,9 +1,8 @@
-o	Undoable track moves.
-o	Planning mode.
 o	Bridge and tunnel building.
 o	Fix habour painting bug.
 o	Signals
-o	SAX2 parser for track_tiles.xml.
+o	Hard code track and terrain types - once 
+	the code has matured, we can revert to using xml.	
 o	Move cursor when appropriate moves occur.
 o	Fire events when elemants on the map are clicked.
 o	Build station dialogue.

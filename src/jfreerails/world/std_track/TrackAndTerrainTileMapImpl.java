@@ -10,8 +10,8 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.net.URL;
 
-import jfreerails.list.TerrainTileTypesList;
-import jfreerails.list.TrackRuleList;
+import jfreerails.world.TerrainTileTypesList;
+import jfreerails.world.TrackRuleList;
 import jfreerails.world.terrain.TerrainType;
 
 /**

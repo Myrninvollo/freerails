@@ -1,6 +1,6 @@
 package jfreerails.world.financial;
 
-import jfreerails.list.IndustryList;
+import jfreerails.world.IndustryList;
 
 public class RRCompany implements StockOwner, RROwner {
 

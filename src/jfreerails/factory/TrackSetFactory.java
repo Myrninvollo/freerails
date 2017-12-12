@@ -3,7 +3,7 @@ import java.awt.Point;
 
 import jfreerails.client.trackview.TrackPieceViewList;
 import jfreerails.lib.ImageSplitter;
-import jfreerails.list.TrackRuleList;
+import jfreerails.world.TrackRuleList;
 
 
 /**

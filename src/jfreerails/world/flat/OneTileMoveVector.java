@@ -234,5 +234,61 @@ final public class OneTileMoveVector
 	private Object readResolve() throws ObjectStreamException {		
     	return OneTileMoveVector.getInstance(this.deltaX, this.deltaY);	
     }
+    
+    public static OneTileMoveVector getNearestVector(int dx, int dy){
+        if(0==dx*dy){
+            if(dx>0){
+                return EAST;
+            }else if(dx<0){
+                return WEST;
+            }else if(dy>0){
+                return SOUTH;
+            }else{
+                return NORTH;
+            }               
+        }
+        
+        double gradient = dy;
+        gradient=gradient/dx;        
+        double B = 2;
+        double A = 0.5;
+        double C = -2;
+        double D = -0.5;
+        if(gradient>B){
+            if(dy<0){
+                return NORTH;
+            }else{
+                return SOUTH;
+            }
+        }else if(gradient > A){
+            if(dy>0){
+                return SOUTH_EAST;
+            }else{
+                return NORTH_WEST;
+            }
+        }
+        
+        
+        else if(gradient > D){
+            if(dx>0){
+                return EAST;
+            }else{
+                return WEST;
+            }
+        }else if(gradient > C){
+            if(dx<0){
+                return SOUTH_WEST;
+            }else{
+                return NORTH_EAST;
+            }
+        }else{
+            if(dy>0){
+                return SOUTH;
+            }else{
+                return NORTH;
+            }
+        }
+        
+    }
 
 }

@@ -72,7 +72,8 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory {
 			new DetailMapView(
 				world.getMap(),
 				ViewLists.getTileViewList(),
-				ViewLists.getTrackPieceViewList());
+				ViewLists.getTrackPieceViewList(),
+				world.getTrainList());
 		overviewMap = new ZoomedOutMapView(world.getMap());
 
 		//init the move handlers
@@ -134,7 +135,7 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory {
 
 			public void actionPerformed(ActionEvent e) {
 
-				World world = new WorldImpl(mapName);
+				World world = WorldImpl.createWorldFromMapFile(mapName);
 				ViewLists viewLists = getViewLists();
 				if (!viewLists.validate(world)) {
 					throw new IllegalArgumentException();
@@ -153,7 +154,7 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory {
 
 			public void actionPerformed(ActionEvent e) {
 
-				World world = new WorldImpl(mapName);
+				World world = WorldImpl.createWorldFromMapFile(mapName);
 				ViewLists viewLists = getViewLists();
 				if (!viewLists.validate(world)) {
 					throw new IllegalArgumentException();

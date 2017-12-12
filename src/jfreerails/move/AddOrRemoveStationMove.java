@@ -3,8 +3,8 @@ package jfreerails.move;
 
 import java.awt.Point;
 
-import jfreerails.type.StationType;
-import jfreerails.type.TrackRule;
+import jfreerails.world.type.StationType;
+import jfreerails.world.type.TrackRule;
 
 
 /**

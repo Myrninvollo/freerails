@@ -1,6 +1,6 @@
 package jfreerails.world.std_cargo;
 
-import jfreerails.type.CargoType;
+import jfreerails.world.type.CargoType;
 import jfreerails.world.std_cargo.AbstCargoBatch;
 
 /**

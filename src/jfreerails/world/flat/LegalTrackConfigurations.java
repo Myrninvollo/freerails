@@ -3,7 +3,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import experimental.FreerailsSerializable;
+import jfreerails.lib.FreerailsSerializable;
+
 
 final public class LegalTrackConfigurations implements FreerailsSerializable{
     

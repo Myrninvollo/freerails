@@ -11,9 +11,10 @@ import java.util.HashSet;
 
 import jfreerails.client.trackview.TrackPieceView;
 import jfreerails.lib.ImageSplitter;
-import jfreerails.list.TrackRuleList;
-import jfreerails.parsers.TrackRuleImplConstructorParameters;
-import jfreerails.type.TrackRule;
+import jfreerails.xmlparsers.TrackRuleImplConstructorParameters;
+import jfreerails.world.type.TrackRule;
+import jfreerails.world.TrackRuleList;
+
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;

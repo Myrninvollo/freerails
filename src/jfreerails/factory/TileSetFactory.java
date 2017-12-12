@@ -2,7 +2,7 @@ package jfreerails.factory;
 import java.awt.Point;
 
 import jfreerails.client.tileview.TileViewList;
-import jfreerails.list.TerrainTileTypesList;
+import jfreerails.world.TerrainTileTypesList;
 
 
 

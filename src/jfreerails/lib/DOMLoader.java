@@ -25,15 +25,11 @@ public class DOMLoader extends java.lang.Object {
     
     public static org.w3c.dom.Document get_dom( java.net.URL xml_url ) {
         javax.xml.parsers.DocumentBuilderFactory  factory = javax.xml.parsers.DocumentBuilderFactory.newInstance();
-        
-        //factory.setValidating(true);   
-        
-        //factory.setNamespaceAware(true);
+           
         System.out.println( "\nLoading XML " + xml_url );
         try {
-            javax.xml.parsers.DocumentBuilder  builder = factory.newDocumentBuilder();
-            java.io.File  file = new java.io.File( xml_url.getFile() );
-            document = builder.parse( file );
+            javax.xml.parsers.DocumentBuilder  builder = factory.newDocumentBuilder();           
+            document = builder.parse( xml_url.toExternalForm() );
         }
         catch( org.xml.sax.SAXException sxe ) {
             

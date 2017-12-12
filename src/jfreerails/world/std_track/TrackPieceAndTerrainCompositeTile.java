@@ -4,12 +4,12 @@
  */
 package jfreerails.world.std_track;
 
-import jfreerails.type.TrackRule;
+import jfreerails.lib.FreerailsSerializable;
+import jfreerails.world.type.TrackRule;
 import jfreerails.world.flat.TrackConfiguration;
 import jfreerails.world.terrain.TerrainTile;
 import jfreerails.world.terrain.TerrainType;
 
-import experimental.FreerailsSerializable;
 
 /**
  * @version 	1.0

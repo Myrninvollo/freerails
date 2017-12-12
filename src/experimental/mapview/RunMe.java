@@ -6,6 +6,8 @@
 
 package experimental.mapview;
 import javax.swing.JFrame;
+import jfreerails.lib.GameLoop;
+import jfreerails.lib.ScreenHandler;
 /**
  *
  * @author  Luke Lindsay
@@ -22,7 +24,11 @@ public class RunMe {
     */
     public static void main (String args[]) {
        JFrame jFrame = new jfreerails.client.ClientJFrame(new SimpleComponentFactoryImpl2());
-       jFrame.show();
+       //jFrame.show();
+       ScreenHandler screenHandler = new ScreenHandler(jFrame, true);
+        GameLoop gameLoop = new GameLoop(screenHandler);
+        Thread t = new Thread(gameLoop);
+        t.start();
     }
 
 }

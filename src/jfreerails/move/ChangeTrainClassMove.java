@@ -2,7 +2,7 @@
 package jfreerails.move;
 
 
-import jfreerails.type.TrainClass;
+import jfreerails.world.type.TrainClass;
 
 /**
  * Represents ...

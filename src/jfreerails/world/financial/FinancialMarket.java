@@ -8,8 +8,9 @@
 package jfreerails.world.financial;
 
 
-import jfreerails.type.EconomicClimate;
-import jfreerails.controller.StockBroker;
+import jfreerails.world.type.EconomicClimate;
+import jfreerails.world.StockBroker;
+
 import java.util.Vector;
 
 /**

@@ -5,13 +5,14 @@ import java.net.URL;
 import jfreerails.RunFreerails;
 import jfreerails.factory.TileSetFactory;
 import jfreerails.factory.TrackSetFactory;
-import jfreerails.list.TerrainTileTypesList;
-import jfreerails.list.TrackRuleList;
 import jfreerails.move.receiver.MoveReceiver;
 import jfreerails.move.receiver.TrackMoveExecutor;
-import jfreerails.parsers.Track_TilesHandlerImpl;
+import jfreerails.xmlparsers.Track_TilesHandlerImpl;
 import jfreerails.world.std_track.TrackAndTerrainTileMap;
 import jfreerails.world.std_track.TrackAndTerrainTileMapImpl;
+import jfreerails.world.train.TrainList;
+
+import experimental.TestOverHeadTrainView;
 
 public class WorldImpl implements World {
 
@@ -20,6 +21,8 @@ public class WorldImpl implements World {
 	private final TrackRuleList trackRuleList;
 
 	private final TrackAndTerrainTileMap map;
+	
+	private final TrainList trainList;
 
 	public WorldImpl(
 		TileSetFactory tileFactory,
@@ -32,9 +35,13 @@ public class WorldImpl implements World {
 		this.map = fm;
 		this.terrainTileTypesList = tileFactory.getTerrainTileTypesList();
 		this.trackRuleList = trackSetFactory.getTrackRuleList();
-
+		trainList= new TrainList();
+		TestOverHeadTrainView.addtrainsTotrainlist(trainList);
+		
 	}
-	public WorldImpl(String mapName) {
+	
+	
+	public  static World  createWorldFromMapFile(String mapName) {
 
 		//Load the xml file specifying terrain types.
 		URL tiles_xml_url =
@@ -44,7 +51,7 @@ public class WorldImpl implements World {
 		TileSetFactory tileFactory =
 			new jfreerails.factory.TileSetFactoryImpl(tiles_xml_url);
 
-		 terrainTileTypesList =
+		TerrainTileTypesList terrainTileTypesList =
 			tileFactory.getTerrainTileTypesList();
 
 		URL track_xml_url =
@@ -53,12 +60,12 @@ public class WorldImpl implements World {
 		Track_TilesHandlerImpl trackSetFactory =
 			new Track_TilesHandlerImpl(track_xml_url);
 
-		trackRuleList = trackSetFactory.getTrackRuleList();
+		TrackRuleList trackRuleList = trackSetFactory.getTrackRuleList();
 
 		//Load the terrain map
 		URL map_url =
 			RunFreerails.class.getResource("/jfreerails/data/" + mapName);
-		 map =
+		 TrackAndTerrainTileMap map =
 			new TrackAndTerrainTileMapImpl(
 				map_url,
 				terrainTileTypesList,
@@ -66,6 +73,9 @@ public class WorldImpl implements World {
 
 		//Create the object that controls building track.
 		MoveReceiver trackMoveExecutor = new TrackMoveExecutor(map);
+		
+		
+       return new WorldImpl(tileFactory, trackSetFactory, map); 		
 
 	}
 
@@ -77,6 +87,9 @@ public class WorldImpl implements World {
 	}
 	public TrackRuleList getTrackRuleList() {
 		return trackRuleList;
+	}
+	public TrainList getTrainList(){
+		return trainList;
 	}
 
 }

@@ -1,7 +1,7 @@
 package jfreerails.world.station;
 
-import jfreerails.misc.GameTime;
-import jfreerails.type.StationType;
+import jfreerails.world.type.StationType;
+import jfreerails.world.GameTime;
 
 final public class StationModelPublic implements StationModel {
 

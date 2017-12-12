@@ -9,15 +9,15 @@ import java.awt.Point;
 import java.net.URL;
 
 import jfreerails.lib.ImageSplitter;
-import jfreerails.list.TrackRuleList;
-import jfreerails.parsers.Track_Tiles_View_Handler;
+import jfreerails.xmlparsers.Track_Tiles_View_Handler;
+import jfreerails.world.TrackRuleList;
 /**
  *
  * @author  lindsal
  * @version 
  */
 final public class SAX2TracksetFactoryImpl
-	implements jfreerails.factory.TrackSetFactory {
+	implements TrackSetFactory {
 
 	Track_Tiles_View_Handler track_Tiles_View_Handler;
 

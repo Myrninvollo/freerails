@@ -11,8 +11,8 @@ import java.awt.event.ActionListener;
 import javax.swing.ButtonGroup;
 import javax.swing.JMenu;
 import javax.swing.JRadioButtonMenuItem;
-import jfreerails.list.TrackRuleList;
 import jfreerails.move.source.TrackMoveProducer;
+import jfreerails.world.TrackRuleList;
 
 /**
 *
@@ -30,7 +30,7 @@ final public class BuildMenu extends javax.swing.JMenu {
 		super();
 	}
 
-	public void setup(jfreerails.list.TrackRuleList trackRuleList, TrackMoveProducer tb) {
+	public void setup(jfreerails.world.TrackRuleList trackRuleList, TrackMoveProducer tb) {
 
 		this.removeAll();		
 		this.trackBuilder = tb;

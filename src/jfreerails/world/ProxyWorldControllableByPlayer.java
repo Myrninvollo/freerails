@@ -1,9 +1,8 @@
 
 
 package jfreerails.world;
-import jfreerails.list.TerrainTileTypesList;
-import jfreerails.list.TrackRuleList;
 import jfreerails.world.std_track.TrackAndTerrainTileMap;
+import jfreerails.world.train.TrainList;
 
 
 
@@ -28,6 +27,9 @@ public class ProxyWorldControllableByPlayer implements World {
 	}
 	public TrackRuleList getTrackRuleList(){
 		return world.getTrackRuleList();
+	}
+	public TrainList getTrainList(){
+		return world.getTrainList();
 	}
 	
 

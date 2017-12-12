@@ -4,7 +4,7 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.net.URL;
 
-import jfreerails.list.TerrainTileTypesList;
+import jfreerails.world.TerrainTileTypesList;
 
 /**
  *  This class encapsulates the terrain map. It is composed of a 2D array of

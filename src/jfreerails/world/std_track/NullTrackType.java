@@ -15,7 +15,7 @@ import jfreerails.world.flat.TrackConfiguration;
  * @author  lindsal
  * @version 
  */
-final public class NullTrackType implements jfreerails.type.TrackRule {
+final public class NullTrackType implements jfreerails.world.type.TrackRule {
 
 	public static final int NULL_TRACK_TYPE_RULE_NUMBER = -999;
 

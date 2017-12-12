@@ -1,7 +1,7 @@
 package jfreerails.world.std_cargo;
 
-import jfreerails.misc.GameTime;
-import jfreerails.type.CargoType;
+import jfreerails.world.type.CargoType;
+import jfreerails.world.GameTime;
 
 final public class TravelledCargoBatch extends AbstCargoBatch {
 

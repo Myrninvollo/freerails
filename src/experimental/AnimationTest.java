@@ -4,8 +4,9 @@ import java.awt.Graphics;
 
 import javax.swing.JComponent;
 import javax.swing.JFrame;
-import jfreerails.client.GameLoop;
-import jfreerails.client.ScreenHandler;
+
+import jfreerails.lib.GameLoop;
+import jfreerails.lib.ScreenHandler;
 
 public class AnimationTest extends JComponent {
     

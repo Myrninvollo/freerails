@@ -1,6 +1,6 @@
 package jfreerails.world.std_track;
 
-import jfreerails.type.TrackRule;
+import jfreerails.world.type.TrackRule;
 import jfreerails.world.flat.*;
 
 final public class TrackPieceImpl implements TrackPiece {

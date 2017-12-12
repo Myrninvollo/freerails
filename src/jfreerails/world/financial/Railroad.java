@@ -1,8 +1,8 @@
 package jfreerails.world.financial;
 
-import jfreerails.controller.TrackBuilderRules;
-import jfreerails.list.StationList;
-import jfreerails.list.TrainList;
+import jfreerails.world.StationList;
+import jfreerails.world.TrackBuilderRules;
+import jfreerails.world.train.TrainList;
 
 public class Railroad {
 	public TrackBuilderRules getTrackBuilderRules() {

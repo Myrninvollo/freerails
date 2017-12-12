@@ -4,9 +4,9 @@
  */
 package jfreerails.world.std_track;
 
+import jfreerails.lib.FreerailsSerializable;
 import jfreerails.world.terrain.TerrainMap;
 
-import experimental.FreerailsSerializable;
 
 /**
  * @version 	1.0

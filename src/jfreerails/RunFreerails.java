@@ -3,10 +3,10 @@ package jfreerails;
 import javax.swing.JFrame;
 import jfreerails.client.ClientJFrame;
 import jfreerails.client.GUIComponentFactoryImpl;
-import jfreerails.client.GameLoop;
-import jfreerails.client.ScreenHandler;
 import jfreerails.client.ViewLists;
 import jfreerails.client.ViewListsImpl;
+import jfreerails.lib.GameLoop;
+import jfreerails.lib.ScreenHandler;
 import jfreerails.world.World;
 import jfreerails.world.WorldImpl;
 
@@ -42,32 +42,43 @@ public class RunFreerails {
 	 *@param  mapName  The filename of the map to load.
 	 */
 
-	private static void createClient(String mapName, boolean fullscreen, boolean nogameloop) {
+	public static void createClient(String mapName, boolean fullscreen, boolean nogameloop) {
 
-		World world = new WorldImpl(mapName);
+		World world = WorldImpl.createWorldFromMapFile(mapName);
 
 		ViewLists viewLists = new ViewListsImpl();
-		if (!viewLists.validate(world)) {
-			throw new IllegalArgumentException();
-		}
-
+		
 		GUIComponentFactoryImpl gUIComponentFactory = new GUIComponentFactoryImpl();
 
-		//gUIComponentFactory.setup(viewLists, world);
-		gUIComponentFactory.setup(viewLists, world);
-		JFrame client = new ClientJFrame(gUIComponentFactory);
 
-		if (nogameloop) {
-			client.setSize(740, 500);
-			client.show();
-		} else {
+       	createClient(fullscreen, nogameloop, world, viewLists, gUIComponentFactory);
 
-			ScreenHandler screenHandler = new ScreenHandler(client, fullscreen);
-			GameLoop gameLoop = new GameLoop(screenHandler);
-			Thread t = new Thread(gameLoop);
-			t.start();
-		}
+	}
 
+	public static void createClient(
+		boolean fullscreen,
+		boolean nogameloop,
+		World world,
+		ViewLists viewLists,
+		GUIComponentFactoryImpl gUIComponentFactory) {
+		 if (!viewLists.validate(world)) {
+		        throw new IllegalArgumentException();
+		    }
+		
+			
+			gUIComponentFactory.setup(viewLists, world);
+			JFrame client = new ClientJFrame(gUIComponentFactory);
+		
+			if (nogameloop) {
+				client.setSize(740, 500);
+				client.show();
+			} else {
+		
+				ScreenHandler screenHandler = new ScreenHandler(client, fullscreen);
+				GameLoop gameLoop = new GameLoop(screenHandler);
+				Thread t = new Thread(gameLoop);
+				t.start();
+			}
 	}
 
 }

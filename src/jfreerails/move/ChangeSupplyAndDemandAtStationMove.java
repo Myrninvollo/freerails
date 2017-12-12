@@ -1,6 +1,6 @@
 package jfreerails.move;
 
-import jfreerails.type.CargoType;
+import jfreerails.world.type.CargoType;
 
 /**
  * Represents ...

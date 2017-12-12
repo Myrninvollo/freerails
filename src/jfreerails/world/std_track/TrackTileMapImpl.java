@@ -9,14 +9,14 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
 
-import jfreerails.list.TrackRuleList;
+import jfreerails.world.TrackRuleList;
 
 /**
  *
  * @author  lindsal
  * @version
  */
-final public class TrackTileMapImpl implements jfreerails.world.std_track.TrackTileMap {
+final public class TrackTileMapImpl implements TrackTileMap {
     
     private final TrackPiece[][] map;
     

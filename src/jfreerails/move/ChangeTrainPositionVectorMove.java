@@ -1,7 +1,7 @@
 package jfreerails.move;
 
-import jfreerails.misc.TrainPositionVector;
 import jfreerails.world.train.TrainContainer;
+import jfreerails.world.train.TrainPositionVector;
 
 /**
  * Represents ...

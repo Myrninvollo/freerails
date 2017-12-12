@@ -2,7 +2,7 @@
 package jfreerails.move;
 
 
-import jfreerails.type.StationImprovement;
+import jfreerails.world.type.StationImprovement;
 
 /**
  * Represents ...

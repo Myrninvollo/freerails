@@ -2,7 +2,7 @@ package jfreerails.world.std_cargo;
 
 import java.awt.Point;
 
-import jfreerails.type.CargoType;
+import jfreerails.world.type.CargoType;
 import jfreerails.world.cargo.CargoBatch;
 
 public abstract class AbstCargoBatch implements CargoBatch {

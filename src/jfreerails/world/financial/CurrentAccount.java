@@ -8,9 +8,8 @@
 package jfreerails.world.financial;
 
 
-import jfreerails.misc.Money;
-import jfreerails.type.CreditTransactionType;
-import jfreerails.type.DebitTransactionType;
+import jfreerails.world.type.CreditTransactionType;
+import jfreerails.world.type.DebitTransactionType;
 
 /**
  * Represents ...

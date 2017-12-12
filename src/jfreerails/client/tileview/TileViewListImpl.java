@@ -8,7 +8,7 @@ package jfreerails.client.tileview;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import jfreerails.list.TerrainTileTypesList;
+import jfreerails.world.TerrainTileTypesList;
 import jfreerails.world.terrain.TerrainType;
 
 /**

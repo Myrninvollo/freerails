@@ -1,7 +1,7 @@
 
 package jfreerails.move;
 
-import jfreerails.type.StationType;
+import jfreerails.world.type.StationType;
 
 
 /**

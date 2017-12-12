@@ -8,7 +8,7 @@ package jfreerails.world.std_track;
 
 import java.io.ObjectStreamException;
 
-import jfreerails.type.TrackRule;
+import jfreerails.world.type.TrackRule;
 import jfreerails.world.flat.TrackConfiguration;
 
 /**

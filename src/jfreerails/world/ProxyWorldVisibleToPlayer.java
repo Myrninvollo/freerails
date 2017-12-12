@@ -3,12 +3,11 @@
 package jfreerails.world;
 import java.util.Vector;
 
-import jfreerails.list.TerrainTileTypesList;
-import jfreerails.list.TrackRuleList;
 import jfreerails.move.Move;
 import jfreerails.move.receiver.MoveReceiver;
 import jfreerails.move.status.MoveStatus;
 import jfreerails.world.std_track.TrackAndTerrainTileMap;
+import jfreerails.world.train.TrainList;
 
 /**
  * Represents ...
@@ -62,6 +61,9 @@ public class ProxyWorldVisibleToPlayer implements MoveReceiver, World {
 	}
 	public TrackRuleList getTrackRuleList() {
 		return world.getTrackRuleList();
+	}
+	public TrainList getTrainList(){
+		return world.getTrainList();
 	}
 
 }

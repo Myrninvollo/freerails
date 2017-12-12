@@ -1,10 +1,13 @@
 package jfreerails.world;
+import jfreerails.lib.FreerailsSerializable;
 import jfreerails.world.std_track.TrackAndTerrainTileMap;
+import jfreerails.world.train.TrainList;
 
-import experimental.FreerailsSerializable;
 
 public interface World extends Types, FreerailsSerializable  {
 
-	TrackAndTerrainTileMap getMap();	
+	TrackAndTerrainTileMap getMap();
+	
+	TrainList getTrainList();	
 
 }

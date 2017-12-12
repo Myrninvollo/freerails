@@ -15,9 +15,9 @@ import jfreerails.client.tileview.TileView;
 import jfreerails.client.tileview.TileViewList;
 
 import jfreerails.lib.ImageSplitter;
-import jfreerails.list.TerrainTileTypesList;
-import jfreerails.list.TerrainTileTypesListImpl;
-import jfreerails.type.TileTypeImpl;
+import jfreerails.world.type.TileTypeImpl;
+import jfreerails.world.TerrainTileTypesList;
+import jfreerails.world.TerrainTileTypesListImpl;
 import jfreerails.world.terrain.TerrainType;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;

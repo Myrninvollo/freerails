@@ -2,7 +2,7 @@ package jfreerails.move;
 
 import java.awt.Point;
 
-import jfreerails.type.IndustryType;
+import jfreerails.world.type.IndustryType;
 
 /**
  * Represents ...
