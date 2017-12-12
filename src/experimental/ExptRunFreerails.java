@@ -1,11 +1,11 @@
 package experimental;
 
 import jfreerails.RunFreerails;
-import jfreerails.client.GUIComponentFactoryImpl;
+import jfreerails.GUIComponentFactoryImpl;
 import jfreerails.client.ViewLists;
-import jfreerails.client.ViewListsImpl;
+import jfreerails.ViewListsImpl;
 import jfreerails.world.World;
-import jfreerails.world.WorldImpl;
+import jfreerails.WorldImpl;
 
 public class ExptRunFreerails {
 

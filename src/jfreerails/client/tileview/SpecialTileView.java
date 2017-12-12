@@ -11,7 +11,6 @@ import jfreerails.world.terrain.TerrainType;
 /**
 *
 * @author  Luke Lindsay
-* @version 
 */
 
 final public class SpecialTileView extends AbstractTileView {

@@ -1,31 +1,31 @@
 package jfreerails.move;
 
-import jfreerails.world.train.EngineModelPublic;
+import jfreerails.world.train.EngineModel;
 
 /**
- * Represents ...
- * 
- * @see OtherClasses
+ *
+ *
+ *
  * @author lindsal
  */
 
 final public class ChangeTrainEngineMove {
 
-	private final EngineModelPublic oldEngine;
+	private final EngineModel oldEngine;
 
-	private final EngineModelPublic newEngine;
+	private final EngineModel newEngine;
 
-	public EngineModelPublic getOldEngine() {
+	public EngineModel getOldEngine() {
 		return oldEngine;
 	}
 
-	public EngineModelPublic getNewEngine() {
+	public EngineModel getNewEngine() {
 		return newEngine;
 	}
 
 	public ChangeTrainEngineMove(
-		EngineModelPublic before,
-		EngineModelPublic after) {
+		EngineModel before,
+		EngineModel after) {
 		oldEngine = before;
 		newEngine = after;
 	}

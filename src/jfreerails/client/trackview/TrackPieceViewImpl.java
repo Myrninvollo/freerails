@@ -17,14 +17,14 @@ import java.awt.Image;
 *  Description of the Class
 *
 *@author     Luke Lindsay
-*@created    09 October 2001
+*     09 October 2001
 */
 
 
 final public class TrackPieceViewImpl implements TrackPieceView {
 
     Image[] trackPieceIcons = new Image[ 512 ];
-    
+
     /**
     *  Description of the Method
     *
@@ -35,7 +35,7 @@ final public class TrackPieceViewImpl implements TrackPieceView {
     *@param  tileSize                Description of Parameter
     *@exception  FreerailsException  Description of Exception
     */
-    
+
     public void drawTrackPieceIcon( int trackTemplate, java.awt.Graphics g, int x, int y, java.awt.Dimension tileSize ) {
         if( ( trackTemplate > 511 ) || ( trackTemplate < 0 ) ) {
             throw new java.lang.IllegalArgumentException( "trackTemplate = " + trackTemplate + ", it should be in the range 0-511" );
@@ -46,7 +46,7 @@ final public class TrackPieceViewImpl implements TrackPieceView {
             g.drawImage( trackPieceIcons[ trackTemplate ], drawX, drawY, null );
         }
     }
-    
+
     /**
     *  Creates new TrackPieceView
     *
@@ -54,25 +54,25 @@ final public class TrackPieceViewImpl implements TrackPieceView {
     *@param  trackImageSplitter        Source of track icons
     *@exception  FreerailsException    Description of Exception
     */
-    
+
     public TrackPieceViewImpl( int[] trackTemplatesPrototypes, jfreerails.lib.ImageSplitter trackImageSplitter )  {
         trackImageSplitter.setTransparencyToTRANSLUCENT();
-        
+
         //Since track tiles have transparent regions.
         for( int  i = 0;i < trackTemplatesPrototypes.length;i++ ) {
-            
+
             /*
             *  Check for invalid parameters.
             */
             if( ( trackTemplatesPrototypes[ i ] > 511 ) || ( trackTemplatesPrototypes[ i ] < 0 ) ) {
                 throw new java.lang.IllegalArgumentException( "trackTemplate = " + trackTemplatesPrototypes[ i ] + ", it should be in the range 0-511" );
             }
-            
+
             /*
             *  Grab the images for those track pieces that are legal.
             */
             for( int  j = 0;j < trackTemplatesPrototypes.length;j++ ) {
-                int[]  rotationsOfTrackTemplate = jfreerails.world.flat.EightRotationsOfTrackPieceProducer.getRotations( trackTemplatesPrototypes[ j ] );
+                int[]  rotationsOfTrackTemplate = jfreerails.world.track.EightRotationsOfTrackPieceProducer.getRotations( trackTemplatesPrototypes[ j ] );
                 for( int  k = 0;k < rotationsOfTrackTemplate.length;k++ ) {
                     if( trackPieceIcons[ rotationsOfTrackTemplate[ k ] ] == null ) {
                         trackPieceIcons[ rotationsOfTrackTemplate[ k ] ] = trackImageSplitter.getTileFromSubGrid( k, j );
@@ -81,7 +81,7 @@ final public class TrackPieceViewImpl implements TrackPieceView {
             }
         }
     }
-    
+
     /**
     *  Gets the trackPieceIcon attribute of the TrackPieceView object
     *
@@ -89,7 +89,7 @@ final public class TrackPieceViewImpl implements TrackPieceView {
     *@return                         The trackPieceIcon value
     *@exception  FreerailsException  Description of Exception
     */
-    
+
     public Image getTrackPieceIcon( int trackTemplate ) {
         if( ( trackTemplate > 511 ) || ( trackTemplate < 0 ) ) {
             throw new java.lang.IllegalArgumentException( "trackTemplate = " + trackTemplate + ", it should be in the range 0-511" );

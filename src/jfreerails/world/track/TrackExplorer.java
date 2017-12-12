@@ -3,7 +3,7 @@ package jfreerails.world.track;
 
 import java.awt.Point;
 
-import jfreerails.world.flat.OneTileMoveVector;
+import jfreerails.world.misc.OneTileMoveVector;
 
 
 public interface TrackExplorer {

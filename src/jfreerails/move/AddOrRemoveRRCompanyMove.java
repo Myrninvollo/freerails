@@ -5,9 +5,9 @@ import java.util.Vector;
 import jfreerails.world.financial.Company;
 
 /**
- * Represents ...
- * 
- * @see OtherClasses
+ *
+ *
+ *
  * @author lindsal
  */
 

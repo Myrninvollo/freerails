@@ -4,7 +4,7 @@ package jfreerails.world.track;
 
 import java.awt.Point;
 
-import jfreerails.world.train.FreerailsPathIterator;
+import jfreerails.world.misc.FreerailsPathIterator;
 
 
 public interface TrackSection {

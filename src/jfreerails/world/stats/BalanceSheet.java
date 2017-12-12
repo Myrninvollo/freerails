@@ -1,89 +1,89 @@
 /**
- * Java class generated from Poseidon UML diagram. 
- * Poseidon is developed by <A HREF="http://www.gentleware.com">Gentleware</A>.
- * Generated with <A HREF="http://jakarta.apache.org/velocity/">velocity</A> template engine.
  *
- * 
+ *
+ *
+ *
+ *
  */
 package jfreerails.world.stats;
 
 
-import jfreerails.world.financial.Money;
+import jfreerails.world.misc.Money;
 
 /**
- * Represents ...
- * 
- * @see OtherClasses
+ *
+ *
+ *
  * @author lindsal
  */
 
 public class BalanceSheet {
 
-  ///////////////////////////////////////
-  //attributes
+
+
 
 /**
- * Represents ...
+ *
 
  */
 
     private Money operatingFunds;
 /**
- * Represents ...
+ *
 
  */
 
     private Money treasuryStock;
 /**
- * Represents ...
+ *
 
  */
 
     private Money otherRRStock;
 /**
- * Represents ...
+ *
 
  */
 
     private Money facilities;
 /**
- * Represents ...
+ *
 
  */
 
     private Money industries;
 /**
- * Represents ...
+ *
 
  */
 
     private Money realEstate;
 /**
- * Represents ...
+ *
 
  */
 
     private Money track;
 /**
- * Represents ...
+ *
 
  */
 
     private Money rollingStock;
 /**
- * Represents ...
+ *
 
  */
 
     private Money outstandingLoans;
 /**
- * Represents ...
+ *
 
  */
 
     private Money stockholdersEquity;
 
-  ///////////////////////////////////////
+
   //access methods for attributes
 
     public Money getOperatingFunds() {

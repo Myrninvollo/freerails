@@ -1,6 +1,6 @@
 package jfreerails.world.financial;
 
-import jfreerails.world.IndustryList;
+import jfreerails.world.cargo.IndustryList;
 
 public class RRCompany implements StockOwner, RROwner {
 
@@ -12,13 +12,7 @@ public class RRCompany implements StockOwner, RROwner {
 	public IndustryList getIndustryList() {
 		return industryList;
 	}
-	public void setIndustryList(IndustryList industryList) {
-		if (this.industryList != industryList) {
-			this.industryList = industryList;
-			if (industryList != null)
-				industryList.setRRCompany(this);
-		}
-	}
+	
 
 	public CompanyDetails getDetails() {
 		return details;

@@ -9,7 +9,6 @@ package jfreerails.lib;
 /**
 *  This class provides methods to grap tiles from an image.
 * @author  lindsal8
-* @version 
 */
 import java.awt.Image;
 import java.awt.Transparency;

@@ -6,15 +6,15 @@ import java.util.Vector;
 import jfreerails.world.financial.RRCompany;
 
 /**
- * Represents ...
- * 
- * @see OtherClasses
+ *
+ *
+ *
  * @author lindsal
  */
 
 public class GameWorld {
 
-   
+
     public GameWorldController gameWorldController;
     public Vector rRCompany = new Vector();
     public CityList cityList;
@@ -27,22 +27,22 @@ public class GameWorld {
         if (this.gameWorldController != gameWorldController) {
             this.gameWorldController = gameWorldController;
             if (gameWorldController != null)
-                gameWorldController.setGameWorld(this);  
-        }      
-    } 
+                gameWorldController.setGameWorld(this);
+        }
+    }
 
     public Vector getRRCompany() {
         return rRCompany;
     }
     public void addRRCompany(RRCompany rRCompany) {
-        if (! this.rRCompany.contains(rRCompany)) {     
-            this.rRCompany.addElement(rRCompany);  
-           
+        if (! this.rRCompany.contains(rRCompany)) {
+            this.rRCompany.addElement(rRCompany);
+
         }
     }
     public void removeRRCompany(RRCompany rRCompany) {
-        if (this.rRCompany.removeElement(rRCompany)) {      
-            
+        if (this.rRCompany.removeElement(rRCompany)) {
+
         }
     }
 
@@ -53,9 +53,9 @@ public class GameWorld {
         if (this.cityList != cityList) {
             this.cityList = cityList;
             if (cityList != null)
-                cityList.setGameWorld(this);  
-        }      
-    } 
+                cityList.setGameWorld(this);
+        }
+    }
 
 
 

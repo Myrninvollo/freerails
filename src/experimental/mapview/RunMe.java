@@ -11,7 +11,6 @@ import jfreerails.lib.ScreenHandler;
 /**
  *
  * @author  Luke Lindsay
- * @version 
  */
 public class RunMe {
 

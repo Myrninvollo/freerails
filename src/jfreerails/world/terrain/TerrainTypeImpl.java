@@ -2,8 +2,8 @@ package jfreerails.world.terrain;
 
 /**
  * This class defines a terrain tile type.
- * 
- * @see OtherClasses
+ *
+ *
  * @author lindsal
  */
 

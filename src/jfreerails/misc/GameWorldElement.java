@@ -7,19 +7,19 @@ import jfreerails.world.financial.Company;
 
 /**
  * Defining operations expected of ...
- * 
- * @see OtherClasses
+ *
+ *
  * @author lindsal
  */
 
 public interface GameWorldElement {
 
-  ///////////////////////////////////////
+
   // operations
 
 /**
  * Does ...
- * 
+ *
  * @return A Company with ...
  */
 

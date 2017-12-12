@@ -3,12 +3,12 @@ package jfreerails.move;
 
 
 import java.awt.Point;
-import jfreerails.world.type.EngineType;
+import jfreerails.world.train.EngineType;
 
 /**
- * Represents ...
- * 
- * @see OtherClasses
+ *
+ *
+ *
  * @author lindsal
  */
 
@@ -27,7 +27,7 @@ final public class AddOrRemoveTrainMove {
     public EngineType getEngine() {
         return engine;
     }
-    
+
     public AddOrRemoveTrainMove(Point p, EngineType e){
     		location=p;
     		engine=e;

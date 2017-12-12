@@ -10,17 +10,16 @@ import java.awt.Point;
 /**
  *
  * @author  lindsal
- * @version 
  */
 public interface TileMap {
-    
+
      Dimension getMapSize();
-     
+
      int getRGB(Point p);
-     
-     
-    
-    boolean boundsContain(Point location);    
+
+
+
+    boolean boundsContain(Point location);
 
 }
 

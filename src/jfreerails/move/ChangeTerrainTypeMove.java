@@ -6,9 +6,9 @@ import java.awt.Point;
 import jfreerails.world.terrain.TerrainType;
 
 /**
- * Represents ...
- * 
- * @see OtherClasses
+ *
+ *
+ *
  * @author lindsal
  */
 
@@ -40,7 +40,7 @@ final public class ChangeTerrainTypeMove implements MapMove {
     	location=p;
     	oldType=before;
     	newType=after;
-    	
+
     }
 }
 

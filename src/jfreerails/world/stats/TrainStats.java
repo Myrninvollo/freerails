@@ -1,42 +1,42 @@
 
 package jfreerails.world.stats;
 
-import jfreerails.world.financial.Money;
-import jfreerails.world.train.TrainModelPublic;
+import jfreerails.world.misc.Money;
+import jfreerails.world.train.TrainModel;
 
 /**
- * Represents ...
- * 
- * @see OtherClasses
+ *
+ *
+ *
  * @author lindsal
  */
 
 public class TrainStats {
 
- 
-    private TrainModelPublic train;
+
+    private TrainModel train;
 
 
     private Money revenueYTD;
 /**
- * Represents ...
+ *
 
  */
 
     private Money revenueLastYear;
 /**
- * Represents ...
+ *
 
  */
 
     private Money revenueLifeTime;
 
-  
 
-    public TrainModelPublic getTrain() {
+
+    public TrainModel getTrain() {
         return train;
     }
-    public void setTrain(TrainModelPublic train) {
+    public void setTrain(TrainModel train) {
         this.train = train;
     }
     public Money getRevenueYTD() {

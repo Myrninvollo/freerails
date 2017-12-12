@@ -3,9 +3,9 @@ package jfreerails.world;
 
 
 /**
- * Represents ...
- * 
- * @see OtherClasses
+ *
+ *
+ *
  * @author lindsal
  */
 

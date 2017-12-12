@@ -1,5 +1,9 @@
 package jfreerails.client;
 
+import jfreerails.misc.TextMessageHandler;
+import jfreerails.misc.TextMessenger;
+import jfreerails.world.misc.*;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 

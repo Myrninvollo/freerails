@@ -11,13 +11,12 @@ import java.awt.event.ActionListener;
 import javax.swing.ButtonGroup;
 import javax.swing.JMenu;
 import javax.swing.JRadioButtonMenuItem;
-import jfreerails.move.source.TrackMoveProducer;
-import jfreerails.world.TrackRuleList;
+import jfreerails.controller.TrackMoveProducer;
+import jfreerails.world.track.TrackRuleList;
 
 /**
 *
 * @author  Luke Lindsay
-* @version
 */
 
 final public class BuildMenu extends javax.swing.JMenu {
@@ -30,9 +29,9 @@ final public class BuildMenu extends javax.swing.JMenu {
 		super();
 	}
 
-	public void setup(jfreerails.world.TrackRuleList trackRuleList, TrackMoveProducer tb) {
+	public void setup(jfreerails.world.track.TrackRuleList trackRuleList, TrackMoveProducer tb) {
 
-		this.removeAll();		
+		this.removeAll();
 		this.trackBuilder = tb;
 		this.setText("Build");
 		javax.swing.ButtonGroup trackTypesGroup = new javax.swing.ButtonGroup();

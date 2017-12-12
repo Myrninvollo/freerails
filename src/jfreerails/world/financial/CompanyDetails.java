@@ -1,6 +1,6 @@
 package jfreerails.world.financial;
 
-import jfreerails.world.GameTime;
+import jfreerails.world.misc.GameTime;
 final public class CompanyDetails {
 	public GameTime getEstablished() {
 		return established;

@@ -8,13 +8,13 @@ package jfreerails.client.tileview;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import jfreerails.world.TerrainTileTypesList;
+import jfreerails.world.terrain.TerrainTileTypesList;
 import jfreerails.world.terrain.TerrainType;
 
 /**
 *@author           Luke Lindsay
-*@created          09 October 2001
-*@createdpublic    class TileViewListImplrsion
+*           09 October 2001
+* public    class TileViewListImplrsion
 */
 
 final public class TileViewListImpl implements TileViewList {

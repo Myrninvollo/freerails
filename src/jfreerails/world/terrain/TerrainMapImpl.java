@@ -4,14 +4,13 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.net.URL;
 
-import jfreerails.world.TerrainTileTypesList;
 
 /**
  *  This class encapsulates the terrain map. It is composed of a 2D array of
  *  terrain tiles, and provides methods to access them.
  *
  *@author     Luke Lindsay
- *@created    21 September 2001
+ *     21 September 2001
  */
 public class TerrainMapImpl extends java.lang.Object implements TerrainMap {
 
@@ -130,7 +129,7 @@ public class TerrainMapImpl extends java.lang.Object implements TerrainMap {
 		return mapRect.contains(location);
 	}
 
-	
+
 	public TerrainMapImpl(
 		int w,
 		int h,

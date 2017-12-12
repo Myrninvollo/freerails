@@ -7,7 +7,7 @@ import jfreerails.world.terrain.TerrainMap;
 *  Description of the Interface
 *
 *@author     Luke Lindsay
-*@created    09 October 2001
+*     09 October 2001
 */
 
 public interface TileView {

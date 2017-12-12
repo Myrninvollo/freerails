@@ -1,13 +1,12 @@
 /**
- * Java class generated from Poseidon UML diagram. 
- * Poseidon is developed by <A HREF="http://www.gentleware.com">Gentleware</A>.
- * Generated with <A HREF="http://jakarta.apache.org/velocity/">velocity</A> template engine.
  *
- * 
+ *
+ *
+ *
+ *
  */
 
 package jfreerails.move;
-import jfreerails.move.status.MoveStatus;
 import jfreerails.world.World;
 
 
@@ -16,31 +15,31 @@ import jfreerails.world.World;
 
 
 /**
- * Represents ...
- * 
- * @see OtherClasses
+ *
+ *
+ *
  * @author lindsal
  */
 
 final public class LeafMove implements Move {
 
-  ///////////////////////////////////////
-  //attributes
+
+
 
 /**
- * Represents ...
+ *
 
  */
 
     public int oldPop;
 /**
- * Represents ...
+ *
 
  */
 
     public int newPop;
 
-  ///////////////////////////////////////
+
   //access methods for attributes
 
     public int getOldPop() {
@@ -56,12 +55,12 @@ final public class LeafMove implements Move {
         this.newPop = newPop;
     }
 
-  ///////////////////////////////////////
+
   // operations
 
 /**
  * Does ...
- * 
+ *
  * @param world ...
  * @return A MoveStatus with ...
  */
@@ -71,7 +70,7 @@ final public class LeafMove implements Move {
     }
 /**
  * Does ...
- * 
+ *
  * @param world ...
  * @return A MoveStatus with ...
  */
@@ -81,7 +80,7 @@ final public class LeafMove implements Move {
     }
 /**
  * Does ...
- * 
+ *
  * @param world ...
  * @return A MoveStatus with ...
  */
@@ -91,7 +90,7 @@ final public class LeafMove implements Move {
     }
 /**
  * Does ...
- * 
+ *
  * @param world ...
  * @return A MoveStatus with ...
  */

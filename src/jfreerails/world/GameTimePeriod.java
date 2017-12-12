@@ -1,5 +1,6 @@
 package jfreerails.world;
 
+import jfreerails.world.misc.GameTime;
 
 
 final public class GameTimePeriod {

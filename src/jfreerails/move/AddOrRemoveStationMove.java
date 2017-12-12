@@ -3,14 +3,14 @@ package jfreerails.move;
 
 import java.awt.Point;
 
-import jfreerails.world.type.StationType;
-import jfreerails.world.type.TrackRule;
+import jfreerails.world.station.StationType;
+import jfreerails.world.track.TrackRule;
 
 
 /**
- * Represents ...
- * 
- * @see OtherClasses
+ *
+ *
+ *
  * @author lindsal
  */
 

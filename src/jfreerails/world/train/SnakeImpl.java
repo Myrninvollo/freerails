@@ -1,5 +1,8 @@
 package jfreerails.world.train;
 
+import jfreerails.world.misc.IntLine;
+import jfreerails.world.misc.FreerailsPathIterator;
+import jfreerails.world.misc.FreerailsPathIteratorImpl;
 import java.awt.Point;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
@@ -17,6 +20,16 @@ public class SnakeImpl implements Snake {
     public SnakeImpl() {
         linkedList.add(new Point(0, 0));
         linkedList.add(new Point(0, 0));
+    }
+    
+    public SnakeImpl(int[] xpoints, int[] ypoints){
+    	if(xpoints.length!=ypoints.length){
+    		throw new IllegalArgumentException();
+    	}
+    	for(int i = 0;i <	xpoints.length; i++){
+    		 linkedList.add(new Point(xpoints[i], ypoints[i]));	
+    	}
+    	
     }
     
     public SnakeImpl(FreerailsPathIterator path) {
@@ -74,7 +87,24 @@ public class SnakeImpl implements Snake {
     
     
     public FreerailsPathIterator pathIterator() {
-       return new FreerailsPathIteratorImpl(linkedList);
+       return FreerailsPathIteratorImpl.forwardsIterator(linkedList);
+    }
+    
+    public FreerailsPathIterator reversePathIterator() {
+       return FreerailsPathIteratorImpl.backwardsIterator(linkedList);
+    }
+    
+    
+    public void getHead(Point p){
+    	Point head = (Point)linkedList.getFirst();
+    	p.x=head.x;
+    	p.y=head.y;
+    }
+    
+    public void getTail(Point p){
+    	Point tail = (Point)linkedList.getLast();
+    	p.x=tail.x;
+    	p.y=tail.y;
     }
     
 }

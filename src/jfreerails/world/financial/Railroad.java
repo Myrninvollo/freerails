@@ -1,7 +1,7 @@
 package jfreerails.world.financial;
 
-import jfreerails.world.StationList;
-import jfreerails.world.TrackBuilderRules;
+import jfreerails.world.station.StationList;
+import jfreerails.world.track.TrackBuilderRules;
 import jfreerails.world.train.TrainList;
 
 public class Railroad {

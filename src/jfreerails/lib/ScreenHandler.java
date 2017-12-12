@@ -14,7 +14,6 @@ import javax.swing.JFrame;
 
 /**
  * @version 	1.0
- * @author
  */
 final public class ScreenHandler {
 

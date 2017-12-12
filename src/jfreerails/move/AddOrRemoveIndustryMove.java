@@ -2,12 +2,12 @@ package jfreerails.move;
 
 import java.awt.Point;
 
-import jfreerails.world.type.IndustryType;
+import jfreerails.world.cargo.IndustryType;
 
 /**
- * Represents ...
- * 
- * @see OtherClasses
+ *
+ *
+ *
  * @author lindsal
  */
 

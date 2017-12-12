@@ -2,13 +2,13 @@
 package jfreerails.move;
 
 
-import jfreerails.world.std_cargo.CompositeCargoBundle;
+import jfreerails.world.cargo.CompositeCargoBundle;
 import jfreerails.world.cargo.CargoContainer;
 
 /**
- * Represents ...
- * 
- * @see OtherClasses
+ *
+ *
+ *
  * @author lindsal
  */
 
@@ -32,12 +32,12 @@ final public class TransferCargoMove {
     public CargoContainer getNewContainer() {
         return newContainer;
     }
-    
+
     public TransferCargoMove(CompositeCargoBundle b, CargoContainer before, CargoContainer after){
     	bundle=b;
     	oldContainer=before;
     	newContainer=after;
-    	
+
     }
 }
 

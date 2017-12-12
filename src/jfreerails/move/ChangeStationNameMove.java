@@ -1,9 +1,9 @@
 package jfreerails.move;
 
 /**
- * Represents ...
- * 
- * @see OtherClasses
+ *
+ *
+ *
  * @author lindsal
  */
 

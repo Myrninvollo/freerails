@@ -2,12 +2,12 @@
 package jfreerails.move;
 
 
-import jfreerails.world.type.TrainClass;
+import jfreerails.world.train.TrainClass;
 
 /**
- * Represents ...
- * 
- * @see OtherClasses
+ *
+ *
+ *
  * @author lindsal
  */
 
@@ -17,7 +17,7 @@ public final class ChangeTrainClassMove {
 
     private final TrainClass newClass;
 
-  
+
     public TrainClass getOldClass() {
         return oldClass;
     }
@@ -25,7 +25,7 @@ public final class ChangeTrainClassMove {
     public TrainClass getNewClass() {
         return newClass;
     }
-    
+
     public ChangeTrainClassMove(TrainClass before, TrainClass after){
     	oldClass=before;
     	newClass=after;

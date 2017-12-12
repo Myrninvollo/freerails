@@ -4,9 +4,8 @@
  */
 package jfreerails.move;
 
-import jfreerails.move.status.MoveStatus;
-import jfreerails.world.std_track.TrackPiece;
-import jfreerails.world.std_track.TrackTileMap;
+import jfreerails.world.track.TrackPiece;
+import jfreerails.world.track.TrackTileMap;
 
 /**
  * @version 	1.0

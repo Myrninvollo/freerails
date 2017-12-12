@@ -1,5 +1,7 @@
 package jfreerails.world.train;
 
+import jfreerails.world.misc.IntLine;
+import jfreerails.world.misc.FreerailsPathIterator;
 import junit.framework.TestCase;
 
 public class SnakeImplTest extends TestCase {
@@ -148,6 +150,31 @@ public class SnakeImplTest extends TestCase {
 		assertLineEquals(0, 0, 30, 40, line);
 		assertTrue(!it.hasNext());
 	}
+	
+	public void testReversePathIterator(){
+		Snake s = new SnakeImpl(new int[]{10,20,30}, new int[]{11,22,33});
+		IntLine line = new IntLine();
+		
+		//First check the forwards iterator.
+		FreerailsPathIterator forwards=s.pathIterator();					
+		forwards.nextSegment(line);
+		assertLineEquals(10,11,20,22, line);
+		forwards.nextSegment(line);
+		assertLineEquals(20,22,30,33, line);
+		assertTrue(!forwards.hasNext());
+		
+		//Second test the backwards iterator.
+		FreerailsPathIterator backwards=s.reversePathIterator();					
+		backwards.nextSegment(line);
+		assertLineEquals(30,33,20,22, line);
+		backwards.nextSegment(line);
+		assertLineEquals(20,22, 10, 11, line);
+		assertTrue(!backwards.hasNext());
+		
+		
+		
+	}
+		
 
 	public void testPathIterator() {
 

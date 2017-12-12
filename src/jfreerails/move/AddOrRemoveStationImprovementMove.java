@@ -2,12 +2,12 @@
 package jfreerails.move;
 
 
-import jfreerails.world.type.StationImprovement;
+import jfreerails.world.station.StationImprovement;
 
 /**
- * Represents ...
- * 
- * @see OtherClasses
+ *
+ *
+ *
  * @author lindsal
  */
 
@@ -17,7 +17,7 @@ final public class AddOrRemoveStationImprovementMove {
 
     private final StationImprovement improvement;
 
-    
+
 
     public StationImprovement getImprovement() {
         return improvement;

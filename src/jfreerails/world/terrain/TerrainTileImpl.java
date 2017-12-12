@@ -6,10 +6,9 @@ package jfreerails.world.terrain;
 
 /**
  * @version 	1.0
- * @author
  */
 public class TerrainTileImpl implements TerrainTile {
-	
+
 	private final TerrainType terrainType;
 
 	public int getRGB() {
@@ -21,9 +20,9 @@ public class TerrainTileImpl implements TerrainTile {
 	public TerrainType getTerrainType(){
 		return terrainType;
 	}
-	
+
 	public TerrainTileImpl(TerrainType terrainType){
-		this.terrainType=terrainType;	
+		this.terrainType=terrainType;
 	}
 
 }

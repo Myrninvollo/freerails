@@ -1,25 +1,25 @@
 
 package jfreerails.move;
 
-import jfreerails.world.type.StationType;
+import jfreerails.world.station.StationType;
 
 
 /**
- * Represents ...
- * 
- * @see OtherClasses
+ *
+ *
+ *
  * @author lindsal
  */
 
 final public class ChangeStationTypeMove {
 
- 
+
 
     private final StationType oldType;
 
     private final StationType newType;
 
-  
+
 
     public StationType getOldType() {
         return oldType;

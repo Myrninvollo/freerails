@@ -11,12 +11,13 @@ import jfreerails.client.train.TrainTypeView;
 import jfreerails.client.train.TrainView;
 import jfreerails.client.train.ViewPerspective;
 import jfreerails.lib.GameModel;
-import jfreerails.world.flat.OneTileMoveVector;
-import jfreerails.world.train.FreerailsPathIterator;
-import jfreerails.world.train.FreerailsPathIteratorImpl;
-import jfreerails.world.train.IntLine;
+import jfreerails.world.misc.OneTileMoveVector;
+import jfreerails.world.misc.FreerailsPathIterator;
+import jfreerails.world.misc.FreerailsPathIteratorImpl;
+import jfreerails.world.misc.IntLine;
 import jfreerails.world.train.PathWalker;
 import jfreerails.world.train.PathWalkerImpl;
+import jfreerails.world.train.WagonType;
 
 /**
  * @author Luke Lindsay 13-Oct-2002
@@ -27,15 +28,15 @@ public class TrainPainter {
 	
 	TrainView localTrainView = new TrainView();
 	
-	TrainTypeView[] train =
+	int[] train =
 		{
-			TrainTypeView.SLOW_FREIGHT,
-			TrainTypeView.BULK_FREIGHT,
-			TrainTypeView.FAST_FREIGHT,
-			TrainTypeView.PASSENGER,
-			TrainTypeView.PASSENGER,
-			TrainTypeView.MAIL,
-			TrainTypeView.ENGINE };
+			WagonType.SLOW_FREIGHT,
+			WagonType.BULK_FREIGHT,
+			WagonType.FAST_FREIGHT,
+			WagonType.PASSENGER,
+			WagonType.PASSENGER,
+			WagonType.MAIL,
+			WagonType.ENGINE };
 	
 	public TrainPainter(){
 		localTrainView.setViewPerspective(ViewPerspective.OVERHEAD);

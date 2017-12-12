@@ -1,9 +1,9 @@
 /**
- * Java class generated from Poseidon UML diagram. 
- * Poseidon is developed by <A HREF="http://www.gentleware.com">Gentleware</A>.
- * Generated with <A HREF="http://jakarta.apache.org/velocity/">velocity</A> template engine.
  *
- * 
+ *
+ *
+ *
+ *
  */
 package jfreerails.world.stats;
 
@@ -11,21 +11,21 @@ package jfreerails.world.stats;
 import jfreerails.world.financial.ListedCompany;
 
 /**
- * Represents ...
- * 
- * @see OtherClasses
+ *
+ *
+ *
  * @author lindsal
  */
 
 public class StockHistory {
 
-   ///////////////////////////////////////
+
    // associations
 
     public ListedCompany listedCompany;
 
 
-   ///////////////////////////////////////
+
    // access methods for associations
 
 
@@ -34,7 +34,7 @@ public class StockHistory {
     }
     public void setListedCompany(ListedCompany listedCompany) {
             this.listedCompany = listedCompany;
-    } 
+    }
 
 
 

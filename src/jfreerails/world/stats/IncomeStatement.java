@@ -1,89 +1,89 @@
 /**
- * Java class generated from Poseidon UML diagram. 
- * Poseidon is developed by <A HREF="http://www.gentleware.com">Gentleware</A>.
- * Generated with <A HREF="http://jakarta.apache.org/velocity/">velocity</A> template engine.
  *
- * 
+ *
+ *
+ *
+ *
  */
 package jfreerails.world.stats;
 
 
-import jfreerails.world.financial.Money;
+import jfreerails.world.misc.Money;
 
 /**
- * Represents ...
- * 
- * @see OtherClasses
+ *
+ *
+ *
  * @author lindsal
  */
 
 public class IncomeStatement {
 
-  ///////////////////////////////////////
-  //attributes
+
+
 
 /**
- * Represents ...
+ *
 
  */
 
     private Money mail;
 /**
- * Represents ...
+ *
 
  */
 
     private Money passengers;
 /**
- * Represents ...
+ *
 
  */
 
     private Money fastFreight;
 /**
- * Represents ...
+ *
 
  */
 
     private Money slowFreight;
 /**
- * Represents ...
+ *
 
  */
 
     private Money bulkFreight;
 /**
- * Represents ...
+ *
 
  */
 
     private Money interestAndFees;
 /**
- * Represents ...
+ *
 
  */
 
     private Money trainMaintenance;
 /**
- * Represents ...
+ *
 
  */
 
     private Money trackMaintenance;
 /**
- * Represents ...
+ *
 
  */
 
     private Money stationMaintenance;
 /**
- * Represents ...
+ *
 
  */
 
     private Money stockProfits;
 
-  ///////////////////////////////////////
+
   //access methods for attributes
 
     public Money getMail() {

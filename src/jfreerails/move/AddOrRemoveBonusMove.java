@@ -1,13 +1,13 @@
 package jfreerails.move;
 
-import jfreerails.world.type.CargoType;
-import jfreerails.world.financial.Money;
+import jfreerails.world.cargo.CargoType;
+import jfreerails.world.misc.Money;
 import jfreerails.world.station.StationModelPrivate;
 
 /**
- * Represents ...
- * 
- * @see OtherClasses
+ *
+ *
+ *
  * @author lindsal
  */
 
@@ -53,7 +53,7 @@ final public class AddOrRemoveBonusMove {
 		StationModelPrivate from,
 		CargoType c,
 		Money amount,
-		String str, 
+		String str,
 		boolean can) {
 		deliverStation = to;
 		pickupStation = from;

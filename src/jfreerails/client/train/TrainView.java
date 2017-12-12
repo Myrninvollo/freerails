@@ -1,5 +1,6 @@
 package jfreerails.client.train;
 
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GraphicsConfiguration;
@@ -7,11 +8,15 @@ import java.awt.GraphicsEnvironment;
 import java.awt.Point;
 import java.awt.Transparency;
 import java.awt.image.BufferedImage;
+import java.util.HashMap;
 import java.util.Iterator;
 
-import jfreerails.world.flat.OneTileMoveVector;
+import jfreerails.world.misc.OneTileMoveVector;
+import jfreerails.world.train.WagonType;
 
 public class TrainView {
+
+	HashMap typeColors = new HashMap();
 
 	private GraphicsConfiguration defaultConfiguration =
 		GraphicsEnvironment
@@ -21,7 +26,7 @@ public class TrainView {
 
 	private ViewPerspective viewPerspective = ViewPerspective.OVERHEAD;
 
-	private TrainTypeView trainTypes = TrainTypeView.PASSENGER;
+	private int trainType = WagonType.PASSENGER;
 
 	private SideOnViewSize sideOnViewSize = SideOnViewSize.TINY;
 
@@ -31,7 +36,7 @@ public class TrainView {
 
 	public void drawTrain(Graphics g, Point p) {
 
-		int x = trainTypes.getTypeNumber();
+		int x = trainType;
 		int y = direction.getNumber();
 		g.drawImage(trains[x][y], p.x - 15, p.y - 15, null);
 		//drawTrainWithoutBuffer(g, p);
@@ -39,7 +44,12 @@ public class TrainView {
 	}
 
 	private void drawTrainWithoutBuffer(Graphics g, Point p) {
-		g.setColor(trainTypes.getColor());
+		
+		
+		TrainTypeView ttv =(TrainTypeView)typeColors.get(new Integer(trainType));
+		Color c = ttv.getColor();
+		
+		g.setColor(c);
 		if (ViewPerspective.OVERHEAD == viewPerspective) {
 
 			Graphics2D g2 = (Graphics2D) g.create();
@@ -67,8 +77,8 @@ public class TrainView {
 		return sideOnViewSize;
 	}
 
-	public TrainTypeView getTrainTypes() {
-		return trainTypes;
+	public int getTrainTypes() {
+		return trainType;
 	}
 
 	public ViewPerspective getViewPerspective() {
@@ -83,8 +93,8 @@ public class TrainView {
 		this.sideOnViewSize = sideOnViewSize;
 	}
 
-	public void setTrainTypes(TrainTypeView trainTypes) {
-		this.trainTypes = trainTypes;
+	public void setTrainTypes(int type) {
+		this.trainType = type;
 	}
 
 	public void setViewPerspective(ViewPerspective viewPerspective) {
@@ -92,17 +102,18 @@ public class TrainView {
 	}
 
 	private void setup() {
-		Object o = TrainTypeView.BULK_FREIGHT;
-		int numberOfTrinTypes = TrainTypeView.getSize();
+		
+	
 
-		trains = new BufferedImage[numberOfTrinTypes][8];
+		trains = new BufferedImage[WagonType.NUMBER_OF_CATEGORIES][8];
 
 		int row = 0;
 		int column = 0;
-		Iterator trainTypes = TrainTypeView.iterator();
+		Iterator trainTypes = typeColors.keySet().iterator();
 		while (trainTypes.hasNext()) {
 			row = 0;
-			this.setTrainTypes((TrainTypeView) trainTypes.next());
+			Integer typeNumber=(Integer)trainTypes.next();
+			this.setTrainTypes(typeNumber.intValue());
 			OneTileMoveVector[] vectors = OneTileMoveVector.getList();
 			for (int i = 0; i < vectors.length; i++) {
 				trains[column][row] =
@@ -121,6 +132,29 @@ public class TrainView {
 	}
 	public TrainView() {
 
+		typeColors.put(
+			new Integer(WagonType.MAIL),
+			new TrainTypeView(Color.WHITE));
+
+		typeColors.put(
+			new Integer(WagonType.PASSENGER),
+			new TrainTypeView(Color.BLUE));
+
+		typeColors.put(
+			new Integer(WagonType.FAST_FREIGHT),
+			new TrainTypeView(Color.YELLOW));
+
+		typeColors.put(
+			new Integer(WagonType.SLOW_FREIGHT),
+			new TrainTypeView(Color.ORANGE));
+
+		typeColors.put(
+			new Integer(WagonType.BULK_FREIGHT),
+			new TrainTypeView(Color.BLACK));
+
+		typeColors.put(
+			new Integer(WagonType.ENGINE),
+			new TrainTypeView(Color.LIGHT_GRAY));
 		setup();
 	}
 

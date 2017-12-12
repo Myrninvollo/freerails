@@ -2,16 +2,16 @@ package jfreerails;
 
 import javax.swing.JFrame;
 import jfreerails.client.ClientJFrame;
-import jfreerails.client.GUIComponentFactoryImpl;
 import jfreerails.client.ViewLists;
-import jfreerails.client.ViewListsImpl;
+import jfreerails.controller.ServerGameEngine;
 import jfreerails.lib.GameLoop;
 import jfreerails.lib.ScreenHandler;
 import jfreerails.world.World;
-import jfreerails.world.WorldImpl;
 
 public class RunFreerails {
 
+	/** @param args 
+	 */
 	public static void main(String[] args) {
 
 		boolean nogameloop = false;
@@ -36,10 +36,12 @@ public class RunFreerails {
 
 	}
 
-	/**
-	 *  Description of the Method
-	 *
-	 *@param  mapName  The filename of the map to load.
+	/** 
+	 * Description of the Method
+	 * 
+	 * @param mapName The filename of the map to load.
+	 * @param fullscreen 
+	 * @param nogameloop 
 	 */
 
 	public static void createClient(String mapName, boolean fullscreen, boolean nogameloop) {
@@ -55,6 +57,12 @@ public class RunFreerails {
 
 	}
 
+	/** @param fullscreen 
+	 * @param nogameloop 
+	 * @param world 
+	 * @param viewLists 
+	 * @param gUIComponentFactory 
+	 */
 	public static void createClient(
 		boolean fullscreen,
 		boolean nogameloop,
@@ -65,17 +73,17 @@ public class RunFreerails {
 		        throw new IllegalArgumentException();
 		    }
 		
-			
-			gUIComponentFactory.setup(viewLists, world);
+			ServerGameEngine gameEngine = new ServerGameEngine(world); 
+			gUIComponentFactory.setup(viewLists, world, gameEngine);
 			JFrame client = new ClientJFrame(gUIComponentFactory);
 		
 			if (nogameloop) {
 				client.setSize(740, 500);
 				client.show();
 			} else {
-		
+				
 				ScreenHandler screenHandler = new ScreenHandler(client, fullscreen);
-				GameLoop gameLoop = new GameLoop(screenHandler);
+				GameLoop gameLoop = new GameLoop(screenHandler, gameEngine);
 				Thread t = new Thread(gameLoop);
 				t.start();
 			}

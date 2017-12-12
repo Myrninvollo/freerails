@@ -1,14 +1,14 @@
 
 package jfreerails.move;
 
-import jfreerails.world.type.DebitTransactionType;
+import jfreerails.world.financial.DebitTransactionType;
 import jfreerails.world.financial.ListedCompany;
-import jfreerails.world.financial.Money;
+import jfreerails.world.misc.Money;
 
 /**
- * Represents ...
- * 
- * @see OtherClasses
+ *
+ *
+ *
  * @author lindsal
  */
 
@@ -34,18 +34,18 @@ final public class ChangeBankAccountBalanceMove implements FinancialMove {
     public DebitTransactionType getType() {
         return type;
     }
-    
+
     public ListedCompany getListedCompany() {
     	throw new java.lang.UnsupportedOperationException(
 			"Method not implemented yet!");
     }
-    
+
     public ChangeBankAccountBalanceMove(ListedCompany lc, Money before, Money after, DebitTransactionType t){
-    
+
     		oldBalance=before;
     		newBalance=after;
     		type=t;
-    } 
+    }
 }
 
 

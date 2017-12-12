@@ -2,7 +2,6 @@ package jfreerails.world.cargo;
 
 import java.util.Iterator;
 
-import jfreerails.world.type.CargoType;
 
 public interface CargoContainer {
 

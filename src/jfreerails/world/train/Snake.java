@@ -1,6 +1,9 @@
 package jfreerails.world.train;
 
-import jfreerails.lib.FreerailsSerializable;
+import java.awt.Point;
+
+import jfreerails.world.misc.FreerailsPathIterator;
+import jfreerails.world.misc.FreerailsSerializable;
 
 
 
@@ -18,5 +21,11 @@ public interface Snake extends FreerailsSerializable {
 	
 	void moveTail(int x, int y);
 	
+	void getHead(Point p);
+	
+	void getTail(Point p);
+	
 	FreerailsPathIterator pathIterator();
+	
+	FreerailsPathIterator reversePathIterator();
 }

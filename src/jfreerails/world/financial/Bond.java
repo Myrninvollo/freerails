@@ -1,11 +1,11 @@
 package jfreerails.world.financial;
 
-import jfreerails.world.GameTime;
+import jfreerails.world.misc.GameTime;
 
 /**
- * Represents ...
- * 
- * @see OtherClasses
+ *
+ *
+ *
  * @author lindsal
  */
 
@@ -16,7 +16,7 @@ final public class Bond {
 	private final int interestRate;
 
 	private final ListedCompany listedCompany;
-	
+
 
 	public GameTime getIssueDate() {
 		return issueDate;
@@ -34,6 +34,6 @@ final public class Bond {
 		issueDate=issued;
 		listedCompany=lc;
 	}
-		
+
 
 }

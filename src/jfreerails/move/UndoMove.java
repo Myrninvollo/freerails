@@ -1,11 +1,10 @@
 package jfreerails.move;
-import jfreerails.move.status.MoveStatus;
 import jfreerails.world.World;
 
 /**
- * Represents ...
- * 
- * @see OtherClasses
+ *
+ *
+ *
  * @author lindsal
  */
 

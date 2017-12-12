@@ -1,3 +1,29 @@
+05-Nov-2002 22:53:11 Luke Lindsay 
+   o Moving trains: the class ServerGameEngine
+   has a list of TrainMover objects, which control the 
+   movement of individual trains.  Movement is triggered
+   by calls to ServerGameEngine.update() in the GameLoop's
+   run() method.   
+03-Nov-2002 22:35:52 Luke Lindsay 
+   o Improvements to TrainPosition and ChangeTrainPositionMove classes
+28-Oct-2002 23:52:39 Luke Lindsay 
+   o Fix javadoc warnings
+   o Add 'upload to sourceforge' task to build.xml
+   o Add world_javadoc task to build xml.
+27-Oct-2002 21:54:46 Luke Lindsay 
+   oWrote ChangeTrainPositionMove and ChangeTrainPositionTest
+27-Oct-2002 01:09:22 Luke Lindsay 
+   oWrote TrainPosition and TrainPositionTest to replace Snake class.
+16-Oct-2002 22:58:03 Luke Lindsay 
+   o Removed cyclic dependencies from the rest of
+   the project.
+16-Oct-2002 21:48:24 Luke Lindsay 
+   o Refactored the jfreerails.world.* packages
+   	so that (1) jfreerails.world.* do not depend on any
+   				other jfreerails packages.
+   			(2) there are no cyclic dependencies between
+   				any of the jfreerails.world.* packages.
+   	hopefully this should make it easier to maintain.
 13-Oct-2002 22:30:30 Luke Lindsay 
    o Added trains!  They don't move yet.  Hit F7 when the cursor 
    is over the track to build one.

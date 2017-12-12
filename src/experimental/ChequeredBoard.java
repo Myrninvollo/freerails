@@ -14,7 +14,6 @@ import javax.swing.JPanel;
 
 /**
  * @version 	1.0
- * @author
  */
 
 public class ChequeredBoard extends JPanel {
@@ -49,7 +48,7 @@ public class ChequeredBoard extends JPanel {
 			}
 		}
 	}
-	
+
 	private class MyMouseAdapter extends MouseAdapter {
 		public void mouseClicked(MouseEvent e) {
 			int x = e.getX() / 40;

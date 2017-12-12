@@ -9,10 +9,10 @@ import java.awt.Image;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import jfreerails.world.type.TrackRule;
-import jfreerails.world.TrackRuleList;
-import jfreerails.world.flat.TrackConfiguration;
-import jfreerails.world.std_track.NullTrackType;
+import jfreerails.world.track.TrackRule;
+import jfreerails.world.track.TrackRuleList;
+import jfreerails.world.track.TrackConfiguration;
+import jfreerails.world.track.NullTrackType;
 import sun.security.krb5.internal.i;
 
 final public class TrackPieceViewList {

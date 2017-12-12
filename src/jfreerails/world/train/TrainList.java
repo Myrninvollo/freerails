@@ -3,23 +3,23 @@ package jfreerails.world.train;
 
 import java.util.ArrayList;
 
-import jfreerails.lib.FreerailsSerializable;
+import jfreerails.world.misc.FreerailsSerializable;
 public class TrainList implements FreerailsSerializable {
     
     private ArrayList trains=new ArrayList();
 
-    public TrainModelPublic trainModelPublic;
+    public TrainModel trainModelPublic;
     
     public TrainList(){
         
     }
     
-    public void addTrain(TrainModelPublic train){
+    public void addTrain(TrainModel train){
         trains.add(train);
     }
     
-    public TrainModelPublic getTrain(int i){
-        return (TrainModelPublic)trains.get(i);
+    public TrainModel getTrain(int i){
+        return (TrainModel)trains.get(i);
     }
     
     public int size(){

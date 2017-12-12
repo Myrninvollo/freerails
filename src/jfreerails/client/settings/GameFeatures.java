@@ -1,70 +1,70 @@
 /**
- * Java class generated from Poseidon UML diagram. 
- * Poseidon is developed by <A HREF="http://www.gentleware.com">Gentleware</A>.
- * Generated with <A HREF="http://jakarta.apache.org/velocity/">velocity</A> template engine.
  *
- * 
+ *
+ *
+ *
+ *
  */
 package jfreerails.client.settings;
 
 
 
 /**
- * Represents ...
- * 
- * @see OtherClasses
+ *
+ *
+ *
  * @author lindsal
  */
 
 public class GameFeatures {
 
-  ///////////////////////////////////////
-  //attributes
+
+
 
 /**
- * Represents ...
+ *
 
  */
 
     private boolean music;
 /**
- * Represents ...
+ *
 
  */
 
     private boolean soundEffects;
 /**
- * Represents ...
+ *
 
  */
 
     private int financialNews;
 /**
- * Represents ...
+ *
 
  */
 
     private int railroadNews;
 /**
- * Represents ...
+ *
 
  */
 
     private int localNews;
 /**
- * Represents ...
+ *
 
  */
 
     private boolean stationBoxes;
 /**
- * Represents ...
+ *
 
  */
 
     private boolean resourceMap;
 
-  ///////////////////////////////////////
+
   //access methods for attributes
 
     public boolean getMusic() {

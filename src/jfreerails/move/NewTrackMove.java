@@ -1,13 +1,12 @@
 
 package jfreerails.move;
 
-import jfreerails.move.status.MoveStatus;
-import jfreerails.world.std_track.TrackTileMap;
+import jfreerails.world.track.TrackTileMap;
 
 /**
- * Represents ...
- * 
- * @see OtherClasses
+ *
+ *
+ *
  * @author lindsal
  */
 
@@ -20,5 +19,5 @@ public interface NewTrackMove extends Move{
 	  MoveStatus doMove(TrackTileMap trackTileMap);
 
 	  MoveStatus undoMove(TrackTileMap trackTileMap);
-	 	
+
 }

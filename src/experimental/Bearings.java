@@ -5,7 +5,6 @@
 package experimental;
 /**
  * @version 	1.0
- * @author
  */
 public class Bearings {
 	public static final int NORTH = 0;

@@ -5,9 +5,9 @@ import jfreerails.world.financial.Stock;
 import jfreerails.world.financial.StockOwner;
 
 /**
- * Represents ...
- * 
- * @see OtherClasses
+ *
+ *
+ *
  * @author lindsal
  */
 
@@ -36,8 +36,8 @@ final public class TransferStockMove  {
     	buyer=to;
     	seller=from;
     	stock=st;
-    	
-    } 
+
+    }
 }
 
 

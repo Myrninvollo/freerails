@@ -1,11 +1,11 @@
 package jfreerails.move;
 
-import jfreerails.world.type.CargoType;
+import jfreerails.world.cargo.CargoType;
 
 /**
- * Represents ...
- * 
- * @see OtherClasses
+ *
+ *
+ *
  * @author lindsal
  */
 

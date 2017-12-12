@@ -17,30 +17,30 @@ import java.util.LinkedList;
  */
 final public class CustomEventQueue extends EventQueue {
     /**
-     * @associates AWTEvent
+     *  AWTEvent
      */
     LinkedList secondEventQueue = new LinkedList();
-    
+
     /**
      * @param event
-     */    
+     */
     protected void dispatchEvent(AWTEvent event) {
-        
+
         synchronized (secondEventQueue) {
-            
+
             secondEventQueue.add(event);
         }
     }
     public void dispatchAllEvents() throws InterruptedException {
         synchronized (secondEventQueue) {
-            
+
             while (secondEventQueue.size() != 0) {
                 AWTEvent event = (AWTEvent) secondEventQueue.removeFirst();
-                
+
                 super.dispatchEvent(event);
-                
+
             }
         }
-        
+
     }
 }

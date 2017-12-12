@@ -2,12 +2,12 @@ package jfreerails.move;
 
 
 import jfreerails.world.*;
-import jfreerails.world.GameTime;
+import jfreerails.world.misc.GameTime;
 
 /**
- * Represents ...
  *
- * @see OtherClasses
+ *
+ *
  * @author lindsal
  */
 

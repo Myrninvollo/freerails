@@ -2,12 +2,12 @@ package jfreerails.move;
 
 import java.util.Vector;
 
-import jfreerails.world.std_cargo.CompositeCargoBundle;
+import jfreerails.world.cargo.CompositeCargoBundle;
 
 /**
- * Represents ...
- * 
- * @see OtherClasses
+ *
+ *
+ *
  * @author lindsal
  */
 

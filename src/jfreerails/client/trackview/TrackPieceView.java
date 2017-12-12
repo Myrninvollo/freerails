@@ -5,7 +5,7 @@ import java.awt.Image;
 *  Description of the Interface
 *
 *@author     Luke Lindsay
-*@created    09 October 2001
+*     09 October 2001
 */
 
 public interface TrackPieceView {

@@ -5,6 +5,8 @@
  */
 
 package experimental.mapview;
+
+import jfreerails.client.view.MainMapAndOverviewMapMediator;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -14,13 +16,12 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JScrollPane;
-import jfreerails.client.view.map.BlankMapView;
-import jfreerails.client.view.map.MapViewJComponentConcrete;
-import jfreerails.client.view.map.NewOverviewMapJComponent;
+import jfreerails.client.view.BlankMapView;
+import jfreerails.client.view.MapViewJComponentConcrete;
+import jfreerails.client.view.NewOverviewMapJComponent;
 /**
  *
  * @author  Luke Lindsay
- * @version
  */
 public class SimpleComponentFactoryImpl2 implements jfreerails.client.GUIComponentFactory {
 
@@ -96,8 +97,8 @@ public class SimpleComponentFactoryImpl2 implements jfreerails.client.GUICompone
 				int newCenterY = oldCenterY * newWidth / oldWidth;
 				visRect.y = newCenterY - visRect.height / 2;
 
-				/* LL: I'm not sure why the 'if' is necessary in the following, but 
-				 * the view does not center on the right spot without it.				 
+				/* LL: I'm not sure why the 'if' is necessary in the following, but
+				 * the view does not center on the right spot without it.
 				 */
 				if (oldWidth < newWidth) {
 					mainMap.setSize(mainMap.getPreferredSize());

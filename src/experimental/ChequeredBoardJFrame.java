@@ -10,15 +10,14 @@ import javax.swing.JFrame;
 
 /**
  * @version 	1.0
- * @author
  */
 public class ChequeredBoardJFrame extends JFrame {
-	
+
 	Board b=new Board();
 	MoveHandler moveHandler=new MoveHandler(b);
 
 	public ChequeredBoardJFrame() {
-		
+
 		b.setPiece(3,3,new Piece(Color.RED));
 		this.getContentPane().add(new ChequeredBoard(b, moveHandler));
 		addWindowListener(new java.awt.event.WindowAdapter() {

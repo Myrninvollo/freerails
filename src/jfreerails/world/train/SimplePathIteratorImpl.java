@@ -1,5 +1,7 @@
 package jfreerails.world.train;
 
+import jfreerails.world.misc.IntLine;
+import jfreerails.world.misc.FreerailsPathIterator;
 import java.util.NoSuchElementException;
 
 public class SimplePathIteratorImpl implements FreerailsPathIterator {
@@ -34,4 +36,5 @@ public class SimplePathIteratorImpl implements FreerailsPathIterator {
 	public boolean hasNext() {
 		return (position + 1) < x.length;
 	}
+	
 }

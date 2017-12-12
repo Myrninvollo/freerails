@@ -2,7 +2,6 @@ package jfreerails.world.train;
 
 import java.util.Vector;
 
-import jfreerails.world.type.WaitUntilFullOrders;
 import jfreerails.world.station.StationModel;
 
 final public class TrainRoute {

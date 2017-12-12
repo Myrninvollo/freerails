@@ -1,6 +1,6 @@
 package jfreerails.world.station;
 
-import jfreerails.world.type.CargoType;
+import jfreerails.world.cargo.CargoType;
 import jfreerails.world.cargo.CargoBundle;
 import jfreerails.world.cargo.CargoContainer;
 public abstract class StationModelPrivate

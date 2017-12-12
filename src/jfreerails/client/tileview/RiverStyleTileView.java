@@ -12,7 +12,6 @@ import jfreerails.world.terrain.TerrainMap;
 /**
 *
 * @author  Luke Lindsay
-* @version 
 */
 
 
@@ -25,9 +24,9 @@ final public class RiverStyleTileView extends jfreerails.client.tileview.Abstrac
     private static final int[] X_LOOK_AT =  {
         -1, 0, 1, 0
     };
-    
+
     /** Creates new RiverStyleTileView */
-    
+
     public RiverStyleTileView( jfreerails.lib.ImageSplitter imageSplitter, int[] rgbValues, TerrainType tileModel )  {
         imageSplitter.setTransparencyToOPAQUE();
         tileIcons = new java.awt.Image[ 16 ];
@@ -37,7 +36,7 @@ final public class RiverStyleTileView extends jfreerails.client.tileview.Abstrac
         super.rgbValues = rgbValues;
         super.tileModel = tileModel;
     }
-    
+
     public int selectTileIcon( int x, int y, jfreerails.world.terrain.TerrainMap map ) {
         int  iconNumber = 0;
         for( int  i = 0;i < 4;i++ ) {
