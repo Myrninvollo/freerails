@@ -8,12 +8,21 @@ package jfreerails.common.trackmodel;
 import jfreerails.common.OneTileMoveVector;
 import jfreerails.common.TileModel;
 import jfreerails.common.exception.FreerailsException;
-import jfreerails.common.IntPoint;
+import java.awt.*;
 
-/**
+/** This class provides a method to get the eight rotations
+* of a track template.  E.g. if the teamplate is:
+* 010
+* 010
+* 110
+* it returns:
+* 010 001 100
+* 010 110 111
+* 110 100 000 etc.
 *
-* @author  Luke Lindsay
-* @version 
+*
+* @author Luke Lindsay
+* @version 1.0
 */
 
 
@@ -24,6 +33,12 @@ public class EightRotationsOfTrackPieceProducer extends java.lang.Object {
     public EightRotationsOfTrackPieceProducer() {
         
     }
+    
+    /** The method that returns the rotations.
+    * @param trackBlueprint A 9bit value that serves as the template.
+    * @return An array of 8 9-bit values that have been generated
+    * by rotating the template.
+    */
     
     public static int[] getRotations( int trackBlueprint ) {
         int  trackTemplate = trackBlueprint;
@@ -50,15 +65,15 @@ public class EightRotationsOfTrackPieceProducer extends java.lang.Object {
     }
     
     private static boolean[][] rotateTrackNodeClockwise( boolean[][] source ) {
-        IntPoint[][]  grabValueFrom = new IntPoint[ 3 ][];
-        grabValueFrom[ 0 ] = new IntPoint[] {
-            new IntPoint( 0, 1 ), new IntPoint( 0, 0 ), new IntPoint( 1, 0 )
+        Point[][]  grabValueFrom = new Point[ 3 ][];
+        grabValueFrom[ 0 ] = new Point[] {
+            new Point( 0, 1 ), new Point( 0, 0 ), new Point( 1, 0 )
         };
-        grabValueFrom[ 1 ] = new IntPoint[] {
-            new IntPoint( 0, 2 ), new IntPoint( 1, 1 ), new IntPoint( 2, 0 )
+        grabValueFrom[ 1 ] = new Point[] {
+            new Point( 0, 2 ), new Point( 1, 1 ), new Point( 2, 0 )
         };
-        grabValueFrom[ 2 ] = new IntPoint[] {
-            new IntPoint( 1, 2 ), new IntPoint( 2, 2 ), new IntPoint( 2, 1 )
+        grabValueFrom[ 2 ] = new Point[] {
+            new Point( 1, 2 ), new Point( 2, 2 ), new Point( 2, 1 )
         };
         
         /* I think there is a neater way of doing this, let me know if you know it!  Luke
@@ -66,11 +81,11 @@ public class EightRotationsOfTrackPieceProducer extends java.lang.Object {
         boolean[][]  output = new boolean[ 3 ][ 3 ];
         for( int  y = 0;y < 3;y++ ) {
             for( int  x = 0;x < 3;x++ ) {
-                IntPoint  point = grabValueFrom[ y ][ x ];
+                Point  point = grabValueFrom[ y ][ x ];
                 
                 /*y,x because of the way I defined grabValueFrom[][] above.
                 */
-                output[ x ][ y ] = source[ point.getX() ][ point.getY() ];
+                output[ x ][ y ] = source[ point.x ][ point.y ];
             }
         }
         return output;

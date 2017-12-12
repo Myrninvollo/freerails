@@ -1,6 +1,7 @@
 <!-- edited with XML Spy v3.5 (http://www.xmlspy.com) by  () -->
+<!--This file species the track (and station) types, and the legal track configurations for each of these types.-->
 <Tiles>
-	<TrackSet X="0" Y="0" Height="30" Width="30" Class="Track">
+	<TrackSet X="0" Y="0" Height="60" Width="60" Class="Track">
 		<TrackType type="standard track" X="0" Y="0" signalTower="false" doubleTrack="false" station="false" maxConsecuativePieces="-1" RGBvalue="000000">
 			<CannotBuildOnTheseTerrainTypes>
 				<TerrainType name="River"/>
@@ -8,6 +9,7 @@
 				<TerrainType name="Foothills"/>
 				<TerrainType name="Ocean"/>
 				<TerrainType name="Mountain"/>
+				<TerrainType name="Harbour"/>
 			</CannotBuildOnTheseTerrainTypes>
 			<ListOfTrackPieceTemplates>
 				<TrackPieceTemplate trackTemplate="010010000">
@@ -63,6 +65,7 @@
 				<TerrainType name="Hills"/>
 				<TerrainType name="Foothills"/>
 				<TerrainType name="Ocean"/>
+				<TerrainType name="Harbour"/>
 				<TerrainType name="Mountain"/>
 			</CannotBuildOnTheseTerrainTypes>
 			<ListOfTrackPieceTemplates>
@@ -174,6 +177,7 @@
 				<TerrainType name="Hills"/>
 				<TerrainType name="Foothills"/>
 				<TerrainType name="Ocean"/>
+				<TerrainType name="Harbour"/>
 				<TerrainType name="Mountain"/>
 			</CannotBuildOnTheseTerrainTypes>
 			<ListOfTrackPieceTemplates>
@@ -195,6 +199,7 @@
 				<TerrainType name="Hills"/>
 				<TerrainType name="Foothills"/>
 				<TerrainType name="Ocean"/>
+				<TerrainType name="Harbour"/>
 				<TerrainType name="Mountain"/>
 			</CannotBuildOnTheseTerrainTypes>
 			<ListOfTrackPieceTemplates>
@@ -216,6 +221,7 @@
 				<TerrainType name="Hills"/>
 				<TerrainType name="Foothills"/>
 				<TerrainType name="Ocean"/>
+				<TerrainType name="Harbour"/>
 				<TerrainType name="Mountain"/>
 			</CannotBuildOnTheseTerrainTypes>
 			<ListOfTrackPieceTemplates>
@@ -237,13 +243,6 @@
 				<TerrainType name="Ocean"/>
 				<TerrainType name="Mountain"/>
 			</CanOnlyBuildOnTheseTerrainTypes>
-			<CannotBuildOnTheseTerrainTypes>
-				<TerrainType name="River"/>
-				<TerrainType name="Hills"/>
-				<TerrainType name="Foothills"/>
-				<TerrainType name="Ocean"/>
-				<TerrainType name="Mountain"/>
-			</CannotBuildOnTheseTerrainTypes>
 			<ListOfTrackPieceTemplates>
 				<TrackPieceTemplate trackTemplate="010010000">
 					<ListOfLegalRoutesAcrossNode>

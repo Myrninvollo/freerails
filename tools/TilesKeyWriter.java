@@ -15,70 +15,13 @@ package jfreerails.tools;
 * @author  lindsal8
 * @version 
 */
-import java.awt.*;
-import java.awt.geom.*;
-import java.awt.image.BufferedImage;
-import java.awt.image.RenderedImage;
-import java.io.*;
-import java.util.*;
 import java.net.URL;
-import javax.swing.ImageIcon;
-import javax.imageio.*;
-import jfreerails.client.tileview.TileView;
-import jfreerails.common.exception.FreerailsException;
-import jfreerails.common.TileFactory;
-import jfreerails.lib.ImageSplitter;
 
 
 public class TilesKeyWriter extends java.lang.Object {
     
     public TilesKeyWriter() {
         
-    }
-    
-    public static void draw_key( URL tiles_xml_url, ImageSplitter terrain ) {
-        try {
-            int  x = 0, y = 0; //Position on the buffered image on which we draw the key.
-            TileFactory  tileFactory = new TileFactory( tiles_xml_url );
-            HashMap  tileViewHashMap = tileFactory.getTileViewHashMap( terrain );
-            Point  tileSize = tileFactory.getTileSize();
-            int  tile_height = (int)tileSize.getX();
-            int  number_of_tiles = tileViewHashMap.size();
-            BufferedImage  tilesKey;
-            tilesKey = new BufferedImage( 300, ( tile_height + 2 ) * number_of_tiles + 50, BufferedImage.TYPE_INT_RGB );
-            Graphics2D  g2 = tilesKey.createGraphics();
-            y += 16;
-            g2.setColor( Color.white );
-            String  str = tiles_xml_url.getFile();
-            g2.drawString( str, 0, y );
-            y += 20;
-            Iterator  iterator = tileViewHashMap.values().iterator();
-            System.out.println( "Drawing tiles" );
-            while( iterator.hasNext() ) {
-                TileView  tileView = (TileView)iterator.next();
-                Image  img = tileView.getIcon().getImage();
-                x = 10;
-                y += 2;
-                g2.setPaint( new Color( tileView.getRGB() ) );
-                Rectangle2D.Double  rect = new Rectangle2D.Double( (double)x, (double)y, (double)tile_height, (double)tile_height );
-                g2.fill( rect );
-                x += 10 + tile_height;
-                g2.drawImage( img, x, y, null );
-                x += 10 + tile_height;
-                g2.setColor( Color.white );
-                y += tile_height;
-                g2.drawString( tileView.getTerrainType(), x, y - 2 );
-            }
-            System.out.println( "Finished drawing tiles" );
-            URL  saveURL = TilesKeyWriter.class.getResource( "/jfreerails/data/" );
-            String  saveFilename = saveURL.getPath() + "key.png";
-            if( ImageIO.write( (RenderedImage)tilesKey, "png", new File( saveFilename ) ) ) {
-                System.out.println( "Key saved as: " + saveFilename );
-            }
-        }
-        catch( Exception e ) {
-            e.printStackTrace();
-        }
     }
     
     /**
@@ -90,10 +33,55 @@ public class TilesKeyWriter extends java.lang.Object {
             
             //Load the picture containing the tile graphics.
             URL  tiles_url = TilesKeyWriter.class.getResource( "/jfreerails/data/freerails_tiles.PNG" );
-            ImageSplitter  terrain = new ImageSplitter( tiles_url );
+            jfreerails.lib.ImageSplitter  terrain = new jfreerails.lib.ImageSplitter( tiles_url );
             URL  tiles_xml_url = TilesKeyWriter.class.getResource( "/jfreerails/data/Tiles.xml" );
             draw_key( tiles_xml_url, terrain );
             System.exit( 0 );
+        }
+        catch( Exception e ) {
+            e.printStackTrace();
+        }
+    }
+    
+    public static void draw_key( URL tiles_xml_url, jfreerails.lib.ImageSplitter terrain ) {
+        try {
+            int  x = 0, y = 0; //Position on the buffered image on which we draw the key.
+            jfreerails.common.TileFactory  tileFactory = new jfreerails.common.TileFactory( tiles_xml_url, terrain );
+            jfreerails.client.tileview.TileViewList  tiles = tileFactory.getTileViewList();
+            java.awt.Point  tileSize = tileFactory.getTileSize();
+            int  tile_height = tileSize.x;
+            int  number_of_tiles = tiles.getLength();
+            java.awt.image.BufferedImage  tilesKey;
+            tilesKey = new java.awt.image.BufferedImage( 300, ( tile_height + 2 ) * number_of_tiles + 50, java.awt.image.BufferedImage.TYPE_INT_RGB );
+            java.awt.Graphics2D  g2 = tilesKey.createGraphics();
+            y += 16;
+            g2.setColor( java.awt.Color.white );
+            String  str = tiles_xml_url.getFile();
+            g2.drawString( str, 0, y );
+            y += 20;
+            java.util.Iterator  iterator = tiles.getIterator();
+            System.out.println( "Drawing tiles" );
+            while( iterator.hasNext() ) {
+                jfreerails.client.tileview.TileView  tileView = (jfreerails.client.tileview.TileView)iterator.next();
+                java.awt.Image  img = tileView.getIcon();
+                x = 10;
+                y += 2;
+                g2.setPaint( new java.awt.Color( tileView.getRGB() ) );
+                java.awt.Rectangle  rect = new java.awt.Rectangle( x, y, tile_height, tile_height );
+                g2.fill( rect );
+                x += 10 + tile_height;
+                g2.drawImage( img, x, y, null );
+                x += 10 + tile_height;
+                g2.setColor( java.awt.Color.white );
+                y += tile_height;
+                g2.drawString( tileView.getTerrainType(), x, y - 2 );
+            }
+            System.out.println( "Finished drawing tiles" );
+            URL  saveURL = TilesKeyWriter.class.getResource( "/jfreerails/data/" );
+            String  saveFilename = saveURL.getPath() + "key.png";
+            if( javax.imageio.ImageIO.write( (java.awt.image.RenderedImage)tilesKey, "png", new java.io.File( saveFilename ) ) ) {
+                System.out.println( "Key saved as: " + saveFilename );
+            }
         }
         catch( Exception e ) {
             e.printStackTrace();

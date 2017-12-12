@@ -5,45 +5,27 @@
 * Created on 20 May 2001, 21:05
 */
 package jfreerails.common.trackmodel;
-
-/**
-* @author  Luke Lindsay.
-* @version 
-*/
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.FactoryConfigurationError;
-import javax.xml.parsers.ParserConfigurationException;
-import java.awt.Point;
-import java.awt.Color;
-import javax.swing.ImageIcon;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.text.*;
-import java.util.*;
-import java.lang.Integer;
-import java.lang.Boolean;
-import java.lang.StringBuffer;
-import org.w3c.dom.*;
-import org.w3c.dom.DOMException;
-import jfreerails.lib.ImageSplitter;
-import jfreerails.lib.DOMLoader;
 import jfreerails.common.exception.FreerailsException;
-import jfreerails.common.trackmodel.TrackRule;
-import jfreerails.common.trackmodel.TrackNode;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.NamedNodeMap;
+import java.text.NumberFormat;
 import jfreerails.client.trackview.TrackPieceView;
-import jfreerails.client.trackview.TrackPieceViewList;
-import jfreerails.common.trackmodel.TrackRule;
-import jfreerails.common.exception.FreerailsException;
-import jfreerails.common.trackmodel.TrackRuleList;
+import java.util.HashSet;
+
+/** This class provides methods to generate a set of track rules
+* whose properites are specified in an XML file.
+*
+* @author Luke Lindsay.
+* @version 1.0
+* 
+*/
 
 
 public class TrackSetFactory extends java.lang.Object {
 
-    private Point trackTileSize;
+    private java.awt.Point trackTileSize;
 
     private NamedNodeMap trackRuleSetAttributes;
 
@@ -59,19 +41,21 @@ public class TrackSetFactory extends java.lang.Object {
         return new TrackRuleList( trackRuleList );
     }
     
-    public Point getTrackPieceSize() throws FreerailsException {
+    public java.awt.Point getTrackPieceSize() throws FreerailsException {
         if( trackTileSize == null ) {
             throw new FreerailsException( "Error: TrackSetFactory.getTrackPieceSize called before trackRulesize had been set" );
         }
         return trackTileSize;
     }
     
-    /** Creates new TrackSetFactory.  It loads an XML file that defines the terrain 
-    types in the trackRule-set*/
+    /** Creates new TrackSetFactory.  It loads an XML file that defines the terrain
+    * types in the trackRule-set
+    * @param xml_url The URL of the XML file defining the track rules.
+    */
     
-    public TrackSetFactory( URL xml_url ) {
+    public TrackSetFactory( java.net.URL xml_url ) {
         Element  trackRules;
-        Document  document = DOMLoader.get_dom( xml_url );
+        org.w3c.dom.Document  document = jfreerails.lib.DOMLoader.get_dom( xml_url );
         trackRules = document.getDocumentElement();
         trackRules.normalize();
         NodeList  trackRulesetNodeList = trackRules.getElementsByTagName( "TrackSet" );
@@ -80,7 +64,7 @@ public class TrackSetFactory extends java.lang.Object {
         this.trackRuleSetAttributes = node_trackRule_set.getAttributes();
     }
     
-    public TrackPieceViewList getTrackViewList( ImageSplitter trackImageSplitter ) throws FreerailsException {
+    public jfreerails.client.trackview.TrackPieceViewList getTrackViewList( jfreerails.lib.ImageSplitter trackImageSplitter ) throws FreerailsException {
         TrackPieceView[]  trackPieceViewList = new TrackPieceView[ trackRulesNodeList.getLength() ];
         try {
             
@@ -94,7 +78,7 @@ public class TrackSetFactory extends java.lang.Object {
             temp_number = trackRuleSetAttributes.getNamedItem( "Y" ).getNodeValue();
             int  y = NumberFormat.getInstance().parse( temp_number ).intValue();
             trackImageSplitter.setTileGrid( x, y, width, height );
-            this.trackTileSize = new Point( width, height );
+            this.trackTileSize = new java.awt.Point( width, height );
         }
         catch( java.text.ParseException pe ) {
             throw new FreerailsException( "ParseException while parsing the xml" + "file specifying the track tile sizes.  Check that the \"Tile_set\" attributes: \"Height\", \"Width\", \"X\", and \"Y\" are integers" );
@@ -103,48 +87,10 @@ public class TrackSetFactory extends java.lang.Object {
             Node  trackViewNode = trackRulesNodeList.item( i );
             trackPieceViewList[ i ] = createTrackPieceView( trackViewNode, trackImageSplitter );
         }
-        return new TrackPieceViewList( trackPieceViewList );
+        return new jfreerails.client.trackview.TrackPieceViewList( trackPieceViewList );
     }
     
-    private TrackRule createTrackRule( Node trackTypeNode, int ruleNumber ) throws FreerailsException {
-        Element  trackTypeElement = (org.w3c.dom.Element)trackTypeNode;
-        NodeList  trackPieceTemplateNodeList = trackTypeElement.getElementsByTagName( "TrackPieceTemplate" );
-        int[]  trackPieceTemplateArray = new int[ trackPieceTemplateNodeList.getLength() ];
-        int[][]  legalRoutesAcrossNodeArray = new int[ trackPieceTemplateNodeList.getLength() ][];
-        for( int  i = 0;i < trackPieceTemplateArray.length;i++ ) {
-            NamedNodeMap  trackPieceAttributes = trackPieceTemplateNodeList.item( i ).getAttributes();
-            String  nodeValue = trackPieceAttributes.getNamedItem( "trackTemplate" ).getNodeValue();
-            trackPieceTemplateArray[ i ] = (int)Integer.parseInt( nodeValue, 2 );
-            legalRoutesAcrossNodeArray[ i ] = getLegalRoutesAcrossNode( trackPieceTemplateNodeList.item( i ) );
-        }
-        return new TrackRule( trackPieceTemplateArray, legalRoutesAcrossNodeArray, ruleNumber );
-    }
-    
-    private int[] getLegalRoutesAcrossNode( Node trackPieceTemplate ) {
-        Element  trackPieceTemplateElement = (org.w3c.dom.Element)trackPieceTemplate;
-        NodeList  legalRoutesAcrossNodeNodeList = trackPieceTemplateElement.getElementsByTagName( "LegalRouteAcrossNode" );
-        int[]  legalRoutesAcrossNode = new int[ legalRoutesAcrossNodeNodeList.getLength() ];
-        for( int  i = 0;i < legalRoutesAcrossNode.length;i++ ) {
-            NamedNodeMap  legalRouteAttributes = legalRoutesAcrossNodeNodeList.item( i ).getAttributes();
-            String  nodeValue = legalRouteAttributes.getNamedItem( "RouteTemplate" ).getNodeValue();
-            legalRoutesAcrossNode[ i ] = (int)Integer.parseInt( nodeValue, 2 );
-        }
-        return legalRoutesAcrossNode;
-    }
-    
-    private HashSet getTerrainTypesList( Node terrainTypesNode ) {
-        Element  terrainTypeListElement = (org.w3c.dom.Element)terrainTypesNode;
-        NodeList  terrainTypeNodeList = terrainTypeListElement.getElementsByTagName( "TerrainType" );
-        HashSet  terrainTypes = new HashSet();
-        for( int  i = 0;i < terrainTypeNodeList.getLength();i++ ) {
-            NamedNodeMap  terrainTypeAttributes = terrainTypeNodeList.item( i ).getAttributes();
-            String  nodeValue = terrainTypeAttributes.getNamedItem( "name" ).getNodeValue();
-            terrainTypes.add( nodeValue );
-        }
-        return terrainTypes;
-    }
-    
-    private TrackPieceView createTrackPieceView( Node trackTypeNode, ImageSplitter trackImageSplitter ) throws FreerailsException {
+    private TrackPieceView createTrackPieceView( Node trackTypeNode, jfreerails.lib.ImageSplitter trackImageSplitter ) throws FreerailsException {
         String  nodeValue;
         Element  trackTypeElement = (org.w3c.dom.Element)trackTypeNode;
         NodeList  trackPieceTemplateNodeList = trackTypeElement.getElementsByTagName( "TrackPieceTemplate" );
@@ -186,7 +132,7 @@ public class TrackSetFactory extends java.lang.Object {
         /* We need to change the format of the rgb value to the same one as used 
         by the the BufferedImage that stores the map.  See jfreerails.common.Map
         */
-        rgb = new Color( rgb ).getRGB();
+        rgb = new java.awt.Color( rgb ).getRGB();
         trackRule.setRGBvalue( rgb );
         attributeValue = trackTypeAttributes.getNamedItem( "maxConsecuativePieces" ).getNodeValue();
         int  maximumConsecutivePieces = (int)Integer.parseInt( attributeValue );
@@ -208,5 +154,43 @@ public class TrackSetFactory extends java.lang.Object {
                 trackRule.setCanOnlyBuildOnTheseTerrainTypes( terrainTypes );
             }
         }
+    }
+    
+    private TrackRule createTrackRule( Node trackTypeNode, int ruleNumber ) throws FreerailsException {
+        Element  trackTypeElement = (org.w3c.dom.Element)trackTypeNode;
+        NodeList  trackPieceTemplateNodeList = trackTypeElement.getElementsByTagName( "TrackPieceTemplate" );
+        int[]  trackPieceTemplateArray = new int[ trackPieceTemplateNodeList.getLength() ];
+        int[][]  legalRoutesAcrossNodeArray = new int[ trackPieceTemplateNodeList.getLength() ][];
+        for( int  i = 0;i < trackPieceTemplateArray.length;i++ ) {
+            NamedNodeMap  trackPieceAttributes = trackPieceTemplateNodeList.item( i ).getAttributes();
+            String  nodeValue = trackPieceAttributes.getNamedItem( "trackTemplate" ).getNodeValue();
+            trackPieceTemplateArray[ i ] = (int)Integer.parseInt( nodeValue, 2 );
+            legalRoutesAcrossNodeArray[ i ] = getLegalRoutesAcrossNode( trackPieceTemplateNodeList.item( i ) );
+        }
+        return new TrackRule( trackPieceTemplateArray, legalRoutesAcrossNodeArray, ruleNumber );
+    }
+    
+    private int[] getLegalRoutesAcrossNode( Node trackPieceTemplate ) {
+        Element  trackPieceTemplateElement = (org.w3c.dom.Element)trackPieceTemplate;
+        NodeList  legalRoutesAcrossNodeNodeList = trackPieceTemplateElement.getElementsByTagName( "LegalRouteAcrossNode" );
+        int[]  legalRoutesAcrossNode = new int[ legalRoutesAcrossNodeNodeList.getLength() ];
+        for( int  i = 0;i < legalRoutesAcrossNode.length;i++ ) {
+            NamedNodeMap  legalRouteAttributes = legalRoutesAcrossNodeNodeList.item( i ).getAttributes();
+            String  nodeValue = legalRouteAttributes.getNamedItem( "RouteTemplate" ).getNodeValue();
+            legalRoutesAcrossNode[ i ] = (int)Integer.parseInt( nodeValue, 2 );
+        }
+        return legalRoutesAcrossNode;
+    }
+    
+    private HashSet getTerrainTypesList( Node terrainTypesNode ) {
+        Element  terrainTypeListElement = (org.w3c.dom.Element)terrainTypesNode;
+        NodeList  terrainTypeNodeList = terrainTypeListElement.getElementsByTagName( "TerrainType" );
+        HashSet  terrainTypes = new HashSet();
+        for( int  i = 0;i < terrainTypeNodeList.getLength();i++ ) {
+            NamedNodeMap  terrainTypeAttributes = terrainTypeNodeList.item( i ).getAttributes();
+            String  nodeValue = terrainTypeAttributes.getNamedItem( "name" ).getNodeValue();
+            terrainTypes.add( nodeValue );
+        }
+        return terrainTypes;
     }
 }

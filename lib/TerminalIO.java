@@ -11,15 +11,13 @@ package jfreerails.lib;
 * @author  lindsal8
 * @version 
 */
-import java.io.*;
-import java.text.*;
 
 
 public class TerminalIO extends java.lang.Object {
 
-    private InputStreamReader converter;
+    private java.io.BufferedReader in;
 
-    private BufferedReader in;
+    private java.io.InputStreamReader converter;
     
     public int my_read_int( java.lang.String prompt ) {
         System.out.println( prompt );
@@ -27,7 +25,7 @@ public class TerminalIO extends java.lang.Object {
         int  i = 0;
         try {
             text = in.readLine();
-            i = NumberFormat.getInstance().parse( text ).intValue();
+            i = java.text.NumberFormat.getInstance().parse( text ).intValue();
         }
         catch( Exception e ) {
             
@@ -38,8 +36,8 @@ public class TerminalIO extends java.lang.Object {
     /** Creates new terminal_io */
     
     public TerminalIO() {
-        converter = new InputStreamReader( System.in );
-        in = new BufferedReader( converter );
+        converter = new java.io.InputStreamReader( System.in );
+        in = new java.io.BufferedReader( converter );
     }
     
     public String my_read_line( java.lang.String prompt ) {

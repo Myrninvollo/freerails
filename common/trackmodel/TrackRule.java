@@ -5,21 +5,16 @@
 * Created on 15 July 2001, 19:53
 */
 package jfreerails.common.trackmodel;
-import jfreerails.common.OneTileMoveVector;
-import jfreerails.common.TileModel;
 import jfreerails.common.exception.FreerailsException;
-import jfreerails.common.IntPoint;
-import jfreerails.common.trackmodel.EightRotationsOfTrackPieceProducer;
-import java.util.*;
+import java.util.HashSet;
 
-/**
-* This class encapsulates the rules that apply to a type of track node.  
-* They concern: the legal routes trains can travel across the node, whether 
-*the node's track can be doubled, on which terrain types it can be built, and the
-*maximum number of consecutive nodes of this type (used for bridges and tunnels).
+/** This class encapsulates the rules that apply to a type of track node.
+* They concern: the legal routes trains can travel across the node, whether
+* the node's track can be doubled, on which terrain types it can be built, and the
+* maximum number of consecutive nodes of this type (used for bridges and tunnels).
 *
-* @author  Luke Lindsay
-* @version 
+* @author Luke Lindsay
+* @version 0.1
 */
 
 
@@ -27,13 +22,17 @@ public class TrackRule extends java.lang.Object {
 
     public int[][] legalRoutesAcrossNodeTemplates;
 
+    private HashSet canOnlyBuildOnTheseTerrainTypes = null;
+
+    private int ruleNumber;
+
     private boolean enableDoubleTrack;
 
     private boolean station = false;
 
-    private boolean signalTower = false;
+    private int rGBvalue = 0;
 
-    private HashSet canOnlyBuildOnTheseTerrainTypes = null;
+    private String typeName;
 
     
     /*Track templates are 9 bit values, so there are 512 possible templates.
@@ -50,89 +49,30 @@ public class TrackRule extends java.lang.Object {
 
     private HashSet cannotBuildOnTheseTerrainTypes = null;
 
-    private int rGBvalue = 0;
-
-    private String typeName;
-
-    private int ruleNumber;
-    
-    public void setRGBvalue( int rGBvalue ) {
-        this.rGBvalue = rGBvalue;
-    }
-    
-    public OneTileMoveVector[] getLegalRoutes( OneTileMoveVector directionComingFrom ) {
-        
-        //TODO add code..
-        return null;
-    }
-    
-    public boolean isAStation() {
-        return station;
-    }
-    
-    public boolean testTrackPieceLegality( int trackTemplateToTest ) throws FreerailsException {
-        
-        //Check the values we have been passed for errors.
-        if( ( trackTemplateToTest > 511 ) || ( trackTemplateToTest < 0 ) ) {
-            throw new FreerailsException( "trackTemplate = " + trackTemplateToTest + ", it should be in the range 0-511" );
-        }
-        return legalTrackTemplates[ trackTemplateToTest ];
-    }
-    
-    public void setTypeName( String name ) {
-        this.typeName = name;
-    }
-    
-    public void setEnableDoubleTrack( boolean dt ) {
-        this.enableDoubleTrack = dt;
-    }
+    private boolean signalTower = false;
     
     public int getRuleNumber() {
         return this.ruleNumber;
+    }
+    
+    public void setCannotBuildOnTheseTerrainTypes( HashSet terrainTypes ) {
+        cannotBuildOnTheseTerrainTypes = terrainTypes;
+        canOnlyBuildOnTheseTerrainTypes = null;
     }
     
     public String getTypeName() {
         return typeName;
     }
     
-    public void setStation( boolean station ) {
-        this.station = station;
+    public boolean isAStation() {
+        return station;
     }
     
-    public int getMaximumConsecutivePieces() {
-        return maximumConsecutivePieces;
-    }
-    
-    public void setMaximumConsecutivePieces( int maximumConsecutivePieces ) {
-        this.maximumConsecutivePieces = maximumConsecutivePieces;
-    }
-    
-    public boolean isASignalTower() {
-        return signalTower;
-    }
-    
-    public boolean canBuildOnThisTerrainType( String TerrainType ) {
-        if( null != canOnlyBuildOnTheseTerrainTypes ) {
-            if( canOnlyBuildOnTheseTerrainTypes.contains( TerrainType ) ) {
-                return true;
-            }
-            else {
-                return false;
-            }
-        }
-        if( null != cannotBuildOnTheseTerrainTypes ) {
-            if( cannotBuildOnTheseTerrainTypes.contains( TerrainType ) ) {
-                return false;
-            }
-            else {
-                return true;
-            }
-        }
-        System.out.println( "Warning: both cannotBuildOnTheseTerrainTypes and canOnlyBuildOnTheseTerrainTypes equals null for track type " + typeName );
-        return true;
-    }
-    
-    /** Creates new TrackRule */
+    /** Creates new TrackRule
+    * @param trackTemplatesPrototypes
+    * @param legalRoutesAcrossNodeTemplatePrototypes
+    * @param ruleNumber
+    * @throws FreerailsException  */
     
     public TrackRule( int[] trackTemplatesPrototypes, int[][] legalRoutesAcrossNodeTemplatePrototypes, int ruleNumber ) throws FreerailsException {
         this.ruleNumber = ruleNumber;
@@ -165,9 +105,41 @@ public class TrackRule extends java.lang.Object {
         }
     }
     
-    public void setCannotBuildOnTheseTerrainTypes( HashSet terrainTypes ) {
-        cannotBuildOnTheseTerrainTypes = terrainTypes;
-        canOnlyBuildOnTheseTerrainTypes = null;
+    public void setStation( boolean station ) {
+        this.station = station;
+    }
+    
+    public void setMaximumConsecutivePieces( int maximumConsecutivePieces ) {
+        this.maximumConsecutivePieces = maximumConsecutivePieces;
+    }
+    
+    public boolean canBuildOnThisTerrainType( String TerrainType ) {
+        if( null != canOnlyBuildOnTheseTerrainTypes ) {
+            if( canOnlyBuildOnTheseTerrainTypes.contains( TerrainType ) ) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        if( null != cannotBuildOnTheseTerrainTypes ) {
+            if( cannotBuildOnTheseTerrainTypes.contains( TerrainType ) ) {
+                return false;
+            }
+            else {
+                return true;
+            }
+        }
+        System.out.println( "Warning: both cannotBuildOnTheseTerrainTypes and canOnlyBuildOnTheseTerrainTypes equals null for track type " + typeName );
+        return true;
+    }
+    
+    public boolean isASignalTower() {
+        return signalTower;
+    }
+    
+    public boolean isDoubleTrackEnabled() {
+        return enableDoubleTrack;
     }
     
     public void setCanOnlyBuildOnTheseTerrainTypes( HashSet terrainTypes ) {
@@ -175,11 +147,38 @@ public class TrackRule extends java.lang.Object {
         cannotBuildOnTheseTerrainTypes = null;
     }
     
-    public boolean isDoubleTrackEnabled() {
-        return enableDoubleTrack;
-    }
-    
     public void setSignalTower( boolean signalTower ) {
         this.signalTower = signalTower;
+    }
+    
+    public void setTypeName( String name ) {
+        this.typeName = name;
+    }
+    
+    public boolean testTrackPieceLegality( int trackTemplateToTest ) throws FreerailsException {
+        
+        //Check the values we have been passed for errors.
+        if( ( trackTemplateToTest > 511 ) || ( trackTemplateToTest < 0 ) ) {
+            throw new FreerailsException( "trackTemplate = " + trackTemplateToTest + ", it should be in the range 0-511" );
+        }
+        return legalTrackTemplates[ trackTemplateToTest ];
+    }
+    
+    public void setEnableDoubleTrack( boolean dt ) {
+        this.enableDoubleTrack = dt;
+    }
+    
+    public int getMaximumConsecutivePieces() {
+        return maximumConsecutivePieces;
+    }
+    
+    public void setRGBvalue( int rGBvalue ) {
+        this.rGBvalue = rGBvalue;
+    }
+    
+    public jfreerails.common.OneTileMoveVector[] getLegalRoutes( jfreerails.common.OneTileMoveVector directionComingFrom ) {
+        
+        //TODO add code..
+        return null;
     }
 }

@@ -7,10 +7,10 @@
 package jfreerails.client.trackview;
 import java.awt.Image;
 import jfreerails.common.exception.FreerailsException;
-import jfreerails.common.IntPoint;
+import java.awt.Point;
 import jfreerails.common.trackmodel.EightRotationsOfTrackPieceProducer;
 import jfreerails.lib.ImageSplitter;
-import javax.swing.ImageIcon;
+import java.awt.Image;
 
 /**
 *
@@ -23,9 +23,17 @@ public class TrackPieceView {
 
     Image[] trackPieceIcons = new Image[ 512 ];
     
+    public Image getTrackPieceIcon( int trackTemplate ) throws FreerailsException {
+        if( ( trackTemplate > 511 ) || ( trackTemplate < 0 ) ) {
+            throw new FreerailsException( "trackTemplate = " + trackTemplate + ", it should be in the range 0-511" );
+        }
+        return trackPieceIcons[ trackTemplate ];
+    }
+    
     /** Creates new TrackPieceView */
     
     public TrackPieceView( int[] trackTemplatesPrototypes, ImageSplitter trackImageSplitter ) throws FreerailsException {
+        trackImageSplitter.setTransparencyToBITMASK(); //Since track tiles have transparent regions.
         for( int  i = 0;i < trackTemplatesPrototypes.length;i++ ) {
             
             /* Check for invalid parameters. */
@@ -38,17 +46,10 @@ public class TrackPieceView {
                 int[]  rotationsOfTrackTemplate = EightRotationsOfTrackPieceProducer.getRotations( trackTemplatesPrototypes[ j ] );
                 for( int  k = 0;k < rotationsOfTrackTemplate.length;k++ ) {
                     if( trackPieceIcons[ rotationsOfTrackTemplate[ k ] ] == null ) {
-                        trackPieceIcons[ rotationsOfTrackTemplate[ k ] ] = trackImageSplitter.getTileFromSubGrid( k, j ).getImage();
+                        trackPieceIcons[ rotationsOfTrackTemplate[ k ] ] = trackImageSplitter.getTileFromSubGrid( k, j );
                     }
                 }
             }
         }
-    }
-    
-    public Image getTrackPieceIcon( int trackTemplate ) throws FreerailsException {
-        if( ( trackTemplate > 511 ) || ( trackTemplate < 0 ) ) {
-            throw new FreerailsException( "trackTemplate = " + trackTemplate + ", it should be in the range 0-511" );
-        }
-        return trackPieceIcons[ trackTemplate ];
     }
 }

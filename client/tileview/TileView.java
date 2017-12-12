@@ -6,40 +6,63 @@
 */
 package jfreerails.client.tileview;
 
+import jfreerails.common.exception.FreerailsException;
+import jfreerails.common.FreerailsMap.TerrainMap;
+
+//import jfreerails.common.FreerailsMap.TerrainMap;
+import java.awt.Image;
+import java.awt.Point;
+
+
 /**
 *  This class encapsulates the visible properties of a tile.
 * @author  Luke Lindsay
-* @version 
+* @version
 */
-import javax.swing.ImageIcon;
-import jfreerails.common.TileModel;
-import jfreerails.client.tileview.TileIconSelector;
-import jfreerails.common.exception.FreerailsException;
-import jfreerails.common.TerrainMap;
 
 
-public class TileView extends java.lang.Object {
+public abstract class TileView extends java.lang.Object implements TileRenderer {
 
-    private TileModel tileModel;
+    protected jfreerails.common.TileModel tileModel;
 
-    private int rgb;
+    protected int rgb;
 
-    private TileIconSelector tileIconSelector;
+    protected int[] rgbValues;
 
-    private ImageIcon[] tileIcons;
+    protected TileIconSelector tileIconSelector;
 
-    private static int tileHeight;
+    protected Image[] tileIcons;
 
-    private static int tileWidth;
+    protected static int tileWidth;
+
+    protected static int tileHeight;
     
-    public ImageIcon getIcon( int x, int y, TerrainMap map ) throws FreerailsException {
-        int  tile = tileIconSelector.selectTileIcon( x, y, map );
-        if( tileIcons[ tile ] != null ) {
-            return tileIcons[ tile ];
+    public void renderTile(java.awt.Graphics g, Point renderCoordinate, Point mapCoordinate, TerrainMap map) {
+        try {
+            java.awt.Image  icon = this.getIcon( mapCoordinate.x, mapCoordinate.y, map );
+            if( null != icon ) {
+                g.drawImage( icon, renderCoordinate.x, renderCoordinate.y, null );
+            }
         }
-        else {
-            throw new FreerailsException( "Error in TileView.getIcon: icon no. " + tile + "==null" );
+        catch( jfreerails.common.exception.FreerailsException fe ) {
+            fe.printStackTrace();
         }
+    }
+    
+    public String getTerrainType() {
+        return tileModel.getTerrainType();
+    }
+    
+    /*The terrain types that are treated as the same.  E.g. for terrain type
+    river; ocean, ports, and other rivers are treated as the same terrain type.
+    */
+    
+    public int selectTileIcon(int x, int y, TerrainMap map) {
+        return 0;
+    }
+    
+    public int getRGB() {
+        return tileModel.getRGB();
     }
     
     public int getTileWidth() {
@@ -50,33 +73,47 @@ public class TileView extends java.lang.Object {
         return tileHeight;
     }
     
-    public int getRGB() {
-        return tileModel.getRGB();
-    }
-    
-    /** Creates new TileView */
-    
-    public TileView( ImageIcon[] tileIcons, TileIconSelector tileIconSelector, TileModel tileModel ) throws FreerailsException {
-        if( ( tileIcons != null ) && ( tileIconSelector != null ) ) {
-            this.tileIcons = tileIcons;
-            this.tileIconSelector = tileIconSelector;
-            this.tileModel = tileModel;
+    public Image getIcon(int x, int y, TerrainMap map) throws FreerailsException {
+        int  tile = selectTileIcon( x, y, map );
+        if( tileIcons[ tile ] != null ) {
+            return tileIcons[ tile ];
         }
         else {
-            throw new FreerailsException( "Error: TileView - tileIcons==" + tileIcons + " and tileIconSelector==" + tileIconSelector );
+            throw new FreerailsException( "Error in TileView.getIcon: icon no. " + tile + "==null" );
         }
     }
     
-    public String getTerrainType() {
-        return tileModel.getTerrainType();
-    }
-    
-    public ImageIcon getIcon() {
+    public Image getIcon() {
         return tileIcons[ 0 ];
     }
     
     public static void setTileSize( int height, int width ) {
         tileHeight = height;
         tileWidth = width;
+    }
+    
+    protected int checkTile(int x, int y, TerrainMap map) {
+        int  match = 1;
+        
+        /*0==match!  (0 is assigned to match because of the way the tiles are set up
+        *in the image from which they are grabbed.)
+        */
+        if( ( ( x < map.getWidth() ) && ( x >= 0 ) ) && ( y < map.getHeight() ) && ( y >= 0 ) ) {
+            for( int  i = 0;i < rgbValues.length;i++ ) {
+                if( map.getTerrainTileType( x, y ) == rgbValues[ i ] ) {
+                    match = 0;
+                
+                //A match
+                }
+            }
+        }
+        else {
+            match = 0; //A match
+        
+        /*If the tile we are checking is off the map, let it be a match.
+        This stops coast appearing where the ocean meets the map edge.
+        */
+        }
+        return match;
     }
 }

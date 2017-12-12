@@ -6,22 +6,15 @@
 */
 package jfreerails.common.exception;
 
-/**
-*
-* @author  Luke Lindsay
-* @version 
+/** Use this Exception to signify that the problem was
+* specific to freerails.  E.g. a rgb value not being
+* mapped to a terrain-type.
+* @author Luke Lindsay
+* @version 1.0
 */
 
 
 public class FreerailsException extends java.lang.Exception {
-    
-    /**
-    * Creates new <code>FreerailsException</code> without detail message.
-    */
-    
-    public FreerailsException() {
-        
-    }
     
     /**
     * Constructs an <code>FreerailsException</code> with the specified detail message.
@@ -30,5 +23,13 @@ public class FreerailsException extends java.lang.Exception {
     
     public FreerailsException( String msg ) {
         super( msg );
+    }
+    
+    /**
+    * Creates new <code>FreerailsException</code> without detail message.
+    */
+    
+    public FreerailsException() {
+        
     }
 }

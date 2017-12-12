@@ -6,21 +6,18 @@
 */
 package jfreerails.client.tileview;
 
+import jfreerails.common.FreerailsMap.TerrainMap;
+
 /**
 *
 * @author  Luke Lindsay
 * @version 
 */
-import jfreerails.common.TerrainMap;
 
 
 public abstract class TileIconSelector extends java.lang.Object {
 
     private int[] rgbValues;
-    
-    public int selectTileIcon( int x, int y, TerrainMap map ) {
-        return 0;
-    }
     
     /*The terrain types that are treated as the same.  E.g. for terrain type 
     river; ocean, ports, and other rivers are treated as the same terrain type. 
@@ -37,7 +34,11 @@ public abstract class TileIconSelector extends java.lang.Object {
         }
     }
     
-    protected int checkTile( int x, int y, TerrainMap map ) {
+    public int selectTileIcon(int x, int y, TerrainMap map) {
+        return 0;
+    }
+    
+    protected int checkTile(int x, int y, TerrainMap map) {
         int  match = 1;
         
         /*0==match!  (0 is assigned to match because of the way the tiles are set up

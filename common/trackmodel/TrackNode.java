@@ -6,68 +6,75 @@
 */
 package jfreerails.common.trackmodel;
 
-/**
-*
-* @author  Luke Lindsay
-* @version 
+/** This class encapsulates the type and configuation
+* of the track on a square.  For every square on
+* which track is layed, an object of this class is
+* created.
+* @author Luke Lindsay
+* @version 0.1
 */
-import jfreerails.common.trackmodel.RailModel;
-import jfreerails.common.OneTileMoveVector;
-import jfreerails.common.IntPoint;
-import jfreerails.common.trackmodel.TrackRule;
-import jfreerails.common.exception.FreerailsException;
 
 
 public class TrackNode extends java.lang.Object {
 
-    private TrackRule trackRule;
+    private TrackRule trackType;
 
-    private boolean[][] railsList = new boolean[ 3 ][ 3 ];
+    private boolean[][] railsArrangement = new boolean[ 3 ][ 3 ];
 
-    private IntPoint position;
+    private java.awt.Point position;
     
-    public void addRail( OneTileMoveVector rail, TrackRule trackRule ) {
-        railsList[ 1 ][ 1 ] = true; //The central piece.
-        railsList[ 1 + rail.getX() ][ 1 + rail.getY() ] = true;
+    public TrackRule getTrackRule() {
+        return this.trackType;
     }
     
     //This value determines which track graphic to display.
     
     public int getTrackGraphicNumber() {
-        return getTrackGraphicNumber( railsList );
+        return getTrackGraphicNumber( railsArrangement );
     }
     
-    public TrackRule getTrackRule() {
-        return this.trackRule;
+    public int getTrackTypeNumber() {
+        return this.trackType.getRuleNumber();
     }
     
-    public boolean testAddRail( OneTileMoveVector rail, TrackRule trackRule ) throws FreerailsException {
+    /** Creates new TrackNode */
+    
+    public TrackNode( java.awt.Point position, TrackRule trackRule ) {
+        this.position = position;
+        this.trackType = trackRule;
+    }
+    
+    public boolean isOrphaned() {
+        final int  orphanedTrackNode = ( 1 << 4 );
+        if( this.getTrackGraphicNumber() == orphanedTrackNode ) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    
+    public java.awt.Point getPosition() {
+        return position;
+    }
+    
+    public boolean testAddRail( jfreerails.common.OneTileMoveVector rail, TrackRule trackRule ) throws jfreerails.common.exception.FreerailsException {
         int  trackGraphicNumber = this.getTrackGraphicNumber();
         trackGraphicNumber = trackGraphicNumber | ( 1 << ( 3 * ( 1 + rail.getY() ) + ( 1 + rail.getX() ) ) );
         trackGraphicNumber = trackGraphicNumber | ( 1 << 4 ); //The centre square!
         return trackRule.testTrackPieceLegality( trackGraphicNumber );
     }
     
-    public void removeRail( OneTileMoveVector direction ) {
-        
-    
-    //setRail( direction, null );
-    }
-    
-    public IntPoint getPosition() {
-        return position;
-    }
-    
-    public int getTrackTypeNumber() {
-        return this.trackRule.getRuleNumber();
-    }
-    
-    /** Creates new TrackNode */
-    
-    public TrackNode( IntPoint position, TrackRule trackRule ) {
-        this.position = position;
-        this.trackRule = trackRule;
-    }
+    /** Returns a 9-bit value specifying  the track configuration, and
+    * hence the appropriate icon, for the track at this node.  E.g.
+    * the binary representation of a vertical straight would be:
+    * 010
+    * 010
+    * 010 i.e. 010010010
+    * @param railsList The rail list that is used ot generate the track
+    * graphic number.
+    * @return The track graphic number.
+    */
     
     public static int getTrackGraphicNumber( boolean[][] railsList ) {
         int  trackGraphicNumber = 0;
@@ -79,5 +86,29 @@ public class TrackNode extends java.lang.Object {
             }
         }
         return trackGraphicNumber;
+    }
+    
+    protected void removeRail( jfreerails.common.OneTileMoveVector direction ) {
+        railsArrangement[ 1 + direction.getX() ][ 1 + direction.getY() ] = false;
+    }
+    
+    protected void addRail( jfreerails.common.OneTileMoveVector rail, TrackRule trackRule ) {
+        railsArrangement[ 1 ][ 1 ] = true; //The central piece.
+        railsArrangement[ 1 + rail.getX() ][ 1 + rail.getY() ] = true;
+    }
+    
+    protected boolean getRail( jfreerails.common.OneTileMoveVector rail ) {
+        return railsArrangement[ 1 + rail.getX() ][ 1 + rail.getY() ];
+    }
+    
+    protected boolean upgrade( TrackRule newTrackRule ) throws jfreerails.common.exception.FreerailsException {
+        int  trackGraphicNumber = this.getTrackGraphicNumber();
+        if( newTrackRule.testTrackPieceLegality( trackGraphicNumber ) ) {
+            this.trackType = newTrackRule;
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 }

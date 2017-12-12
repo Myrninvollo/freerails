@@ -6,46 +6,77 @@
 */
 package jfreerails.common;
 
-/**
-*  This class provides methods to create a set of TileModel and TileView objects,
-* whose properties are defined in an xml file.
-*
-* @author  Luke Lindsay.
-* @version 
-*/
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.FactoryConfigurationError;
-import javax.xml.parsers.ParserConfigurationException;
-import java.awt.Point;
-import java.awt.Color;
-import javax.swing.ImageIcon;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
-import java.io.File;
-import java.io.IOException;
 import java.net.URL;
-import java.text.*;
-import java.util.HashMap;
-import java.lang.Integer;
-import org.w3c.dom.*;
-import org.w3c.dom.DOMException;
-import jfreerails.common.TileModel;
+import java.text.NumberFormat;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 import jfreerails.lib.ImageSplitter;
-import jfreerails.lib.DOMLoader;
+import java.util.ArrayList;
 import jfreerails.client.tileview.TileView;
-import jfreerails.client.tileview.*;
+import jfreerails.client.tileview.StandardTileView;
+import java.awt.Point;
 import jfreerails.common.exception.FreerailsException;
-import jfreerails.common.TerrainTileTypesList;
+
+import jfreerails.client.tileview.TileViewList;
+
+/** This class provides methods to create a set of TileModel and TileView objects,
+* whose  visual and non-visual properies are defined in an XML file.
+* @author Luke Lindsay.
+* @version 1.0
+*/
 
 
 public class TileFactory extends java.lang.Object {
 
+    private Element tileSet;
+
+    private ImageSplitter tilesImageSplitter;
+
+    private TerrainTileTypesList terrainTileTypesList;
+
+    private TileViewList tileViewList;
+
     private Point tileSize;
+    
 
-    private NamedNodeMap tileSetAttributes;
+    private class ParsingVariables extends java.lang.Object {
 
-    private NodeList tilesNodeList;
+        public TileView thisTileView;
+
+        public TileModel parentTileModel;
+
+        public TileView parentTileView;
+
+        public Element tile;
+
+        public java.util.HashMap tileViewHashMap;
+
+        public ArrayList tileModelList;
+
+        public TileModel thisTileModel;
+        
+        public ParsingVariables() {
+            tileViewHashMap = new java.util.HashMap();
+            tileModelList = new ArrayList();
+        }
+    }
+    
+    public TileFactory(URL xml_url, ImageSplitter terrain) throws FreerailsException {
+        this( xml_url );
+        if( terrain != null ) {
+            this.tilesImageSplitter = terrain;
+            getTileSize( tilesImageSplitter );
+        }
+        else {
+            throw new FreerailsException( "Null imageSplitter passed to the TileFactory constructor" );
+        }
+        generateTileLists( tileSet.getChildNodes(), new ParsingVariables() );
+    }
+    
+    /** Returns the tile size in pixels.
+    * @throws FreerailsException Thrown when the tile size has not been set.
+    * @return tilesize in pixels.
+    */
     
     public Point getTileSize() throws FreerailsException {
         if( tileSize == null ) {
@@ -54,18 +85,85 @@ public class TileFactory extends java.lang.Object {
         return tileSize;
     }
     
-    public HashMap getTileViewHashMap( ImageSplitter terrain ) throws FreerailsException {
-        System.out.print( "\nGetting terrain tiles from image" );
+    /** This method is called by the client.  It returns
+    * the visual properties of the terrain tiles.
+    *
+    * @param terrain The imageSplitter that holds the image from
+    * which the tile icons are to be grabbed.
+    * @throws FreerailsException Thrown if there is an error parsing the XML file.
+    * @return The object encapsulating the list of tile views.
+    */
+    
+    public TileViewList getTileViewList() throws FreerailsException {
+        return this.tileViewList;
+    }
+    
+    /** Creates new TileFactory.
+    * @param xml_url The XML file specifying the terrain types.
+    */
+    
+    public TileFactory(URL xml_url) throws FreerailsException {
+        org.w3c.dom.Element  tiles;
+        org.w3c.dom.Document  document = jfreerails.lib.DOMLoader.get_dom( xml_url );
+        tiles = document.getDocumentElement();
+        tiles.normalize();
+        org.w3c.dom.NodeList  tilesetNodeList = tiles.getElementsByTagName( "Tile_set" );
+        this.tileSet = (Element)tilesetNodeList.item( 0 );
+        generateTileLists( tileSet.getChildNodes(), new ParsingVariables() );
+    }
+    
+    /** This method returns the non-visual properties of the tile-set,
+    * so it would be called by the client and the server.
+    * @return The set of tile models.
+    */
+    
+    public TerrainTileTypesList getTerrainTileTypesList() {
+        return terrainTileTypesList;
+    }
+    
+    private void processList( NodeList tilesToProcess, ParsingVariables parsingVariables ) throws FreerailsException {
+        for( int  i = 0;i < tilesToProcess.getLength();i++ ) {
+            org.w3c.dom.Node  tile = tilesToProcess.item( i );
+            String  str = tile.getNodeName();
+            if( str.equalsIgnoreCase( "Tile" ) ) {
+                TileModel  tileModel = getTileModel( (Element)tile );
+                parsingVariables.tileModelList.add( tileModel );
+                if( tilesImageSplitter != null ) {
+                    parsingVariables.thisTileView = getTileView( (Element)tile, tilesImageSplitter, tileModel, parsingVariables.parentTileView );
+                    if( ( parsingVariables.thisTileView == null ) || ( tileModel == null ) ) {
+                        throw new FreerailsException( "Error in TileFactory.getTileViewList - (tileView == null)||(tileModel==null) " );
+                    }
+                    parsingVariables.tileViewHashMap.put( new Integer( tileModel.getRGB() ), parsingVariables.thisTileView );
+                }
+                
+                /*We need to check whether this Tile has any specials. */
+                NodeList  children = tile.getChildNodes();
+                for( int  ii = 0;ii < children.getLength();ii++ ) {
+                    String  childName = children.item( ii ).getNodeName();
+                    if( childName.equalsIgnoreCase( "specials" ) ) {
+                        TileView  tempThis = parsingVariables.thisTileView;
+                        TileView  tempParent = parsingVariables.parentTileView;
+                        parsingVariables.parentTileView = parsingVariables.thisTileView;
+                        processList( children.item( ii ).getChildNodes(), parsingVariables );
+                        parsingVariables.thisTileView = tempThis;
+                        parsingVariables.parentTileView = tempParent;
+                    }
+                }
+            }
+        }
+    }
+    
+    private void getTileSize( ImageSplitter terrain ) throws FreerailsException {
         try {
             
             //Get values, then setup the ImageSplitter.
-            String  temp_number = tileSetAttributes.getNamedItem( "Height" ).getNodeValue();
+            String  temp_number = tileSet.getAttribute( "Height" );
             int  height = NumberFormat.getInstance().parse( temp_number ).intValue();
-            temp_number = tileSetAttributes.getNamedItem( "Width" ).getNodeValue();
+            temp_number = tileSet.getAttribute( "Width" );
             int  width = NumberFormat.getInstance().parse( temp_number ).intValue();
-            temp_number = tileSetAttributes.getNamedItem( "X" ).getNodeValue();
+            temp_number = tileSet.getAttribute( "X" );
             int  x = NumberFormat.getInstance().parse( temp_number ).intValue();
-            temp_number = tileSetAttributes.getNamedItem( "Y" ).getNodeValue();
+            temp_number = tileSet.getAttribute( "Y" );
             int  y = NumberFormat.getInstance().parse( temp_number ).intValue();
             terrain.setTileGrid( x, y, width, height );
             this.tileSize = new Point( width, height );
@@ -73,125 +171,120 @@ public class TileFactory extends java.lang.Object {
         catch( java.text.ParseException pe ) {
             throw new FreerailsException( "ParseException while parsing the xml" + "file specifying the tile sizes.  Check that the \"Tile_set\" attributes: \"Height\", \"Width\", \"X\", and \"Y\" are integers" );
         }
-        HashMap  tileViewHashMap = new HashMap();
-        
-        //TileView[] tileViewList=new TileView[tilesNodeList.getLength()];
-        NamedNodeMap  namedNodeMap_tile_attributes;
-        for( int  i = 0;i < tilesNodeList.getLength();i++ ) {
-            namedNodeMap_tile_attributes = tilesNodeList.item( i ).getAttributes();
-            TileModel  tileModel = getTileModel( namedNodeMap_tile_attributes );
-            TileView  tileView = getTileView( namedNodeMap_tile_attributes, terrain, tileModel );
-            if( tileView == null ) {
-                throw new FreerailsException( "Error in TileFactory.getTileViewList - tileView==null" );
-            }
-            
-            //tileViewList[i].setTileModel(tileModel);
-            tileViewHashMap.put( new Integer( tileModel.getRGB() ), tileView );
-        }
-        return tileViewHashMap;
     }
     
-    /** Creates new TileFactory.  It loads an XML file that defines the terrain 
-    types in the tile-set*/
-    
-    public TileFactory( URL xml_url ) {
-        Element  tiles;
-        Document  document = DOMLoader.get_dom( xml_url );
-        tiles = document.getDocumentElement();
-        tiles.normalize();
-        NodeList  tilesetNodeList = tiles.getElementsByTagName( "Tile_set" );
-        Node  node_tile_set = tilesetNodeList.item( 0 );
-        this.tilesNodeList = tiles.getElementsByTagName( "Tile" );
-        this.tileSetAttributes = node_tile_set.getAttributes();
-    }
-    
-    public TerrainTileTypesList getTerrainTileTypesList() {
-        TileModel[]  tileModelList = new TileModel[ tilesNodeList.getLength() ];
-        NamedNodeMap  namedNodeMap_tile_attributes;
-        for( int  i = 0;i < tilesNodeList.getLength();i++ ) {
-            namedNodeMap_tile_attributes = tilesNodeList.item( i ).getAttributes();
-            tileModelList[ i ] = getTileModel( namedNodeMap_tile_attributes );
-        }
-        return new TerrainTileTypesList( tileModelList );
-    }
-    
-    private TileModel getTileModel( NamedNodeMap namedNodeMap_tile_attributes ) {
-        String  terrainType = namedNodeMap_tile_attributes.getNamedItem( "Type" ).getNodeValue();
-        String  temp_number = namedNodeMap_tile_attributes.getNamedItem( "rgb" ).getNodeValue();
-        int  rgb = (int)Integer.parseInt( temp_number, 16 );
-        
-        /* We need to change the format of the rgb value to the same one as used 
-        by the the BufferedImage that stores the map.  See jfreerails.common.Map
-        */
-        rgb = new Color( rgb ).getRGB();
-        TileModel  tileModel = new TileModel( rgb, terrainType );
-        return tileModel;
-    }
-    
-    private TileView getTileView( NamedNodeMap namedNodeMap_tile_attributes, ImageSplitter imageSplitter, TileModel tileModel ) throws FreerailsException {
+    private TileView getTileView( Element tile, ImageSplitter imageSplitter, TileModel tileModel, TileView parentTileView ) throws FreerailsException {
+        TileView  tileView;
         int  x, y; //the tile icon position in the grid.
         try {
-            String  temp_number = namedNodeMap_tile_attributes.getNamedItem( "X" ).getNodeValue();
+            String  temp_number = tile.getAttribute( "X" );
             x = NumberFormat.getInstance().parse( temp_number ).intValue();
-            temp_number = namedNodeMap_tile_attributes.getNamedItem( "Y" ).getNodeValue();
+            temp_number = tile.getAttribute( "Y" );
             y = NumberFormat.getInstance().parse( temp_number ).intValue();
         }
         catch( java.text.ParseException pe ) {
             throw new FreerailsException( "ParseException while parsing the xml" + "file specifying the tile sizes.  Check that the \"Tile\" attributes: \"X\", and \"Y\" are integers" + "and that the attribute \"rgb\" is a hex value in the same format as the following: \"fcfc48\"" );
         }
-        int  rgb = tileModel.getRGB();
-        int[]  rgbValues =  {
-            rgb
-        };
-        ImageIcon[]  tileIcons;
-        TileIconSelector  tileIconSelector;
-        String  tileSelectorName = namedNodeMap_tile_attributes.getNamedItem( "tileSelector" ).getNodeValue();
+        imageSplitter.setSubGridOffset( x, y );
+        int[]  rgbValues = getRGBValuesToCheckFor( tileModel, tile );
+        java.awt.Image[]  tileIcons;
+        jfreerails.client.tileview.TileIconSelector  tileIconSelector;
+        String  tileSelectorName = tile.getAttribute( "tileSelector" );
         tileSelectorName.equalsIgnoreCase( "Standard" );
         if( tileSelectorName.equalsIgnoreCase( "Standard" ) ) {
-            tileIconSelector = new StandardTileIconSelector( rgbValues );
-            tileIcons = new ImageIcon[ 1 ];
-            tileIcons[ 0 ] = imageSplitter.getTileFromGrid( x, y );
+            tileView = new StandardTileView( imageSplitter, rgbValues, tileModel );
         }
         else {
             if( tileSelectorName.equalsIgnoreCase( "Chequered" ) ) {
-                tileIconSelector = new ChequeredTileIconSelector( rgbValues );
-                tileIcons = new ImageIcon[ 2 ];
-                for( int  i = 0;i < tileIcons.length;i++ ) {
-                    tileIcons[ i ] = imageSplitter.getTileFromGrid( x + i, y );
-                }
+                tileView = new jfreerails.client.tileview.ChequeredTileView( imageSplitter, rgbValues, tileModel );
             }
             else {
                 if( tileSelectorName.equalsIgnoreCase( "ForestStyle" ) ) {
-                    tileIconSelector = new ForestStyleTileIconSelector( rgbValues );
-                    tileIcons = new ImageIcon[ 4 ];
-                    
-                    //Grap them in this order so that they display correctly :)
-                    tileIcons[ 0 ] = imageSplitter.getTileFromGrid( x + 2, y );
-                    tileIcons[ 1 ] = imageSplitter.getTileFromGrid( x + 3, y );
-                    tileIcons[ 2 ] = imageSplitter.getTileFromGrid( x + 1, y );
-                    tileIcons[ 3 ] = imageSplitter.getTileFromGrid( x, y );
+                    tileView = new jfreerails.client.tileview.ForestStyleTileView( imageSplitter, rgbValues, tileModel );
                 }
                 else {
                     if( tileSelectorName.equalsIgnoreCase( "RiverStyle" ) ) {
-                        tileIconSelector = new RiverStyleTileIconSelector( rgbValues );
-                        tileIcons = new ImageIcon[ 16 ];
-                        for( int  i = 0;i < tileIcons.length;i++ ) {
-                            tileIcons[ i ] = imageSplitter.getTileFromGrid( x + i, y );
-                        }
+                        tileView = new jfreerails.client.tileview.RiverStyleTileView( imageSplitter, rgbValues, tileModel );
                     }
-                    
-                    //Insert more TileIconSelector types here..
                     else {
-                        System.out.println( "Error: the TileIconSelector's type was either not recognised or not specified" );
-                        System.out.println( "Forced to use Standard TileIconSelector" );
-                        tileIconSelector = new StandardTileIconSelector( rgbValues );
-                        tileIcons = new ImageIcon[ 1 ];
-                        tileIcons[ 0 ] = imageSplitter.getTileFromGrid( x, y );
+                        if( tileSelectorName.equalsIgnoreCase( "special" ) ) {
+                            tileView = new jfreerails.client.tileview.SpecialTileView( imageSplitter, rgbValues, tileModel, parentTileView );
+                        }
+                        
+                        //Insert more TileIconSelector types here..
+                        else {
+                            System.out.println( "Error: the TileIconSelector's type was either not recognised or not specified" );
+                            System.out.println( "Forced to use Standard TileIconSelector" );
+                            tileView = new StandardTileView( imageSplitter, rgbValues, tileModel );
+                        }
                     }
                 }
             }
         }
-        TileView  tileView = new TileView( tileIcons, tileIconSelector, tileModel );
         return tileView;
+    }
+    
+    private int[] getRGBValuesToCheckFor( TileModel tileModel, Element tile ) {
+        int  rgb = tileModel.getRGB();
+        ArrayList  rgbValuesArrayList = new ArrayList();
+        rgbValuesArrayList.add( new Integer( rgb ) );
+        NodeList  children = tile.getChildNodes();
+        for( int  ii = 0;ii < children.getLength();ii++ ) {
+            String  childName = children.item( ii ).getNodeName();
+            if( childName.equalsIgnoreCase( "treatTheseAsTheSameType" ) ) {
+                NodeList  treatTheseAsTheSameType = children.item( ii ).getChildNodes();
+                for( int  i = 0;i < treatTheseAsTheSameType.getLength();i++ ) {
+                    String  nodeName = treatTheseAsTheSameType.item( i ).getNodeName();
+                    if( nodeName.equalsIgnoreCase( "Type" ) ) {
+                        Element  terrainType = (Element)treatTheseAsTheSameType.item( i );
+                        String  temp_number = terrainType.getAttribute( "rgb" );
+                        int  _rgb = string2RGBValue( temp_number );
+                        rgbValuesArrayList.add( new Integer( _rgb ) );
+                    }
+                }
+            }
+            if( childName.equalsIgnoreCase( "specials" ) ) {
+                NodeList  treatTheseAsTheSameType = children.item( ii ).getChildNodes();
+                for( int  i = 0;i < treatTheseAsTheSameType.getLength();i++ ) {
+                    String  nodeName = treatTheseAsTheSameType.item( i ).getNodeName();
+                    if( nodeName.equalsIgnoreCase( "Tile" ) ) {
+                        Element  terrainType = (Element)treatTheseAsTheSameType.item( i );
+                        String  temp_number = terrainType.getAttribute( "rgb" );
+                        int  _rgb = string2RGBValue( temp_number );
+                        rgbValuesArrayList.add( new Integer( _rgb ) );
+                    }
+                }
+            }
+        }
+        int[]  rgbValues = new int[ rgbValuesArrayList.size() ];
+        for( int  i = 0;i < rgbValuesArrayList.size();i++ ) {
+            Integer  tempInt = (Integer)rgbValuesArrayList.get( i );
+            rgbValues[ i ] = tempInt.intValue();
+        }
+        return rgbValues;
+    }
+    
+    private TileModel getTileModel( Element tile ) {
+        String  terrainType = tile.getAttribute( "Type" );
+        String  temp_number = tile.getAttribute( "rgb" );
+        int  rgb = string2RGBValue( temp_number );
+        TileModel  tileModel = new TileModel( rgb, terrainType );
+        return tileModel;
+    }
+    
+    private int string2RGBValue( String temp_number ) {
+        int  rgb = (int)Integer.parseInt( temp_number, 16 );
+        
+        /* We need to change the format of the rgb value to the same one as used
+        by the the BufferedImage that stores the map.  See jfreerails.common.Map
+        */
+        rgb = new java.awt.Color( rgb ).getRGB();
+        return rgb;
+    }
+    
+    private void generateTileLists( NodeList tilesToProcess, ParsingVariables parsingVariables ) throws FreerailsException {
+        processList( tilesToProcess, parsingVariables );
+        this.tileViewList = new jfreerails.client.tileview.TileViewList( parsingVariables.tileViewHashMap );
+        this.terrainTileTypesList = new TerrainTileTypesList( parsingVariables.tileModelList );
     }
 }

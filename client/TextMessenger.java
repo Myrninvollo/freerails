@@ -13,7 +13,7 @@ package jfreerails.client;
 */
 
 
-public interface MessengerBoy {
+public interface TextMessenger {
     
     public void displayMessage( java.lang.String message );
 }

@@ -5,38 +5,14 @@
 * Created on 04 July 2001, 03:54
 */
 package jfreerails;
+import jfreerails.lib.ImageSplitter;
+import java.net.URL;
 
 /**
 *
 * @author  Luke Lindsay
 * @version 
 */
-import java.awt.Point;
-import java.net.URL;
-import java.io.IOException;
-import java.util.HashMap;
-import javax.swing.ImageIcon;
-import javax.swing.JTable;
-import jfreerails.common.TerrainMap;
-import jfreerails.client.IconMap;
-import jfreerails.client.MainviewJComponentFactory;
-import jfreerails.client.tileview.TileView;
-import jfreerails.common.TileFactory;
-import jfreerails.client.ClientJFrame;
-import jfreerails.lib.TerminalIO;
-import jfreerails.lib.ImageSplitter;
-import jfreerails.common.exception.FreerailsException;
-import jfreerails.client.trackview.TrackPieceView;
-import jfreerails.client.tileview.TileRenderer;
-import jfreerails.client.tileview.TileEventListener;
-import jfreerails.client.MessengerBoy;
-import jfreerails.common.OneTileMoveVector;
-import jfreerails.common.trackmodel.*;
-import jfreerails.common.IntPoint;
-import jfreerails.client.trackview.TrackPieceViewList;
-import jfreerails.common.trackmodel.TrackRuleList;
-import jfreerails.client.BuildMenu;
-import jfreerails.common.TerrainTileTypesList;
 
 
 public class RunFreerails extends java.lang.Object {
@@ -47,14 +23,10 @@ public class RunFreerails extends java.lang.Object {
         
     }
     
-    /**
-    * @param args the command line arguments
-    */
-    
     public static void main( String args[] ) {
         String  map_name;
-        TerminalIO  my_io = new TerminalIO();
-        map_name = "testmap.png"; //my_io.my_read_line("Enter map filename (e.g. test.map)");
+        jfreerails.lib.TerminalIO  my_io = new jfreerails.lib.TerminalIO();
+        map_name = "testmap.png";
         while( !map_name.equalsIgnoreCase( "exit" ) ) {
             createClient( map_name );
             map_name = my_io.my_read_line( "\nEnter map filename or type exit (Note, maps are now png files - try testmap.png)" );
@@ -72,48 +44,42 @@ public class RunFreerails extends java.lang.Object {
             
             //Load the xml file specifying terrain types.
             URL  tiles_xml_url = RunFreerails.class.getResource( "/jfreerails/data/Tiles.xml" );
-            TileFactory  tileFactory = new TileFactory( tiles_xml_url );
+            jfreerails.common.TileFactory  tileFactory = new jfreerails.common.TileFactory( tiles_xml_url, terrain );
             
             //Get tile images from the picture as specified by the xml file.        
-            HashMap  tiles = tileFactory.getTileViewHashMap( terrain );
-            Point  tilesSize = tileFactory.getTileSize();
-            TerrainTileTypesList  terrainTileTypesList = tileFactory.getTerrainTileTypesList();
-            
-            //Load the terrain map
-            URL  map_url = RunFreerails.class.getResource( "/jfreerails/data/" + mapName );
-            TerrainMap  terrain_map = new TerrainMap( map_url, terrainTileTypesList );
-            
-            //Create a track map the same size as the terrain map.
-            TrackMap  trackMap = new TrackMap( terrain_map.getWidth(), terrain_map.getHeight() );
+            jfreerails.client.tileview.TileViewList  tiles = tileFactory.getTileViewList();
+            java.awt.Point  tilesSize = tileFactory.getTileSize();
+            jfreerails.common.TerrainTileTypesList  terrainTileTypesList = tileFactory.getTerrainTileTypesList();
             
             //Load the track graphics and create the trackset
             URL  track_tiles_url = RunFreerails.class.getResource( "/jfreerails/data/track.png" );
             URL  track_xml_url = RunFreerails.class.getResource( "/jfreerails/data/track.xml" );
             ImageSplitter  track = new ImageSplitter( track_tiles_url );
-            TrackSetFactory  trackSetFactory = new TrackSetFactory( track_xml_url );
+            jfreerails.common.trackmodel.TrackSetFactory  trackSetFactory = new jfreerails.common.trackmodel.TrackSetFactory( track_xml_url );
             
             //Get the track graphics and track rules.
-            TrackPieceViewList  trackPieceViewList = trackSetFactory.getTrackViewList( track );
-            TrackRuleList  trackRules = trackSetFactory.getTrackRuleList();
-            TrackRule  trackRule = trackRules.getTrackRule( 0 );
-            TrackPieceView  trackPieceView = trackPieceViewList.getTrackPieceView( 0 );
+            jfreerails.client.trackview.TrackPieceViewList  trackPieceViewList = trackSetFactory.getTrackViewList( track );
+            jfreerails.common.trackmodel.TrackRuleList  trackRules = trackSetFactory.getTrackRuleList();
+            jfreerails.common.trackmodel.TrackRule  trackRule = trackRules.getTrackRule( 0 );
+            jfreerails.client.trackview.TrackPieceView  trackPieceView = trackPieceViewList.getTrackPieceView( 0 );
+            
+            //Load the terrain map
+            URL  map_url = RunFreerails.class.getResource( "/jfreerails/data/" + mapName );
+            jfreerails.common.FreerailsMap  map = new jfreerails.common.FreerailsMap( map_url, terrainTileTypesList );
             
             //Create the object that controls building track.
-            TrackBuilder  trackBuilder = new TrackBuilder( trackMap, trackRule, terrain_map );
+            jfreerails.common.trackmodel.TrackBuilder  trackBuilder = new jfreerails.common.trackmodel.TrackBuilder( map, trackRule );
             
-            //Create table model that controls which terrain and track graphics are drawn
-            IconMap  iconMap = new IconMap( terrain_map, tiles, trackMap, trackPieceViewList );
+            //Create the visual components to add to the client window.
+            jfreerails.client.MapView  mapView = new jfreerails.client.Background( map, tiles, trackPieceViewList );
+            jfreerails.client.MapViewJComponent  mapViewJComponent = new jfreerails.client.MapViewJComponentConcrete( mapView, trackBuilder );
+            jfreerails.client.BuildMenu  buildMenu = new jfreerails.client.BuildMenu( trackRules, trackBuilder );
             
-            //Prepare a JTable with a custom cell renderer to display the array of tile images.
-            MainviewJComponentFactory  mainviewJComponentFactory = new MainviewJComponentFactory( tilesSize );
-            JTable  mainviewJTable = mainviewJComponentFactory.newMainviewJTable( iconMap, trackBuilder );
-            BuildMenu  buildMenu = new BuildMenu( trackRules, trackBuilder );
-            
-            //Add this extended JTable to a JFrame and display it.
-            ClientJFrame  client = new ClientJFrame( mainviewJTable, buildMenu );
+            //Add the mapview and build menu to an extended JFrame.
+            jfreerails.client.ClientJFrame  client = new jfreerails.client.ClientJFrame( mapViewJComponent, buildMenu );
             client.show();
         }
-        catch( FreerailsException fe ) {
+        catch( jfreerails.common.exception.FreerailsException fe ) {
             fe.printStackTrace();
         }
     }

@@ -6,26 +6,29 @@
 */
 package jfreerails.common.trackmodel;
 
-/**
+/** This class represents the track that connects two squares/nodes.
 *
-* @author  Luke Lindsay
-* @version 
+*
+*
+*
+* @author Luke Lindsay
+* @version 0.1
 */
 
 
 public class RailModel extends java.lang.Object {
-
-    private int gradient = 0;
-
-    private boolean doubleTrack = false;
-
-    private Object[] trainList;
 
     private Object nodeB;
 
     private Object nodeA;
 
     private int length;
+
+    private int gradient = 0;
+
+    private boolean doubleTrack = false;
+
+    private Object[] trainList;
     
     public void setDoubleTrack( boolean doubleTrack ) {
         this.doubleTrack = doubleTrack;
@@ -62,7 +65,12 @@ public class RailModel extends java.lang.Object {
         
     }
     
-    /** Creates new RailModel */
+    /** Creates new RailModel
+    * @param nodeA The first of the track-nodes this rail connects.
+    * @param nodeB The second of the ...
+    * @param length The length of the track piece.
+    * @param direction the direction of the rail, e.g. N.E.
+    */
     
     public RailModel( Object nodeA, Object nodeB, int length, int direction ) {
         this.nodeA = nodeA;

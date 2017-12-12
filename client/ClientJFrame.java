@@ -5,50 +5,58 @@
 * Created on 25 July 2001, 01:52
 */
 package jfreerails.client;
-import javax.swing.JTable;
-import jfreerails.client.BuildMenu;
-import jfreerails.common.trackmodel.*;
-import jfreerails.lib.TextMessageHandler;
 
-/**
+/** The JFrame for the client window.
 *
-* @author  Luke Lindsay
+* @author Luke Lindsay
 */
 
 
-public class ClientJFrame extends javax.swing.JFrame implements jfreerails.client.MessengerBoy {
+public class ClientJFrame extends javax.swing.JFrame implements jfreerails.client.TextMessenger {
 
-    private javax.swing.JMenuBar jMenuBar1;
-
-    private javax.swing.JLabel messageBoyJLabel;
-
-    private javax.swing.JPanel jPanel1;
-
-    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane mapViewJScrollPane;
 
     private BuildMenu buildMenu;
 
-    private javax.swing.JTable mainViewJTable;
+    private javax.swing.JMenuBar jMenuBar1;
+
+    private javax.swing.JLabel textMessageOutputJLabel;
+
+    private javax.swing.JComponent mapView;
     
-    /** Creates new form ClientJFrame */
+    /** Displays a messages to the player.
+    * @param message The message to be displayed.
+    */
     
-    public ClientJFrame( JTable jTable1, BuildMenu buildMenu ) {
-        TextMessageHandler.setMessengerBoy( this );
+    public void displayMessage( java.lang.String message ) {
+        textMessageOutputJLabel.setText( message );
+    }
+    
+    /** Creates new form ClientJFrame
+    * @param mapView The component that displays the map.
+    * @param buildMenu The menu for choosing different track types etc.
+    */
+    
+    public ClientJFrame( javax.swing.JComponent mapView, BuildMenu buildMenu ) {
+        
+        //this.setUndecorated(true);
+        jfreerails.lib.TextMessageHandler.setMessengerBoy( this );
         this.buildMenu = buildMenu;
-        this.mainViewJTable = jTable1;
+        this.mapView = mapView;
         System.out.println( "\nCreating client window" );
         initComponents();
     }
     
-    public void displayMessage( java.lang.String message ) {
-        messageBoyJLabel.setText( message );
+    private void exitForm( java.awt.event.WindowEvent evt ) {
+        
+    
+    //Exit application could go here.        
     }
     
     private void initComponents() {
-        messageBoyJLabel = new javax.swing.JLabel();
+        textMessageOutputJLabel = new javax.swing.JLabel();
         jMenuBar1 = new javax.swing.JMenuBar();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jPanel1 = new javax.swing.JPanel();
+        mapViewJScrollPane = new javax.swing.JScrollPane();
         addWindowListener( new java.awt.event.WindowAdapter()  {
             
             public void windowClosing( java.awt.event.WindowEvent evt ) {
@@ -63,18 +71,11 @@ public class ClientJFrame extends javax.swing.JFrame implements jfreerails.clien
             }
         } );
         setJMenuBar( jMenuBar1 );
-        messageBoyJLabel.setText( "Welcome to freerails.  Use the mouse to lay track.  Moving the cursor by one square lays track" );
-        getContentPane().add( messageBoyJLabel, java.awt.BorderLayout.SOUTH );
-        jScrollPane1.setPreferredSize( new java.awt.Dimension( 500, 500 ) );
-        jPanel1.add( mainViewJTable );
-        jScrollPane1.setViewportView( jPanel1 );
-        getContentPane().add( jScrollPane1, java.awt.BorderLayout.CENTER );
+        textMessageOutputJLabel.setText( "Welcome to freerails.  Use the mouse to lay track.  Moving the cursor by one square lays track" );
+        getContentPane().add( textMessageOutputJLabel, java.awt.BorderLayout.SOUTH );
+        mapViewJScrollPane.setPreferredSize( new java.awt.Dimension( 500, 500 ) );
+        mapViewJScrollPane.setViewportView( mapView );
+        getContentPane().add( mapViewJScrollPane, java.awt.BorderLayout.CENTER );
         pack();
-    }
-    
-    /** Exit the Application */
-    
-    private void exitForm( java.awt.event.WindowEvent evt ) {
-        
     }
 }
