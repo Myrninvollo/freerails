@@ -5,11 +5,17 @@
  */
 
 package jfreerails.client.view;
-import jfreerails.world.top.*;
+import java.awt.event.ActionListener;
+
 import jfreerails.client.renderer.ViewLists;
-import java.awt.event.*;
-import jfreerails.world.station.*;
-import jfreerails.world.cargo.*;
+import jfreerails.world.cargo.CargoBundle;
+import jfreerails.world.cargo.CargoType;
+import jfreerails.world.station.StationModel;
+import jfreerails.world.top.KEY;
+import jfreerails.world.top.NonNullElements;
+import jfreerails.world.top.World;
+import jfreerails.world.top.WorldIterator;
+import jfreerails.world.track.FreerailsTile;
 
 /** This JPanel displays the supply and demand at a station.
  *
@@ -130,20 +136,30 @@ public class StationInfoJPanel extends javax.swing.JPanel implements View {
         }
         
         int stationNumber = wi.getIndex();
-        StationModel station = (StationModel)w.get(KEY.STATIONS, stationNumber);        
-        String title = "<h2 align=\"center\">Supply and Demand at "+station.getStationName()+"</h2>";
+        StationModel station = (StationModel)w.get(KEY.STATIONS, stationNumber);
+        FreerailsTile tile = w.getTile(station.x, station.y); 
+        String stationTypeName = tile.getTrackRule().getTypeName();  
+        CargoBundle cargoWaiting = (CargoBundle)w.get(KEY.CARGO_BUNDLES, station.getCargoBundleNumber());     
+        String title = "<h2 align=\"center\">"+station.getStationName()+" ("+stationTypeName+")</h2>";
         String table ="<table width=\"100%\" border=\"0\" cellspacing=\"0\" cellpadding=\"3\"><tr><td>&nbsp;</td>\n    <td>Will pay for</td>\n    <td>Supplies / cars per year</td><td>Waiting for pickup / car loads</td>  </tr>";
         for(int i = 0 ; i < w.size(KEY.CARGO_TYPES) ; i++){         
-            CargoType cargoType = (CargoType)w.get(KEY.CARGO_TYPES, i);
-            table +="<tr><td>"+cargoType.getDisplayName()+"</td>";
-            String demanded = (station.getDemand().isCargoDemanded(i) ? "Yes" : "No");
-            table +="<td>"+demanded+ "</td>";            
-            int amountWaiting = station.getWaiting().getAmountWeighting(i);
-            String waiting = (amountWaiting > 0) ? String.valueOf(amountWaiting) : "&nbsp;";
-            table +="<td>"+waiting+"</td>";
+        	
+        	//get the values
+            CargoType cargoType = (CargoType)w.get(KEY.CARGO_TYPES, i);                       
+            String demanded = (station.getDemand().isCargoDemanded(i) ? "Yes" : "No");                                 			
             int amountSupplied = station.getSupply().getSupply(i);
-            String supply = (amountSupplied > 0) ? String.valueOf(amountSupplied) : "&nbsp;";
-            table +="<td>"+supply+"</td></tr>";
+            String supply = (amountSupplied > 0) ? String.valueOf(amountSupplied) : "&nbsp;";            
+			int amountWaiting = cargoWaiting.getAmount(i);
+			String waiting = (amountWaiting > 0) ? String.valueOf(amountWaiting) : "&nbsp;";
+			
+			//build the html
+			table +="<tr>";
+			table +="<td>"+cargoType.getDisplayName()+"</td>";
+			table +="<td>"+demanded+ "</td>";  
+			table +="<td>"+supply+"</td>";
+			table +="<td>"+waiting+"</td>";
+			table +="</tr>";
+                       
         }
         table +="</table>";
         String label = "<html>" + title + table + "</html>";

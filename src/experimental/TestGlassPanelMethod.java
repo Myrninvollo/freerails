@@ -12,6 +12,7 @@ import jfreerails.client.view.DialogueBoxController;
 import jfreerails.world.top.*;
 import jfreerails.world.station.*;
 import jfreerails.world.train.*;
+import jfreerails.world.cargo.*;
 import java.util.Random;
 /**
  *
@@ -36,11 +37,20 @@ public class TestGlassPanelMethod extends javax.swing.JFrame {
         wetf.addTypesToWorld(w);
         int numberOfCargoTypes = w.size(KEY.CARGO_TYPES);
         
-        w.add(KEY.STATIONS, new StationModel(10, 10, "Bristol", numberOfCargoTypes));
-        w.add(KEY.STATIONS, new StationModel(10, 10, "Bath", numberOfCargoTypes));
-        w.add(KEY.STATIONS, new StationModel(10, 10, "Cardiff", numberOfCargoTypes));
-        w.add(KEY.STATIONS, new StationModel(10, 10, "London", numberOfCargoTypes));
-        w.add(KEY.STATIONS, new StationModel(10, 10, "Swansea", numberOfCargoTypes));
+        w.add(KEY.STATIONS, new StationModel(10, 10, "Bristol", numberOfCargoTypes, 0));
+        w.add(KEY.STATIONS, new StationModel(10, 10, "Bath", numberOfCargoTypes, 0));
+        w.add(KEY.STATIONS, new StationModel(10, 10, "Cardiff", numberOfCargoTypes, 0));
+        w.add(KEY.STATIONS, new StationModel(10, 10, "London", numberOfCargoTypes, 0));
+        w.add(KEY.STATIONS, new StationModel(10, 10, "Swansea", numberOfCargoTypes, 0));
+        //Set up cargo bundle, for the purpose of this test code all the trains can share the
+        //same one.
+        CargoBundle cb = new CargoBundleImpl();
+        cb.setAmount(new CargoBatch(0, 10, 10, 8, 0), 10);
+        cb.setAmount(new CargoBatch(0, 10, 10, 9, 0), 10);
+        cb.setAmount(new CargoBatch(1, 10, 10, 9, 0), 10);
+        cb.setAmount(new CargoBatch(3, 10, 10, 9, 0), 10);
+        cb.setAmount(new CargoBatch(5, 10, 10, 9, 0), 10);
+        w.add(KEY.CARGO_BUNDLES, cb);
         
         Schedule schedule = new Schedule();
         TrainOrdersModel order = new TrainOrdersModel(0, new int[]{0,0,0}, false);

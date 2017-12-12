@@ -20,19 +20,19 @@ public class StationModel implements FreerailsSerializable {
 	
 	private DemandAtStation demand;
 	
-	private CargoWaitingAtStation waiting;
+	private int cargoBundleNumber;
 	
 	/** What this station is building. */
 	private ProductionAtEngineShop production;
 	
-	public StationModel(int x, int y, String stationName, int numberOfCargoTypes) {
+	public StationModel(int x, int y, String stationName, int numberOfCargoTypes, int cargoBundle) {
 		this.name = stationName;
 		this.x = x;
 		this.y = y;
 		
 		supply = new SupplyAtStation(new int[numberOfCargoTypes]);
 		demand = new DemandAtStation(new boolean[numberOfCargoTypes]);
-		waiting = new CargoWaitingAtStation(new int[numberOfCargoTypes]);
+		cargoBundleNumber = cargoBundle;
 		
 	}
 	
@@ -70,8 +70,8 @@ public class StationModel implements FreerailsSerializable {
 		return supply;
 	}
 
-	public CargoWaitingAtStation getWaiting() {
-		return waiting;
+	public int getWaiting() {
+		return cargoBundleNumber;
 	}
 
 	public void setDemand(DemandAtStation demand) {
@@ -82,8 +82,38 @@ public class StationModel implements FreerailsSerializable {
 		this.supply = supply;
 	}
 
-	public void setWaiting(CargoWaitingAtStation waiting) {
-		this.waiting = waiting;
+	public void setWaiting(int waiting) {
+		this.cargoBundleNumber = waiting;
+	}
+
+	public int getCargoBundleNumber() {
+		return cargoBundleNumber;
+	}
+	public boolean equals(Object o) {		
+		if(o instanceof StationModel){
+			StationModel test = (StationModel)o;
+			if(this.cargoBundleNumber!=test.cargoBundleNumber){
+				return false;
+			}
+			if(!this.demand.equals(test.demand)){
+				return false;
+			}
+			if(!this.name.equals(test.name)){
+				return false;				
+			}
+			if(!(this.production == null ? test.production == null : this.production.equals(test.production))){
+				return false;
+			}
+			if(!this.supply.equals(test.supply)){
+				return false;
+			}
+			if(this.x!=test.x || this.y != test.y){
+				return false;
+			}
+			return true;
+		}else{		
+			return false;
+		}
 	}
 
 }

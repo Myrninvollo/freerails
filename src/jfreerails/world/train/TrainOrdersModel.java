@@ -16,7 +16,7 @@ public class TrainOrdersModel implements FreerailsSerializable {
     
     public final boolean waitUntilFull;
     
-    public final int[] consist;;   //The wagon types to add; if null, then no change.
+    public final int[] consist;   //The wagon types to add; if null, then no change.
     
     public final int station; //The number of the station to goto.
     
@@ -34,4 +34,9 @@ public class TrainOrdersModel implements FreerailsSerializable {
     public int getStationNumber(){
         return station;
     }    
+    
+    public boolean isNoConsistChange(){
+    	return null==consist;	
+    }
+    
 }

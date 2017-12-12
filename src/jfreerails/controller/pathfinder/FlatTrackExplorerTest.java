@@ -21,10 +21,7 @@ public class FlatTrackExplorerTest extends TestCase {
 
 	World world;
 
-	/**
-	 * Constructor for NewFlatTrackExplorerTest.
-	 * @param arg0
-	 */
+	
 	public FlatTrackExplorerTest(String arg0) {
 		super(arg0);
 	}
@@ -89,7 +86,8 @@ public class FlatTrackExplorerTest extends TestCase {
 		p.setValuesFromInt(fte.getVertexConnectedByEdge());
 		assertEquals(OneTileMoveVector.NORTH_EAST, p.getDirection());
 		assertTrue(!fte.hasNextEdge());
-
+		
+		
 	}
 	/** Tests that we can move the track explorer at point 10,10
 	 * northeast, and that when we have done this, we can move it back again.

@@ -15,15 +15,30 @@ public class TrainModel implements FreerailsSerializable{
     
     int engineType = 0; 
            
-    int[] wagonTypes = new int[]{0, 1, 2};       
+    int[] wagonTypes = new int[]{0, 1, 2};   
     
-    public TrainModel(int engine, int[] wagons, TrainPositionOnMap p, Schedule s){
+	private int cargoBundleNumber;    
+    
+    public TrainModel(int engine, int[] wagons, TrainPositionOnMap p, Schedule s, int BundleId ){//World world){
         this.engineType = engine;
         this.wagonTypes=wagons;
         trainposition=p;
         this.schedule=s;
+        this.cargoBundleNumber = BundleId;        
     }
     
+    public TrainModel(int[] wagons, int BundleId ){		
+		this.wagonTypes=wagons;				
+		this.cargoBundleNumber = BundleId;    	
+    }
+    
+	public TrainModel(int engine, int[] wagons, TrainPositionOnMap p, Schedule s){
+			this.engineType = engine;
+			this.wagonTypes=wagons;
+			trainposition=p;
+			this.schedule=s;      
+	}
+		
     public TrainModel(int engine){
 	this.engineType = engine;  
     }
@@ -80,5 +95,9 @@ public class TrainModel implements FreerailsSerializable{
 	public int getEngineType() {
 		return engineType;
 	}
-
+	
+	public int getCargoBundleNumber() {
+		return cargoBundleNumber;
+	}
+	
 }

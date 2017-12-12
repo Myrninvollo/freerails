@@ -23,11 +23,31 @@ public class SideOnTrainViewJPanel extends javax.swing.JPanel {
 
 	boolean showEngine = false;
 
+	boolean noChange = false;
+
 	private ArrayList wagons = new ArrayList();
 
 	private ViewLists viewLists;
 
 	private World w;
+
+	int scaledImageHeight = 15;
+
+	public boolean isNoChange() {
+		return noChange;
+	}
+
+	public void setNoChange(boolean noChange) {
+		this.noChange = noChange;
+	}
+
+	public void setShowEngine(boolean b) {
+		this.showEngine = b;
+	}
+
+	public void setEngineType(int i) {
+		this.engineType = i;
+	}
 
 	public int[] getWagons() {
 		int[] wagonsArray = new int[wagons.size()];
@@ -52,7 +72,10 @@ public class SideOnTrainViewJPanel extends javax.swing.JPanel {
 		initComponents();
 	}
 
-	public void setup(World world, ViewLists vl, ActionListener submitButtonCallBack) {
+	public void setup(
+		World world,
+		ViewLists vl,
+		ActionListener submitButtonCallBack) {
 		this.viewLists = vl;
 		this.w = world;
 	}
@@ -61,29 +84,43 @@ public class SideOnTrainViewJPanel extends javax.swing.JPanel {
 
 		int x = 0;
 
-		final int SCALED_IMAGE_HEIGHT = 15;
-
 		int y = 0;
 
 		Image image;
+		if (noChange) {
+			g.drawString("No change", 10, 10);
+		} else {
+			//paint the wagons
+			for (int i = 0; i < this.wagons.size(); i++) {
 
-		//paint the wagons
-		for (int i = 0; i < this.wagons.size(); i++) {
+				Integer type = (Integer) wagons.get(i);
+				image =
+					viewLists.getTrainImages().getSideOnWagonImage(
+						type.intValue());
+				int scaledWidth =
+					image.getWidth(null)
+						* scaledImageHeight
+						/ image.getHeight(null);
 
-			Integer type = (Integer) wagons.get(i);
-			image = viewLists.getTrainImages().getSideOnWagonImage(type.intValue());
-			int scaledWidth = image.getWidth(null) * SCALED_IMAGE_HEIGHT / image.getHeight(null);
+				g.drawImage(image, x, y, scaledWidth, scaledImageHeight, null);
+				x += scaledWidth;
 
-			g.drawImage(image, x, y, scaledWidth, SCALED_IMAGE_HEIGHT, null);
-			x += scaledWidth;
+			}
 
-		}
+			if (showEngine) {
+				//paint the engine
+				image =
+					this.viewLists.getTrainImages().getSideOnEngineImage(
+						this.engineType);
 
-		if (showEngine) {
-			//paint the engine
-			image = this.viewLists.getTrainImages().getSideOnEngineImage(this.engineType);
-			g.drawImage(image, x, y, null);
-			x += image.getWidth(null);
+				int scaledWidth =
+					image.getWidth(null)
+						* scaledImageHeight
+						/ image.getHeight(null);
+
+				g.drawImage(image, x, y, scaledWidth, scaledImageHeight, null);
+				x += scaledWidth;
+			}
 		}
 	}
 
@@ -96,7 +133,8 @@ public class SideOnTrainViewJPanel extends javax.swing.JPanel {
 
 		setLayout(new java.awt.BorderLayout());
 
-		setBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 0, 0), 3));
+		setBorder(
+			new javax.swing.border.LineBorder(new java.awt.Color(0, 0, 0), 3));
 		setOpaque(false);
 	} //GEN-END:initComponents
 

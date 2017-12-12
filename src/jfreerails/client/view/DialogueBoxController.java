@@ -17,6 +17,7 @@ import javax.swing.border.LineBorder;
 
 import jfreerails.client.common.MyGlassPanel;
 import jfreerails.client.renderer.ViewLists;
+import jfreerails.controller.CalcSupplyAtStations;
 import jfreerails.move.ChangeProductionAtEngineShopMove;
 import jfreerails.move.Move;
 import jfreerails.move.MoveStatus;
@@ -43,7 +44,7 @@ public class DialogueBoxController {
 	private MyGlassPanel glassPanel;
 	private NewsPaperJPanel newspaper;
 	private SelectWagonsJPanel selectWagons;
-	private TrainScheduleJPanel trainSchedule;
+	private TrainScheduleJPanel trainScheduleJPanel;
 	private GameControlsJPanel showControls;
 	private TerrainInfoJPanel terrainInfo;
 	private StationInfoJPanel stationInfo;
@@ -99,11 +100,11 @@ public class DialogueBoxController {
 		showControls.setup(w, vl, this.closeCurrentDialogue);
 
 		//Set up train orders dialogue
-		trainSchedule = new TrainScheduleJPanel();
-		trainSchedule.setup(w, vl, new ActionListener() {
+		trainScheduleJPanel = new TrainScheduleJPanel();
+		trainScheduleJPanel.setup(w, vl, new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				int trainNumber = trainSchedule.getTrainNumber();
-				Schedule schedule = trainSchedule.getNewSchedule();
+				int trainNumber = trainScheduleJPanel.getTrainNumber();
+				Schedule schedule = trainScheduleJPanel.getNewSchedule();
 				TrainModel train = (TrainModel) w.get(KEY.TRAINS, trainNumber);
 				train.setSchedule(schedule);
 				closeContent();
@@ -163,8 +164,8 @@ public class DialogueBoxController {
 		if (!wi.next()) {
 			System.out.println("Cannot show train orders since there are no trains!");
 		} else {
-			trainSchedule.displayFirst();
-			showContent(trainSchedule);
+			trainScheduleJPanel.displayFirst();
+			showContent(trainScheduleJPanel);
 		}
 	}
 
@@ -203,6 +204,8 @@ public class DialogueBoxController {
 
 	public void showStationInfo(int stationNumber) {
 		try{		
+			CalcSupplyAtStations cSAS = new CalcSupplyAtStations(w);
+			cSAS.doProcessing();
 			stationInfo.setStation(stationNumber);
 			showContent(stationInfo);
 		}catch (NoSuchElementException e){
@@ -234,6 +237,22 @@ public class DialogueBoxController {
 
 	public void setDefaultFocusOwner(Component defaultFocusOwner) {
 		this.defaultFocusOwner = defaultFocusOwner;
+	}
+	
+	public void showStationOrTerrainInfo(int x, int y){
+		FreerailsTile tile = w.getTile(x,y);
+		if(tile.getTrackRule().isStation()){
+			 for(int i = 0 ; i < w.size(KEY.STATIONS); i++){
+			 	StationModel station = (StationModel)w.get(KEY.STATIONS, i);
+			 	if(null!=station && station.x == x && station.y==y){
+			 		this.showStationInfo(i);
+			 		return;
+			 	}
+			 }	
+			 throw new IllegalStateException("Could find station at "+x+", "+y);
+		}else{
+			this.showTerrainInfo(x, y);			
+		}
 	}
 
 }

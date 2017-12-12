@@ -7,7 +7,7 @@ import javax.swing.JFrame;
 import jfreerails.client.common.GameLoop;
 import jfreerails.client.common.ScreenHandler;
 import jfreerails.client.renderer.ViewLists;
-import jfreerails.controller.ServerGameEngine;
+import jfreerails.server.ServerGameEngine;
 import jfreerails.world.top.World;
 
 public class RunFreerails {

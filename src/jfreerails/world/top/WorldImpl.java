@@ -6,8 +6,10 @@ import jfreerails.world.common.FreerailsSerializable;
 import jfreerails.world.track.FreerailsTile;
 
 public class WorldImpl implements World {
-
+		
 	private final ArrayList[] lists = new ArrayList[KEY.getNumberOfKeys()];
+	
+	private final FreerailsSerializable[] items = new FreerailsSerializable[ITEM.getNumberOfKeys()];
 
 	private FreerailsTile[][] map;
 
@@ -44,8 +46,9 @@ public class WorldImpl implements World {
 		lists[key.getKeyNumber()].set(index, element);
 	}
 
-	public void add(KEY key, FreerailsSerializable element) {
+	public int add(KEY key, FreerailsSerializable element) {
 		lists[key.getKeyNumber()].add(element);
+		return size(key)-1;
 	}
 
 	public int size(KEY key) {
@@ -94,6 +97,59 @@ public class WorldImpl implements World {
 		int size = lists[key.getKeyNumber()].size();
 		int index = size - 1;
 		return (FreerailsSerializable)lists[key.getKeyNumber()].remove(index);
+	}
+		
+	public boolean equals(Object o) {		
+		if(o instanceof WorldImpl){
+			WorldImpl test = (WorldImpl)o;
+			
+			if(lists.length != test.lists.length){
+				return false;
+			}else{
+				for(int i = 0 ; i < lists.length ; i++){
+					if(!lists[i].equals(test.lists[i])){
+						return false;
+					}
+				}
+			}
+			
+			if((this.getMapWidth() != test.getMapWidth()) || (this.getMapHeight() != test.getMapHeight())){
+				return false;
+			}else{
+				for(int x = 0 ; x < this.getMapWidth() ; x++){
+					for(int y = 0 ; y < this.getMapHeight(); y++){
+						if(!getTile(x, y).equals(test.getTile(x, y))){
+							System.out.println(getTile(x, y));
+							System.out.println(test.getTile(x, y));
+							return false;
+						}
+					}
+				}
+			}
+			if(this.items.length != test.items.length){
+				return false;
+			}else{
+				for(int i = 0; i < this.items.length ; i ++){
+					//Some of the elements in the items array might be null, so we check for this before
+					//calling equals to avoid NullPointerExceptions.
+					if(!(null == items[i] ? null==test.items[i] : items[i].equals(test.items[i]))){
+						return false;
+					}
+				}
+			}
+			//phew!
+			return true;			
+		}else{		
+			return false;
+		}
+	}
+
+	public FreerailsSerializable get(ITEM item) {		
+		return items[item.getKeyNumber()];
+	}
+
+	public void set(ITEM item, FreerailsSerializable element) {
+		items[item.getKeyNumber()]=element;		
 	}
 
 }

@@ -11,6 +11,7 @@ import jfreerails.client.renderer.MapLayerRenderer;
 import jfreerails.client.renderer.MapRenderer;
 import jfreerails.client.renderer.SquareTileBackgroundRenderer;
 import jfreerails.client.renderer.StationNamesRenderer;
+import jfreerails.client.renderer.StationRadiusRenderer;
 import jfreerails.client.renderer.ViewLists;
 import jfreerails.world.top.World;
 
@@ -25,6 +26,8 @@ public class DetailMapView implements MapRenderer {
 	private final CityNamesRenderer cityNames;
 	
 	private final StationNamesRenderer stationNames;
+	
+	private final StationRadiusRenderer stationRadius;
 
 	public DetailMapView(
 		World world,
@@ -36,6 +39,11 @@ public class DetailMapView implements MapRenderer {
 		
 		cityNames = new CityNamesRenderer(world);
 		stationNames = new StationNamesRenderer(world);
+		stationRadius = new StationRadiusRenderer();
+	}
+
+	public StationRadiusRenderer getStationRadius() {
+		return stationRadius;
 	}
 
 	public float getScale() {
@@ -51,6 +59,8 @@ public class DetailMapView implements MapRenderer {
 		trainsview.paint((Graphics2D)g);
 		cityNames.paint((Graphics2D)g);
 		stationNames.paint((Graphics2D)g);
+		stationRadius.paint((Graphics2D)g);
+		
 	}
 
 	public void paintRectangleOfTiles(
@@ -63,6 +73,7 @@ public class DetailMapView implements MapRenderer {
 		trainsview.paint((Graphics2D)g);
 		cityNames.paint((Graphics2D)g);
 		stationNames.paint((Graphics2D)g);
+		stationRadius.paint((Graphics2D)g);
 	}
 
 	public void refreshTile(int x, int y) {
@@ -78,5 +89,6 @@ public class DetailMapView implements MapRenderer {
 		trainsview.paint((Graphics2D)g);
 		cityNames.paint((Graphics2D)g);
 		stationNames.paint((Graphics2D)g);
+		stationRadius.paint((Graphics2D)g);
 	}
 }

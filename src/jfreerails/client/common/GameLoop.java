@@ -12,17 +12,15 @@ import jfreerails.util.GameModel;
 /** hopefully this will work better on linux!	*/
 
 final public class GameLoop implements Runnable {
-		
 
-	Runnable r;
-
-	final boolean LOCK_FRAME_RATE = false;
+	final static boolean LIMIT_FRAME_RATE = false;
 
 	boolean gameNotDone = true;
 
 	final ScreenHandler screenHandler;
 
-	final int TARGET_FPS = 30;
+	final static int TARGET_FPS = 30;
+	
 
 	final GameModel gameModel;
 
@@ -40,7 +38,8 @@ final public class GameLoop implements Runnable {
 
 	public void run() {
 
-		RepaintManager repaintManager = new RepaintManagerForActiveRendering(screenHandler.frame);
+		RepaintManager repaintManager =
+			new RepaintManagerForActiveRendering(screenHandler.frame);
 
 		RepaintManager.setCurrentManager(repaintManager);
 
@@ -57,12 +56,14 @@ final public class GameLoop implements Runnable {
 
 		long frameStartTime;
 
+		long nextModelUpdateDue = System.currentTimeMillis();
+
 		while (gameNotDone) {
 
 			frameStartTime = System.currentTimeMillis();
 
 			synchronized (mutex) {
-
+				
 				gameModel.update();
 
 				Graphics g = screenHandler.getDrawGraphics();
@@ -80,7 +81,7 @@ final public class GameLoop implements Runnable {
 			}
 			Toolkit.getDefaultToolkit().sync();
 
-			if (LOCK_FRAME_RATE) {
+			if (LIMIT_FRAME_RATE) {
 				long deltatime = System.currentTimeMillis() - frameStartTime;
 
 				while (deltatime < (1000 / TARGET_FPS)) {

@@ -31,9 +31,9 @@ public class TestNonNullElements extends TestCase {
     
     protected void setUp(){
         w = new WorldImpl();
-        station1 = new StationModel(10, 20, "Station1", 4);
-        station2 = new StationModel(15, 16, "Station2", 4);
-        station3 = new StationModel(30, 50, "Station3", 4);
+        station1 = new StationModel(10, 20, "Station1", 4, 0);
+        station2 = new StationModel(15, 16, "Station2", 4, 1);
+        station3 = new StationModel(30, 50, "Station3", 4, 2);
         w.add(KEY.STATIONS, station1);
         w.add(KEY.STATIONS, null);
         w.add(KEY.STATIONS, station2);

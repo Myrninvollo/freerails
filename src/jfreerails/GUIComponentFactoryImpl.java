@@ -4,11 +4,13 @@ import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.JComponent;
+import javax.swing.ButtonGroup;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
 
 import jfreerails.client.renderer.MapRenderer;
@@ -19,6 +21,8 @@ import jfreerails.client.top.ClientJFrame;
 import jfreerails.client.top.GUIComponentFactory;
 import jfreerails.client.top.StationTypesPopup;
 import jfreerails.client.top.UserInputOnMapController;
+import jfreerails.client.view.CashJLabel;
+import jfreerails.client.view.DateJLabel;
 import jfreerails.client.view.DetailMapView;
 import jfreerails.client.view.DialogueBoxController;
 import jfreerails.client.view.FreerailsCursor;
@@ -28,14 +32,19 @@ import jfreerails.client.view.MapViewMoveReceiver;
 import jfreerails.client.view.OverviewMapJComponent;
 import jfreerails.controller.MoveChainFork;
 import jfreerails.controller.MoveReceiver;
-import jfreerails.controller.ServerGameEngine;
 import jfreerails.controller.StationBuilder;
 import jfreerails.controller.TrackMoveExecutor;
 import jfreerails.controller.TrackMoveProducer;
-import jfreerails.world.station.CalcSupplyAtStations;
+import jfreerails.server.ServerGameEngine;
 import jfreerails.world.top.World;
 
 public class GUIComponentFactoryImpl implements GUIComponentFactory {
+
+	private DateJLabel datejLabel;
+	private CashJLabel cashjLabel;
+	private javax.swing.JPanel trainsJPanel;
+	private javax.swing.JMenu helpMenu;
+	private javax.swing.JLabel messageJLabel;
 
 	private final DialogueBoxController dialogueBoxController;
 
@@ -50,12 +59,13 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory {
 	StationTypesPopup stationTypesPopup;
 	BuildMenu buildMenu;
 	JMenu displayMenu;
-	JComponent overviewMapContainer;
-	JComponent mainMapContainer;
+	JPanel overviewMapContainer;
+	JScrollPane mainMapContainer;
 	MapViewJComponentConcrete mapViewJComponent;
 	TrackMoveProducer trackBuilder;
 	private JScrollPane mainMapScrollPane1;
-	MapRenderer mainMap, overviewMap;
+	MapRenderer overviewMap;
+	DetailMapView mainMap;
 
 	Rectangle r = new Rectangle(10, 10, 10, 10);
 
@@ -77,9 +87,18 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory {
 
 		//glassPanel = new MyGlassPanel();
 		//glassPanel.showContent(new NewsPaperJPanel());
-		clientJFrame = new ClientJFrame(this);
-		dialogueBoxController= new DialogueBoxController(clientJFrame);
+
 		//clientJFrame.setGlassPane(glassPanel);
+
+		trainsJPanel = new javax.swing.JPanel();
+		datejLabel = new DateJLabel();
+
+		cashjLabel = new CashJLabel();
+		messageJLabel = new javax.swing.JLabel("Message");
+		trainsJPanel.setBackground(new java.awt.Color(255, 51, 51));
+
+		clientJFrame = new ClientJFrame(this);
+		dialogueBoxController = new DialogueBoxController(clientJFrame);
 	}
 
 	public void setup(ViewLists vl, World w, ServerGameEngine ge) {
@@ -93,33 +112,30 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory {
 		dialogueBoxController.setup(w, vl);
 
 		//create the main and overview maps
-		mainMap =
-			new DetailMapView(
-				world,
-				viewLists
-				);
+		mainMap = new DetailMapView(world, viewLists);
 		overviewMap = new ZoomedOutMapRenderer(world);
 
 		//init the move handlers
 
-		MoveReceiver trackMoveExecutor = new TrackMoveExecutor(world);
-		MoveChainFork moveFork = new MoveChainFork(trackMoveExecutor);
-
 		MoveReceiver overviewmapMoveReceiver = new MapViewMoveReceiver(mainMap);
-		moveFork.add(overviewmapMoveReceiver);
+
+		MoveChainFork moveFork = new MoveChainFork(overviewmapMoveReceiver);
+
+		TrackMoveExecutor trackMoveExecutor =
+			new TrackMoveExecutor(world, moveFork);
 
 		MoveReceiver mainmapMoveReceiver = new MapViewMoveReceiver(overviewMap);
 		moveFork.add(mainmapMoveReceiver);
 
-		trackBuilder = new TrackMoveProducer(world, moveFork);
-		StationBuilder sb = new StationBuilder(trackBuilder, world);
+		trackBuilder = new TrackMoveProducer(world, trackMoveExecutor);
+		StationBuilder sb = new StationBuilder(trackMoveExecutor, world);
 
-		stationTypesPopup.setup(sb);
+		stationTypesPopup.setup(sb, mainMap.getStationRadius());
 
 		this.cursor = new FreerailsCursor(mainMap);
 		//setup the the main and overview map JComponents
 
-		 ((MapViewJComponentConcrete) mapViewJComponent).setup(mainMap, cursor);
+		((MapViewJComponentConcrete) mapViewJComponent).setup(mainMap, cursor);
 
 		dialogueBoxController.setDefaultFocusOwner(mapViewJComponent);
 
@@ -128,25 +144,23 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory {
 			trackBuilder,
 			stationTypesPopup,
 			cursor,
-			dialogueBoxController);
+			dialogueBoxController,
+			trackMoveExecutor);
 
 		buildMenu.setup(world, trackBuilder);
 		mainMapScrollPane1.setViewportView(this.mapViewJComponent);
 		((OverviewMapJComponent) overviewMapContainer).setup(overviewMap);
+
+		datejLabel.setup(w, null, null);
+		cashjLabel.setup(w, null, null);
 	}
 
-	public JComponent createOverviewMap() {
+	public JPanel createOverviewMap() {
 		return overviewMapContainer;
 	}
 
-	public JComponent createMainMap() {
-
+	public JScrollPane createMainMap() {
 		return mainMapScrollPane1;
-
-	}
-
-	public JLabel createMessagePanel() {
-		return new JLabel("Message");
 	}
 
 	public JMenu createBuildMenu() {
@@ -162,28 +176,26 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory {
 				dialogueBoxController.showTrainOrders();
 			}
 		});
-		
+
 		JMenuItem stationInfoJMenuItem = new JMenuItem("Station Info");
 		stationInfoJMenuItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				CalcSupplyAtStations cSAS = new CalcSupplyAtStations(world);
-				cSAS.doProcessing();
+			public void actionPerformed(ActionEvent e) {				
 				dialogueBoxController.showStationInfo(0);
 			}
 		});
-//		I've moved the processing to the menu item above, LL		
-//		JMenuItem stationInfoCalculations = new JMenuItem("Calculate Station Info");
-//		stationInfoCalculations.addActionListener(new ActionListener() {
-//			public void actionPerformed(ActionEvent e) {
-//				CalcSupplyAtStations cSAS = new CalcSupplyAtStations(world);
-//				cSAS.doProcessing();
-//			}
-//		});
-		
+		//		I've moved the processing to the menu item above, LL		
+		//		JMenuItem stationInfoCalculations = new JMenuItem("Calculate Station Info");
+		//		stationInfoCalculations.addActionListener(new ActionListener() {
+		//			public void actionPerformed(ActionEvent e) {
+		//				CalcSupplyAtStations cSAS = new CalcSupplyAtStations(world);
+		//				cSAS.doProcessing();
+		//			}
+		//		});
+
 		displayMenu.add(trainOrdersJMenuItem);
 		displayMenu.add(stationInfoJMenuItem);
 		//displayMenu.add(stationInfoCalculations);
-		
+
 		return displayMenu;
 	}
 
@@ -210,7 +222,8 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory {
 
 			public void actionPerformed(ActionEvent e) {
 
-				gameEngine.newGame(OldWorldImpl.createWorldFromMapFile(mapName));
+				gameEngine.newGame(
+					OldWorldImpl.createWorldFromMapFile(mapName));
 				World world = gameEngine.getWorld();
 				ViewLists viewLists = getViewLists();
 
@@ -230,7 +243,8 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory {
 
 			public void actionPerformed(ActionEvent e) {
 
-				gameEngine.newGame(OldWorldImpl.createWorldFromMapFile(mapName));
+				gameEngine.newGame(
+					OldWorldImpl.createWorldFromMapFile(mapName));
 				World world = gameEngine.getWorld();
 				ViewLists viewLists = getViewLists();
 
@@ -287,10 +301,55 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory {
 
 		});
 
-		JMenuItem showControls = new JMenuItem("Show game controls");
-		showControls.addActionListener(new java.awt.event.ActionListener() {
-			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				dialogueBoxController.showGameControls();
+		//Set up the gamespeed submenu.
+		ButtonGroup group = new ButtonGroup();
+		JMenu gameSpeedSubMenu = new JMenu("Game Speed...");
+
+		JRadioButtonMenuItem paused = new JRadioButtonMenuItem("Frozen");
+		group.add(paused);
+		gameSpeedSubMenu.add(paused);
+		paused.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				gameEngine.setTargetTicksPerSecond(0);
+			}
+		});
+
+		JRadioButtonMenuItem slow = new JRadioButtonMenuItem("Slow");
+		group.add(slow);
+		gameSpeedSubMenu.add(slow);
+		slow.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				gameEngine.setTargetTicksPerSecond(10);
+			}
+		});
+
+		JRadioButtonMenuItem moderate = new JRadioButtonMenuItem("Moderate");
+		group.add(moderate);
+		gameSpeedSubMenu.add(moderate);
+		moderate.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				gameEngine.setTargetTicksPerSecond(30);
+			}
+		});
+
+		//Set the initial game speed to moderate.
+		moderate.setSelected(true);		
+
+		JRadioButtonMenuItem fast = new JRadioButtonMenuItem("Fast");
+		group.add(fast);
+		gameSpeedSubMenu.add(fast);
+		fast.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				gameEngine.setTargetTicksPerSecond(50);
+			}
+		});
+
+		JRadioButtonMenuItem turbo = new JRadioButtonMenuItem("Turbo");
+		group.add(turbo);
+		gameSpeedSubMenu.add(turbo);
+		turbo.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				gameEngine.setTargetTicksPerSecond(50);
 			}
 		});
 
@@ -300,8 +359,8 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory {
 		gameMenu.add(loadGameJMenuItem);
 		gameMenu.add(saveGameJMenuItem);
 		gameMenu.addSeparator();
+		gameMenu.add(gameSpeedSubMenu);
 		gameMenu.add(newspaperJMenuItem);
-		gameMenu.add(showControls);
 		gameMenu.addSeparator();
 		gameMenu.add(quitJMenuItem);
 
@@ -328,6 +387,36 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory {
 	public JFrame createClientJFrame() {
 		return clientJFrame;
 
+	}
+
+	public JMenu createHelpMenu() {
+
+		helpMenu = new javax.swing.JMenu("Help");
+		JMenuItem showControls = new JMenuItem("Show game controls");
+		showControls.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				dialogueBoxController.showGameControls();
+			}
+		});
+
+		helpMenu.add(showControls);
+		return helpMenu;
+	}
+
+	public JPanel createTrainsJPanel() {
+		return trainsJPanel;
+	}
+
+	public JLabel createCashJLabel() {
+		return cashjLabel;
+	}
+
+	public JLabel createMessagePanel() {
+		return messageJLabel;
+	}
+
+	public JLabel createDateJLabel() {
+		return datejLabel;
 	}
 
 }

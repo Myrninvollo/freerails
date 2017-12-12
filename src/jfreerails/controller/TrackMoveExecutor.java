@@ -1,5 +1,6 @@
 package jfreerails.controller;
 
+import java.util.Stack;
 
 import jfreerails.move.Move;
 import jfreerails.move.MoveStatus;
@@ -14,10 +15,13 @@ final public class TrackMoveExecutor implements MoveReceiver {
 
 	private final World world;
 
-	
-	public TrackMoveExecutor(World w) {
-		this.world = w;
-		
+	private final MoveReceiver moveReceiver;
+
+	private static final Stack moveStack = new Stack();
+
+	public TrackMoveExecutor(World w, MoveReceiver mr) {
+		world = w;
+		moveReceiver = mr;
 	}
 
 	/*
@@ -25,13 +29,29 @@ final public class TrackMoveExecutor implements MoveReceiver {
 	 */
 	public MoveStatus processMove(Move move) {
 		if (move instanceof TrackMove) {
-			return ((TrackMove)move).doMove(world);
+			moveStack.push(move);
+
+			MoveStatus ms = ((TrackMove) move).doMove(world);
+
+			moveReceiver.processMove(move);
+
+			return ms;
 		} else {
 			System.out.println("is not a track move");
 			return MoveStatus.MOVE_RECEIVED;
 		}
+	}
 
-		
+	public void undoLastMove() {
+		if (moveStack.size() > 0) {
+			Move m = (Move) moveStack.pop();
+			m.undoMove(world);
+
+			moveReceiver.processMove(m);
+
+		} else {
+			System.out.println("No moves on stack.");
+		}
 	}
 
 }

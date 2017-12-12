@@ -10,6 +10,7 @@ import java.awt.Rectangle;
 
 import jfreerails.world.common.OneTileMoveVector;
 import jfreerails.world.top.World;
+import jfreerails.world.track.FreerailsTile;
 import jfreerails.world.track.NullTrackPiece;
 import jfreerails.world.track.NullTrackType;
 import jfreerails.world.track.TrackConfiguration;
@@ -21,50 +22,16 @@ import jfreerails.world.track.TrackRule;
  * @author  lindsal
  * 
  */
-public final class ChangeTrackPieceCompositeMove implements TrackMove, MapUpdateMove {
+public final class ChangeTrackPieceCompositeMove extends CompositeMove implements TrackMove, MapUpdateMove {
 
-	private final TrackMove moveA, moveB;
+	private final Rectangle updatedTiles;
 
 	/** Creates new ChangeTrackPieceCompositeMove */
 	public ChangeTrackPieceCompositeMove(TrackMove a, TrackMove b) {
-		moveA = a;
-		moveB = b;
+		super(new Move[]{a, b});
+		updatedTiles = a.getUpdatedTiles().union(b.getUpdatedTiles());						
 	}
 
-	public MoveStatus doMove(World w) {
-
-		MoveStatus moveStatus = tryDoMove(w);
-		if (moveStatus.ok) {
-			moveA.doMove(w);
-			moveB.doMove(w);
-			return moveStatus;
-		} else {
-			return moveStatus;
-		}
-	}
-
-	public MoveStatus tryDoMove(World w) {
-
-		MoveStatus moveStatusA, moveStatusB;
-		moveStatusA = moveA.tryDoMove(w);
-		moveStatusB = moveB.tryDoMove(w);
-		if (moveStatusA.isOk() && moveStatusB.isOk()) {
-			return MoveStatus.MOVE_OK;
-		} else {
-			return MoveStatus.MOVE_FAILED;
-		}
-
-	}
-
-	public MoveStatus tryUndoMove(World w) {
-
-		return MoveStatus.MOVE_RECEIVED;
-	}
-
-	public MoveStatus undoMove(World w) {
-
-		return MoveStatus.MOVE_RECEIVED;
-	}
 	public static ChangeTrackPieceCompositeMove generateBuildTrackMove(
 		Point from,
 		OneTileMoveVector direction,
@@ -110,7 +77,7 @@ public final class ChangeTrackPieceCompositeMove implements TrackMove, MapUpdate
 		TrackPiece oldTrackPiece, newTrackPiece;
 
 		if (w.boundsContain(p.x, p.y)) {
-			oldTrackPiece = (TrackPiece) w.getTile(p.x, p.y);
+			oldTrackPiece = ((FreerailsTile) w.getTile(p.x, p.y)).getTrackPiece();
 			if (oldTrackPiece.getTrackRule() != NullTrackType.getInstance()) {
 				TrackConfiguration trackConfiguration =
 					TrackConfiguration.add(oldTrackPiece.getTrackConfiguration(), direction);
@@ -170,8 +137,8 @@ public final class ChangeTrackPieceCompositeMove implements TrackMove, MapUpdate
 		return trackRule.getTrackPiece(trackConfiguration);
 	}
 
-	public Rectangle getUpdatedTiles() {
-		return moveA.getUpdatedTiles();
+	public Rectangle getUpdatedTiles() {	
+		return updatedTiles;
 	}
 
 }

@@ -1,25 +1,25 @@
 package jfreerails.world.top;
 
-import jfreerails.world.common.GameTime;
+import jfreerails.world.common.GameCalendar;
 
 
 final public class GameTimePeriod {
 
  
-    private final GameTime start;
+    private final GameCalendar start;
 
 
-    private final GameTime end;
+    private final GameCalendar end;
 
-    public GameTime getStart() {
+    public GameCalendar getStart() {
         return start;
     }
 
-    public GameTime getEnd() {
+    public GameCalendar getEnd() {
         return end;
     }
     
-    public GameTimePeriod(GameTime from, GameTime to){
+    public GameTimePeriod(GameCalendar from, GameCalendar to){
     	
     	start=from;
     	end=to;

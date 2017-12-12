@@ -1,7 +1,7 @@
 package jfreerails.world.station;
 
 
-import jfreerails.world.common.GameTime;
+import jfreerails.world.common.GameCalendar;
 
 /**
  * Defining operations expected of ...
@@ -26,7 +26,7 @@ public interface SwitchingYard {
  * @return A GameTime with ...
  */
 
-    GameTime getTimePerChangedCar();
+    GameCalendar getTimePerChangedCar();
 
 }
 

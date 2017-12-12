@@ -25,6 +25,15 @@ import jfreerails.world.track.FreerailsTile;
  *
  */
 public interface World extends FreerailsSerializable {
+	
+	
+	/** Returns the element mapped to the specified item.
+	 */
+	FreerailsSerializable get(ITEM item);
+    
+	/** Replaces the element mapped to the specified item with the specified element.
+	*/
+	void set(ITEM item, FreerailsSerializable element);
     
     /** Returns the element at the specified position in the specified list.
      */
@@ -34,9 +43,10 @@ public interface World extends FreerailsSerializable {
      */
     void set(KEY key, int index, FreerailsSerializable element);
     
-    /** Appends the specified element to the end of the specifed list.
+    /** Appends the specified element to the end of the specifed list and returns the index
+     * that can be used to retrieve it.
      */
-    void add(KEY key, FreerailsSerializable element);
+    int add(KEY key, FreerailsSerializable element);
     
     /** Removes the last element from the specified list. */
     FreerailsSerializable removeLast(KEY key);

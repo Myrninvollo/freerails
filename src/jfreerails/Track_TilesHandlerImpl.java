@@ -20,13 +20,17 @@ import jfreerails.world.track.TrackRule;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
-public class Track_TilesHandlerImpl implements Track_TilesHandler, TrackSetFactory {
+public class Track_TilesHandlerImpl
+	implements Track_TilesHandler, TrackSetFactory {
 
 	int maxConsequ;
-	
+
 	protected ArrayList ruleList;
 	protected jfreerails.world.track.TrackRuleProperties trackRuleProperties;
-	protected jfreerails.world.track.LegalTrackConfigurations legalTrackConfigurations;
+	protected jfreerails
+		.world
+		.track
+		.LegalTrackConfigurations legalTrackConfigurations;
 	public static final boolean DEBUG = false;
 	protected World w;
 	protected ArrayList legalTemplates;
@@ -34,7 +38,8 @@ public class Track_TilesHandlerImpl implements Track_TilesHandler, TrackSetFacto
 	protected LegalTrackPlacement legalTrackPlacement;
 	//  protected LegalTrackPlacement.PlacementRule placementRule;
 
-	public void start_CanOnlyBuildOnTheseTerrainTypes(final Attributes meta) throws SAXException {
+	public void start_CanOnlyBuildOnTheseTerrainTypes(final Attributes meta)
+		throws SAXException {
 
 		terrainTypes = new java.util.HashSet();
 	}
@@ -42,21 +47,27 @@ public class Track_TilesHandlerImpl implements Track_TilesHandler, TrackSetFacto
 	public void end_CanOnlyBuildOnTheseTerrainTypes() throws SAXException {
 
 		legalTrackPlacement =
-			new LegalTrackPlacement(terrainTypes, LegalTrackPlacement.PlacementRule.ONLY_ON_THESE);
+			new LegalTrackPlacement(
+				terrainTypes,
+				LegalTrackPlacement.PlacementRule.ONLY_ON_THESE);
 		terrainTypes = null;
 	}
 
-	public void start_ListOfTrackPieceTemplates(final Attributes meta) throws SAXException {
+	public void start_ListOfTrackPieceTemplates(final Attributes meta)
+		throws SAXException {
 		legalTemplates = new ArrayList();
 	}
 
 	public void end_ListOfTrackPieceTemplates() throws SAXException {
 		legalTrackConfigurations =
-			new jfreerails.world.track.LegalTrackConfigurations(maxConsequ, legalTemplates);
+			new jfreerails.world.track.LegalTrackConfigurations(
+				maxConsequ,
+				legalTemplates);
 		legalTemplates = null;
 	}
 
-	public void start_ListOfLegalRoutesAcrossNode(final Attributes meta) throws SAXException {
+	public void start_ListOfLegalRoutesAcrossNode(final Attributes meta)
+		throws SAXException {
 		if (DEBUG)
 			System.err.println("start_ListOfLegalRoutesAcrossNode: " + meta);
 	}
@@ -66,12 +77,14 @@ public class Track_TilesHandlerImpl implements Track_TilesHandler, TrackSetFacto
 			System.err.println("end_ListOfLegalRoutesAcrossNode()");
 	}
 
-	public void handle_LegalRouteAcrossNode(final Attributes meta) throws SAXException {
+	public void handle_LegalRouteAcrossNode(final Attributes meta)
+		throws SAXException {
 		if (DEBUG)
 			System.err.println("handle_LegalRouteAcrossNode: " + meta);
 	}
 
-	public void start_CannotBuildOnTheseTerrainTypes(final Attributes meta) throws SAXException {
+	public void start_CannotBuildOnTheseTerrainTypes(final Attributes meta)
+		throws SAXException {
 		terrainTypes = new java.util.HashSet();
 	}
 
@@ -93,28 +106,44 @@ public class Track_TilesHandlerImpl implements Track_TilesHandler, TrackSetFacto
 		 *  by the the BufferedImage that stores the map.  See jfreerails.common.Map
 		 */
 		rGBvalue = new java.awt.Color(rGBvalue).getRGB();
-		
-		boolean isStation = Boolean.valueOf(meta.getValue("station")).booleanValue();
-		
-		boolean enableDoubleTrack = Boolean.valueOf(meta.getValue("doubleTrack")).booleanValue();
+
+		boolean isStation =
+			Boolean.valueOf(meta.getValue("station")).booleanValue();
+
+		boolean enableDoubleTrack =
+			Boolean.valueOf(meta.getValue("doubleTrack")).booleanValue();
 		String typeName = meta.getValue("type");
 		int ruleNumber = ruleList.size();
-		maxConsequ = (int) Integer.parseInt(meta.getValue("maxConsecuativePieces"));
+		maxConsequ =
+			(int) Integer.parseInt(meta.getValue("maxConsecuativePieces"));
+		String stationRadiusString = meta.getValue("stationRadius");
+		int stationRadius;
+		if (null != stationRadiusString) {
+			stationRadius = (int) Integer.parseInt(stationRadiusString);
+		} else {
+			stationRadius = 0;
+		}
 		trackRuleProperties =
 			new jfreerails.world.track.TrackRuleProperties(
 				rGBvalue,
 				enableDoubleTrack,
 				typeName,
 				ruleNumber,
-				isStation);
+				isStation,
+				stationRadius);
 
 	}
 
 	public void end_TrackType() throws SAXException {
 
 		ruleList.add(
-			(Object) (new jfreerails.world.track
-				.TrackRuleImpl(trackRuleProperties, legalTrackConfigurations, legalTrackPlacement)));
+			(Object) (new jfreerails
+				.world
+				.track
+				.TrackRuleImpl(
+					trackRuleProperties,
+					legalTrackConfigurations,
+					legalTrackPlacement)));
 
 		legalTrackConfigurations = null;
 		trackRuleProperties = null;
@@ -135,7 +164,8 @@ public class Track_TilesHandlerImpl implements Track_TilesHandler, TrackSetFacto
 			System.err.println("end_Tiles()");
 	}
 
-	public void start_TrackPieceTemplate(final Attributes meta) throws SAXException {
+	public void start_TrackPieceTemplate(final Attributes meta)
+		throws SAXException {
 		legalTemplates.add(meta.getValue("trackTemplate"));
 	}
 
@@ -148,19 +178,21 @@ public class Track_TilesHandlerImpl implements Track_TilesHandler, TrackSetFacto
 	}
 
 	public void end_TrackSet() throws SAXException {
-		
+
 	}
 
 	public Track_TilesHandlerImpl(java.net.URL trackXmlUrl) {
 		try {
-			Track_TilesParser.parse(trackXmlUrl, this, new Track_TilesParsletImpl());
+			Track_TilesParser.parse(
+				trackXmlUrl,
+				this,
+				new Track_TilesParsletImpl());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 	protected Track_TilesHandlerImpl() {
 	}
-	
 
 	public TrackPieceRendererList getTrackViewList(ImageSplitter trackImageSplitter) {
 		throw new UnsupportedOperationException();
@@ -171,9 +203,9 @@ public class Track_TilesHandlerImpl implements Track_TilesHandler, TrackSetFacto
 	}
 
 	public void addTrackRules(World w) {
-		for(int i = 0; i< this.ruleList.size(); i++){
-			TrackRule r = (TrackRule)ruleList.get(i);
-			w.add(KEY.TRACK_RULES, r);			
+		for (int i = 0; i < this.ruleList.size(); i++) {
+			TrackRule r = (TrackRule) ruleList.get(i);
+			w.add(KEY.TRACK_RULES, r);
 		}
 	}
 }

@@ -1,14 +1,19 @@
 package jfreerails;
 
 import java.net.URL;
-import org.xml.sax.*;
 
 import jfreerails.controller.MoveReceiver;
 import jfreerails.controller.TrackMoveExecutor;
 import jfreerails.world.city.CityTilePositioner;
 import jfreerails.world.city.InputCityNames;
+import jfreerails.world.common.GameCalendar;
+import jfreerails.world.common.GameTime;
+import jfreerails.world.common.Money;
+import jfreerails.world.top.ITEM;
 import jfreerails.world.top.World;
 import jfreerails.world.top.WorldImpl;
+
+import org.xml.sax.SAXException;
 
 public class OldWorldImpl {
 
@@ -68,7 +73,12 @@ public class OldWorldImpl {
 			CityTilePositioner ctp = new CityTilePositioner(w);
 		
 		//Create the object that controls building track.
-		MoveReceiver trackMoveExecutor = new TrackMoveExecutor(w);
+		MoveReceiver trackMoveExecutor = new TrackMoveExecutor(w, null);
+		
+		//Set the time..
+		w.set(ITEM.CALENDAR, new GameCalendar(1200, 1840));
+		w.set(ITEM.TIME, new GameTime(0));
+		w.set(ITEM.CASH, new Money(100000));
 		
 		return w;
 	}

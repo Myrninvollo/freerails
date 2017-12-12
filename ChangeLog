@@ -1,3 +1,70 @@
+28-Jun-2003 21:46:40 Luke
+	o Moved 'show game controls' menu item to the Help menu.
+	o Removed 'add cargo to stations' menu item from the game
+	menu.  Now cargo is added to stations at the start of each 
+	year.
+	o Set the intial game speed to 'moderate'.
+	o Added junit test for DropOffAndPickupCargoMoveGenerator
+28-Jun-2003 13:18:04 Luke
+	o Moved classes to remove circular dependencies between
+	packages and updated the 'checkdep' ant target. 
+27-Jun-2003 23:46:15 Luke
+	o Added 'station of origin' field to CargoBatch and updated
+	the classes that use CargoBatch as appropriate.  It lets us
+	check whether a train has brought cargo back to the station
+	that it came from.
+27-Jun-2003 23:25:54 Luke
+	o Added 'no change' option to train orders - it indicates 
+	that a train should keep whatever wagons it has when it stops 
+	at a station.
+	o Made 'no change' the default order for new trains. 
+15-Jun_2003 23:17:00 Luke
+	o Improved the train oders dialogue to show
+	the current train consist and what cargo the
+	train is carrying.
+15-Jun_2003 23:17:00 Luke
+	o Fixed a load of problems with station building.
+	-stations can now only be built on the track
+	-building a station on a station now upgrades the
+	station rather than adding a new one.
+	-building stations is now fully undoable in the same
+	way as building track.		
+15-Jun_2003 20:55:00 Luke
+	o The map gets centered on the curors when you press 'C';
+	o Pressing 'I' over a station brings up the station info dialogue
+	box.
+	o Station radii are defined in track xml.
+	o The radius of the station type selected is
+	shown on the map when the station types popup is
+	visible.
+14-Jun_2003 20:40:00 Luke
+	o Fixed bug where train went past station before 
+	turning around.
+12-Jun_2003 20:40:00 Luke
+	o Improved javadoc comments.
+11-Jun-2003 17:39:00 Luke
+	o Add change game speed submenu to game menu.
+11-Jun-2003 17:26:00 Scott
+	o Implemented the Train/Station cargo dropoff and pickup feature, 
+		trains currently only pickup cargo. Its playable!
+05-Jun-2003 21:57:45 Luke
+	o Added loadAndUnloadCargo(..) method to 
+	jfreerails.controller.pathfinder.TrainPathFinder
+04-Jun-2003 23:04:47 Luke
+	o Updated jfreerails.world package overview.
+01-Jun-2003 21:01:14 Luke
+	o The game times passes as real time passes.
+01-Jun-2003 18:45:42 Luke
+	o Rewrote  ClientJFrame using Netbean's GUI editor.
+	o Added JLabels to show the date and available cash to ClientJFrame. 
+31-May-2003 23:58:04 Luke
+	o Pressing backspace now undoes building/removing track.
+31-May-2003 21:28:30 Luke
+	o Make build track moves undoable.
+31-May-2003 16:26:35 Luke
+	o Cargo gets added to stations based on what they supply,
+	currently this is triggered by the 'Add cargo to stations' item
+	on the game menu.
 19-May-2003 04:02:00 Scott
 	o Fixed the problem and deviation from the design ;-) of the station
 	cargo calculations, there's now a temporary menu item on the display menu.
