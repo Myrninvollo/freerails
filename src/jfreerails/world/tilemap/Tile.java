@@ -1,5 +1,7 @@
 package jfreerails.world.tilemap;
 
+import experimental.FreerailsSerializable;
+
 /**
 *  Description of the Interface
 *
@@ -8,7 +10,7 @@ package jfreerails.world.tilemap;
 */
 
 
-public interface Tile {
+public interface Tile extends FreerailsSerializable {
     
     
     int getRGB();

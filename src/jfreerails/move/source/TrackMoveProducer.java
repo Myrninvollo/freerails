@@ -2,14 +2,14 @@
 package jfreerails.move.source;
 import java.awt.Point;
 
-import jfreerails.lib.TextMessageHandler;
+import jfreerails.client.TextMessageHandler;
 import jfreerails.list.TrackRuleList;
-import jfreerails.misc.OneTileMoveVector;
 import jfreerails.move.ChangeTrackPieceCompositeMove;
 import jfreerails.move.ChangeTrackPieceMove;
 import jfreerails.move.receiver.MoveReceiver;
 import jfreerails.move.status.MoveStatus;
 import jfreerails.type.TrackRule;
+import jfreerails.world.flat.OneTileMoveVector;
 import jfreerails.world.std_track.TrackPiece;
 import jfreerails.world.std_track.TrackTileMap;
 

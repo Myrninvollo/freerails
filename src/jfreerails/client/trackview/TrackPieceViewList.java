@@ -11,8 +11,8 @@ import java.util.Iterator;
 
 import jfreerails.list.TrackRuleList;
 import jfreerails.type.TrackRule;
+import jfreerails.world.flat.TrackConfiguration;
 import jfreerails.world.std_track.NullTrackType;
-import jfreerails.world.std_track.TrackConfiguration;
 import sun.security.krb5.internal.i;
 
 final public class TrackPieceViewList {

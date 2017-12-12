@@ -5,15 +5,18 @@
 package jfreerails.world.std_track;
 
 import jfreerails.type.TrackRule;
-import jfreerails.world.terrain.TerrainType;
+import jfreerails.world.flat.TrackConfiguration;
 import jfreerails.world.terrain.TerrainTile;
+import jfreerails.world.terrain.TerrainType;
+
+import experimental.FreerailsSerializable;
 
 /**
  * @version 	1.0
  * @author
  */
 final public class TrackPieceAndTerrainCompositeTile
-	implements TrackPiece, TerrainTile {
+	implements TrackPiece, TerrainTile, FreerailsSerializable {
 		
 	
 	private final TrackPiece trackPiece;

@@ -1,9 +1,9 @@
 
 /*
-* MapViewJComponent.java
-*
-* Created on 31 July 2001, 13:56
-*/
+ * MapViewJComponent.java
+ *
+ * Created on 31 July 2001, 13:56
+ */
 package jfreerails.client.view.map;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -13,17 +13,18 @@ import java.awt.Rectangle;
 import javax.swing.SwingUtilities;
 import jfreerails.client.FreerailsCursor;
 import jfreerails.client.event.CursorEvent;
+import jfreerails.client.event.CursorEventListener;
 import jfreerails.move.source.TrackMoveProducer;
 
 /**
-*
-* @author  Luke Lindsay
-* @version
-*/
+ *
+ * @author  Luke Lindsay
+ * @version
+ */
 
 final public class MapViewJComponentConcrete
 	extends MapViewJComponent
-	implements jfreerails.client.event.CursorEventListener {
+	implements CursorEventListener {
 
 	private TrackMoveProducer trackBuilder;
 
@@ -36,7 +37,8 @@ final public class MapViewJComponentConcrete
 			if (SwingUtilities.isLeftMouseButton(mouseEvent)) {
 				int x = mouseEvent.getX();
 				int y = mouseEvent.getY();
-				Dimension tileSize = mapView.getTileSize();
+				float scale = mapView.getScale();
+				Dimension tileSize = new Dimension((int) scale, (int) scale);
 				cursor.TryMoveCursor(
 					new java.awt.Point(
 						x / tileSize.width,
@@ -50,24 +52,37 @@ final public class MapViewJComponentConcrete
 		super.paintComponent(g);
 		java.awt.Graphics2D g2 = (java.awt.Graphics2D) g;
 
-		//java.awt.Rectangle  r = this.getVisibleRect();
+		java.awt.Rectangle r = this.getVisibleRect();
 
-		//tiledBackgroundPainter.paint( g2, r );
-		cursor.cursorRenderer.paintCursor(g2, new java.awt.Dimension(30, 30));
+		mapView.paintRect(g2, r);
+		if (null != cursor) {
+			cursor.cursorRenderer.paintCursor(
+				g2,
+				new java.awt.Dimension(30, 30));
+		}
 	}
 
-	public MapViewJComponentConcrete(
-		NewMapView mv,
-		TrackMoveProducer trackBuilder) {
+	public MapViewJComponentConcrete() {
+		super();
+		this.addMouseListener(new MapViewJComponentMouseAdapter());
+	}
 
-		super(new SquareTileBackgroundPainter(mv));
+	public void setup(MapView mv, TrackMoveProducer trackBuilder) {
+		super.mapView=mv;
 		this.setBorder(null);
 		this.trackBuilder = trackBuilder;
+		
+		this.removeKeyListener(this.cursor);
+		
 		this.cursor = new FreerailsCursor(mv);
 		cursor.addCursorEventListener(this);
-		this.addMouseListener(new MapViewJComponentMouseAdapter());
+		
+		
 		this.addKeyListener(cursor);
-		this.requestFocus();
+	}
+
+	public void setup(MapView mv){
+		super.mapView=mv;
 	}
 
 	public void cursorJumped(CursorEvent ce) {
@@ -81,7 +96,7 @@ final public class MapViewJComponentConcrete
 			for (tile.y = ce.newPosition.y - 1;
 				tile.y < ce.newPosition.y + 2;
 				tile.y++) {
-				mapView.refreshTile(tile);
+				mapView.refreshTile(tile.x, tile.y);
 			}
 		}
 
@@ -100,7 +115,7 @@ final public class MapViewJComponentConcrete
 				for (tile.y = ce.oldPosition.y - 1;
 					tile.y < ce.oldPosition.y + 2;
 					tile.y++) {
-					mapView.refreshTile(tile);
+					mapView.refreshTile(tile.x, tile.y);
 				}
 			}
 
@@ -114,16 +129,11 @@ final public class MapViewJComponentConcrete
 		reactToCursorMovement(ce);
 	}
 
-	public void updateTiles(java.awt.Rectangle rect) {
-
-	}
-
-	public void updateTile(java.awt.Point tileCoodinate) {
-
-	}
+	
 
 	private void reactToCursorMovement(CursorEvent ce) {
-		java.awt.Dimension tileSize = mapView.getTileSize();
+		float scale = mapView.getScale();
+		Dimension tileSize = new Dimension((int) scale, (int) scale);
 		Rectangle vr = this.getVisibleRect();
 		Rectangle rectangleSurroundingCursor = new Rectangle(0, 0, 1, 1);
 		rectangleSurroundingCursor.setLocation(
@@ -148,87 +158,33 @@ final public class MapViewJComponentConcrete
 			tileSize.width * 3,
 			tileSize.height * 3);
 	}
-	public Dimension getTileSize() {
-		return mapView.getTileSize();
-
-	}
-
+	
 	public float getScale() {
 		return mapView.getScale();
 
 	}
+	
 
-	public void setScale(float scale) {
-		throw new UnsupportedOperationException("Method not yet implemented.");
+	
+	public void paintTile(Graphics g, int tileX, int tileY) {
 	}
 
-	public void paintTile(Graphics g, Point tile) {
-		throw new UnsupportedOperationException("Method not yet implemented.");
+	public void paintRectangleOfTiles(
+		Graphics g,
+		int x,
+		int y,
+		int width,
+		int height) {
 	}
 
-	public void paintRectangleOfTiles(Graphics g, Rectangle tilesToPaint) {
-		throw new UnsupportedOperationException("Method not yet implemented.");
+	public void refreshTile(int x, int y) {
+	}
+
+	public void refreshRectangleOfTiles(int x, int y, int width, int height) {
 	}
 
 	public void paintRect(Graphics g, Rectangle visibleRect) {
-		throw new UnsupportedOperationException("Method not yet implemented.");
-	}
-
-	public NewMapView getParentMapView() {
-		throw new UnsupportedOperationException("Method not yet implemented.");
-
-	}
-
-	public void setParentMapView(NewMapView parent) {
-		throw new UnsupportedOperationException("Method not yet implemented.");
-	}
-
-	public void refreshTile(Point tile) {
-		throw new UnsupportedOperationException("Method not yet implemented.");
-	}
-
-	public void refresh() {
-		throw new UnsupportedOperationException("Method not yet implemented.");
-	}
-
-	public Dimension getMapSizeInPixels() {
-		return mapView.getMapSizeInPixels();
-	}
-	public Dimension getMapSizeInTiles() {
-		throw new UnsupportedOperationException("Method not yet implemented.");
-	}
-	public void refreshTileAndNotifyParent(Point tile) {
-		throw new UnsupportedOperationException("Method not yet implemented.");
-
-	}
-	public void refreshAndNotifyParent() {
-		throw new UnsupportedOperationException("Method not yet implemented.");
-
 	}
 
 	
-
-	//public Dimension getMapSizeInPixels();
-
-	
-	
-
-	public void paintRect(Graphics g) {
-	}
-
-	
-	public void refreshRectangleOfTiles(Rectangle tilesToRefresh) {
-	}
-
-	public void reset() {
-	}
-
-	public boolean canDoScale(float scale) {
-		return false;
-		 }
-
-	public float[] getPreferedScales() {
-		return null;
-		 }
-
 }

@@ -5,14 +5,17 @@
  */
 
 package jfreerails.type;
-import java.util.Iterator;
+import java.io.ObjectStreamException;
 import java.util.HashSet;
+import java.util.Iterator;
+
+import experimental.FreerailsSerializable;
 /**
  *
  * @author  lindsal
  * @version 
  */
-public final class LegalTrackPlacement {    
+public final class LegalTrackPlacement implements FreerailsSerializable {    
     /**
      * @associates Object 
      */
@@ -37,13 +40,26 @@ public final class LegalTrackPlacement {
         }  
     }
     
-    final public static  class PlacementRule {
+    final public static  class PlacementRule implements FreerailsSerializable {
+    	
+    	private int i;
         
-        private PlacementRule(){}
+        private PlacementRule(int i){
+        	this.i=i;
+        }
         
-        public static final PlacementRule ONLY_ON_THESE=new PlacementRule();
+        private Object readResolve() throws ObjectStreamException {		
+        	
+        	if(i==1){
+        		return ONLY_ON_THESE;
+        	}else{
+        		return ANYWHERE_EXCEPT_ON_THESE;
+        	}    	
+    	}
+                
+        public static final PlacementRule ONLY_ON_THESE=new PlacementRule(1);
         
-        public static final PlacementRule ANYWHERE_EXCEPT_ON_THESE=new PlacementRule();
+        public static final PlacementRule ANYWHERE_EXCEPT_ON_THESE=new PlacementRule(2);
     }
 
 }

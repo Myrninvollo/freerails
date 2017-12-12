@@ -72,7 +72,7 @@ final public class TrackPieceViewImpl implements TrackPieceView {
             *  Grab the images for those track pieces that are legal.
             */
             for( int  j = 0;j < trackTemplatesPrototypes.length;j++ ) {
-                int[]  rotationsOfTrackTemplate = jfreerails.misc.EightRotationsOfTrackPieceProducer.getRotations( trackTemplatesPrototypes[ j ] );
+                int[]  rotationsOfTrackTemplate = jfreerails.world.flat.EightRotationsOfTrackPieceProducer.getRotations( trackTemplatesPrototypes[ j ] );
                 for( int  k = 0;k < rotationsOfTrackTemplate.length;k++ ) {
                     if( trackPieceIcons[ rotationsOfTrackTemplate[ k ] ] == null ) {
                         trackPieceIcons[ rotationsOfTrackTemplate[ k ] ] = trackImageSplitter.getTileFromSubGrid( k, j );

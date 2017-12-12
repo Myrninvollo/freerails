@@ -1,8 +1,10 @@
 package jfreerails.type;
 import java.util.Iterator;
 
-import jfreerails.world.std_track.TrackConfiguration;
+import jfreerails.world.flat.TrackConfiguration;
 import jfreerails.world.std_track.TrackPiece;
+
+import experimental.FreerailsSerializable;
 /**
 *  Description of the Interface
 *
@@ -10,7 +12,7 @@ import jfreerails.world.std_track.TrackPiece;
 *@created    09 October 2001
 */
 
-public interface TrackRule {
+public interface TrackRule extends FreerailsSerializable {
 
 	boolean canBuildOnThisTerrainType(String TerrainType);
 
@@ -24,8 +26,8 @@ public interface TrackRule {
 
 	int getMaximumConsecutivePieces();
 
-	jfreerails.misc.OneTileMoveVector[] getLegalRoutes(
-		jfreerails.misc.OneTileMoveVector directionComingFrom);
+	jfreerails.world.flat.OneTileMoveVector[] getLegalRoutes(
+		jfreerails.world.flat.OneTileMoveVector directionComingFrom);
 
 	boolean isDoubleTrackEnabled();
 

@@ -1,13 +1,14 @@
 package jfreerails.world.std_track;
 
 import jfreerails.type.TrackRule;
+import jfreerails.world.flat.*;
 
 final public class TrackPieceImpl implements TrackPiece {
-    private final jfreerails.world.std_track.TrackConfiguration configuration;
+    private final jfreerails.world.flat.TrackConfiguration configuration;
     
     private final TrackRule trackType;
     
-    public TrackPieceImpl(jfreerails.world.std_track.TrackConfiguration c,TrackRule type){
+    public TrackPieceImpl(jfreerails.world.flat.TrackConfiguration c,TrackRule type){
         configuration=c;
         trackType=type;
         

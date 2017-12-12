@@ -6,7 +6,10 @@
 
 package jfreerails.world.std_track;
 
+import java.io.ObjectStreamException;
+
 import jfreerails.type.TrackRule;
+import jfreerails.world.flat.TrackConfiguration;
 
 /**
  *
@@ -41,6 +44,10 @@ final public class NullTrackPiece implements jfreerails.world.std_track.TrackPie
     
     public TrackConfiguration getTrackConfiguration() {
         return TrackConfiguration.getFlatInstance(0);
+    }
+    
+    private Object readResolve() throws ObjectStreamException {
+    	return nullTrackPiece;	
     }
     
 }

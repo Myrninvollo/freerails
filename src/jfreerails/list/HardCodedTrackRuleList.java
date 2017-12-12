@@ -1,8 +1,8 @@
 package jfreerails.list;
 
-import jfreerails.type.LegalTrackConfigurations;
 import jfreerails.type.LegalTrackPlacement;
 import jfreerails.type.TrackRuleProperties;
+import jfreerails.world.flat.LegalTrackConfigurations;
 
 public class HardCodedTrackRuleList {
 	

@@ -29,7 +29,7 @@ final public class CursorEvent extends java.util.EventObject {
     * precisely one tile, its vector is stored in this
     * variable.
     */
-    public jfreerails.misc.OneTileMoveVector vector;
+    public jfreerails.world.flat.OneTileMoveVector vector;
 
     
     /** The new cursor coordinate in tiles.

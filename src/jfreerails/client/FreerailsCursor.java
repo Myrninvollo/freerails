@@ -19,8 +19,7 @@ import java.awt.event.KeyEvent;
 import jfreerails.client.event.CursorEvent;
 import jfreerails.client.event.CursorEventListener;
 import jfreerails.client.view.map.MapView;
-import jfreerails.client.view.map.NewMapView;
-import jfreerails.misc.OneTileMoveVector;
+import jfreerails.world.flat.OneTileMoveVector;
 
 final public class FreerailsCursor implements java.awt.event.KeyListener {
 
@@ -45,7 +44,7 @@ final public class FreerailsCursor implements java.awt.event.KeyListener {
 	//private jfreerails.common.trackmodel.TrackBuilder trackBuilder;
 	private Point cursorMapPosition = new Point(0, 0);
 
-	private NewMapView mapView;
+	private MapView mapView;
 
 	/** This inner class controls rendering of the cursor.
 	*/
@@ -118,6 +117,8 @@ final public class FreerailsCursor implements java.awt.event.KeyListener {
 			case KeyEvent.VK_BACK_SPACE :
 				System.out.println("Undo last move");
 				break;
+			case KeyEvent.VK_ENTER :
+				System.out.println("Send moves to server");	
 				
 
 			default :
@@ -154,12 +155,12 @@ final public class FreerailsCursor implements java.awt.event.KeyListener {
 					oldCursorMapPosition);
 
 			} else {
-				jfreerails.lib.TextMessageHandler.sendMessage(
+				jfreerails.client.TextMessageHandler.sendMessage(
 					"Jumped to: " + cursorMapPosition.x + ", " + cursorMapPosition.y);
 				fireOffCursorJumped(oldCursorMapPosition, cursorMapPosition);
 			}
 		} else {
-			jfreerails.lib.TextMessageHandler.sendMessage("Illegal cursor position!");
+			jfreerails.client.TextMessageHandler.sendMessage("Illegal cursor position!");
 		}
 	}
 
@@ -183,7 +184,7 @@ final public class FreerailsCursor implements java.awt.event.KeyListener {
 	* @param mapView The view that the curors moves across.
 	*/
 
-	public FreerailsCursor(NewMapView mv) {
+	public FreerailsCursor(MapView mv) {
 		this.mapView = mv;
 	}
 

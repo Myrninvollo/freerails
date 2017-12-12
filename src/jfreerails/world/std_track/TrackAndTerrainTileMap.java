@@ -6,10 +6,12 @@ package jfreerails.world.std_track;
 
 import jfreerails.world.terrain.TerrainMap;
 
+import experimental.FreerailsSerializable;
+
 /**
  * @version 	1.0
  * @author
  */
-public interface TrackAndTerrainTileMap extends TerrainMap, TrackTileMap {
+public interface TrackAndTerrainTileMap extends TerrainMap, TrackTileMap, FreerailsSerializable {
 
 }

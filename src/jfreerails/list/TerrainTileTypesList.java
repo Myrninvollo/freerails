@@ -3,6 +3,8 @@ import java.util.Iterator;
 
 import jfreerails.world.terrain.TerrainType;
 
+import experimental.FreerailsSerializable;
+
 /**
 *  Description of the Interface
 *
@@ -10,7 +12,7 @@ import jfreerails.world.terrain.TerrainType;
 *@created    09 October 2001
 */
 
-public interface TerrainTileTypesList {
+public interface TerrainTileTypesList extends FreerailsSerializable {
 
 	 String getTerrainName(int rgb);
 

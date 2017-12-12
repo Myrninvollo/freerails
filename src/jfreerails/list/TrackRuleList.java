@@ -11,6 +11,8 @@ import java.util.Iterator;
 import jfreerails.type.TrackRule;
 import jfreerails.world.terrain.TerrainType;
 
+import experimental.FreerailsSerializable;
+
 
 
 /**
@@ -20,7 +22,7 @@ import jfreerails.world.terrain.TerrainType;
 */
 
 
-final public class TrackRuleList {
+final public class TrackRuleList implements FreerailsSerializable{
 
     public static final int DEFAULT_TRACK_TYPE = 0;
 

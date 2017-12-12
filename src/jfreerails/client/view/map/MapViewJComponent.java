@@ -6,8 +6,12 @@
  */
 package jfreerails.client.view.map;
 
+import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
+
+import javax.swing.JComponent;
+import javax.swing.Scrollable;
 
 /**
  *@author     Luke Lindsay
@@ -16,90 +20,51 @@ import java.awt.Rectangle;
  */
 
 public abstract class MapViewJComponent
-	extends javax.swing.JComponent
-	implements javax.swing.Scrollable, NewMapView, MapView {
+	extends JComponent
+	implements Scrollable, MapView {
 
 	/**
 	 *  Description of the Field
 	 */
-	protected NewMapView mapView;
+	protected MapView mapView=new BlankMapView(10);
 
-	/**
-	 *  Description of the Field
-	 */
-	//protected NewMapView tiledBackgroundPainter;
-
-	/**
-	 *  Creates new MapViewJComponent
-	 *
-	 *@param  tiledBackgroundPainter  Description of the Parameter
-	 *@param  mapView                 Description of the Parameter
-	 */
-
-	public MapViewJComponent(NewMapView mapView) {
-		//this.tiledBackgroundPainter = tiledBackgroundPainter;
+	public MapViewJComponent() {
+	}	
+		
+	/*
+	public void setMapView(MapView mapView) {
 		this.mapView = mapView;
 		this.setPreferredSize(mapView.getMapSizeInPixels());
 	}
+	*/
 
-	/**
-	 *  Description of the Method
-	 *
-	 *@param  g  Description of the Parameter
-	 */
 	protected void paintComponent(java.awt.Graphics g) {
 		java.awt.Graphics2D g2 = (java.awt.Graphics2D) g;
 		java.awt.Rectangle r = this.getVisibleRect();
 		mapView.paintRect(g2, r);
 	}
 
-	/**
-	 *  Gets the scrollableUnitIncrement attribute of the MapViewJComponent
-	 *  object
-	 *
-	 *@param  rectangle    Description of the Parameter
-	 *@param  orientation  Description of the Parameter
-	 *@param  direction    Description of the Parameter
-	 *@return              The scrollableUnitIncrement value
-	 */
 	public int getScrollableUnitIncrement(
 		java.awt.Rectangle rectangle,
 		int orientation,
 		int direction) {
-		if (javax.swing.SwingConstants.VERTICAL == orientation) {
-			return mapView.getTileSize().height;
-		} else {
-			return mapView.getTileSize().width;
-		}
+
+		return (int) mapView.getScale();
+
 	}
 
-	/**
-	 *  Gets the scrollableTracksViewportWidth attribute of the
-	 *  MapViewJComponent object
-	 *
-	 *@return    The scrollableTracksViewportWidth value
-	 */
 	public boolean getScrollableTracksViewportWidth() {
 		return false;
 	}
 
-	/**
-	 *  Gets the scrollableBlockIncrement attribute of the MapViewJComponent
-	 *  object
-	 *
-	 *@param  rectangle    Description of the Parameter
-	 *@param  orientation  Description of the Parameter
-	 *@param  direction    Description of the Parameter
-	 *@return              The scrollableBlockIncrement value
-	 */
 	public int getScrollableBlockIncrement(
 		java.awt.Rectangle rectangle,
 		int orientation,
 		int direction) {
 		if (javax.swing.SwingConstants.VERTICAL == orientation) {
 			int best =
-				((rectangle.height / mapView.getTileSize().height) - 2)
-					* mapView.getTileSize().height;
+				(int) (((rectangle.height / mapView.getScale()) - 2)
+					* mapView.getScale());
 			if (best > 0) {
 				return best;
 			} else {
@@ -107,8 +72,8 @@ public abstract class MapViewJComponent
 			}
 		} else {
 			int best =
-				((rectangle.width / mapView.getTileSize().width) - 2)
-					* mapView.getTileSize().width;
+				(int) (((rectangle.width / mapView.getScale()) - 2)
+					* mapView.getScale());
 			if (best > 0) {
 				return best;
 			} else {
@@ -156,12 +121,21 @@ public abstract class MapViewJComponent
 		visRect.x = (int) (tile.x * scale - (visRect.width / 2));
 		visRect.y = (int) (tile.y * scale - (visRect.height / 2));
 		this.scrollRectToVisible(visRect);
+		
 	}
-	public boolean isWrappedVertically(){
+	/*
+	public boolean isWrappedVertically() {
 		return false;
 	}
-	public boolean isWrappedHorizontally(){
+	public boolean isWrappedHorizontally() {
 		return false;
+	}
+	*/
+	public Dimension getMapSizeInPixels() {
+		return mapView.getMapSizeInPixels();
+	}
+	public Dimension getPreferredSize(){
+		return getMapSizeInPixels();
 	}
 
 }

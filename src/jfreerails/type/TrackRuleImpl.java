@@ -7,8 +7,8 @@
 package jfreerails.type;
 import java.util.Iterator;
 
-import jfreerails.misc.OneTileMoveVector;
-import jfreerails.world.std_track.TrackConfiguration;
+import jfreerails.world.flat.*;
+import jfreerails.world.flat.OneTileMoveVector;
 import jfreerails.world.std_track.TrackPiece;
 import jfreerails.world.std_track.TrackPieceImpl;
 import jfreerails.world.terrain.TerrainType;

@@ -1,6 +1,8 @@
 package jfreerails.type;
 
-final public class TrackRuleProperties {
+import experimental.FreerailsSerializable;
+
+final public class TrackRuleProperties implements FreerailsSerializable {
 
 	public String getTypeName() {
 		return typeName;

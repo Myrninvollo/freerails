@@ -1,8 +1,8 @@
-Freerails Java - version 0.0.6
+Freerails Java - version 0.0.7
 
 What's new:
-*	Full screen mode.
-*	FPS counter.
+ Games can now be loaded and saved.	 
+ New games can be started.
 
 Getting it, either:
 
@@ -11,7 +11,7 @@ or
 	Download a package from the sourceforge page.
 
 
-Requires: JDK 1.4 (beta), which can be downloaded from:
+Requires: JDK 1.4, which can be downloaded from:
 http://java.sun.com/j2se/1.4/
 
 
@@ -19,13 +19,16 @@ To compile and run:
 (1)	Go to the directory src
 (2)	To compile, type: javac jfreerails/RunFreerails.java
 (3)	To run in   (i) windowed mode, type: java jfreerails/RunFreerails
-				(ii) fullscreen mode, type: java jfreerails/RunFreerails fullscreen
+		(ii) fullscreen mode, type: java jfreerails/RunFreerails fullscreen
 				
 For more information, see:
 http://sourceforge.net/projects/freerails/
 or
 http://freerails.sourceforge.net/
 
+N.B. The source package contains some unit tests.  To compile them you will
+need to add junit.jar to your classpath, which can be downloaded from 
+www.junit.org.
 
 
 

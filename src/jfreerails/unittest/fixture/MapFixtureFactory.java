@@ -5,11 +5,11 @@ import java.util.Iterator;
 
 import jfreerails.list.TerrainTileTypesList;
 import jfreerails.list.TrackRuleList;
-import jfreerails.type.LegalTrackConfigurations;
 import jfreerails.type.LegalTrackPlacement;
 import jfreerails.type.TrackRule;
 import jfreerails.type.TrackRuleImpl;
 import jfreerails.type.TrackRuleProperties;
+import jfreerails.world.flat.LegalTrackConfigurations;
 import jfreerails.world.std_track.TrackAndTerrainTileMap;
 import jfreerails.world.terrain.TerrainType;
 

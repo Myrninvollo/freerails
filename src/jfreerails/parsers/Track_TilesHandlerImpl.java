@@ -24,7 +24,7 @@ public class Track_TilesHandlerImpl implements Track_TilesHandler {
      */
     protected ArrayList ruleList;
     protected jfreerails.type.TrackRuleProperties trackRuleProperties;
-    protected jfreerails.type.LegalTrackConfigurations legalTrackConfigurations;
+    protected jfreerails.world.flat.LegalTrackConfigurations legalTrackConfigurations;
     public static final boolean DEBUG = false;
     protected jfreerails.list.TrackRuleList trackRuleList;
     protected ArrayList legalTemplates;
@@ -48,7 +48,7 @@ public class Track_TilesHandlerImpl implements Track_TilesHandler {
     }
     
     public void end_ListOfTrackPieceTemplates() throws SAXException {
-        legalTrackConfigurations = new jfreerails.type.LegalTrackConfigurations(maxConsequ, legalTemplates);
+        legalTrackConfigurations = new jfreerails.world.flat.LegalTrackConfigurations(maxConsequ, legalTemplates);
         legalTemplates=null;
     }
     

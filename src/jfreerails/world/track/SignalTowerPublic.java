@@ -2,18 +2,20 @@ package jfreerails.world.track;
 
 final public class SignalTowerPublic implements SignalTower {
 
-	private final TrackNode trackNode;
+
 	private final Signal signal;
 
+	/*
 	public TrackNode getStandardTrackNode() {
 		return trackNode;
 	}
+	*/
 
 	public Signal getSignal() {
 		return signal;
 	}
 	public SignalTowerPublic() {
-		trackNode = null;
+		//trackNode = null;
 		signal = null;
 	}
 }

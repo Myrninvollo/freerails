@@ -1,6 +1,7 @@
 package jfreerails.client;
 
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 
 public interface GUIComponentFactory {
@@ -9,10 +10,12 @@ public interface GUIComponentFactory {
 	
 	JComponent createMainMap();
 	
-	JComponent createMessagePanel();
+	JLabel createMessagePanel();
 	
 	JMenu createBuildMenu();
 	
 	JMenu createGameMenu();
+	
+	JMenu createDisplayMenu();
 	
 }

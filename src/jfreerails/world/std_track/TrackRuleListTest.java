@@ -10,6 +10,7 @@ package jfreerails.world.std_track;
 
 import jfreerails.list.TrackRuleList;
 import jfreerails.unittest.fixture.MapFixtureFactory;
+import jfreerails.world.flat.*;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;

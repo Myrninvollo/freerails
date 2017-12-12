@@ -17,9 +17,8 @@ import jfreerails.world.std_track.TrackAndTerrainTileMap;
 import jfreerails.world.std_track.TrackTileMap;
 import jfreerails.world.terrain.TerrainMap;
 
-final public class ZoomedOutMapView implements NewMapView, MoveReceiver {
+final public class ZoomedOutMapView implements MapView {
 
-	private Class mapUpdateMoveClass;
 
 	private TerrainMap terrainMap;
 
@@ -27,7 +26,6 @@ final public class ZoomedOutMapView implements NewMapView, MoveReceiver {
 
 	private BufferedImage mapImage;//, scaledMapImage;
 
-	private NewMapView parent;
 
 	protected GraphicsConfiguration defaultConfiguration =
 		GraphicsEnvironment
@@ -38,32 +36,14 @@ final public class ZoomedOutMapView implements NewMapView, MoveReceiver {
 	public ZoomedOutMapView(TrackAndTerrainTileMap map) {
 		this.terrainMap = map;
 		this.trackSystem = map;
-		this.refresh();
+		this.refresh();		
 		//mapImage.setRGB(0, 0, mapWidth, mapHeight, rgbArrary, 0, mapWidth);
 
-		try {
-			mapUpdateMoveClass = Class.forName("jfreerails.move.MapUpdateMove");
-
-		} catch (ClassNotFoundException e) {
-
-			e.printStackTrace();
-		}
+		
 	}
 
-	/*
-	 * @see NewMapView#getMapSizeInTiles()
-	 */
-	public Dimension getMapSizeInTiles() {
-		return new Dimension(terrainMap.getWidth(), terrainMap.getHeight());
-	}
-
-	/*
-	 * @see NewMapView#getTileSize()
-	 */
-	public Dimension getTileSize() {
-		return new Dimension(1, 1);
-	}
-
+	
+	
 	/*
 	 * @see NewMapView#getScale()
 	 */
@@ -71,25 +51,8 @@ final public class ZoomedOutMapView implements NewMapView, MoveReceiver {
 		return 1;
 	}
 
-	/*
-	 * @see NewMapView#setScale(float)
-	 */
-	public void setScale(float scale) {
-	}
-
-	/*
-	 * @see NewMapView#paintTile(Graphics, Point)
-	 */
-	public void paintTile(Graphics g, Point tile) {
-		g.drawImage(mapImage, 0, 0, null);
-	}
-
-	/*
-	 * @see NewMapView#paintRectangleOfTiles(Graphics, Rectangle)
-	 */
-	public void paintRectangleOfTiles(Graphics g, Rectangle tilesToPaint) {
-		g.drawImage(mapImage, 0, 0, null);
-	}
+	
+	
 
 	/*
 	 * @see NewMapView#paintRect(Graphics, Rectangle)
@@ -98,19 +61,7 @@ final public class ZoomedOutMapView implements NewMapView, MoveReceiver {
 		g.drawImage(mapImage, 0, 0, null);
 	}
 
-	/*
-	 * @see NewMapView#getParentMapView()
-	 */
-	public NewMapView getParentMapView() {
-		return parent;
-	}
-
-	/*
-	 * @see NewMapView#setParentMapView(NewMapView)
-	 */
-	public void setParentMapView(NewMapView parent) {
-		this.parent = parent;
-	}
+	
 
 	/*
 	 * @see NewMapView#refreshTile(Point)
@@ -155,18 +106,7 @@ final public class ZoomedOutMapView implements NewMapView, MoveReceiver {
 		}
 	}
 
-	/*
-	 * @see NewMapView#refreshTileAndNotifyParent(Point)
-	 */
-	public void refreshTileAndNotifyParent(Point tile) {
-
-	}
-
-	/*
-	 * @see NewMapView#refreshAndNotifyParent()
-	 */
-	public void refreshAndNotifyParent() {
-	}
+	
 
 	/*
 	 * @see NewMapView#getMapSizeInPixels()
@@ -174,32 +114,30 @@ final public class ZoomedOutMapView implements NewMapView, MoveReceiver {
 	public Dimension getMapSizeInPixels() {
 		return new Dimension(terrainMap.getWidth(), terrainMap.getHeight());
 	}
-	public MoveStatus processMove(Move move) {
-		if (mapUpdateMoveClass.isInstance(move)) {
-			//System.out.println("updating tiles");
-			Rectangle r = ((MapUpdateMove) move).getUpdatedTiles();
-			//System.out.println(r);
-			Point tile = new Point();
-			for (tile.x = r.x; tile.x < (r.x + r.width); tile.x++) {
-				for (tile.y = r.y; tile.y < (r.y + r.height); tile.y++) {
-					int rgb;
-					//TrackNode node = trackSystem.getTrackNode(tile);
-					//if (node != null) {
-					//	rgb = node.getRGB();
-						//System.out.println("track here: "+tile.toString());
-					//} else {
-						rgb = trackSystem.getRGB(tile);
-						//System.out.println("no track here: "+tile.toString());
-					//}
+	
+	public void paintTile(Graphics g, int tileX, int tileY) {
+		g.drawImage(mapImage, 0, 0, null);
+	}
 
-					mapImage.setRGB(tile.x, tile.y, rgb);
-				}
+	public void paintRectangleOfTiles(
+		Graphics g,
+		int x,
+		int y,
+		int width,
+		int height) {
+			g.drawImage(mapImage, 0, 0, null);
+	}
+
+	public void refreshTile(int x, int y) {
+		refreshTile(new Point(x,y));
+	}
+
+	public void refreshRectangleOfTiles(int x, int y, int width, int height) {
+		for (int xx=x;xx<x+width;xx++){
+			for(int yy=y;yy<y+height;yy++){
+				refreshTile(new Point (xx,yy));
 			}
-			parent.refreshAndNotifyParent();
-
-		} 
-		return MoveStatus.MOVE_RECEIVED;
-
+		}				
 	}
 
 }

@@ -58,13 +58,13 @@ public class TrackRuleParserTest extends junit.framework.TestCase {
         
         //Check that the rules allow  the expected configurations.
         String strConfiguation="010010000";
-        int configuation=jfreerails.type.LegalTrackConfigurations.stringTemplate2Int(strConfiguation);
+        int configuation=jfreerails.world.flat.LegalTrackConfigurations.stringTemplate2Int(strConfiguation);
         assertEquals(true, rule0.testTrackPieceLegality(configuation));
         assertEquals(true, rule1.testTrackPieceLegality(configuation));
         
         //Check that the rules disallow  the expected configurations.
         strConfiguation="010010110";
-        configuation=jfreerails.type.LegalTrackConfigurations.stringTemplate2Int(strConfiguation);
+        configuation=jfreerails.world.flat.LegalTrackConfigurations.stringTemplate2Int(strConfiguation);
         assertEquals(false, rule0.testTrackPieceLegality(configuation));
         assertEquals(false, rule1.testTrackPieceLegality(configuation));
         

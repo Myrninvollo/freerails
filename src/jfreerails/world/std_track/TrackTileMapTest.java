@@ -16,7 +16,7 @@ import java.awt.Dimension;
 import java.awt.Point;
 import jfreerails.list.TrackRuleList;
 import jfreerails.unittest.fixture.MapFixtureFactory;
-import jfreerails.type.LegalTrackConfigurations;
+import jfreerails.world.flat.LegalTrackConfigurations;
 import jfreerails.type.TrackRule;
 /**
  *

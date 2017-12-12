@@ -5,8 +5,9 @@
 * Created on 01 August 2001, 06:16
 */
 package jfreerails.client.view.map;
-import java.awt.*;
-import jfreerails.client.*;
+import java.awt.Graphics;
+import java.awt.Point;
+import java.awt.Rectangle;
 
 /**
 *
@@ -17,20 +18,14 @@ import jfreerails.client.*;
 
 public interface MapViewLayer {
     
-     void paintTile( Graphics g, Point tile);
+     void paintTile(Graphics g, int tileX, int tileY);
     
-     void paintRectangleOfTiles( Graphics g,  Rectangle tilesToPaint );
-        
-     void paintRect(Graphics g);
-     
-     void refreshTile(Point tile);
+     void paintRectangleOfTiles( Graphics g,  int x, int y, int width, int height);
+                 
+     void refreshTile(int x, int y);
     
-     void refreshRectangleOfTiles( Rectangle tilesToRefresh );
-        
-     void reset();
+     void refreshRectangleOfTiles( int x, int y, int width, int height);
      
-     boolean canDoScale(float scale);
-     
-     float[] getPreferedScales();
+     void paintRect(Graphics g, Rectangle visibleRect);                
         
 }

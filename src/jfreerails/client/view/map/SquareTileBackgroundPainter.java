@@ -20,127 +20,53 @@ import java.awt.Rectangle;
  *@version    1.0
  */
 
-final public class SquareTileBackgroundPainter extends BufferedTiledBackgroundPainter {
+final public class SquareTileBackgroundPainter
+	extends BufferedTiledBackgroundPainter {
 
-    private NewMapView mapView;
-
-
-    /**
-     *  Updates a tile of the backgound buffer. It needs to be called when a
-     *  visilbe tile's properties change, e.g. track is built on the tile.
-     *
-     *@param  mapCoord  map coordinate of in tiles.
-     */
-
-//    public void refreshTile(int xx, int yy) {
-//
-//                    
-//    }
-
-
-    /**
-     *  Description of the Method
-     *
-     *@param  x       Description of the Parameter
-     *@param  y       Description of the Parameter
-     *@param  width   Description of the Parameter
-     *@param  height  Description of the Parameter
-     */
-    protected void paintBufferRectangle(int x, int y, int width, int height) {
-        java.awt.Graphics gg=bg.create();
-        gg.setClip( x,  y,  width,  height);
-        gg.translate(-bufferRect.x , -bufferRect.y);
-        mapView.paintRect(gg, bufferRect);
-    }
-
-
-    /**
-     *  Creates new SquareTileBackgroundPainter
-     *
-     *@param  mapView  Object that has access to the map and paints individual
-     *      tiles.
-     */
-
-    public SquareTileBackgroundPainter(NewMapView mv) {
-        this.mapView = mv;
-    }
-    public void refreshRectangleOfTiles(Rectangle r){
-        Dimension tileSize=mapView.getTileSize();
-        int w=tileSize.width;
-        int h=tileSize.height;
-        java.awt.Graphics gg=bg.create();
-        gg.translate(-bufferRect.x , -bufferRect.y);
-        gg.clipRect(r.x*w,r.y*h,r.width*w,r.height*h);
-        mapView.paintRectangleOfTiles(gg, r);
-    }
-    public Dimension getTileSize(){
-		return mapView.getTileSize();
+	private MapViewLayer mapView;
+	
+	private final float scale;
+	private final float scaleAsInt;
+	
+	protected void paintBufferRectangle(int x, int y, int width, int height) {
+		java.awt.Graphics gg = bg.create();
+		gg.setClip(x, y, width, height);
+		gg.translate(-bufferRect.x, -bufferRect.y);
+		mapView.paintRect(gg, bufferRect);
 	}
 	
-	public float getScale() {
-		return mapView.getScale();
+
+	public SquareTileBackgroundPainter(MapViewLayer mv, float _scale) {
 		
+		this.scale=_scale;
+		scaleAsInt=(int)scale;
+		this.mapView = mv;
 	}
-
-	
-	public void setScale(float scale) {
-		mapView.setScale(scale);
-
-	}
-	public void paintTile(Graphics g, Point tile) {
-		mapView.paintTile(g, tile);
-	}
-
-	
-	public void paintRectangleOfTiles(Graphics g, Rectangle tilesToPaint) {
-		throw new UnsupportedOperationException("Method not yet implemented.");
-	}
-
-	
-//	public void paintRect(Graphics g, Rectangle visibleRect) {
-//		throw new UnsupportedOperationException("Method not yet implemented.");
-//	}
-	
-
-	
-	public NewMapView getParentMapView() {
-		throw new UnsupportedOperationException("Method not yet implemented.");
-	
-	}
-
-	
-	public void setParentMapView(NewMapView parent) {
-		throw new UnsupportedOperationException("Method not yet implemented.");
-	}
-
-	
-	public void refreshTile(Point tile) {
+	public void refreshRectangleOfTiles(int x, int y, int width, int height) {
 		
-                    Graphics gg=bg.create();
-                    gg.translate(-bufferRect.x , -bufferRect.y);
-                    mapView.paintTile(gg, tile);
+		
+		java.awt.Graphics gg = bg.create();
+		gg.translate(-bufferRect.x, -bufferRect.y);
+		gg.clipRect((int) (x * scaleAsInt), (int)(y * scaleAsInt), (int)(width * scaleAsInt), (int)(height * scaleAsInt));
+		mapView.paintRectangleOfTiles(gg, x,  y,  width,  height);
+	}
+	
+	public void paintTile(Graphics g, int tileX, int tileY) {
+		mapView.paintTile(g,tileX,tileY);
+	}
 
+	public void paintRectangleOfTiles(
+		Graphics g,
+		int x,
+		int y,
+		int width,
+		int height) {
+		mapView.paintRectangleOfTiles(g, x,  y,  width,  height);	
 	}
 
-	
-	public void refresh() {
-		throw new UnsupportedOperationException("Method not yet implemented.");
-	}
-
-	
-	public Dimension getMapSizeInPixels() {
-		return mapView.getMapSizeInPixels();
-	
-	}
-	public Dimension getMapSizeInTiles(){
-		return mapView.getMapSizeInTiles();
-	}
-	public void refreshTileAndNotifyParent(Point tile){
-		throw new UnsupportedOperationException("Method not yet implemented.");
-	
-	}
-	public void refreshAndNotifyParent(){
-		throw new UnsupportedOperationException("Method not yet implemented.");
-	
-	}
+	public void refreshTile(int x, int y) {
+		Graphics gg = bg.create();
+		gg.translate(-bufferRect.x, -bufferRect.y);
+		mapView.paintTile(gg, x,y);
+	}	
 }
