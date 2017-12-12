@@ -1,9 +1,7 @@
 package jfreerails.world.track;
 
-
-
-public class SignalTowerPrivate implements SignalTower{
-     public Signal getSignal(){
-         return null;
-     }
+public class SignalTowerPrivate implements SignalTower {
+    public Signal getSignal() {
+        return null;
+    }
 }

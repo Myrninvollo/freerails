@@ -1,3 +1,39 @@
+Dec 24, 2003 9:36:36 AM Luke
+	o Prepare for release.
+Dec 23, 2003 23:15:58 PM Luke
+	o Refactoring to remove some cyclic dependencies. 
+Dec 20, 2003 1:53:19 AM Luke
+	O Apply part of Robert Tuck's performance patch.
+	o Update side on wagon graphics.
+	o Fix for bug 839355 (User not told why track cannot be built)
+Dec 18, 2003 11:34:25 PM Luke
+	o Fix for bug 855729 (Game does not start on pre 1.4.2 VMs) 
+Dec 17, 2003 11:33:14 PM Luke
+	o Move UNITS_OF_CARGO_PER_WAGON constant to WagonType.
+Dec 17, 2003 5:50:09 PM Luke
+	o Applied Robert Tuck's patch to fix apparent network lag.
+	o Tweaked 'format' ant target so that it does not format files that are up to date.
+Dec 13, 2003 11:38:12 PM Luke
+	o Fix bug: stations on the trains schedule can now be changed again.
+Dec 13, 2003 10:09:04 PM Luke
+	o Fixed bug: passengers are now demanded by cities and villages.
+	o Fixed bug: track maintenance cost is no longer equal to the build cost.
+	o Fixed bug 839366 (No feedback when trains arrive)
+Dec 12, 2003 9:57:38 PM Luke
+	o Add Robert Tuck's new train graphics.
+Dec 8, 2003 12:29:41 AM Luke
+	o Deprecate methods that take a mutex as a parameter.
+Dec 6, 2003 12:20:24 AM Luke
+	o Apply source code formatting.
+Dec 5, 2003 11:54:58 PM Luke
+	o Apply Robert Tucks move ahead patch.
+Nov 30, 2003 2:27:01 PM Luke
+	o Fixed bug 839376 (Harbours are not painted properly)
+Nov 30, 2003 1:24:28 AM Luke
+	o Fixed bug 839336 (Removing station train heading to causes Exception) 
+Nov 29, 2003 9:46:07 PM Luke
+	o Fixed bug 839392(After F8 to build station, position still follows mouse)
+	o Added jalopy 'format' target to build.xml
 Nov 18, 2003 11:36:38 PM Luke
 	o Applied Robert Tuck's patch to fix the bug that occurred with 1 local client 
 	and 1 networked client in a 2nd VM.

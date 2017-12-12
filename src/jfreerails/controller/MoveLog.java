@@ -5,13 +5,10 @@
  *
  *
  */
-
 package jfreerails.controller;
+
 import java.util.Vector;
-
 import jfreerails.move.Move;
-
-
 
 
 /**
@@ -20,58 +17,42 @@ import jfreerails.move.Move;
  *
  * @author lindsal
  */
-
 public class MoveLog implements MoveReceiver {
-
-
-   // associations
-
+    // associations
     public MoveReceiver moveReceiver;
     public Vector move = new Vector();
 
-
-
-   // access methods for associations
-
-
+    // access methods for associations
     public MoveReceiver getMoveReceiver() {
         return moveReceiver;
     }
+
     public void setMoveReceiver(MoveReceiver moveReceiver) {
-            this.moveReceiver = moveReceiver;
+        this.moveReceiver = moveReceiver;
     }
 
     public Vector getMove() {
         return move;
     }
+
     public void addMove(Move move) {
-        if (! this.move.contains(move)) {
+        if (!this.move.contains(move)) {
             this.move.addElement(move);
         }
     }
+
     public void removeMove(Move move) {
         this.move.removeElement(move);
     }
 
+    // operations
 
-
-  // operations
-
-/**
- * Does ...
- *
- * @param Move ...
- * @return A MoveStatus with ...
- */
-
+    /**
+     * Does ...
+     *
+     * @param Move ...
+     * @return A MoveStatus with ...
+     */
     public void processMove(Move Move) {
     }
-
-
-
 }
-
-
-
-
-

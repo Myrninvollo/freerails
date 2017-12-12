@@ -397,8 +397,8 @@ public class NewTrainScheduleJPanel extends javax.swing.JPanel implements NewVie
             stationMenuItem.setText(stationModel.getStationName());
             stationMenuItem
             .addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent evt) {
-                   
+                public void actionPerformed(java.awt.event.ActionEvent evt) {                
+                    setStationNumber(stationIndex);
                 }
             });
             changeStationJMenu.add(stationMenuItem);
@@ -534,6 +534,10 @@ public class NewTrainScheduleJPanel extends javax.swing.JPanel implements NewVie
     }
     
     public void itemAdded(KEY key, int index) {
+        //do nothing.
+    }
+
+    public void itemRemoved(KEY key, int index) {
         //do nothing.
     }
     

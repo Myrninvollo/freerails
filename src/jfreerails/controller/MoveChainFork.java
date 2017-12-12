@@ -1,69 +1,124 @@
 package jfreerails.controller;
 
 import java.util.ArrayList;
-
 import jfreerails.move.AddItemToListMove;
 import jfreerails.move.ChangeItemInListMove;
+import jfreerails.move.RemoveItemFromListMove;
+import jfreerails.move.CompositeMove;
 import jfreerails.move.Move;
+import jfreerails.move.UndoneMove;
+import jfreerails.world.top.KEY;
 import jfreerails.world.top.WorldListListener;
 
+
 /**
- * @version 	1.0
- * 
+ * @version         1.0
+ *
  * A central point at which a client may register to receive moves which have
  * been committed.
  */
 final public class MoveChainFork implements MoveReceiver {
+    private final ArrayList moveReceivers = new ArrayList();
+    private final ArrayList splitMoveReceivers = new ArrayList();
+    private final ArrayList listListeners = new ArrayList();
 
-	private final ArrayList moveReceivers = new ArrayList();
+    public MoveChainFork() {
+        // do nothing
+    }
 
-	private final ArrayList listListeners = new ArrayList();	
+    public void remove(MoveReceiver moveReceiver) {
+        moveReceivers.remove(moveReceiver);
+    }
 
-	public MoveChainFork() {
-		// do nothing
-	}
+    public void add(MoveReceiver moveReceiver) {
+        moveReceivers.add(moveReceiver);
+    }
 
-	
+    public void removeSplitMoveReceiver(MoveReceiver moveReceiver) {
+        splitMoveReceivers.remove(moveReceiver);
+    }
 
-	public void remove(MoveReceiver moveReceiver) {		
-		moveReceivers.remove(moveReceiver);
-	}
+    public void addSplitMoveReceiver(MoveReceiver moveReceiver) {
+        splitMoveReceivers.add(moveReceiver);
+    }
 
-	public void add(MoveReceiver moveReceiver) {		
-		moveReceivers.add(moveReceiver);
-	}
+    public void removeListListener(WorldListListener listener) {
+        listListeners.remove(listener);
+    }
 
-	public void removeListListener(WorldListListener listener) {
-		listListeners.remove(listener);
-	}
+    public void addListListener(WorldListListener listener) {
+        listListeners.add(listener);
+    }
 
-	public void addListListener(WorldListListener listener) {
-		listListeners.add(listener);
-	}
+    /*
+     * @see MoveReceiver#processMove(Move)
+     */
+    public void processMove(Move move) {
+        for (int i = 0; i < moveReceivers.size(); i++) {
+            MoveReceiver m = (MoveReceiver)moveReceivers.get(i);
+            m.processMove(move);
+        }
 
-	/*
-	 * @see MoveReceiver#processMove(Move)
-	 */
-	public void processMove(Move move) {
-		
-		for (int i = 0; i < moveReceivers.size(); i++) {
-			MoveReceiver m = (MoveReceiver) moveReceivers.get(i);
-			m.processMove(move);
-		}
+        splitMove(move);
+    }
 
-		if (move instanceof AddItemToListMove) {
-			for (int i = 0; i < listListeners.size(); i++) {
-				AddItemToListMove mm = (AddItemToListMove) move;
-				WorldListListener l = (WorldListListener) listListeners.get(i);
-				l.itemAdded(mm.getKey(), mm.getIndex());
-			}
+    private void splitMove(Move move) {
+        if (move instanceof CompositeMove) {
+            Move[] moves = ((CompositeMove)move).getMoves();
 
-		} else if (move instanceof ChangeItemInListMove) {
-			for (int i = 0; i < listListeners.size(); i++) {
-				ChangeItemInListMove mm = (ChangeItemInListMove) move;
-				WorldListListener l = (WorldListListener) listListeners.get(i);
-				l.listUpdated(mm.getKey(), mm.getIndex());
-			}
-		}
-	}
+            for (int i = 0; i < moves.length; i++) {
+                splitMove(moves[i]);
+            }
+        } else {
+            for (int i = 0; i < splitMoveReceivers.size(); i++) {
+                MoveReceiver m = (MoveReceiver)splitMoveReceivers.get(i);
+                m.processMove(move);
+            }
+
+            if (move instanceof AddItemToListMove) {
+                AddItemToListMove mm = (AddItemToListMove)move;
+                sendItemAdded(mm.getKey(), mm.getIndex());
+            } else if (move instanceof ChangeItemInListMove) {
+                ChangeItemInListMove mm = (ChangeItemInListMove)move;
+                sendListUpdated(mm.getKey(), mm.getIndex());
+            } else if (move instanceof RemoveItemFromListMove) {
+                RemoveItemFromListMove mm = (RemoveItemFromListMove)move;
+                sendItemRemoved(mm.getKey(), mm.getIndex());
+            } else if (move instanceof UndoneMove) {
+                Move m = ((UndoneMove)move).getUndoneMove();
+
+                if (m instanceof AddItemToListMove) {
+                    AddItemToListMove mm = (AddItemToListMove)m;
+                    sendItemRemoved(mm.getKey(), mm.getIndex());
+                } else if (m instanceof RemoveItemFromListMove) {
+                    RemoveItemFromListMove mm = (RemoveItemFromListMove)m;
+                    sendItemAdded(mm.getKey(), mm.getIndex());
+                } else if (move instanceof ChangeItemInListMove) {
+                    ChangeItemInListMove mm = (ChangeItemInListMove)move;
+                    sendListUpdated(mm.getKey(), mm.getIndex());
+                }
+            }
+        }
+    }
+
+    private void sendItemAdded(KEY key, int index) {
+        for (int i = 0; i < listListeners.size(); i++) {
+            WorldListListener l = (WorldListListener)listListeners.get(i);
+            l.itemAdded(key, index);
+        }
+    }
+
+    private void sendItemRemoved(KEY key, int index) {
+        for (int i = 0; i < listListeners.size(); i++) {
+            WorldListListener l = (WorldListListener)listListeners.get(i);
+            l.itemRemoved(key, index);
+        }
+    }
+
+    private void sendListUpdated(KEY key, int index) {
+        for (int i = 0; i < listListeners.size(); i++) {
+            WorldListListener l = (WorldListListener)listListeners.get(i);
+            l.listUpdated(key, index);
+        }
+    }
 }

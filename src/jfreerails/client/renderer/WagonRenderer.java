@@ -14,9 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
-
 import javax.imageio.ImageIO;
-
 import jfreerails.client.common.ImageManager;
 import jfreerails.world.cargo.CargoType;
 import jfreerails.world.common.OneTileMoveVector;
@@ -24,227 +22,221 @@ import jfreerails.world.top.KEY;
 import jfreerails.world.top.ReadOnlyWorld;
 import jfreerails.world.train.WagonType;
 
+
 public class WagonRenderer {
+    HashMap typeColors = new HashMap();
+    private static GraphicsConfiguration defaultConfiguration = GraphicsEnvironment.getLocalGraphicsEnvironment()
+                                                                                   .getDefaultScreenDevice()
+                                                                                   .getDefaultConfiguration();
+    private ViewPerspective viewPerspective = ViewPerspective.OVERHEAD;
+    private int trainType = WagonType.PASSENGER;
+    private SideOnViewImageSize sideOnViewSize = SideOnViewImageSize.TINY;
+    private OneTileMoveVector direction = OneTileMoveVector.NORTH;
+    BufferedImage[][] trains;
 
-	HashMap typeColors = new HashMap();
+    public void rendererTrain(Graphics g, Point p) {
+        int x = trainType;
+        int y = direction.getNumber();
+        g.drawImage(trains[x][y], p.x - 15, p.y - 15, null);
+        //drawTrainWithoutBuffer(g, p);
+    }
 
-	private static GraphicsConfiguration defaultConfiguration =
-		GraphicsEnvironment
-			.getLocalGraphicsEnvironment()
-			.getDefaultScreenDevice()
-			.getDefaultConfiguration();
+    private void rendererTrainWithoutBuffer(Graphics g, Point p) {
+        TrainTypeRenderer ttv = (TrainTypeRenderer)typeColors.get(new Integer(
+                    trainType));
+        Color c = ttv.getColor();
 
-	private ViewPerspective viewPerspective = ViewPerspective.OVERHEAD;
+        g.setColor(c);
 
-	private int trainType = WagonType.PASSENGER;
+        if (ViewPerspective.OVERHEAD == viewPerspective) {
+            Graphics2D g2 = (Graphics2D)g.create();
+            g2.rotate(direction.getDirection(), p.x, p.y);
+            g2.fillRect(p.x - 5, p.y - 10, 10, 20);
+        } else {
+            int width = sideOnViewSize.getWidth();
+            int height = sideOnViewSize.getHeight();
+            g.fillRect(p.x + 25 - width / 2, p.y + 25 - width / 2, width, height);
+        }
+    }
 
-	private SideOnViewImageSize sideOnViewSize = SideOnViewImageSize.TINY;
+    public OneTileMoveVector getDirection() {
+        return direction;
+    }
 
-	private OneTileMoveVector direction = OneTileMoveVector.NORTH;
+    public SideOnViewImageSize getSideOnViewSize() {
+        return sideOnViewSize;
+    }
 
-	BufferedImage[][] trains;
+    public int getTrainTypes() {
+        return trainType;
+    }
 
-	public void rendererTrain(Graphics g, Point p) {
+    public ViewPerspective getViewPerspective() {
+        return viewPerspective;
+    }
 
-		int x = trainType;
-		int y = direction.getNumber();
-		g.drawImage(trains[x][y], p.x - 15, p.y - 15, null);
-		//drawTrainWithoutBuffer(g, p);
+    public void setDirection(OneTileMoveVector direction) {
+        this.direction = direction;
+    }
 
-	}
+    public void setSideOnViewSize(SideOnViewImageSize sideOnViewSize) {
+        this.sideOnViewSize = sideOnViewSize;
+    }
 
-	private void rendererTrainWithoutBuffer(Graphics g, Point p) {
+    public void setTrainTypes(int type) {
+        this.trainType = type;
+    }
 
-		TrainTypeRenderer ttv = (TrainTypeRenderer) typeColors.get(new Integer(trainType));
-		Color c = ttv.getColor();
+    public void setViewPerspective(ViewPerspective viewPerspective) {
+        this.viewPerspective = viewPerspective;
+    }
 
-		g.setColor(c);
-		if (ViewPerspective.OVERHEAD == viewPerspective) {
+    private void setup() {
+        trains = new BufferedImage[WagonType.NUMBER_OF_CATEGORIES][8];
 
-			Graphics2D g2 = (Graphics2D) g.create();
-			g2.rotate(direction.getDirection(), p.x, p.y);
-			g2.fillRect(p.x - 5, p.y - 10, 10, 20);
+        int row = 0;
+        int column = 0;
+        Iterator trainTypes = typeColors.keySet().iterator();
 
-		} else {
+        while (trainTypes.hasNext()) {
+            row = 0;
 
-			int width = sideOnViewSize.getWidth();
-			int height = sideOnViewSize.getHeight();
-			g.fillRect(p.x + 25 - width / 2, p.y + 25 - width / 2, width, height);
-		}
+            Integer typeNumber = (Integer)trainTypes.next();
+            column = typeNumber.intValue();
+            this.setTrainTypes(typeNumber.intValue());
 
-	}
+            OneTileMoveVector[] vectors = OneTileMoveVector.getList();
 
-	public OneTileMoveVector getDirection() {
-		return direction;
-	}
+            for (int i = 0; i < vectors.length; i++) {
+                trains[column][row] = defaultConfiguration.createCompatibleImage(30,
+                        30, Transparency.TRANSLUCENT);
 
-	public SideOnViewImageSize getSideOnViewSize() {
-		return sideOnViewSize;
-	}
+                Graphics g = trains[column][row].getGraphics();
+                row++;
+                this.setDirection(vectors[i]);
 
-	public int getTrainTypes() {
-		return trainType;
-	}
+                Point p = new Point(15, 15);
+                this.rendererTrainWithoutBuffer(g, p);
+            }
+        }
+    }
 
-	public ViewPerspective getViewPerspective() {
-		return viewPerspective;
-	}
+    public WagonRenderer() {
+        typeColors.put(new Integer(WagonType.MAIL),
+            new TrainTypeRenderer(Color.WHITE));
 
-	public void setDirection(OneTileMoveVector direction) {
-		this.direction = direction;
-	}
+        typeColors.put(new Integer(WagonType.PASSENGER),
+            new TrainTypeRenderer(Color.BLUE));
 
-	public void setSideOnViewSize(SideOnViewImageSize sideOnViewSize) {
-		this.sideOnViewSize = sideOnViewSize;
-	}
+        typeColors.put(new Integer(WagonType.FAST_FREIGHT),
+            new TrainTypeRenderer(Color.YELLOW));
 
-	public void setTrainTypes(int type) {
-		this.trainType = type;
-	}
+        typeColors.put(new Integer(WagonType.SLOW_FREIGHT),
+            new TrainTypeRenderer(new Color(128, 0, 0)));
 
-	public void setViewPerspective(ViewPerspective viewPerspective) {
-		this.viewPerspective = viewPerspective;
-	}
+        typeColors.put(new Integer(WagonType.BULK_FREIGHT),
+            new TrainTypeRenderer(Color.BLACK));
 
-	private void setup() {
+        typeColors.put(new Integer(WagonType.ENGINE),
+            new TrainTypeRenderer(Color.LIGHT_GRAY));
+        setup();
+    }
 
-		trains = new BufferedImage[WagonType.NUMBER_OF_CATEGORIES][8];
+    public static void main(String[] args) {
+        try {
+            WagonRenderer wagonRenderer = new WagonRenderer();
 
-		int row = 0;
-		int column = 0;
-		Iterator trainTypes = typeColors.keySet().iterator();
-		while (trainTypes.hasNext()) {
-			row = 0;
-			Integer typeNumber = (Integer) trainTypes.next();
-			column = typeNumber.intValue();
-			this.setTrainTypes(typeNumber.intValue());
-			OneTileMoveVector[] vectors = OneTileMoveVector.getList();
-			for (int i = 0; i < vectors.length; i++) {
-				trains[column][row] =
-					defaultConfiguration.createCompatibleImage(30, 30, Transparency.TRANSLUCENT);
-				Graphics g = trains[column][row].getGraphics();
-				row++;
-				this.setDirection(vectors[i]);
-				Point p = new Point(15, 15);
-				this.rendererTrainWithoutBuffer(g, p);
-			}
+            writeImages(wagonRenderer, "mail", WagonType.MAIL);
+            writeImages(wagonRenderer, "passenger", WagonType.PASSENGER);
+            writeImages(wagonRenderer, "goods", WagonType.FAST_FREIGHT);
+            writeImages(wagonRenderer, "steel", WagonType.SLOW_FREIGHT);
+            writeImages(wagonRenderer, "coal", WagonType.BULK_FREIGHT);
+            writeImages(wagonRenderer, "norris", WagonType.ENGINE);
+            writeImages(wagonRenderer, "grasshopper", WagonType.ENGINE);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-		}
-	}
-	public WagonRenderer() {
+    private static void writeImages(WagonRenderer wagonRenderer,
+        String typeName, int type) throws IOException {
+        OneTileMoveVector[] vectors = OneTileMoveVector.getList();
 
-		typeColors.put(new Integer(WagonType.MAIL), new TrainTypeRenderer(Color.WHITE));
+        for (int i = 0; i < vectors.length; i++) {
+            String fileName = typeName + "_" + vectors[i].toAbrvString() +
+                ".png";
+            File file = new File("src/jfreerails/data/trains/" + fileName);
 
-		typeColors.put(new Integer(WagonType.PASSENGER), new TrainTypeRenderer(Color.BLUE));
+            RenderedImage image = (RenderedImage)wagonRenderer.trains[type][vectors[i].getNumber()];
+            ImageIO.write(image, "PNG", file);
+        }
+    }
 
-		typeColors.put(new Integer(WagonType.FAST_FREIGHT), new TrainTypeRenderer(Color.YELLOW));
+    public Image generateSideOnImage(int type) {
+        Image image = defaultConfiguration.createCompatibleImage(200, 100,
+                Transparency.BITMASK);
+        Graphics g = image.getGraphics();
+        TrainTypeRenderer ttv = (TrainTypeRenderer)typeColors.get(new Integer(
+                    type));
+        Color c = ttv.getColor();
+        g.setColor(c);
+        g.fillRect(10, 25, 180, 55);
+        g.setColor(Color.BLACK);
+        g.fillArc(40, 80, 20, 20, 0, 360);
+        g.fillArc(140, 80, 20, 20, 0, 360);
 
-		typeColors.put(
-			new Integer(WagonType.SLOW_FREIGHT),
-			new TrainTypeRenderer(new Color(128, 0, 0)));
+        return image;
+    }
 
-		typeColors.put(new Integer(WagonType.BULK_FREIGHT), new TrainTypeRenderer(Color.BLACK));
+    public static void writeImages(ImageManager imageManager, ReadOnlyWorld w) {
+        WagonRenderer wagonRenderer = new WagonRenderer();
 
-		typeColors.put(new Integer(WagonType.ENGINE), new TrainTypeRenderer(Color.LIGHT_GRAY));
-		setup();
-	}
+        for (int j = 0; j < w.size(KEY.CARGO_TYPES); j++) {
+            CargoType cargoType = (CargoType)w.get(KEY.CARGO_TYPES, j);
+            String name = cargoType.getName();
+            String category = cargoType.getCategory();
 
-	public static void main(String[] args) {
-		try {
-			WagonRenderer wagonRenderer = new WagonRenderer();
+            int type = 0;
 
-			writeImages(wagonRenderer, "mail", WagonType.MAIL);
-			writeImages(wagonRenderer, "passenger", WagonType.PASSENGER);
-			writeImages(wagonRenderer, "goods", WagonType.FAST_FREIGHT);
-			writeImages(wagonRenderer, "steel", WagonType.SLOW_FREIGHT);
-			writeImages(wagonRenderer, "coal", WagonType.BULK_FREIGHT);
-			writeImages(wagonRenderer, "norris", WagonType.ENGINE);
-			writeImages(wagonRenderer, "grasshopper", WagonType.ENGINE);
+            if (category.equals("Mail")) {
+                type = WagonType.MAIL;
+            } else if (category.equals("Passengers")) {
+                type = WagonType.PASSENGER;
+            } else if (category.equals("Fast_Freight")) {
+                type = WagonType.FAST_FREIGHT;
+            } else if (category.equals("Slow_Freight")) {
+                type = WagonType.SLOW_FREIGHT;
+            } else if (category.equals("Bulk_Freight")) {
+                type = WagonType.BULK_FREIGHT;
+            } else {
+                throw new IllegalArgumentException(category);
+            }
 
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+            OneTileMoveVector[] vectors = OneTileMoveVector.getList();
 
-	private static void writeImages(WagonRenderer wagonRenderer, String typeName, int type)
-		throws IOException {
-		OneTileMoveVector[] vectors = OneTileMoveVector.getList();
-		for (int i = 0; i < vectors.length; i++) {
-			String fileName = typeName + "_" + vectors[i].toAbrvString() + ".png";
-			File file = new File("src/jfreerails/data/trains/" + fileName);
+            for (int i = 0; i < vectors.length; i++) {
+                String fileName = generateOverheadFilename(name, i);
 
-			RenderedImage image =
-				(RenderedImage) wagonRenderer.trains[type][vectors[i].getNumber()];
-			ImageIO.write(image, "PNG", file);
-			
-		}
-	}
+                Image image = wagonRenderer.trains[type][vectors[i].getNumber()];
+                imageManager.setImage(fileName, image);
+            }
 
-	public Image generateSideOnImage(int type) {
-		Image image = defaultConfiguration.createCompatibleImage(200, 100, Transparency.BITMASK);
-		Graphics g = image.getGraphics();
-		TrainTypeRenderer ttv = (TrainTypeRenderer) typeColors.get(new Integer(type));
-		Color c = ttv.getColor();
-		g.setColor(c);
-		g.fillRect(10, 25, 180, 55);
-		g.setColor(Color.BLACK);
-		g.fillArc(40, 80, 20, 20, 0, 360);
-		g.fillArc(140, 80, 20, 20, 0, 360);
-		return image;
-	}
+            String fileName = generateSideOnFilename(name);
 
-	public static void writeImages(ImageManager imageManager, ReadOnlyWorld w) {
-		WagonRenderer wagonRenderer = new WagonRenderer();
-		for (int j = 0; j < w.size(KEY.CARGO_TYPES); j++) {
-			CargoType cargoType = (CargoType) w.get(KEY.CARGO_TYPES, j);
-			String name = cargoType.getName();
-			String category = cargoType.getCategory();
+            imageManager.setImage(fileName,
+                wagonRenderer.generateSideOnImage(type));
+        }
+    }
 
-			int type = 0;
-			if (category.equals("Mail")) {
-				type = WagonType.MAIL;
-			} else if (category.equals("Passengers")) {
-				type = WagonType.PASSENGER;
-			} else if (category.equals("Fast_Freight")) {
-				type = WagonType.FAST_FREIGHT;
-			} else if (category.equals("Slow_Freight")) {
-				type = WagonType.SLOW_FREIGHT;
-			} else if (category.equals("Bulk_Freight")) {
-				type = WagonType.BULK_FREIGHT;
-			} else {
-				throw new IllegalArgumentException(category);
-			}
-			OneTileMoveVector[] vectors = OneTileMoveVector.getList();
-			for (int i = 0; i < vectors.length; i++) {
-				String fileName =
-					generateOverheadFilename(name,i);
+    public static String generateOverheadFilename(String name, int i) {
+        OneTileMoveVector[] vectors = OneTileMoveVector.getList();
 
-				Image image = wagonRenderer.trains[type][vectors[i].getNumber()];
-				imageManager.setImage(fileName, image);
-			}
+        return "trains" + File.separator + "overhead" + File.separator + name +
+        "_" + vectors[i].toAbrvString() + ".png";
+    }
 
-			String fileName = generateSideOnFilename(name);
-
-			imageManager.setImage(fileName, wagonRenderer.generateSideOnImage(type));
-
-		}
-
-	}
-
-	public static String generateOverheadFilename(String name, int i) {
-		OneTileMoveVector[] vectors = OneTileMoveVector.getList();
-		return "trains"
-			+ File.separator
-			+ "overhead"
-			+ File.separator
-			+ name
-			+ "_"
-			+ vectors[i].toAbrvString()
-			+ ".png";
-	}
-
-	public static String generateSideOnFilename(String name) {
-		return "trains" + File.separator + "sideon" + File.separator + name + ".png";
-	}
-
+    public static String generateSideOnFilename(String name) {
+        return "trains" + File.separator + "sideon" + File.separator + name +
+        ".png";
+    }
 }

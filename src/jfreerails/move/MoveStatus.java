@@ -1,53 +1,53 @@
-/**
- *
- *
- *
- *
- *
- */
-
 package jfreerails.move;
 
+import jfreerails.world.common.FreerailsSerializable;
+
+
 /**
- *
- *
+ * XXX DO NOT TEST == AGAINST MOVE_FAILED XXX
  *
  * @author lindsal
  */
+final public class MoveStatus implements FreerailsSerializable {
+    public static final MoveStatus MOVE_OK = new MoveStatus(true,
+            "Move accepted");
 
-final public class MoveStatus {
+    /**
+     * Not public - only instances of Move should need to access this.
+     */
+    static final MoveStatus MOVE_FAILED = new MoveStatus(false, "Move rejected");
+    public final boolean ok;
+    public final String message;
 
-	public static final MoveStatus MOVE_OK = new MoveStatus(true, "Move accepted");
+    /**
+     * Avoid creating a duplicate when deserializing.
+     */
+    private Object readResolve() {
+        if (ok) {
+            return MOVE_OK;
+        } else {
+            return this;
+        }
+    }
 
-	public static final MoveStatus MOVE_FAILED = new MoveStatus(false, "Move rejected");
+    private MoveStatus(boolean ok, String mess) {
+        this.ok = ok;
+        this.message = mess;
+    }
 
-	public static final MoveStatus MOVE_RECEIVED = new MoveStatus(false, "Move received");
+    public static MoveStatus moveFailed(String reason) {
+        //Next 2 lines are just for debuging.
+        //It lets us see where moves are failing.
+        //Exception e = new Exception();
+        //e.printStackTrace();
+        return new MoveStatus(false, reason);
+    }
 
-	public final boolean ok;
+    public boolean isOk() {
+        return ok;
+    }
 
-	public final String message;
-
-	private MoveStatus(boolean ok, String mess) {
-		this.ok = ok;
-		this.message = mess;
-	}
-	
-	public static MoveStatus moveFailed(String reason){
-		
-		//Next 2 lines are just for debuging.
-		//It lets us see where moves are failing.
-		//Exception e = new Exception();
-		//e.printStackTrace();
-		
-		
-		return new MoveStatus(false, reason);
-	}
-
-	public boolean isOk() {
-		return ok;
-	}
-	public String toString() {
-		return message;
-	}
-
+    public String toString() {
+        return message;
+    }
 }

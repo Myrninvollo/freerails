@@ -1,4 +1,3 @@
-
 /*
 * MessengerBoy.java
 *
@@ -6,13 +5,11 @@
 */
 package jfreerails.controller;
 
+
 /**
 *
 * @author  Luke Lindsay
 */
-
-
 public interface TextMessenger {
-
-     void displayMessage( java.lang.String message );
+    void displayMessage(java.lang.String message);
 }

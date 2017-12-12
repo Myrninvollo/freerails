@@ -18,6 +18,9 @@ public interface MapCursor {
 
 		public void removeCursorEventListener(CursorEventListener l) {
 		}
+
+		public void setMessage(String message) {			
+		}
 	};
 
 	/**
@@ -40,4 +43,6 @@ public interface MapCursor {
 	 * @param l The listener.
 	 */
 	public void removeCursorEventListener(CursorEventListener l);
+	
+	public void setMessage(String message);
 }

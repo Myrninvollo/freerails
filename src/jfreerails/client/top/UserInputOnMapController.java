@@ -3,132 +3,122 @@ package jfreerails.client.top;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.event.KeyEvent;
-
-import jfreerails.client.top.GUIClient;
 import jfreerails.client.view.CursorEvent;
 import jfreerails.client.view.CursorEventListener;
 import jfreerails.client.view.DialogueBoxController;
 import jfreerails.client.view.MapCursor;
 import jfreerails.client.view.MapViewJComponent;
 import jfreerails.client.view.ModelRoot;
-import jfreerails.controller.UncommittedMoveReceiver;
 import jfreerails.controller.TrackMoveProducer;
+import jfreerails.controller.UncommittedMoveReceiver;
+import jfreerails.move.MoveStatus;
+
 
 public class UserInputOnMapController implements CursorEventListener {
+    private StationTypesPopup stationTypesPopup;
+    private MapViewJComponent mapView;
+    private TrackMoveProducer trackBuilder;
+    private MapCursor cursor;
+    private DialogueBoxController dialogueBoxController;
+    private UncommittedMoveReceiver trackMoveExecutor;
+    private ModelRoot modelRoot;
 
-	private StationTypesPopup stationTypesPopup;
+    public UserInputOnMapController(ModelRoot mr) {
+        modelRoot = mr;
+    }
 
-	private MapViewJComponent mapView;
+    public void cursorOneTileMove(CursorEvent ce) {
+        if (null != trackBuilder) {
+            MoveStatus ms = trackBuilder.buildTrack(ce.oldPosition, ce.vector);
 
-	private TrackMoveProducer trackBuilder;
+            if (ms.ok) {
+                cursor.setMessage("");
+            } else {
+                cursor.setMessage(ms.message);
+            }
 
-	private MapCursor cursor;
+            Point tile = new Point();
 
-	private DialogueBoxController dialogueBoxController;
+            for (tile.x = ce.oldPosition.x - 1; tile.x < ce.oldPosition.x + 2;
+                    tile.x++) {
+                for (tile.y = ce.oldPosition.y - 1;
+                        tile.y < ce.oldPosition.y + 2; tile.y++) {
+                    mapView.refreshTile(tile.x, tile.y);
+                }
+            }
+        } else {
+            System.err.println("No track builder available!");
+        }
+    }
 
-	private UncommittedMoveReceiver trackMoveExecutor;
+    public void setup(MapViewJComponent mv, TrackMoveProducer trackBuilder,
+        StationTypesPopup stPopup, ModelRoot mr, DialogueBoxController dbc,
+        UncommittedMoveReceiver tx) {
+        trackMoveExecutor = tx;
+        this.dialogueBoxController = dbc;
+        this.mapView = mv;
+        this.stationTypesPopup = stPopup;
 
-	private ModelRoot modelRoot;
+        this.trackBuilder = trackBuilder;
 
-	public UserInputOnMapController(ModelRoot mr) {
-	    modelRoot = mr;
-	}
+        this.cursor = mr.getCursor();
 
-	public void cursorOneTileMove(CursorEvent ce) {
-		if (null != trackBuilder) {
+        cursor.addCursorEventListener(this);
+    }
 
-			trackBuilder.buildTrack(ce.oldPosition, ce.vector);
-			Point tile = new Point();
-			for (tile.x = ce.oldPosition.x - 1;
-				tile.x < ce.oldPosition.x + 2;
-				tile.x++) {
-				for (tile.y = ce.oldPosition.y - 1;
-					tile.y < ce.oldPosition.y + 2;
-					tile.y++) {
-					mapView.refreshTile(tile.x, tile.y);
-				}
-			}
+    public void cursorJumped(CursorEvent ce) {
+        trackBuilder.upgradeTrack(ce.newPosition);
+    }
 
-		} else {
-			System.err.println("No track builder available!");
-		}
-	}
+    public void cursorKeyPressed(CursorEvent ce) {
+        switch (ce.keyEvent.getKeyCode()) {
+        case KeyEvent.VK_F7: {
+            buildTrain(ce);
 
-	public void setup(
-		MapViewJComponent mv,
-		TrackMoveProducer trackBuilder,
-		StationTypesPopup stPopup,
-		GUIClient c,
-		DialogueBoxController dbc,
-		UncommittedMoveReceiver tx) {
-		trackMoveExecutor = tx;
-		this.dialogueBoxController = dbc;
-		this.mapView = mv;
-		this.stationTypesPopup = stPopup;
+            break;
+        }
 
-		this.trackBuilder = trackBuilder;
+        case KeyEvent.VK_F8: {
+            //defensive copy.
+            Point tile = new Point(ce.newPosition);
 
-		this.cursor = c.getCursor();
+            //Check whether we can built a station here before proceeding.
+            if (stationTypesPopup.canBuiltStationHere(tile)) {
+                float scale = mapView.getScale();
+                Dimension tileSize = new Dimension((int)scale, (int)scale);
+                int x = tile.x * tileSize.width;
+                int y = tile.y * tileSize.height;
+                stationTypesPopup.show(mapView, x, y, tile);
+            } else {
+                modelRoot.getUserMessageLogger().println("Can't" +
+                    " build station here!");
+            }
 
-		cursor.addCursorEventListener(this);
+            break;
+        }
 
-	}
+        case KeyEvent.VK_BACK_SPACE:
+            trackMoveExecutor.undoLastMove();
 
-	public void cursorJumped(CursorEvent ce) {
-		trackBuilder.upgradeTrack(ce.newPosition);
-	}
+            break;
 
-	public void cursorKeyPressed(CursorEvent ce) {
+        case KeyEvent.VK_I: {
+            dialogueBoxController.showStationOrTerrainInfo(ce.newPosition.x,
+                ce.newPosition.y);
 
-	    switch (ce.keyEvent.getKeyCode()) {
-		case KeyEvent.VK_F7 :
-		    {
-			buildTrain(ce);
-			break;
-		    }
-		case KeyEvent.VK_F8 :
-		    {							
-			//defensive copy.
-			Point tile = new Point(ce.newPosition);
+            break;
+        }
 
-			//Check whether we can built a station here before proceeding.
-			if (stationTypesPopup.canBuiltStationHere(tile)) {
-			    float scale = mapView.getScale();
-			    Dimension tileSize =
-				new Dimension((int) scale, (int) scale);
-			    int x = tile.x * tileSize.width;
-			    int y = tile.y * tileSize.height;
-			    stationTypesPopup.show(mapView, x, y, tile);
-			} else {
-			    modelRoot.getUserMessageLogger().println("Can't" +
-				    " build station here!");
-			}
-			break;
-		    }
-		case KeyEvent.VK_BACK_SPACE :
-		    
-		    trackMoveExecutor.undoLastMove();
-		    break;
-		case KeyEvent.VK_I :
-		    {
-			dialogueBoxController.showStationOrTerrainInfo(
-				ce.newPosition.x,
-				ce.newPosition.y);
-			break;
-		    }
-		case KeyEvent.VK_C :
-		    {
-			mapView.centerOnTile(
-				new Point(ce.newPosition.x, ce.newPosition.y));
-			break;
-		    }
-	    }
-	}
+        case KeyEvent.VK_C: {
+            mapView.centerOnTile(new Point(ce.newPosition.x, ce.newPosition.y));
 
-	private void buildTrain(CursorEvent ce) {
+            break;
+        }
+        }
+    }
 
-		dialogueBoxController.showSelectEngine();
-		//trainBuilder.buildTrain(ce.newPosition);
-	}
-
+    private void buildTrain(CursorEvent ce) {
+        dialogueBoxController.showSelectEngine();
+        //trainBuilder.buildTrain(ce.newPosition);
+    }
 }

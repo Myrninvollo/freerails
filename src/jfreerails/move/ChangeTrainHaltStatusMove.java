@@ -1,6 +1,4 @@
-
 package jfreerails.move;
-
 
 
 /**
@@ -9,14 +7,9 @@ package jfreerails.move;
  *
  * @author lindsal
  */
-
 final public class ChangeTrainHaltStatusMove {
-
     private final boolean newHalt;
-
-
     private final boolean oldHalt;
-
 
     public boolean getNewHalt() {
         return newHalt;
@@ -26,13 +19,8 @@ final public class ChangeTrainHaltStatusMove {
         return oldHalt;
     }
 
-    public ChangeTrainHaltStatusMove(boolean before, boolean after){
-    	newHalt=after;
-    	oldHalt=before;
+    public ChangeTrainHaltStatusMove(boolean before, boolean after) {
+        newHalt = after;
+        oldHalt = before;
     }
 }
-
-
-
-
-

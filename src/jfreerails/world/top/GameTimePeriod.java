@@ -4,11 +4,7 @@ import jfreerails.world.common.GameCalendar;
 
 
 final public class GameTimePeriod {
-
- 
     private final GameCalendar start;
-
-
     private final GameCalendar end;
 
     public GameCalendar getStart() {
@@ -18,15 +14,9 @@ final public class GameTimePeriod {
     public GameCalendar getEnd() {
         return end;
     }
-    
-    public GameTimePeriod(GameCalendar from, GameCalendar to){
-    	
-    	start=from;
-    	end=to;
+
+    public GameTimePeriod(GameCalendar from, GameCalendar to) {
+        start = from;
+        end = to;
     }
 }
-
-
-
-
-

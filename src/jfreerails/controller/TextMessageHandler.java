@@ -1,4 +1,3 @@
-
 /*
 * TextMessageHandler.java
 *
@@ -7,27 +6,22 @@
 package jfreerails.controller;
 
 
-
 /**
 *
 * @author  Luke Lindsay
 */
-
-
 public class TextMessageHandler {
-
     private static TextMessenger messageSender = null;
-    
-    public static synchronized void setMessengerBoy( TextMessenger mBoy ) {
+
+    public static synchronized void setMessengerBoy(TextMessenger mBoy) {
         messageSender = mBoy;
     }
-    
-    public static synchronized void sendMessage( String message ) {
-        if( messageSender == null ) {
-            System.out.println( message );
-        }
-        else {
-            messageSender.displayMessage( message );
+
+    public static synchronized void sendMessage(String message) {
+        if (messageSender == null) {
+            System.out.println(message);
+        } else {
+            messageSender.displayMessage(message);
         }
     }
 }

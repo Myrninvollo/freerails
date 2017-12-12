@@ -3,128 +3,131 @@ package jfreerails;
 import java.awt.DisplayMode;
 import java.io.IOException;
 import java.net.InetAddress;
-
 import jfreerails.client.common.ScreenHandler;
 import jfreerails.client.top.GUIClient;
 import jfreerails.server.GameServer;
 import jfreerails.util.FreerailsProgressMonitor;
+import jfreerails.controller.ServerControlInterface;
+
 
 /**
  * This class allows a server and/or client to be configured and started.
  */
 public class RunFreerails {
+    boolean done = false;
+    FreerailsProgressMonitor monitor = FreerailsProgressMonitor.NULL_INSTANCE;
+    private InetAddress remoteServer;
+    int numberOfClients = 1;
+    int mode = ScreenHandler.WINDOWED_MODE;
+    DisplayMode displayMode = null;
 
-	boolean done = false;
+    /**
+     * The GameServer we create
+     */
+    private GameServer localServer;
 
-	FreerailsProgressMonitor monitor = FreerailsProgressMonitor.NULL_INSTANCE;
+    /**
+     * The game we want to start
+     */
+    private ServerControlInterface game;
 
-	private InetAddress remoteServer;
+    public RunFreerails() {
+    }
 
-	int numberOfClients = 1;
+    public RunFreerails(FreerailsProgressMonitor monitor) {
+        this.monitor = monitor;
+    }
 
-	int mode = ScreenHandler.WINDOWED_MODE;
+    public static void main(String[] args) throws IOException {
+        new RunFreerailsJFrame().show();
+    }
 
-	DisplayMode displayMode = null;
-	
-	private GameServer localServer;
+    /**
+     * Starts the server in a new thread.
+     * @return a reference to the server
+     */
+    public ServerControlInterface startServer() {
+        long startTime = System.currentTimeMillis();
+        String map_name;
+        map_name = "south_america";
+        game = createServer(map_name);
+        System.out.println("Time taken to start server: " +
+            (System.currentTimeMillis() - startTime) + "ms");
 
-	public RunFreerails() {
-	}
+        return game;
+    }
 
-	public RunFreerails(FreerailsProgressMonitor monitor) {
-		this.monitor = monitor;
-	}
+    /**
+     * Starts one or more clients in separate threads.
+     */
+    public void startClients() {
+        try {
+            start();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
 
-	public static void main(String[] args) throws IOException {
-		new RunFreerailsJFrame().show();
-	}
+    private void start() throws IOException {
+        long startTime = System.currentTimeMillis();
+        System.out.println("Will start " + numberOfClients + " clients.");
 
-	/**
-	 * Starts the server in a new thread.
-	 * @return a reference to the server
-	 */
-	public GameServer startServer() {
-		long startTime = System.currentTimeMillis();
-		String map_name;
-		GameServer gs = null;
-		map_name = "south_america";
-		gs = createServer(map_name);
-		localServer = gs;
-		System.out.println("Time taken to start server: " +
-			(System.currentTimeMillis() - startTime) + "ms");
-		return gs;
-	}
+        for (int i = 0; i < numberOfClients; i++) {
+            String title = "Client " + (i + 1);
 
-	/**
-	 * Starts one or more clients in separate threads.
-	 */
-	public void startClients() {
-		try {
-			start();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+            if (remoteServer == null) {
+                if (game == null) {
+                    throw new IllegalStateException("Must start a " +
+                        "server unless connecting remotely!");
+                }
 
-	}
+                GUIClient gc = new GUIClient(game, game.getLocalConnection(),
+                        mode, displayMode, title, monitor);
+            } else {
+                GUIClient gc = new GUIClient(remoteServer, mode, displayMode,
+                        title, monitor);
+            }
+        }
 
-	private void start() throws IOException {
-		long startTime = System.currentTimeMillis();
-		System.out.println("Will start "+numberOfClients+ " clients.");
-		for(int i = 0 ; i < numberOfClients; i ++){		
-		    String title = "Client " + (i + 1);
-		    if (remoteServer == null) {
-			if (localServer == null) {
-			    throw new IllegalStateException("Must start a "
-			    + "server unless connecting remotely!");
-			}
-			GUIClient gc = new
-			    GUIClient(localServer.getLocalConnection(),
-				mode, displayMode, title, monitor);
-			gc.setServerControls(localServer.getServerControls());
-		    } else {
-			GUIClient gc = new GUIClient(remoteServer, mode,
-				displayMode, title, monitor);
-		    }
-		}
-		long deltaTime = System.currentTimeMillis() - startTime;
-		System.out.println("Time taken to start clients: " +
-			deltaTime + "ms");
-	}
-	
-	private GameServer createServer(String mapName)
-	{
-		return new GameServer(mapName, monitor);
-	}
+        long deltaTime = System.currentTimeMillis() - startTime;
+        System.out.println("Time taken to start clients: " + deltaTime + "ms");
+    }
 
-	public DisplayMode getDisplayMode() {
-		return displayMode;
-	}
+    private ServerControlInterface createServer(String mapName) {
+        localServer = new GameServer();
 
-	public int getMode() {
-		return mode;
-	}
+        return localServer.getNewGame(mapName, monitor);
+    }
 
-	public int getNumberOfClients() {
-		return numberOfClients;
-	}
+    public DisplayMode getDisplayMode() {
+        return displayMode;
+    }
 
-	public void setDisplayMode(DisplayMode mode) {
-		displayMode = mode;
-	}
+    public int getMode() {
+        return mode;
+    }
 
-	public void setMode(int i) {
-		mode = i;
-	}
+    public int getNumberOfClients() {
+        return numberOfClients;
+    }
 
-	public void setNumberOfClients(int i) {
-		numberOfClients = i;
-	}
+    public void setDisplayMode(DisplayMode mode) {
+        displayMode = mode;
+    }
 
-	public void run() {
-	}
+    public void setMode(int i) {
+        mode = i;
+    }
 
-	public void setRemoteServer(InetAddress address) {
-	    remoteServer = address;
-	}
+    public void setNumberOfClients(int i) {
+        numberOfClients = i;
+    }
+
+    public void run() {
+    }
+
+    public void setRemoteServer(InetAddress address) {
+        remoteServer = address;
+    }
 }

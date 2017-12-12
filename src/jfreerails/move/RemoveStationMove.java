@@ -1,95 +1,82 @@
 /*
  * Created on 15-Apr-2003
- * 
+ *
  */
 package jfreerails.move;
 
 import java.awt.Rectangle;
-
+import java.util.ArrayList;
 import jfreerails.world.station.StationModel;
 import jfreerails.world.top.KEY;
 import jfreerails.world.top.NonNullElements;
-import jfreerails.world.top.World;
 import jfreerails.world.top.ReadOnlyWorld;
 import jfreerails.world.top.WorldIterator;
+import jfreerails.world.train.ImmutableSchedule;
+import jfreerails.world.train.MutableSchedule;
+
 
 /**
  * This Move removes a station from the station list and from the map.
  * @author Luke
- * 
+ *
  */
-public class RemoveStationMove extends RemoveItemFromListMove implements TrackMove {
+public class RemoveStationMove extends CompositeMove implements TrackMove {
+    private RemoveStationMove(ArrayList moves) {
+        super(moves);
+    }
 
-	private final ChangeTrackPieceMove trackMove; //this move removes the station from the map.
+    static RemoveStationMove getInstance(ReadOnlyWorld w,
+        ChangeTrackPieceMove removeTrackMove) {
+        WorldIterator wi = new NonNullElements(KEY.STATIONS, w);
+        int stationIndex = -1;
 
-	private RemoveStationMove(
-		int index,
-		StationModel station,
-		ChangeTrackPieceMove removeTrackMove) {
-		super(KEY.STATIONS, index, station);
-		trackMove = removeTrackMove;		
-	}
+        while (wi.next()) {
+            StationModel station = (StationModel)wi.getElement();
 
-	static RemoveStationMove getInstance(ReadOnlyWorld w, ChangeTrackPieceMove removeTrackMove) {
-		WorldIterator wi = new NonNullElements(KEY.STATIONS, w);
-		int stationIndex = -1;
-		while (wi.next()) {
-			StationModel station = (StationModel) wi.getElement();
-			if (station.x == removeTrackMove.getLocation().x
-				&& station.y == removeTrackMove.getLocation().y) {
-				//We have found the station!
-				stationIndex = wi.getIndex();
-				break;
-			}
-		}
-		if (-1 == stationIndex) {
-			throw new IllegalArgumentException(
-				"Could find a station at "
-					+ removeTrackMove.getLocation().x
-					+ ", "
-					+ removeTrackMove.getLocation().y);
-		}
-		StationModel station2remove = (StationModel) w.get(KEY.STATIONS, stationIndex);
-		return new RemoveStationMove(stationIndex, station2remove, removeTrackMove);
-	}
+            if (station.x == removeTrackMove.getLocation().x &&
+                    station.y == removeTrackMove.getLocation().y) {
+                //We have found the station!
+                stationIndex = wi.getIndex();
 
-	public Rectangle getUpdatedTiles() {
-		return trackMove.getUpdatedTiles();
-	}
+                break;
+            }
+        }
 
-	public MoveStatus tryDoMove(World w) {
-		MoveStatus ms = trackMove.tryDoMove(w);
-		if (!ms.ok) {
-			return ms;
-		} else {
-			return super.tryDoMove(w);
-		}
-	}
+        if (-1 == stationIndex) {
+            throw new IllegalArgumentException("Could find a station at " +
+                removeTrackMove.getLocation().x + ", " +
+                removeTrackMove.getLocation().y);
+        }
 
-	public MoveStatus tryUndoMove(World w) {
-		MoveStatus ms = trackMove.tryUndoMove(w);
-		if (!ms.ok) {
-			return ms;
-		} else {
-			return super.tryUndoMove(w);
-		}
-	}
+        StationModel station2remove = (StationModel)w.get(KEY.STATIONS,
+                stationIndex);
+        ArrayList moves = new ArrayList();
+        moves.add(removeTrackMove);
+        moves.add(new RemoveItemFromListMove(KEY.STATIONS, stationIndex,
+                station2remove));
 
-	public MoveStatus doMove(World w) {
-		MoveStatus ms = this.tryDoMove(w);
-		if (ms.isOk()) {
-			super.doMove(w);
-			trackMove.doMove(w);
-		}
-		return ms;
-	}
+        //Now update any train schedules that include this station.
+        WorldIterator schedules = new NonNullElements(KEY.TRAIN_SCHEDULES, w);
 
-	public MoveStatus undoMove(World w) {
-		MoveStatus ms = this.tryUndoMove(w);
-		if (ms.isOk()) {
-			super.undoMove(w);
-			trackMove.undoMove(w);
-		}
-		return ms;
-	}
+        while (schedules.next()) {
+            ImmutableSchedule schedule = (ImmutableSchedule)schedules.getElement();
+
+            if (schedule.stopsAtStation(stationIndex)) {
+                MutableSchedule mutableSchedule = new MutableSchedule(schedule);
+                mutableSchedule.removeAllStopsAtStation(stationIndex);
+
+                Move changeScheduleMove = new ChangeTrainScheduleMove(schedules.getIndex(),
+                        schedule, mutableSchedule.toImmutableSchedule());
+                moves.add(changeScheduleMove);
+            }
+        }
+
+        return new RemoveStationMove(moves);
+    }
+
+    public Rectangle getUpdatedTiles() {
+        TrackMove tm = (TrackMove)getMove(0);
+
+        return tm.getUpdatedTiles();
+    }
 }

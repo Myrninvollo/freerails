@@ -138,7 +138,7 @@ public class DialogueBoxController {
 		// setup the supply and demand at station dialogue.
 		stationInfo = new StationInfoJPanel();
 		stationInfo.setup(w, vl);
-		moveChainFork.add(stationInfo);
+		moveChainFork.addSplitMoveReceiver(stationInfo);
 		stationInfo.setMapCursor(mapCursor);
 
 		// setup the 'show controls' dialogue
@@ -151,10 +151,11 @@ public class DialogueBoxController {
 		//moveChainFork.add(trainScheduleJPanel);
 
 		//Set up select engine dialogue.
-		selectEngine = new SelectEngineJPanel(this);
+		selectEngine = new SelectEngineJPanel();
 		selectEngine.setup(w, vl, new ActionListener() {
 
 			public void actionPerformed(ActionEvent arg0) {
+				closeContent();
 				showSelectWagons();
 			}
 

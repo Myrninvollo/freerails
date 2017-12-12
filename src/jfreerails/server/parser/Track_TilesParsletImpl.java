@@ -9,8 +9,8 @@ package jfreerails.server.parser;
 
 import org.xml.sax.SAXException;
 
+
 final public class Track_TilesParsletImpl implements Track_TilesParslet {
-    
     public int template(final java.lang.String data) throws SAXException {
         try {
             return Integer.parseInt(data.trim());
@@ -18,14 +18,14 @@ final public class Track_TilesParsletImpl implements Track_TilesParslet {
             throw new SAXException("template(" + data.trim() + ")", ex);
         }
     }
-    
-    public int[][] routesList(final java.lang.String data) throws SAXException {
-        throw new SAXException("Not implemented yet.");
-    }
-    
-    public int[] templatesList(final java.lang.String data) throws SAXException {
-        throw new SAXException("Not implemented yet.");
-    }
-    
-}
 
+    public int[][] routesList(final java.lang.String data)
+        throws SAXException {
+        throw new SAXException("Not implemented yet.");
+    }
+
+    public int[] templatesList(final java.lang.String data)
+        throws SAXException {
+        throw new SAXException("Not implemented yet.");
+    }
+}

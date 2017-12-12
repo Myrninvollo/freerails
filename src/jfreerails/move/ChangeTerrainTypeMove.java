@@ -1,9 +1,8 @@
-
 package jfreerails.move;
 
 import java.awt.Point;
-
 import jfreerails.world.terrain.TerrainType;
+
 
 /**
  *
@@ -11,18 +10,9 @@ import jfreerails.world.terrain.TerrainType;
  *
  * @author lindsal
  */
-
-final public class ChangeTerrainTypeMove  {
-
-
-
+final public class ChangeTerrainTypeMove {
     private final Point location;
-
-
     private final TerrainType oldType;
-
-
-
     private final TerrainType newType;
 
     public Point getLocation() {
@@ -36,15 +26,10 @@ final public class ChangeTerrainTypeMove  {
     public TerrainType getNewType() {
         return newType;
     }
-    public ChangeTerrainTypeMove(Point p, TerrainType before, TerrainType after){
-    	location=p;
-    	oldType=before;
-    	newType=after;
 
+    public ChangeTerrainTypeMove(Point p, TerrainType before, TerrainType after) {
+        location = p;
+        oldType = before;
+        newType = after;
     }
 }
-
-
-
-
-

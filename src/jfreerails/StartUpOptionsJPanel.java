@@ -17,7 +17,7 @@ import javax.swing.JFrame;
 import jfreerails.client.common.ScreenHandler;
 import jfreerails.client.view.DisplayModesComboBoxModels;
 import jfreerails.client.view.MyDisplayMode;
-import jfreerails.server.GameServer;
+import jfreerails.controller.ServerControlInterface;
 import jfreerails.util.FreerailsProgressMonitor;
 
 /**
@@ -30,7 +30,7 @@ public class StartUpOptionsJPanel extends javax.swing.JPanel {
     
     DisplayMode selectedDisplayMode= null;
     
-    private GameServer gs;
+    private ServerControlInterface gs;
 
     int numberOfClients = 1;
     
@@ -57,7 +57,7 @@ public class StartUpOptionsJPanel extends javax.swing.JPanel {
     
     private ActionListener startGameActionListener = new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
-	    gs.startGame();
+	    gs.setTargetTicksPerSecond(30);
 	    parentWindow.dispose();
 	}
     };

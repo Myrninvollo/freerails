@@ -1,24 +1,20 @@
 package jfreerails.client.top;
 
-import java.awt.EventQueue;
-import java.awt.Toolkit;
 import java.awt.DisplayMode;
 import java.io.IOException;
 import java.net.InetAddress;
-
 import javax.swing.JFrame;
-
-import jfreerails.client.common.SynchronizedEventQueue;
 import jfreerails.client.common.ScreenHandler;
+import jfreerails.client.common.SynchronizedEventQueue;
 import jfreerails.client.renderer.ViewLists;
-import jfreerails.client.view.MapCursor;
-import jfreerails.controller.ConnectionToServer;
 import jfreerails.client.view.ModelRoot;
+import jfreerails.controller.ConnectionToServer;
 import jfreerails.controller.InetConnection;
 import jfreerails.controller.LocalConnection;
 import jfreerails.controller.MoveChainFork;
 import jfreerails.controller.ServerControlInterface;
 import jfreerails.util.FreerailsProgressMonitor;
+
 
 /**
  * This class implements a GUI-driven client to be used by human players.
@@ -28,101 +24,69 @@ import jfreerails.util.FreerailsProgressMonitor;
  * the client having access to a ServerControlInterface object
  */
 public class GUIClient extends Client {
-	private MapCursor cursor = null;
-	private Object mutex;
-	private GUIComponentFactoryImpl gUIComponentFactory;
-	protected ServerControlModel serverControls = new
-	    ServerControlModel(null);
+    private Object mutex;
+    private GUIComponentFactoryImpl gUIComponentFactory;
+    private ModelRoot modelRoot;
 
-	private ModelRoot modelRoot;
+    private GUIClient(ConnectionToServer server, int mode, DisplayMode dm,
+        String title, FreerailsProgressMonitor pm) throws IOException {
+        SynchronizedEventQueue.use();
 
-	public void setCursor(MapCursor c) {
-		cursor = c;
-	}
+        modelRoot = new ModelRoot();
+        receiver = new ConnectionAdapter(modelRoot);
+        moveChainFork = new MoveChainFork();
+        receiver.setMoveReceiver(moveChainFork);
+        receiver.setConnection(server);
 
-	public MapCursor getCursor() {
-		return cursor;
-	}
+        modelRoot.setMoveReceiver(receiver);
+        modelRoot.setMoveFork(moveChainFork);
 
-	private GUIClient(ConnectionToServer server, int mode, DisplayMode dm,
-		String title, FreerailsProgressMonitor pm)
-	    throws IOException {
-		/* set up the synchronized event queue if not already done */
-		EventQueue eventQueue = Toolkit.getDefaultToolkit().
-		    getSystemEventQueue();
-		if (! (Toolkit.getDefaultToolkit().getSystemEventQueue()
-			    instanceof SynchronizedEventQueue)) {
-		    eventQueue.push(new SynchronizedEventQueue());
-		}
+        GUIComponentFactoryImpl gUIComponentFactory = new GUIComponentFactoryImpl(modelRoot);
 
-		modelRoot = new ModelRoot();
-		receiver = new ConnectionAdapter(modelRoot);
-		moveChainFork = new MoveChainFork();
-		receiver.setMoveReceiver(moveChainFork);
-		receiver.setConnection(server);
+        ViewLists viewLists = new ViewListsImpl(receiver.world, pm);
 
+        if (!viewLists.validate(receiver.world)) {
+            throw new IllegalArgumentException();
+        }
 
-		GUIComponentFactoryImpl gUIComponentFactory =
-		    new GUIComponentFactoryImpl(this);
-		
-		ViewLists viewLists = new ViewListsImpl(receiver.world, pm);
-		if (!viewLists.validate(receiver.world)) {
-		    throw new IllegalArgumentException();
-		}
+        gUIComponentFactory.setup(viewLists, receiver.world);
 
-		gUIComponentFactory.setup(viewLists);
+        JFrame client = gUIComponentFactory.createClientJFrame(title);
 
-		JFrame client = gUIComponentFactory.createClientJFrame(title);
+        //We want to setup the screen handler before creating the view lists since the 
+        //ViewListsImpl creates images that are compatible with the current display settings 
+        //and the screen handler may change the display settings.
+        ScreenHandler screenHandler = new ScreenHandler(client, mode, dm);
 
+        moveChainFork.add(gUIComponentFactory);
 
-		//We want to setup the screen handler before creating the view lists since the 
-		//ViewListsImpl creates images that are compatible with the current display settings 
-		//and the screen handler may change the display settings.
-		ScreenHandler screenHandler= new ScreenHandler(client, mode, dm);
+        GameLoop gameLoop = new GameLoop(screenHandler);
+        Thread t = new Thread(gameLoop);
+        t.start();
+    }
 
-		moveChainFork.add(gUIComponentFactory);
+    /**
+     * Start a client with an internet connection to a server
+     */
+    public GUIClient(InetAddress server, int mode, DisplayMode dm,
+        String title, FreerailsProgressMonitor pm) throws IOException {
+        this(new InetConnection(server), mode, dm, title, pm);
+    }
 
+    /**
+     * sets up a connnection with a local server. Currently this is the only
+     * form of connection supported.
+     * @throws java.io.IOException if the connection could not be opened
+     */
+    public GUIClient(ServerControlInterface controls, LocalConnection server,
+        int mode, DisplayMode dm, String title, FreerailsProgressMonitor pm)
+        throws IOException {
+        this((ConnectionToServer)new LocalConnection(server), mode, dm, title,
+            pm);
+        this.modelRoot.setServerControls(controls);
+    }
 
-		
-		GameLoop gameLoop = new GameLoop(screenHandler);
-		Thread t = new Thread(gameLoop);
-		t.start();
-
-	    }
-
-	/**
-	 * Start a client with an internet connection to a server
-	 */
-	public GUIClient(InetAddress server, int mode, DisplayMode dm, String
-		title, FreerailsProgressMonitor pm) throws
-	    IOException {
-	    this(new InetConnection(server), mode, dm, title, pm);
-	}
-
-	/**
-	 * sets up a connnection with a local server. Currently this is the only
-	 * form of connection supported.
-	 * @throws java.io.IOException if the connection could not be opened
-	 */
-	public GUIClient(LocalConnection server, int mode, DisplayMode dm,
-	String title, FreerailsProgressMonitor pm) throws IOException {
-		this((ConnectionToServer) new LocalConnection(server), mode,
-		dm, title, pm);
-	}
-
-	/**
-	 * Not all clients may return a valid object - access to the server controls
-	 * is at the discretion of the server.
-	 */
-	public ServerControlModel getServerControls() {
-		return serverControls;
-	}
-
-	public void setServerControls(ServerControlInterface controls) {
-		serverControls.setServerControlInterface(controls);
-	}
-
-	public ModelRoot getModelRoot() {
-	    return modelRoot;
-	}
+    public ModelRoot getModelRoot() {
+        return modelRoot;
+    }
 }
