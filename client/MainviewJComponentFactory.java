@@ -10,12 +10,12 @@ import java.awt.event.*;
 import javax.swing.table.*;
 import java.awt.*;
 import javax.swing.table.AbstractTableModel;
-
 import java.util.*;
 import jfreerails.client.tileview.TileRenderer;
 import jfreerails.client.IconMap;
 import jfreerails.common.trackmodel.*;
 import jfreerails.client.tileview.TileEventListener;
+
 /**
 * This class creates a JTable with a custom cell renderer to display the map in
 *the main window.  The data model it uses is a 2D array of ImageIcons.
@@ -33,27 +33,18 @@ public class MainviewJComponentFactory extends java.lang.Object {
     private JTable tbl;
 
     private Point tileSize;
-   
-    public javax.swing.JTable newMainviewJTable( IconMap iconMap, TrackBuilder trackBuilder) {
-        //String  cols[] = new String[ lblData[ 0 ].length ];
-        
-        //The column headings.  When col[i]==null, no heading is shown for column i.
-        //TableModel  tblmodel = new DefaultTableModel( lblData, cols )  {
-            
-        //    public boolean isCellEditable( int row, int col ) {
-         //       return false;
-         //   }
-        //};
     
+    public javax.swing.JTable newMainviewJTable( IconMap iconMap, TrackBuilder trackBuilder ) {
         tbl = new JTable( iconMap );
-        tbl.setPreferredSize( new java.awt.Dimension( ( (int)tileSize.getX() * iconMap.getColumnCount()), ( (int)tileSize.getY() * iconMap.getRowCount() ) ) );
+        java.awt.Dimension  tableSize = new java.awt.Dimension( ( (int)tileSize.getX() * iconMap.getColumnCount() ), ( (int)tileSize.getY() * iconMap.getRowCount() ) );
+        tbl.setPreferredSize( tableSize );
         tbl.setIntercellSpacing( new java.awt.Dimension( 0, 0 ) );
         tbl.setRowHeight( (int)tileSize.getY() );
-       // Class  bb = tbl.getColumnClass( 1 );
-       // System.out.println(bb);
-        tbl.setDefaultRenderer( Object.class, new TileRenderer((int)tileSize.getX(),(int)tileSize.getY()) );
-        tbl.addMouseListener(new TileEventListener(tbl, trackBuilder, (AbstractTableModel) iconMap));
-        
+        tbl.setCellSelectionEnabled( true );
+        tbl.setColumnSelectionAllowed( false );
+        tbl.setRowSelectionAllowed( false );
+        tbl.setDefaultRenderer( Object.class, new TileRenderer( (int)tileSize.getX(), (int)tileSize.getY() ) );
+        tbl.addMouseListener( new TileEventListener( tbl, trackBuilder, (AbstractTableModel)iconMap ) );
         return tbl;
     }
     

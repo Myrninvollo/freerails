@@ -21,6 +21,20 @@ public class TerminalIO extends java.lang.Object {
 
     private BufferedReader in;
     
+    public int my_read_int( java.lang.String prompt ) {
+        System.out.println( prompt );
+        String  text = null;
+        int  i = 0;
+        try {
+            text = in.readLine();
+            i = NumberFormat.getInstance().parse( text ).intValue();
+        }
+        catch( Exception e ) {
+            
+        }
+        return i;
+    }
+    
     /** Creates new terminal_io */
     
     public TerminalIO() {
@@ -38,20 +52,6 @@ public class TerminalIO extends java.lang.Object {
             
         }
         return text;
-    }
-    
-    public int my_read_int( java.lang.String prompt ) {
-        System.out.println( prompt );
-        String  text = null;
-        int  i = 0;
-        try {
-            text = in.readLine();
-            i = NumberFormat.getInstance().parse( text ).intValue();
-        }
-        catch( Exception e ) {
-            
-        }
-        return i;
     }
     
     /**

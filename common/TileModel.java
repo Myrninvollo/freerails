@@ -19,6 +19,10 @@ public class TileModel extends java.lang.Object {
 
     private int rgb;
     
+    public int getRGB() {
+        return rgb;
+    }
+    
     /** Creates new Tile */
     
     public TileModel( int rgb, java.lang.String terrainType ) {
@@ -28,9 +32,5 @@ public class TileModel extends java.lang.Object {
     
     public String getTerrainType() {
         return terrainType;
-    }
-    
-    public int getRGB() {
-        return rgb;
     }
 }

@@ -1,5 +1,4 @@
 
- 
 /*
 * test1.java
 *
@@ -25,70 +24,67 @@ import jfreerails.common.exception.FreerailsException;
 
 public class ImageSplitter extends java.lang.Object {
 
-    private URL image_url;
+    private int subGridYoffset = 0;
 
-    private int tile_grid_width, tile_grid_height, grid_start_x, grid_start_y;
+    private int tileGridWidth, tileGridHeight, gridXAxisOrigin, gridYAxisOrigin;
 
-    private BufferedImage bi_source;
+    private BufferedImage sourceBufferedImage;
+
+    private URL imageURL;
+
+    private int subGridXOffset = 0;
 
     private int source_width, source_height;
     
-    public ImageIcon get_tile_from_grid( int grid_x, int grid_y ) throws FreerailsException {
-        ImageIcon  tile = get_tile( ( ( grid_start_x + ( grid_x * tile_grid_width ) ) ), ( ( grid_start_y + ( grid_y * tile_grid_width ) ) ), tile_grid_width, tile_grid_height );
+    public ImageIcon getTileFromGrid( int gridX, int gridY ) throws FreerailsException {
+        ImageIcon  tile = getTile( ( ( gridXAxisOrigin + ( gridX * tileGridWidth ) ) ), ( ( gridYAxisOrigin + ( gridY * tileGridWidth ) ) ), tileGridWidth, tileGridHeight );
         if( tile == null ) {
-            System.out.print( "Error in ImageSplitter.ImageIcon: tileIcon==null." );
+            System.out.println( "Error in ImageSplitter.ImageIcon: tileIcon==null." );
         }
         return tile;
     }
     
-    public ImageIcon get_tile( int x, int y, int tile_width, int tile_height ) throws FreerailsException {
+    public ImageIcon getTile( int x, int y, int tileWidth, int tileHeight ) throws FreerailsException {
         try {
-            BufferedImage  bi_tile = bi_source.getSubimage( x, y, tile_width, tile_height );
-            ImageIcon  icon_tile = new ImageIcon( bi_tile );
-            return icon_tile;
+            BufferedImage  tileBufferedImage = sourceBufferedImage.getSubimage( x, y, tileWidth, tileHeight );
+            ImageIcon  tileIcon = new ImageIcon( tileBufferedImage );
+            return tileIcon;
         }
         catch( java.awt.image.RasterFormatException e ) {
-            throw new FreerailsException( "Tried to get tile from outside the image.\n" + "Source image: " + image_url );
+            throw new FreerailsException( "Tried to get tile from outside the image.\n" + "Source image: " + imageURL );
         }
     }
-    
-    public ImageIcon[] get_tile_column( int x, int y, int tile_width, int tile_height, int num ) throws FreerailsException {
-        ImageIcon[]  tile_column = new ImageIcon[ num ];
-        for( int  count = 0;count < num;count++ ) {
-            tile_column[ count ] = get_tile( x, y, tile_width, tile_height );
-            y += tile_height;
-        }
-        return tile_column;
-    }
-    
-    /** Creates new test1 */
     
     public ImageSplitter( URL url ) throws FreerailsException {
         
         //Load a picture and draw it on a buffered image.
-        image_url = url;
-        System.out.print( "\nLoading image: " + image_url );
+        imageURL = url;
+        System.out.println( "\nLoading image: " + imageURL );
         try {
-            bi_source = ImageIO.read( image_url );
+            sourceBufferedImage = ImageIO.read( imageURL );
         }
         catch( IOException e ) {
-            throw new FreerailsException( "IOException loading " + image_url );
+            throw new FreerailsException( "IOException loading " + imageURL );
         }
     }
     
-    public ImageIcon[] get_tile_row( int x, int y, int tile_width, int tile_height, int num ) throws FreerailsException {
-        ImageIcon[]  tile_row = new ImageIcon[ num ];
-        for( int  count = 0;count < num;count++ ) {
-            tile_row[ count ] = get_tile( x, y, tile_width, tile_height );
-            x += tile_width;
-        }
-        return tile_row;
+    public void setTileGrid( int x, int y, int tileWidth, int tileHeight ) {
+        tileGridWidth = tileWidth;
+        tileGridHeight = tileHeight;
+        gridXAxisOrigin = x;
+        gridYAxisOrigin = y;
     }
     
-    public void set_tile_grid( int x, int y, int tile_width, int tile_height ) {
-        tile_grid_width = tile_width;
-        tile_grid_height = tile_height;
-        grid_start_x = x;
-        grid_start_y = y;
+    public void setSubGridOffset( int x, int y ) {
+        subGridXOffset = x;
+        subGridYoffset = y;
+    }
+    
+    public ImageIcon getTileFromSubGrid( int gridX, int gridY ) throws FreerailsException {
+        ImageIcon  tile = getTile( ( ( gridXAxisOrigin + ( ( subGridXOffset + gridX ) * tileGridWidth ) ) ), ( ( gridYAxisOrigin + ( ( subGridYoffset + gridY ) * tileGridWidth ) ) ), tileGridWidth, tileGridHeight );
+        if( tile == null ) {
+            System.out.println( "Error in ImageSplitter.ImageIcon: tileIcon==null." );
+        }
+        return tile;
     }
 }

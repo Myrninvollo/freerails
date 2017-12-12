@@ -15,10 +15,6 @@ package jfreerails.common.trackmodel;
 
 public class RailModel extends java.lang.Object {
 
-    private Object nodeA;
-
-    private int length;
-
     private int gradient = 0;
 
     private boolean doubleTrack = false;
@@ -26,27 +22,21 @@ public class RailModel extends java.lang.Object {
     private Object[] trainList;
 
     private Object nodeB;
+
+    private Object nodeA;
+
+    private int length;
     
-    public boolean getDoubleTrack() {
-        return doubleTrack;
-    }
-    
-    public Object[] getTrainList() {
-        return trainList;
+    public void setDoubleTrack( boolean doubleTrack ) {
+        this.doubleTrack = doubleTrack;
     }
     
     public void removeTrain( Object train ) {
         
     }
     
-    public Object[] getNodeList() {
-        return new Object[] {
-            nodeA, nodeB
-        };
-    }
-    
-    public int getGradient() {
-        return gradient;
+    public int getLength() {
+        return length;
     }
     
     public Object getOtherNode( Object thisNode ) {
@@ -64,8 +54,8 @@ public class RailModel extends java.lang.Object {
         return null;
     }
     
-    public void removeRail() {
-        
+    public Object[] getTrainList() {
+        return trainList;
     }
     
     public void addTrain( Object train ) {
@@ -79,11 +69,21 @@ public class RailModel extends java.lang.Object {
         this.nodeB = nodeB;
     }
     
-    public int getLength() {
-        return length;
+    public int getGradient() {
+        return gradient;
     }
     
-    public void setDoubleTrack( boolean doubleTrack ) {
-        this.doubleTrack = doubleTrack;
+    public boolean getDoubleTrack() {
+        return doubleTrack;
+    }
+    
+    public void removeRail() {
+        
+    }
+    
+    public Object[] getNodeList() {
+        return new Object[] {
+            nodeA, nodeB
+        };
     }
 }

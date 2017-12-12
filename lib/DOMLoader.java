@@ -40,7 +40,7 @@ public class DOMLoader extends java.lang.Object {
         //factory.setValidating(true);   
         
         //factory.setNamespaceAware(true);
-        System.out.print( "\nLoading XML: " + xml_url );
+        System.out.println( "\nLoading XML " + xml_url );
         try {
             DocumentBuilder  builder = factory.newDocumentBuilder();
             File  file = new File( xml_url.getFile() );

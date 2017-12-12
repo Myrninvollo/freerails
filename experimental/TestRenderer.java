@@ -20,19 +20,28 @@ public class TestRenderer extends JComponent {
 
     private int height = 30, width = 30; //The tile size.
     
+    public void setTileValues( ArrayList images, boolean selected ) {
+        this.images = images;
+        this.isSelected = selected;
+    }
+    
     public void paint( Graphics g ) {
+        
         //for( int  i = 0;i < images.size();i++ ) {
-            if( images.get(0) != null ) {
-                g.drawImage( (Image)images.get(0) , 0, 0, this );
-            }
-            else {
-                //Graphics2D  g2 = (Graphics2D)g;
-               // g2.fillRect(0,0,30,30);
-              
-                
-                //System.out.println( "Non fatal error: tile icon==null" );
-            }
-       // }
+        if( images.get( 0 ) != null ) {
+            g.drawImage( (Image)images.get( 0 ), 0, 0, this );
+        }
+        else {
+            
+        
+        //Graphics2D  g2 = (Graphics2D)g;
+        
+        // g2.fillRect(0,0,30,30);
+        
+        //System.out.println( "Non fatal error: tile icon==null" );
+        }
+        
+        // }
         if( isSelected == true ) {
             
             //Draw the cursor.
@@ -44,15 +53,15 @@ public class TestRenderer extends JComponent {
     }
     
     public TestRenderer() {
-        //URL  tile_url = TestRenderer.class.getResource( "/jfreerails/experimental/single_terrain_tile.PNG" );
-        //images.add(Toolkit.getDefaultToolkit().getImage( tile_url ));
-       // URL  track_url = TestRenderer.class.getResource( "/jfreerails/experimental/single_track_tile.PNG" );
-        //images.add(Toolkit.getDefaultToolkit().getImage( track_url ));
-    }
+        
     
-    public void setTileValues( ArrayList images, boolean selected ) {
-        this.images = images;
-        this.isSelected = selected;
+    //URL  tile_url = TestRenderer.class.getResource( "/jfreerails/experimental/single_terrain_tile.PNG" );
+    
+    //images.add(Toolkit.getDefaultToolkit().getImage( tile_url ));
+    
+    // URL  track_url = TestRenderer.class.getResource( "/jfreerails/experimental/single_track_tile.PNG" );
+    
+    //images.add(Toolkit.getDefaultToolkit().getImage( track_url ));
     }
     
     public static void main( String[] args ) {

@@ -20,13 +20,13 @@ import jfreerails.common.TerrainMap;
 
 public class TileView extends java.lang.Object {
 
-    private TileIconSelector tileIconSelector;
-
-    private ImageIcon[] tileIcons;
-
     private TileModel tileModel;
 
     private int rgb;
+
+    private TileIconSelector tileIconSelector;
+
+    private ImageIcon[] tileIcons;
 
     private static int tileHeight;
 
@@ -42,6 +42,18 @@ public class TileView extends java.lang.Object {
         }
     }
     
+    public int getTileWidth() {
+        return tileWidth;
+    }
+    
+    public int getTileHeight() {
+        return tileHeight;
+    }
+    
+    public int getRGB() {
+        return tileModel.getRGB();
+    }
+    
     /** Creates new TileView */
     
     public TileView( ImageIcon[] tileIcons, TileIconSelector tileIconSelector, TileModel tileModel ) throws FreerailsException {
@@ -55,24 +67,12 @@ public class TileView extends java.lang.Object {
         }
     }
     
-    public ImageIcon getIcon() {
-        return tileIcons[ 0 ];
-    }
-    
-    public int getTileWidth() {
-        return tileWidth;
-    }
-    
-    public int getTileHeight() {
-        return tileHeight;
-    }
-    
     public String getTerrainType() {
         return tileModel.getTerrainType();
     }
     
-    public int getRGB() {
-        return tileModel.getRGB();
+    public ImageIcon getIcon() {
+        return tileIcons[ 0 ];
     }
     
     public static void setTileSize( int height, int width ) {

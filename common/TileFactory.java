@@ -36,45 +36,22 @@ import jfreerails.lib.DOMLoader;
 import jfreerails.client.tileview.TileView;
 import jfreerails.client.tileview.*;
 import jfreerails.common.exception.FreerailsException;
+import jfreerails.common.TerrainTileTypesList;
 
 
 public class TileFactory extends java.lang.Object {
 
+    private Point tileSize;
+
     private NamedNodeMap tileSetAttributes;
 
     private NodeList tilesNodeList;
-
-    private Point tileSize;
     
     public Point getTileSize() throws FreerailsException {
         if( tileSize == null ) {
             throw new FreerailsException( "Error: TileFactory.getTileSize called before tilesize had been set" );
         }
         return tileSize;
-    }
-    
-    /** Creates new TileFactory.  It loads an XML file that defines the terrain 
-    types in the tile-set*/
-    
-    public TileFactory( URL xml_url ) {
-        Element  tiles;
-        Document  document = DOMLoader.get_dom( xml_url );
-        tiles = document.getDocumentElement();
-        tiles.normalize();
-        NodeList  tilesetNodeList = tiles.getElementsByTagName( "Tile_set" );
-        Node  node_tile_set = tilesetNodeList.item( 0 );
-        this.tilesNodeList = tiles.getElementsByTagName( "Tile" );
-        this.tileSetAttributes = node_tile_set.getAttributes();
-    }
-    
-    public TileModel[] getTileModelList() {
-        TileModel[]  tileModelList = new TileModel[ tilesNodeList.getLength() ];
-        NamedNodeMap  namedNodeMap_tile_attributes;
-        for( int  i = 0;i < tilesNodeList.getLength();i++ ) {
-            namedNodeMap_tile_attributes = tilesNodeList.item( i ).getAttributes();
-            tileModelList[ i ] = getTileModel( namedNodeMap_tile_attributes );
-        }
-        return tileModelList;
     }
     
     public HashMap getTileViewHashMap( ImageSplitter terrain ) throws FreerailsException {
@@ -90,7 +67,7 @@ public class TileFactory extends java.lang.Object {
             int  x = NumberFormat.getInstance().parse( temp_number ).intValue();
             temp_number = tileSetAttributes.getNamedItem( "Y" ).getNodeValue();
             int  y = NumberFormat.getInstance().parse( temp_number ).intValue();
-            terrain.set_tile_grid( x, y, width, height );
+            terrain.setTileGrid( x, y, width, height );
             this.tileSize = new Point( width, height );
         }
         catch( java.text.ParseException pe ) {
@@ -112,6 +89,30 @@ public class TileFactory extends java.lang.Object {
             tileViewHashMap.put( new Integer( tileModel.getRGB() ), tileView );
         }
         return tileViewHashMap;
+    }
+    
+    /** Creates new TileFactory.  It loads an XML file that defines the terrain 
+    types in the tile-set*/
+    
+    public TileFactory( URL xml_url ) {
+        Element  tiles;
+        Document  document = DOMLoader.get_dom( xml_url );
+        tiles = document.getDocumentElement();
+        tiles.normalize();
+        NodeList  tilesetNodeList = tiles.getElementsByTagName( "Tile_set" );
+        Node  node_tile_set = tilesetNodeList.item( 0 );
+        this.tilesNodeList = tiles.getElementsByTagName( "Tile" );
+        this.tileSetAttributes = node_tile_set.getAttributes();
+    }
+    
+    public TerrainTileTypesList getTerrainTileTypesList() {
+        TileModel[]  tileModelList = new TileModel[ tilesNodeList.getLength() ];
+        NamedNodeMap  namedNodeMap_tile_attributes;
+        for( int  i = 0;i < tilesNodeList.getLength();i++ ) {
+            namedNodeMap_tile_attributes = tilesNodeList.item( i ).getAttributes();
+            tileModelList[ i ] = getTileModel( namedNodeMap_tile_attributes );
+        }
+        return new TerrainTileTypesList( tileModelList );
     }
     
     private TileModel getTileModel( NamedNodeMap namedNodeMap_tile_attributes ) {
@@ -149,14 +150,14 @@ public class TileFactory extends java.lang.Object {
         if( tileSelectorName.equalsIgnoreCase( "Standard" ) ) {
             tileIconSelector = new StandardTileIconSelector( rgbValues );
             tileIcons = new ImageIcon[ 1 ];
-            tileIcons[ 0 ] = imageSplitter.get_tile_from_grid( x, y );
+            tileIcons[ 0 ] = imageSplitter.getTileFromGrid( x, y );
         }
         else {
             if( tileSelectorName.equalsIgnoreCase( "Chequered" ) ) {
                 tileIconSelector = new ChequeredTileIconSelector( rgbValues );
                 tileIcons = new ImageIcon[ 2 ];
                 for( int  i = 0;i < tileIcons.length;i++ ) {
-                    tileIcons[ i ] = imageSplitter.get_tile_from_grid( x + i, y );
+                    tileIcons[ i ] = imageSplitter.getTileFromGrid( x + i, y );
                 }
             }
             else {
@@ -165,17 +166,17 @@ public class TileFactory extends java.lang.Object {
                     tileIcons = new ImageIcon[ 4 ];
                     
                     //Grap them in this order so that they display correctly :)
-                    tileIcons[ 0 ] = imageSplitter.get_tile_from_grid( x + 2, y );
-                    tileIcons[ 1 ] = imageSplitter.get_tile_from_grid( x + 3, y );
-                    tileIcons[ 2 ] = imageSplitter.get_tile_from_grid( x + 1, y );
-                    tileIcons[ 3 ] = imageSplitter.get_tile_from_grid( x, y );
+                    tileIcons[ 0 ] = imageSplitter.getTileFromGrid( x + 2, y );
+                    tileIcons[ 1 ] = imageSplitter.getTileFromGrid( x + 3, y );
+                    tileIcons[ 2 ] = imageSplitter.getTileFromGrid( x + 1, y );
+                    tileIcons[ 3 ] = imageSplitter.getTileFromGrid( x, y );
                 }
                 else {
                     if( tileSelectorName.equalsIgnoreCase( "RiverStyle" ) ) {
                         tileIconSelector = new RiverStyleTileIconSelector( rgbValues );
                         tileIcons = new ImageIcon[ 16 ];
                         for( int  i = 0;i < tileIcons.length;i++ ) {
-                            tileIcons[ i ] = imageSplitter.get_tile_from_grid( x + i, y );
+                            tileIcons[ i ] = imageSplitter.getTileFromGrid( x + i, y );
                         }
                     }
                     
@@ -185,7 +186,7 @@ public class TileFactory extends java.lang.Object {
                         System.out.println( "Forced to use Standard TileIconSelector" );
                         tileIconSelector = new StandardTileIconSelector( rgbValues );
                         tileIcons = new ImageIcon[ 1 ];
-                        tileIcons[ 0 ] = imageSplitter.get_tile_from_grid( x, y );
+                        tileIcons[ 0 ] = imageSplitter.getTileFromGrid( x, y );
                     }
                 }
             }
