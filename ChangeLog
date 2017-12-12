@@ -1,3 +1,28 @@
+03-Sep-2003 21:50:00 Luke
+	o Added GUI to select display mode and number of clients.
+28-Aug-2003 23:00:00 Luke
+	o Made train speed decrease with no of wagons.
+	o Made fare increase with distacne travelled.
+	o Made CalcSupplyAtStations implement WorldListListener so
+	that when a new station is added, its supply and demand is
+	calculated by the server.
+25-Aug-2003 23:00:00 Luke
+	o Added new Train orders dialogue.
+	o Made changes to train consist and schedule
+	use Moves instead of changing the DB directly.
+	o Lots of other changes/fixes.
+23-Aug-2003 15:45:00 Luke
+	o Removed cruft from the experiemental package.
+	o Added a simple train list dialogue, accessible via the display menu.
+	o Made the engine images have transparent backgrounds and flipped them 
+	horizontally.
+19-Aug-2003 00:59:00 Luke
+	o Applied Robert Tuck's patches that separated the
+	client and server and allow you to start up two clients
+	in the same JVM.
+	o Fixed painting bug that occured when you started two
+	clients.
+	o Major refactor to get the checkdep ant target working again.
 11-Aug-2003 21:06:23 Luke
 	o You are now charged for track maintenance once per year.
 	o Cargo converions occur when you deliver cargo to a station

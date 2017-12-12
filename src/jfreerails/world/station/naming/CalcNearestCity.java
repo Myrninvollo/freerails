@@ -11,15 +11,15 @@ package jfreerails.world.station.naming;
 
 import jfreerails.world.city.CityModel;
 import jfreerails.world.top.KEY;
-import jfreerails.world.top.World;
+import jfreerails.world.top.ReadOnlyWorld;
 
 public class CalcNearestCity {
 
 	private int x;
 	private int y;
-	private World w;
+	private ReadOnlyWorld w;
 
-	public CalcNearestCity(World world, int x, int y) {
+	public CalcNearestCity(ReadOnlyWorld world, int x, int y) {
 
 		this.w = world;
 		this.x = x;

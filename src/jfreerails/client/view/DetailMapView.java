@@ -13,7 +13,7 @@ import jfreerails.client.renderer.SquareTileBackgroundRenderer;
 import jfreerails.client.renderer.StationNamesRenderer;
 import jfreerails.client.renderer.StationRadiusRenderer;
 import jfreerails.client.renderer.ViewLists;
-import jfreerails.world.top.World;
+import jfreerails.world.top.ReadOnlyWorld;
 
 public class DetailMapView implements MapRenderer {
 
@@ -30,7 +30,7 @@ public class DetailMapView implements MapRenderer {
 	private final StationRadiusRenderer stationRadius;
 
 	public DetailMapView(
-		World world,
+		ReadOnlyWorld world,
 		ViewLists vl) {									
 		trainsview = new TestOverHeadTrainView(world, vl);
 		background = new SquareTileBackgroundRenderer(new MapBackgroundRender(world, vl.getTileViewList(), vl.getTrackPieceViewList()), 30);

@@ -15,25 +15,26 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLayeredPane;
+import javax.swing.JList;
 import javax.swing.border.LineBorder;
 
 import jfreerails.client.common.MyGlassPanel;
 import jfreerails.client.renderer.ViewLists;
-import jfreerails.controller.CalcSupplyAtStations;
+import jfreerails.controller.MoveChainFork;
 import jfreerails.controller.MoveExecuter;
 import jfreerails.move.ChangeProductionAtEngineShopMove;
 import jfreerails.move.Move;
-import jfreerails.move.MoveStatus;
 import jfreerails.world.station.ProductionAtEngineShop;
 import jfreerails.world.station.StationModel;
 import jfreerails.world.top.KEY;
 import jfreerails.world.top.NonNullElements;
-import jfreerails.world.top.World;
+import jfreerails.world.top.ReadOnlyWorld;
 import jfreerails.world.top.WorldIterator;
 import jfreerails.world.track.FreerailsTile;
 
 /**	This class is responsible for displaying dialogue boxes, adding borders to them as appropriate, and
- *  returning focus to the last focus owner after a dialogue box has been closed.  Currently dialogue boxes
+ *  returning focus to the last focus owner after a dialogue box has been closed.  It is also responsible for 
+ * adding components that need to update in response to moves to the MoveChainFork.  Currently dialogue boxes
  * are not separate windows.  Instead, they are drawn on the modal layer of the main JFrames LayerPlane.  This
  * allows dialogue boxes with transparent regions to be used.
  *
@@ -46,22 +47,38 @@ public class DialogueBoxController {
 	private MyGlassPanel glassPanel;
 	private NewsPaperJPanel newspaper;
 	private SelectWagonsJPanel selectWagons;
-	private TrainScheduleJPanel trainScheduleJPanel;
+	//private TrainScheduleJPanel trainScheduleJPanel;
 	private GameControlsJPanel showControls;
 	private TerrainInfoJPanel terrainInfo;
 	private StationInfoJPanel stationInfo;
-
-	private World w;
+	private JList trainList = new JList();
+	private TrainDialogueJPanel trainDialogueJPanel;
+	private ReadOnlyWorld world;
+	private ViewLists viewLists;
 
 	private Component defaultFocusOwner = null;
 
 	private LineBorder defaultBorder =
-		new javax.swing.border.LineBorder(new java.awt.Color(0, 0, 0), 3);
+		new LineBorder(new java.awt.Color(0, 0, 0), 3);
 
 	/** Use this ActionListener to close a dialogue without performing any other action. */
 	private ActionListener closeCurrentDialogue = new ActionListener() {
 		public void actionPerformed(ActionEvent arg0) {
 			closeContent();
+		}
+	};
+
+	private CallBacks callbacks = new CallBacks() {
+		public void closeDialogue() {
+			closeContent();
+		}
+
+		public void moveCursor(int x, int y) {
+			// TODO Auto-generated method stub			
+		}
+
+		public void processMove(Move m) {
+			MoveExecuter.getMoveExecuter().processMove(m);
 		}
 	};
 
@@ -76,7 +93,9 @@ public class DialogueBoxController {
 		glassPanel.setVisible(false);
 
 		//We need to resize the glass panel when its parent resizes.
-		frame.getLayeredPane().addComponentListener(new java.awt.event.ComponentAdapter() {
+		frame
+			.getLayeredPane()
+			.addComponentListener(new java.awt.event.ComponentAdapter() {
 			public void componentResized(java.awt.event.ComponentEvent evt) {
 				glassPanel.setSize(glassPanel.getParent().getSize());
 				glassPanel.revalidate();
@@ -86,8 +105,23 @@ public class DialogueBoxController {
 		closeButton.addActionListener(closeCurrentDialogue);
 	}
 
-	public void setup(World world, ViewLists vl) {
-		this.w = world;
+	public void setup(
+		ReadOnlyWorld w,
+		ViewLists vl,
+		MoveChainFork moveChainFork,
+		MapCursor mapCursor) {
+
+		if (w == null)
+			throw new NullPointerException();
+		if (vl == null)
+			throw new NullPointerException();
+		if (moveChainFork == null)
+			throw new NullPointerException();
+		if (mapCursor == null)
+			throw new NullPointerException();
+
+		this.world = w;
+		viewLists = vl;
 
 		//Setup the various dialogue boxes.
 
@@ -98,14 +132,17 @@ public class DialogueBoxController {
 		// setup the supply and demand at station dialogue.
 		stationInfo = new StationInfoJPanel();
 		stationInfo.setup(w, vl);
+		moveChainFork.add(stationInfo);
+		stationInfo.setMapCursor(mapCursor);
 
 		// setup the 'show controls' dialogue
 		showControls = new GameControlsJPanel();
 		showControls.setup(w, vl, this.closeCurrentDialogue);
 
 		//Set up train orders dialogue
-		trainScheduleJPanel = new TrainScheduleJPanel();
-		trainScheduleJPanel.setup(w, vl);
+		//trainScheduleJPanel = new TrainScheduleJPanel();
+		//trainScheduleJPanel.setup(w, vl);
+		//moveChainFork.add(trainScheduleJPanel);
 
 		//Set up select engine dialogue.
 		selectEngine = new SelectEngineJPanel(this);
@@ -120,10 +157,13 @@ public class DialogueBoxController {
 		newspaper.setup(w, vl, closeCurrentDialogue);
 
 		selectWagons = new SelectWagonsJPanel();
+
+		final ReadOnlyWorld finalROW = this.world;
+		//So that inner class can reference it.
 		selectWagons.setup(w, vl, new ActionListener() {
 
 			public void actionPerformed(ActionEvent arg0) {
-				WorldIterator wi = new NonNullElements(KEY.STATIONS, w);
+				WorldIterator wi = new NonNullElements(KEY.STATIONS, finalROW);
 				if (wi.next()) {
 
 					StationModel station = (StationModel) wi.getElement();
@@ -134,20 +174,21 @@ public class DialogueBoxController {
 					ProductionAtEngineShop after =
 						new ProductionAtEngineShop(engineType, wagonTypes);
 
-					Move m = new ChangeProductionAtEngineShopMove(before, after, wi.getIndex());
-					MoveStatus ms =
+					Move m =
+						new ChangeProductionAtEngineShopMove(
+							before,
+							after,
+							wi.getIndex());
 					MoveExecuter.getMoveExecuter().processMove(m);
-					if (!ms.ok) {
-						System.out.println(
-							"Couldn't change production at station: " + ms.toString());
-					} else {
-						System.out.println("Production at station changed.");
-					}
 				}
 				closeContent();
 			}
 
 		});
+
+		trainDialogueJPanel = new TrainDialogueJPanel();
+		trainDialogueJPanel.setup(world, viewLists, callbacks);
+		moveChainFork.addListListener(trainDialogueJPanel);
 	}
 
 	public void showNewspaper(String headline) {
@@ -156,17 +197,18 @@ public class DialogueBoxController {
 	}
 
 	public void showTrainOrders() {
-		WorldIterator wi = new NonNullElements(KEY.TRAINS, w);
+		WorldIterator wi = new NonNullElements(KEY.TRAINS, world);
 		if (!wi.next()) {
-			System.out.println("Cannot show train orders since there are no trains!");
+			System.out.println(
+				"Cannot show train orders since there are no trains!");
 		} else {
-			trainScheduleJPanel.displayFirst();
-			showContent(trainScheduleJPanel);
+			trainDialogueJPanel.display(0);
+			this.showContent(trainDialogueJPanel);
 		}
 	}
 
 	public void showSelectEngine() {
-		WorldIterator wi = new NonNullElements(KEY.STATIONS, w);
+		WorldIterator wi = new NonNullElements(KEY.STATIONS, world);
 		if (!wi.next()) {
 			System.out.println("Can't build train since there are no stations");
 		} else {
@@ -176,12 +218,12 @@ public class DialogueBoxController {
 	}
 
 	public void showGameControls() {
-		
+
 		showContent(this.showControls);
 	}
 
 	public void showSelectWagons() {
-		
+
 		selectWagons.resetSelectedWagons();
 		selectWagons.setEngineType(selectEngine.getEngineType());
 		showContent(selectWagons);
@@ -193,52 +235,60 @@ public class DialogueBoxController {
 	}
 
 	public void showTerrainInfo(int x, int y) {
-		FreerailsTile tile = w.getTile(x, y);
+		FreerailsTile tile = world.getTile(x, y);
 		int terrainType = tile.getTerrainTypeNumber();
 		showTerrainInfo(terrainType);
 	}
 
 	public void showStationInfo(int stationNumber) {
-		try{		
-			/* XXX FIXME This is the wrong place for this!!! 
-			 * This needs to be done somewhere on the server side */
-			CalcSupplyAtStations cSAS = new CalcSupplyAtStations(w);
-			cSAS.doProcessing();
-
+		try {
 			stationInfo.setStation(stationNumber);
 			showContent(stationInfo);
-		}catch (NoSuchElementException e){
-			System.out.println("Station "+stationNumber+" does not exist!");
+		} catch (NoSuchElementException e) {
+			System.out.println("Station " + stationNumber + " does not exist!");
+		}
+	}
+
+	public void showTrainList() {
+		if (world.size(KEY.TRAINS) > 0) {
+			trainList.setModel(new World2ListModelAdapter(world, KEY.TRAINS));
+			TrainViewJPanel trainView =
+				new TrainViewJPanel(world, viewLists, 0);
+			trainList.setCellRenderer(trainView);
+			trainView.setHeight(50);
+			showContent(trainList);
+		} else {
+			System.out.println("There are no trains to display!");
 		}
 	}
 
 	public void showContent(JComponent component) {
-	    JComponent contentPanel;
-	    if (! (component instanceof View)) {
-		contentPanel = new javax.swing.JPanel();
-		contentPanel.setLayout(new java.awt.GridBagLayout());
-		GridBagConstraints constraints = new GridBagConstraints();
-		constraints.gridx = 0;
-		constraints.gridy = 0;
-		constraints.weightx = 1.0;
-		constraints.weighty = 1.0;
-		contentPanel.add(component, constraints);
+		JComponent contentPanel;
+		if (!(component instanceof View)) {
+			contentPanel = new javax.swing.JPanel();
+			contentPanel.setLayout(new java.awt.GridBagLayout());
+			GridBagConstraints constraints = new GridBagConstraints();
+			constraints.gridx = 0;
+			constraints.gridy = 0;
+			constraints.weightx = 1.0;
+			constraints.weighty = 1.0;
+			contentPanel.add(component, constraints);
 
-		constraints = new GridBagConstraints();
-		constraints.gridx = 0;
-		constraints.gridy = 1;
-		contentPanel.add(closeButton, constraints);
-	    } else {
-		contentPanel = component;
-	    }
+			constraints = new GridBagConstraints();
+			constraints.gridx = 0;
+			constraints.gridy = 1;
+			contentPanel.add(closeButton, constraints);
+		} else {
+			contentPanel = component;
+		}
 
-	    contentPanel.setBorder(defaultBorder);
+		contentPanel.setBorder(defaultBorder);
 		//		if(!glassPanel.isVisible()){
 		//			KeyboardFocusManager keyboardFocusManager =
 		//			KeyboardFocusManager.getCurrentKeyboardFocusManager();
 		//			lastFocusOwner = keyboardFocusManager.getFocusOwner();
 		//		}
-	    glassPanel.showContent(contentPanel);
+		glassPanel.showContent(contentPanel);
 		glassPanel.validate();
 		glassPanel.setVisible(true);
 	}
@@ -256,20 +306,22 @@ public class DialogueBoxController {
 	public void setDefaultFocusOwner(Component defaultFocusOwner) {
 		this.defaultFocusOwner = defaultFocusOwner;
 	}
-	
-	public void showStationOrTerrainInfo(int x, int y){
-		FreerailsTile tile = w.getTile(x,y);
-		if(tile.getTrackRule().isStation()){
-			 for(int i = 0 ; i < w.size(KEY.STATIONS); i++){
-			 	StationModel station = (StationModel)w.get(KEY.STATIONS, i);
-			 	if(null!=station && station.x == x && station.y==y){
-			 		this.showStationInfo(i);
-			 		return;
-			 	}
-			 }	
-			 throw new IllegalStateException("Could find station at "+x+", "+y);
-		}else{
-			this.showTerrainInfo(x, y);			
+
+	public void showStationOrTerrainInfo(int x, int y) {
+		FreerailsTile tile = world.getTile(x, y);
+		if (tile.getTrackRule().isStation()) {
+			for (int i = 0; i < world.size(KEY.STATIONS); i++) {
+				StationModel station =
+					(StationModel) world.get(KEY.STATIONS, i);
+				if (null != station && station.x == x && station.y == y) {
+					this.showStationInfo(i);
+					return;
+				}
+			}
+			throw new IllegalStateException(
+				"Could find station at " + x + ", " + y);
+		} else {
+			this.showTerrainInfo(x, y);
 		}
 	}
 

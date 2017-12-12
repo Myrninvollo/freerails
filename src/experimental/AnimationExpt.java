@@ -5,8 +5,15 @@ import java.awt.Graphics;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 
-import jfreerails.client.common.GameLoop;
+import jfreerails.client.top.GameLoop;
 import jfreerails.client.common.ScreenHandler;
+
+/** This class tests that the game loop and screen handler are working correctly.  All it does is display 
+ * the current time in ms and display the number of frames per second.
+ * 
+ * @author Luke Lindsay
+ *
+ */
 
 public class AnimationExpt extends JComponent {
     
@@ -20,9 +27,8 @@ public class AnimationExpt extends JComponent {
     
     public static void main(String[] args) {
         JFrame f = new JFrame();
-        f.getContentPane().add(new AnimationExpt());
-        boolean fullscreen=false;
-        ScreenHandler screenHandler=new ScreenHandler(f, fullscreen);
+        f.getContentPane().add(new AnimationExpt());      
+        ScreenHandler screenHandler=new ScreenHandler(f, ScreenHandler.WINDOWED_MODE, null);
         GameLoop gameLoop=new GameLoop(screenHandler);
         Thread t=new Thread(gameLoop);
         t.start();

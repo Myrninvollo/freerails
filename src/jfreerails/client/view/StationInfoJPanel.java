@@ -10,18 +10,16 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
 import jfreerails.client.renderer.ViewLists;
-import jfreerails.controller.MoveChainFork;
 import jfreerails.controller.MoveReceiver;
 import jfreerails.move.AddItemToListMove;
 import jfreerails.move.ListMove;
 import jfreerails.move.Move;
-import jfreerails.move.MoveStatus;
 import jfreerails.world.cargo.CargoBundle;
 import jfreerails.world.cargo.CargoType;
 import jfreerails.world.station.StationModel;
 import jfreerails.world.top.KEY;
 import jfreerails.world.top.NonNullElements;
-import jfreerails.world.top.World;
+import jfreerails.world.top.ReadOnlyWorld;
 import jfreerails.world.top.WorldIterator;
 import jfreerails.world.track.FreerailsTile;
 
@@ -29,12 +27,15 @@ import jfreerails.world.track.FreerailsTile;
  *
  * @author  Luke
  */
-public class StationInfoJPanel extends javax.swing.JPanel implements
-    MoveReceiver {
+public class StationInfoJPanel
+extends javax.swing.JPanel
+implements MoveReceiver {
     
     private ViewLists vl;
-    private World w;
+    private ReadOnlyWorld w;
     private WorldIterator wi;
+    private boolean ignoreMoves = true;
+    private MapCursor mapCursor = MapCursor.NULL_MAP_CURSOR;
     
     /**
      * The index of the cargoBundle associated with this station
@@ -110,151 +111,178 @@ public class StationInfoJPanel extends javax.swing.JPanel implements
         add(previousStation, gridBagConstraints);
 
     }//GEN-END:initComponents
-
-    private void previousStationActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_previousStationActionPerformed
+    
+    private void previousStationActionPerformed(
+    java.awt.event.ActionEvent evt) {
+		//GEN-FIRST:event_previousStationActionPerformed
         // Add your handling code here:
-         if(wi.previous() ){
-	     Point p = new Point(((StationModel) wi.getElement()).getStationX(),
-		     ((StationModel) wi.getElement()).getStationY());
-	     FreerailsCursor.getCursor().TryMoveCursor(p);
-		     
+        if (wi.previous()) {
+            Point p =
+            new Point(
+            ((StationModel) wi.getElement()).getStationX(),
+            ((StationModel) wi.getElement()).getStationY());
+            getMapCursor().tryMoveCursor(p);
+            
             display();
-        }else{
+        } else {
             throw new IllegalStateException();
         }
-    }//GEN-LAST:event_previousStationActionPerformed
-
-    private void nextStationActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nextStationActionPerformed
+	} //GEN-LAST:event_previousStationActionPerformed
+    
+    private void nextStationActionPerformed(
+    java.awt.event.ActionEvent evt) {
+		//GEN-FIRST:event_nextStationActionPerformed
         // Add your handling code here:
-          if(wi.next()){
-	     Point p = new Point(((StationModel) wi.getElement()).getStationX(),
-		     ((StationModel) wi.getElement()).getStationY());
-	     FreerailsCursor.getCursor().TryMoveCursor(p);
+        if (wi.next()) {
+            Point p =
+            new Point(
+            ((StationModel) wi.getElement()).getStationX(),
+            ((StationModel) wi.getElement()).getStationY());
+            getMapCursor().tryMoveCursor(p);
             display();
-        }else{
+        } else {
             throw new IllegalStateException();
         }
         
-    }//GEN-LAST:event_nextStationActionPerformed
-
-    public void setup(World w, ViewLists vl) {
+	} //GEN-LAST:event_nextStationActionPerformed
+    
+    public void setup(ReadOnlyWorld w, ViewLists vl) {
         this.vl = vl;
         this.w = w;
         this.wi = new NonNullElements(KEY.STATIONS, w);
-	addComponentListener(componentListener);
-    }    
+        addComponentListener(componentListener);
+    }
     
-    public void setStation(int stationNumber){
+    public void setStation(int stationNumber) {
         this.wi.gotoIndex(stationNumber);
         display();
     }
     
-    public void display(){
+    public void display() {
         
-        if(wi.getRowNumber()>0){
+        if (wi.getRowNumber() > 0) {
             this.previousStation.setEnabled(true);
-        }else{
+        } else {
             this.previousStation.setEnabled(false);
         }
         
-        if(wi.getRowNumber()<(wi.size()-1)){
+        if (wi.getRowNumber() < (wi.size() - 1)) {
             this.nextStation.setEnabled(true);
-        }else{
+        } else {
             this.nextStation.setEnabled(false);
         }
         
         int stationNumber = wi.getIndex();
-	String label;
-	if (stationNumber != WorldIterator.BEFORE_FIRST) {
-        StationModel station = (StationModel)w.get(KEY.STATIONS, stationNumber);
-        FreerailsTile tile = w.getTile(station.x, station.y); 
-        String stationTypeName = tile.getTrackRule().getTypeName();  
-	    cargoBundleIndex = station.getCargoBundleNumber();
-        CargoBundle cargoWaiting = (CargoBundle)w.get(KEY.CARGO_BUNDLES, station.getCargoBundleNumber());     
-        String title = "<h2 align=\"center\">"+station.getStationName()+" ("+stationTypeName+")</h2>";
-        String table ="<table width=\"100%\" border=\"0\" cellspacing=\"0\" cellpadding=\"3\"><tr><td>&nbsp;</td>\n    <td>Will pay for</td>\n    <td>Supplies / cars per year</td><td>Waiting for pickup / car loads</td>  </tr>";
-        for(int i = 0 ; i < w.size(KEY.CARGO_TYPES) ; i++){         
-        	
-        	//get the values
-            CargoType cargoType = (CargoType)w.get(KEY.CARGO_TYPES, i);                       
-            String demanded = (station.getDemand().isCargoDemanded(i) ? "Yes" : "No");                                 			
-            int amountSupplied = station.getSupply().getSupply(i);
-            String supply = (amountSupplied > 0) ? String.valueOf(amountSupplied) : "&nbsp;";            
-			int amountWaiting = cargoWaiting.getAmount(i);
-			String waiting = (amountWaiting > 0) ? String.valueOf(amountWaiting) : "&nbsp;";
-			
-			//build the html
-			table +="<tr>";
-			table +="<td>"+cargoType.getDisplayName()+"</td>";
-			table +="<td>"+demanded+ "</td>";  
-			table +="<td>"+supply+"</td>";
-			table +="<td>"+waiting+"</td>";
-			table +="</tr>";
-                       
+        String label;
+        if (stationNumber != WorldIterator.BEFORE_FIRST) {
+            StationModel station =
+            (StationModel) w.get(KEY.STATIONS, stationNumber);
+            FreerailsTile tile = w.getTile(station.x, station.y);
+            String stationTypeName = tile.getTrackRule().getTypeName();
+            cargoBundleIndex = station.getCargoBundleNumber();
+            CargoBundle cargoWaiting =
+            (CargoBundle) w.get(
+            KEY.CARGO_BUNDLES,
+            station.getCargoBundleNumber());
+            String title =
+            "<h2 align=\"center\">"
+            + station.getStationName()
+            + " ("
+            + stationTypeName
+            + ")</h2>";
+            String table =
+            "<table width=\"100%\" border=\"0\" cellspacing=\"0\" cellpadding=\"3\"><tr><td>&nbsp;</td>\n    <td>Will pay for</td>\n    <td>Supplies / cars per year</td><td>Waiting for pickup / car loads</td>  </tr>";
+            for (int i = 0; i < w.size(KEY.CARGO_TYPES); i++) {
+                
+                //get the values
+                CargoType cargoType = (CargoType) w.get(KEY.CARGO_TYPES, i);
+                String demanded =
+                (station.getDemand().isCargoDemanded(i) ? "Yes" : "No");
+                int amountSupplied = station.getSupply().getSupply(i);
+                String supply =
+                (amountSupplied > 0)
+                ? String.valueOf(amountSupplied)
+                : "&nbsp;";
+                int amountWaiting = cargoWaiting.getAmount(i);
+                String waiting =
+                (amountWaiting > 0)
+                ? String.valueOf(amountWaiting)
+                : "&nbsp;";
+                
+                //build the html
+                table += "<tr>";
+                table += "<td>" + cargoType.getDisplayName() + "</td>";
+                table += "<td>" + demanded + "</td>";
+                table += "<td>" + supply + "</td>";
+                table += "<td>" + waiting + "</td>";
+                table += "</tr>";
+                
+            }
+            table += "</table>";
+            label = "<html>" + title + table + "</html>";
+        } else {
+            cargoBundleIndex = WorldIterator.BEFORE_FIRST;
+            label =
+            "<html><h2 align=\"center\">No Station "
+            + "Selected</h2></html>";
         }
-        table +="</table>";
-	    label = "<html>" + title + table + "</html>";
-	} else {
-	    cargoBundleIndex = WorldIterator.BEFORE_FIRST;
-	    label = "<html><h2 align=\"center\">No Station " +
-	    "Selected</h2></html>";
-	}
         jLabel1.setText(label);
+        this.repaint();
     }
     
     ComponentAdapter componentListener = new ComponentAdapter() {
-	public void componentHidden(ComponentEvent e) {
-	    MoveChainFork.getMoveChainFork().remove(StationInfoJPanel.this);
-	}
-
-	public void componentShown(ComponentEvent e) {
-	    MoveChainFork.getMoveChainFork().add(StationInfoJPanel.this);
-	    int i = wi.getIndex();
-	    wi.reset();
-	    if (i != WorldIterator.BEFORE_FIRST) {
-		wi.gotoIndex(i);
-	    }
-	    display();
-	}
+        public void componentHidden(ComponentEvent e) {
+            ignoreMoves = true;
+        }
+        
+        public void componentShown(ComponentEvent e) {
+            ignoreMoves = false;
+            int i = wi.getIndex();
+            wi.reset();
+            if (i != WorldIterator.BEFORE_FIRST) {
+                wi.gotoIndex(i);
+            }
+            display();
+        }
     };
     
-    public MoveStatus processMove(Move move) {
-	if (! (move instanceof ListMove)) {
-	    return MoveStatus.MOVE_RECEIVED;
-	}
-
-	ListMove lm = (ListMove) move;
-	int currentIndex = wi.getIndex();
-	int changedIndex = lm.getIndex();
-	KEY key = lm.getKey();
-	if (key == KEY.CARGO_BUNDLES) {
-	    if (changedIndex == cargoBundleIndex) {
-		/* update our cargo bundle */
-		display();
-		return MoveStatus.MOVE_OK;
-	    }
-	} else if (key == KEY.STATIONS) {
-	    wi.reset();
-	    if (currentIndex != WorldIterator.BEFORE_FIRST) {
-		wi.gotoIndex(currentIndex);
-	    }
-	    if (lm instanceof AddItemToListMove &&
-		    wi.getIndex() == WorldIterator.BEFORE_FIRST) {
-		if (wi.next()) {
-		    display();
-		}
-	    }
-	    if (changedIndex < currentIndex) {
-		previousStation.setEnabled(lm.getBefore() != null);
-	    } else if (changedIndex > currentIndex) {
-		nextStation.setEnabled(lm.getAfter() != null);
-	    } else {
-		display();
-	    }
-	} else {
-	    return MoveStatus.MOVE_RECEIVED;
-	}
-	return MoveStatus.MOVE_OK;
+    public void processMove(Move move) {
+        if(ignoreMoves){
+            return;
+        }
+        if (!(move instanceof ListMove)) {
+            return;
+        }
+        ListMove lm = (ListMove) move;
+        int currentIndex = wi.getIndex();
+        int changedIndex = lm.getIndex();
+        KEY key = lm.getKey();
+        if (key == KEY.CARGO_BUNDLES) {
+            if (changedIndex == cargoBundleIndex) {
+                /* update our cargo bundle */
+                display();
+                return;
+            }
+        } else if (key == KEY.STATIONS) {
+            wi.reset();
+            if (currentIndex != WorldIterator.BEFORE_FIRST) {
+                wi.gotoIndex(currentIndex);
+            }
+            if (lm instanceof AddItemToListMove
+            && wi.getIndex() == WorldIterator.BEFORE_FIRST) {
+                if (wi.next()) {
+                    display();
+                }
+            }
+            if (changedIndex < currentIndex) {
+                previousStation.setEnabled(lm.getBefore() != null);
+            } else if (changedIndex > currentIndex) {
+                nextStation.setEnabled(lm.getAfter() != null);
+            } else {
+                display();
+            }
+        }
+        return;
     }
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -262,5 +290,17 @@ public class StationInfoJPanel extends javax.swing.JPanel implements
     private javax.swing.JButton nextStation;
     private javax.swing.JButton previousStation;
     // End of variables declaration//GEN-END:variables
+    
+    
+    public MapCursor getMapCursor() {
+        return mapCursor;
+    }
+    
+    public void setMapCursor(MapCursor cursor) {
+        if(null == cursor){
+            throw new NullPointerException();
+        }
+        mapCursor = cursor;
+    }
     
 }

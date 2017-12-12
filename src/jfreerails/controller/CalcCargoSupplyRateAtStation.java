@@ -18,7 +18,7 @@ import jfreerails.world.terrain.Conversion;
 import jfreerails.world.terrain.Production;
 import jfreerails.world.terrain.TerrainType;
 import jfreerails.world.top.KEY;
-import jfreerails.world.top.World;
+import jfreerails.world.top.ReadOnlyWorld;
 import jfreerails.world.track.FreerailsTile;
 import jfreerails.world.track.TrackRule;
 
@@ -27,7 +27,7 @@ public class CalcCargoSupplyRateAtStation {
 	/** The threshold that demand for a cargo must exceed before the station demands the cargo */
 	private static final int PREREQUISITE_FOR_DEMAND = 16;
 
-	private World w;
+	private ReadOnlyWorld w;
 	private int x;
 	private int y;
 
@@ -35,7 +35,7 @@ public class CalcCargoSupplyRateAtStation {
 	private int[] demand;
 	private int[] converts;
 
-	public CalcCargoSupplyRateAtStation(World world, int X, int Y) {
+	public CalcCargoSupplyRateAtStation(ReadOnlyWorld world, int X, int Y) {
 
 		this.w = world;
 		this.x = X;

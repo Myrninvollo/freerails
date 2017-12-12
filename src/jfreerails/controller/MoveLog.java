@@ -10,7 +10,6 @@ package jfreerails.controller;
 import java.util.Vector;
 
 import jfreerails.move.Move;
-import jfreerails.move.MoveStatus;
 
 
 
@@ -65,8 +64,7 @@ public class MoveLog implements MoveReceiver {
  * @return A MoveStatus with ...
  */
 
-    public MoveStatus processMove(Move Move) {
-        return null;
+    public void processMove(Move Move) {
     }
 
 

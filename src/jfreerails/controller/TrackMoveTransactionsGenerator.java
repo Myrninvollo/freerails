@@ -14,7 +14,7 @@ import jfreerails.world.accounts.AddItemTransaction;
 import jfreerails.world.accounts.Transaction;
 import jfreerails.world.common.Money;
 import jfreerails.world.top.KEY;
-import jfreerails.world.top.World;
+import jfreerails.world.top.ReadOnlyWorld;
 import jfreerails.world.track.NullTrackType;
 import jfreerails.world.track.TrackRule;
 
@@ -40,9 +40,9 @@ public class TrackMoveTransactionsGenerator {
 
 	private ArrayList transactions = new ArrayList();
 
-	private World w;
+	private ReadOnlyWorld w;
 
-	public TrackMoveTransactionsGenerator(World world) {
+	public TrackMoveTransactionsGenerator(ReadOnlyWorld world) {
 		w = world;
 
 	}

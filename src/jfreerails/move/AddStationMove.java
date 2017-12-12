@@ -7,12 +7,11 @@ package jfreerails.move;
 import java.awt.Point;
 import java.awt.Rectangle;
 
-
 import jfreerails.world.cargo.CargoBundleImpl;
 import jfreerails.world.common.Money;
 import jfreerails.world.station.StationModel;
 import jfreerails.world.top.KEY;
-import jfreerails.world.top.World;
+import jfreerails.world.top.ReadOnlyWorld;
 import jfreerails.world.track.TrackRule;
 
 /**
@@ -29,12 +28,13 @@ public class AddStationMove extends CompositeMove implements TrackMove {
 		super(moves);					
 	}
 
-	public static AddStationMove generateMove(World w, String stationName, Point p, ChangeTrackPieceMove upgradeTrackMove){	
+	public static AddStationMove generateMove(ReadOnlyWorld w, String stationName, Point p, ChangeTrackPieceMove upgradeTrackMove){	
 					
 		int cargoBundleNumber = w.size(KEY.CARGO_BUNDLES);
 		Move addCargoBundleMove = new AddCargoBundleMove(cargoBundleNumber, new CargoBundleImpl());
 		int stationNumber = w.size(KEY.STATIONS);
 		StationModel station = new StationModel(p.x, p.y, stationName, w.size(KEY.CARGO_TYPES), cargoBundleNumber);
+		
 		Move addStation = new AddItemToListMove(KEY.STATIONS,  stationNumber, station);
 		TrackRule typeAfter = upgradeTrackMove.getNewTrackPiece().getTrackRule();
 		Money cost = typeAfter.getPrice();	

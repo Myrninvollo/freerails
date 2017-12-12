@@ -15,16 +15,16 @@ import java.util.Vector;
 import jfreerails.world.station.StationModel;
 import jfreerails.world.top.KEY;
 import jfreerails.world.top.NonNullElements;
-import jfreerails.world.top.World;
+import jfreerails.world.top.ReadOnlyWorld;
 import jfreerails.world.top.WorldIterator;
 
 public class VerifyStationName {
 
-	private World w;
+	private ReadOnlyWorld w;
 	private String nameToVerify;
 	private Vector stationAlternatives;
 
-	public VerifyStationName(World world, String name) {
+	public VerifyStationName(ReadOnlyWorld world, String name) {
 		this.w = world;
 		this.nameToVerify = name;
 		this.stationAlternatives = new Vector();

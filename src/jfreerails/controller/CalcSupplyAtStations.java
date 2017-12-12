@@ -4,6 +4,8 @@
  * 
  * This class loops through all of the known stations and recalculates
  * the cargoes that they supply.
+ *
+ * FIXME This class should really be in the jfreerails.server package.
  */
 
 package jfreerails.controller;
@@ -14,11 +16,12 @@ import jfreerails.world.station.StationModel;
 import jfreerails.world.station.SupplyAtStation;
 import jfreerails.world.top.KEY;
 import jfreerails.world.top.NonNullElements;
-import jfreerails.world.top.World;
+import jfreerails.world.top.ReadOnlyWorld;
+import jfreerails.world.top.WorldListListener;
 
-public class CalcSupplyAtStations {
+public class CalcSupplyAtStations implements WorldListListener {
 
-	private World w;
+	private ReadOnlyWorld w;
 
 	/**
 	 * 
@@ -27,7 +30,7 @@ public class CalcSupplyAtStations {
 	 * @param world The World object that contains all about the game world
 	 * 
 	 */
-	public CalcSupplyAtStations(World world) {
+	public CalcSupplyAtStations(ReadOnlyWorld world) {
 		this.w = world;	
 	}
 	
@@ -75,6 +78,18 @@ public class CalcSupplyAtStations {
 		station.setSupply(supplyAtStation);
 		station.setDemand(supplyRate.getDemand());
 		station.setConverted(supplyRate.getConversion());
+	}
+
+	public void listUpdated(KEY key, int index) {
+		if(key == KEY.STATIONS){
+			this.doProcessing();	
+		}	
+	}
+
+	public void itemAdded(KEY key, int index) {
+		if(key == KEY.STATIONS){
+			this.doProcessing();	
+		}		
 	}
 	
 }

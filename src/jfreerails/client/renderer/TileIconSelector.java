@@ -6,7 +6,7 @@
 */
 package jfreerails.client.renderer;
 
-import jfreerails.world.top.World;
+import jfreerails.world.top.ReadOnlyWorld;
 
 
 /**
@@ -34,7 +34,7 @@ public abstract class TileIconSelector extends java.lang.Object {
         }
     }
 
-    public int selectTileIcon( int x, int y, World w ) {
+    public int selectTileIcon( int x, int y, ReadOnlyWorld w ) {
         return 0;
     }
 	/* This seems to be duplicated in AbstractTileRenderer

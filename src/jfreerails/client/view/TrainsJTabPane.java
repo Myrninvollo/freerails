@@ -3,7 +3,7 @@
  */
 
 /*
- * $Id: TrainsJTabPane.java,v 1.2 2003/08/07 23:05:46 lindsal Exp $
+ * $Id: TrainsJTabPane.java,v 1.4 2003/08/25 22:26:14 lindsal Exp $
  */
 
 package jfreerails.client.view;
@@ -13,14 +13,13 @@ import java.awt.Point;
 import javax.swing.JTabbedPane;
 
 import jfreerails.client.renderer.ViewLists;
-import jfreerails.world.top.World;
+import jfreerails.world.top.ReadOnlyWorld;
 
 public class TrainsJTabPane extends JTabbedPane implements CursorEventListener {
     private TerrainInfoJPanel terrainInfoPanel;
     private StationInfoJPanel stationInfoPanel;
-    private TrainScheduleJPanel trainSchedulePanel;
-
-    private World world;
+    //private TrainScheduleJPanel trainSchedulePanel;
+    private ReadOnlyWorld world;
 
     public TrainsJTabPane() {
 	/* set up trainsJTabbedPane */
@@ -32,22 +31,24 @@ public class TrainsJTabPane extends JTabbedPane implements CursorEventListener {
 	stationInfoPanel = new StationInfoJPanel();
 	addTab("Station Info", stationInfoPanel);
         
-        trainSchedulePanel = new TrainScheduleJPanel();
-        addTab("Train Schedule", trainSchedulePanel);
+       // trainSchedulePanel = new TrainScheduleJPanel();
+       // addTab("Train Schedule", trainSchedulePanel);
         
     }
+    
+    public void setMapCursor(MapCursor mapCursor){
+		stationInfoPanel.setMapCursor(mapCursor);
+    }
 	
-    public void setup(FreerailsCursor cursor, World w, ViewLists vl) {
-	terrainInfoPanel.setup(w, vl);
-	stationInfoPanel.setup(w, vl);
-	trainSchedulePanel.setup(w, vl);
-        
-        trainSchedulePanel.displayFirst();
-	stationInfoPanel.display();
-        
-	cursor.addCursorEventListener(this);
+    public void setup(ReadOnlyWorld w,  ViewLists vl) {	
 	world = w;
-
+	terrainInfoPanel.setup(world, vl);
+	stationInfoPanel.setup(world, vl);
+	//trainSchedulePanel.setup(world, vl);
+        
+    //    trainSchedulePanel.displayFirst();
+	stationInfoPanel.display();
+        	
     }
 
     private void updateTerrainInfo(CursorEvent e) {

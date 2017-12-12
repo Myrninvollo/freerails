@@ -19,10 +19,10 @@ public class GameJFrame extends javax.swing.JFrame {
     
     GameModel model = GameModel.NULL_MODEL;
     
-    boolean fullscreen=false;
+    int mode = ScreenHandler.WINDOWED_MODE;
     
-    public void setFullScreen(boolean b){
-        this.fullscreen=b;
+    public void setFullScreen(int  i){
+		mode = i;
     }
 
 	public GameJFrame(Painter r) {
@@ -63,10 +63,10 @@ public class GameJFrame extends javax.swing.JFrame {
     }
 
 	public void startGameLoop() {
-		ScreenHandler screenHandler = new ScreenHandler(this, fullscreen);
-		GameLoop gameLoop = new GameLoop(screenHandler, this.model);
-		Thread t = new Thread(gameLoop);
-		t.start();
+		ScreenHandler screenHandler = new ScreenHandler(this, mode, null);
+		//GameLoop gameLoop = new GameLoop(screenHandler, this.model);
+		//Thread t = new Thread(gameLoop);
+		//t.start();
 	}
 
 }

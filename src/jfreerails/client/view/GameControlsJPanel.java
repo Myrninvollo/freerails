@@ -5,16 +5,24 @@
  */
 
 package jfreerails.client.view;
-import jfreerails.world.top.World;
-import jfreerails.client.renderer.ViewLists;
 import java.awt.event.ActionListener;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
+import jfreerails.client.renderer.ViewLists;
+import jfreerails.world.top.ReadOnlyWorld;
+
 /**
  *  This JPanel shows the games controls, that is, which keys do what.  Currently, it just displays
  *a hard coded html string.
  * @author  Luke
  */
 public class GameControlsJPanel extends javax.swing.JPanel implements View {
+
+	private ReadOnlyWorld w;
 
 	/** Creates new form GameControlsJPanel */
 	public GameControlsJPanel() {
@@ -42,9 +50,10 @@ public class GameControlsJPanel extends javax.swing.JPanel implements View {
 	} //GEN-END:initComponents
 
 	public void setup(
-		World w,
+		ReadOnlyWorld w,
 		ViewLists vl,
 		ActionListener submitButtonCallBack) {
+		this.w = w;
 		this.done.addActionListener(submitButtonCallBack);
 	}
 

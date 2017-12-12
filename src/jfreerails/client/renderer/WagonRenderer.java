@@ -21,7 +21,7 @@ import jfreerails.client.common.ImageManager;
 import jfreerails.world.cargo.CargoType;
 import jfreerails.world.common.OneTileMoveVector;
 import jfreerails.world.top.KEY;
-import jfreerails.world.top.World;
+import jfreerails.world.top.ReadOnlyWorld;
 import jfreerails.world.train.WagonType;
 
 public class WagonRenderer {
@@ -193,7 +193,7 @@ public class WagonRenderer {
 		return image;
 	}
 
-	public static void writeImages(ImageManager imageManager, World w) {
+	public static void writeImages(ImageManager imageManager, ReadOnlyWorld w) {
 		WagonRenderer wagonRenderer = new WagonRenderer();
 		for (int j = 0; j < w.size(KEY.CARGO_TYPES); j++) {
 			CargoType cargoType = (CargoType) w.get(KEY.CARGO_TYPES, j);

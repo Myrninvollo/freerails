@@ -27,11 +27,8 @@ public class TrainMover  implements FreerailsServerSerializable{
 	
 	final World w;
 	
-	double trainSpeed;
 
-	public TrainMover(FreerailsPathIterator from, FreerailsPathIterator to, World world, int trainNo) {
-					
-		trainSpeed = rand.nextDouble()+1;			
+	public TrainMover(FreerailsPathIterator from, FreerailsPathIterator to, World world, int trainNo) {							
 		
 		this.trainNumber=trainNo;
 		this.w=world;
@@ -58,27 +55,31 @@ public class TrainMover  implements FreerailsServerSerializable{
 	
 	
 	public ChangeTrainPositionMove update(int distanceTravelled) {
-		double  distance = distanceTravelled * trainSpeed;					
+		double distanceTravelledAsDouble = distanceTravelled;
+		double  distance = distanceTravelledAsDouble * getTrainSpeed();					
 		walker.stepForward(distance);
 		return ChangeTrainPositionMove.generate(w, walker, trainNumber);		
 	}
 
-
-
-	/**
-	 * Returns the trainSpeed.
-	 * @return int
-	 */
+	
 	public double getTrainSpeed() {
-		return trainSpeed;
-	}
-
-	/**
-	 * Sets the trainSpeed.
-	 * @param trainSpeed The trainSpeed to set
-	 */
-	public void setTrainSpeed(double trainSpeed) {
-		this.trainSpeed = trainSpeed;
-	}
+		TrainModel train = (TrainModel)w.get(KEY.TRAINS, trainNumber);
+		int trainLength = train.getNumberOfWagons();
+		//For now train speeds are hard coded.
+		switch(trainLength){
+			case 0:
+				return 1;
+			case 1:
+				return 0.8;
+			case 2:
+				return 0.6;
+			case 3:
+				return 0.4;
+			case 4:
+				return 0.3;
+			default:
+				return 0.2;				
+		}
+	}	
 
 }

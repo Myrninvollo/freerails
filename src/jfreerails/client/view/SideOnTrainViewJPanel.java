@@ -12,7 +12,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
 import jfreerails.client.renderer.ViewLists;
-import jfreerails.world.top.World;
+import jfreerails.world.top.ReadOnlyWorld;
 /**
  *
  * @author  Luke
@@ -29,7 +29,7 @@ public class SideOnTrainViewJPanel extends javax.swing.JPanel {
 
 	private ViewLists viewLists;
 
-	private World w;
+	private ReadOnlyWorld w;
 
 	int scaledImageHeight = 15;
 
@@ -73,7 +73,7 @@ public class SideOnTrainViewJPanel extends javax.swing.JPanel {
 	}
 
 	public void setup(
-		World world,
+		ReadOnlyWorld world,
 		ViewLists vl,
 		ActionListener submitButtonCallBack) {
 		this.viewLists = vl;
