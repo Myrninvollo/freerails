@@ -52,7 +52,7 @@ public class MapFixtureFactory {
 				"100110000" };
 
 		legalTrackConfigurations[0] = new LegalTrackConfigurations(-1, trackTemplates0);
-		trackRuleProperties[0] = new TrackRuleProperties(1, false, "type0", 0, false, 0);
+		trackRuleProperties[0] = new TrackRuleProperties(1, false, "type0", 0, false, 0, 0, 10);
 		legalTrackPlacement[0] =
 			new LegalTrackPlacement(
 				new HashSet(),
@@ -66,7 +66,7 @@ public class MapFixtureFactory {
 		//2nd track type..
 		String[] trackTemplates1 = { "000010000", "010010000", "010010010" };
 		legalTrackConfigurations[1] = new LegalTrackConfigurations(-1, trackTemplates1);
-		trackRuleProperties[1] = new TrackRuleProperties(2, false, "type1", 1, false, 0);
+		trackRuleProperties[1] = new TrackRuleProperties(2, false, "type1", 1, false, 0, 0, 20);
 		HashSet cannotBuildOnTheseTerrainTypes = new HashSet();
 		cannotBuildOnTheseTerrainTypes.add("mountain");
 		legalTrackPlacement[1] =
@@ -80,7 +80,7 @@ public class MapFixtureFactory {
 				legalTrackPlacement[1]);
 
 		//3rd track type..
-		trackRuleProperties[2] = new TrackRuleProperties(3, false, "type2", 2, false, 0);
+		trackRuleProperties[2] = new TrackRuleProperties(3, false, "type2", 2, false, 0, 0, 30);
 		String[] trackTemplates2 = { "000010000" };
 		legalTrackConfigurations[2] = new LegalTrackConfigurations(-1, trackTemplates2);
 		legalTrackPlacement[2] =

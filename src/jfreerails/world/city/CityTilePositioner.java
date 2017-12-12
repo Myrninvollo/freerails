@@ -74,19 +74,19 @@ public class CityTilePositioner {
 	public int calcNumberOfInitialTiles() {
 
 		double myRand = Math.random();
-		int numberInitialTiles = 5;
+		int numberInitialTiles = 10;
 
 		if (myRand < 0.8) {
-			numberInitialTiles = 4;
+			numberInitialTiles = 8;
 		}
 		if (myRand < 0.6) {
-			numberInitialTiles = 3;
+			numberInitialTiles = 6;
 		}
 		if (myRand < 0.4) {
-			numberInitialTiles = 2;
+			numberInitialTiles = 4;
 		}
 		if (myRand < 0.2) {
-			numberInitialTiles = 1;
+			numberInitialTiles = 2;
 		}
 
 		return numberInitialTiles;

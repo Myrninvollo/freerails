@@ -43,6 +43,8 @@
     Y CDATA #REQUIRED
     signalTower (true|false)  #REQUIRED
     X CDATA #REQUIRED
+    price CDATA #REQUIRED
+    maintenance CDATA #REQUIRED
   >
 
   <!ELEMENT TrackPieceTemplate (ListOfLegalRoutesAcrossNode)>

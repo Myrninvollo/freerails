@@ -1,3 +1,72 @@
+11-Aug-2003 21:06:23 Luke
+	o You are now charged for track maintenance once per year.
+	o Cargo converions occur when you deliver cargo to a station
+	if an industry that converts the relevant cargo is within the
+	station radius.
+07-Aug-2003 23:26:02 Luke
+	o Applied Robert Tuck's patches to:
+	(i) 	Stop the Terrain Info panel from setting its preferred size to
+	a fixed value.
+	(ii) 	Fix the issue with starting a new map and being unable to lay
+	track.
+	(iii) 	Update remaining classes to use MoveExecuter.
+	(iv) 	Add the station info panel to the tab plane.
+	(v)		Add the train info/orders panel to the tab plane.
+06-Aug-2003 20:54:47 Luke
+	o Applied Robert Tuck's patch to stop the splitpane divider
+	getting focus when you press F8.
+	o Added the field 'constrained' to AddTransactionMove.  When 
+	this is set to true, the move will fail if you don't have enough
+	cash.
+	o Made the building and upgrading track cash constrained. 
+04-Aug-2003 22:35:08 Luke
+	o Added 5 patches contributed by Robert Tuck
+	(i)		Changes to build.xml
+	(ii)	Added 'View mode' to build menu.
+	(iii)	Update to train schedule so that stations
+			can be added and removed.
+	(iv)	Changes to MoveChain and Addition of
+			MoveExecutor.
+	(v)		Adding TabbedPane to the RHS with a tab
+			to show terrain info.
+	o Made build xml copy the game controls html file.
+02-Aug-2003 22:16:33 Luke
+	o Increased the number of resource tiles that are placed
+	around cities.
+	o Fixed bug where cargo was added to trains before wagons
+	were changed.
+01-Aug-2003 20:57:10 Luke
+	o Fixed failure in DropOffAndPickupCargoMoveGeneratorTest.	
+30-Jul-2003 21:51:56 Luke
+	o The player gets paid for delivering cargo, simply
+	$1,000 per unit of cargo for now.
+	See jfreerails.server.ProcessCargoAtStationMoveGenerator
+	o Fixed bug where 40 times too much cargo was being
+	produced by changing figues in cargo_and_terrain.xml	
+27-Jul-2003 17:27:19 Luke
+	o Got DropOffAndPickupCargoMoveGeneratorTest running 
+	without failures.
+21-Jul-2003 23:48:47 Luke
+	o The player now gets charged for:
+		-building stations
+		-building trains
+		-upgrading track
+	o The text for the 'Game controls' dialogue
+	box is now read in from a file rather than
+	hard coded into the java.
+08-Jul-2003 19:55:14 Luke
+	o Added initial balance of 1,000,000.
+	o Added prices to the track types defined in track_tiles.xml
+	o Updated the track XML parser to read in the track prices.
+	o Updated the build track moves that you get charged when you build
+	track and get a small credit when you remove track.	  
+07-Jul-2003 22:41:23 Luke
+	o Wrote 'Move' class to add financial transactions.
+	o Changed the class that adds cargo to stations so that
+	it adds 40 units per year if the station supplies one 
+	carload per year. 
+30-Jun-2003 17:29:00 Scott
+ 	o Cargo is now transferred correctly
 28-Jun-2003 21:46:40 Luke
 	o Moved 'show game controls' menu item to the Help menu.
 	o Removed 'add cargo to stations' menu item from the game

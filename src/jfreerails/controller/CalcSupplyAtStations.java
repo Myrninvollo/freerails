@@ -74,6 +74,7 @@ public class CalcSupplyAtStations {
 		SupplyAtStation supplyAtStation = new SupplyAtStation(cargoSupplied);
 		station.setSupply(supplyAtStation);
 		station.setDemand(supplyRate.getDemand());
+		station.setConverted(supplyRate.getConversion());
 	}
 	
 }

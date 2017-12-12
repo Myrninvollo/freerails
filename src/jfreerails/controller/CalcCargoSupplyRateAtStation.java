@@ -11,6 +11,7 @@ package jfreerails.controller;
 import java.util.Vector;
 
 import jfreerails.world.cargo.CargoType;
+import jfreerails.world.station.ConvertedAtStation;
 import jfreerails.world.station.DemandAtStation;
 import jfreerails.world.terrain.Consumption;
 import jfreerails.world.terrain.Conversion;
@@ -32,6 +33,7 @@ public class CalcCargoSupplyRateAtStation {
 
 	Vector supplies;
 	private int[] demand;
+	private int[] converts;
 
 	public CalcCargoSupplyRateAtStation(World world, int X, int Y) {
 
@@ -48,7 +50,9 @@ public class CalcCargoSupplyRateAtStation {
 
 		supplies = new Vector();
 		PopulateSuppliesVector();
-		demand = new int[w.size(KEY.CARGO_TYPES)];
+		int numCargoTypes = w.size(KEY.CARGO_TYPES);
+		demand = new int[numCargoTypes];
+		converts = ConvertedAtStation.emptyConversionArray(numCargoTypes);
 
 	}
 
@@ -98,6 +102,10 @@ public class CalcCargoSupplyRateAtStation {
 		}
 		return new DemandAtStation(demandboolean);
 	}
+	
+	public ConvertedAtStation getConversion(){
+		return new ConvertedAtStation(this.converts);
+	}
 
 	private void incrementSupplyAndDemand(int i, int j) {
 
@@ -135,6 +143,7 @@ public class CalcCargoSupplyRateAtStation {
 			int type = conversion[m].getInput();
 			//Only one tile that converts the cargo type is needed for the station to demand the cargo type.				
 			demand[type] += PREREQUISITE_FOR_DEMAND;
+			converts[type] = conversion[m].getOutput();
 		}
 	}
 

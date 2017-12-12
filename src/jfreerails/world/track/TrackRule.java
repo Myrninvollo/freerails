@@ -2,6 +2,7 @@ package jfreerails.world.track;
 import java.util.Iterator;
 
 import jfreerails.world.common.FreerailsSerializable;
+import jfreerails.world.common.Money;
 
 /**
 *  Description of the Interface
@@ -15,6 +16,10 @@ public interface TrackRule extends FreerailsSerializable {
 	boolean canBuildOnThisTerrainType(String TerrainType);
 	
 	boolean isStation();
+	
+	Money getPrice();
+	
+	Money getMaintenanceCost();
 	
 	int getStationRadius();
 

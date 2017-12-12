@@ -37,7 +37,8 @@ final public class ChangeTrackPieceMove implements TrackMove, MapUpdateMove {
 		return trackPieceAfter;
 	}
 
-	public ChangeTrackPieceMove(TrackPiece before, TrackPiece after, Point p) {
+	public ChangeTrackPieceMove(TrackPiece before, TrackPiece after, Point p) {		
+		
 		trackPieceBefore = before;
 		trackPieceAfter = after;
 		location = new Point(p);
@@ -93,7 +94,7 @@ final public class ChangeTrackPieceMove implements TrackMove, MapUpdateMove {
 		int terrainType = w.getTile(location.x, location.y).getTerrainTypeNumber();
 		TerrainType tt = (TerrainType) w.get(KEY.TERRAIN_TYPES, terrainType);
 		if (!newTrackPiece.getTrackRule().canBuildOnThisTerrainType(tt.getTerrainCategory())) {
-			return MoveStatus.moveFailed("Cann't build track on water!");
+			return MoveStatus.moveFailed("Can't build track on water!");
 		}
 		return MoveStatus.MOVE_OK;
 	}
@@ -188,4 +189,6 @@ final public class ChangeTrackPieceMove implements TrackMove, MapUpdateMove {
 			return false;
 		}
 	}
+	
+	
 }

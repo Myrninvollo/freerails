@@ -8,6 +8,8 @@ package jfreerails.move;
 import java.awt.Point;
 import java.awt.Rectangle;
 
+
+import jfreerails.world.common.Money;
 import jfreerails.world.common.OneTileMoveVector;
 import jfreerails.world.top.World;
 import jfreerails.world.track.FreerailsTile;
@@ -47,7 +49,8 @@ public final class ChangeTrackPieceCompositeMove extends CompositeMove implement
 				direction.getOpposite(),
 				trackRule,
 				w);
-
+		Money price = new Money(trackRule.getPrice().getAmount()*2);
+	
 		return new ChangeTrackPieceCompositeMove(a, b);
 	}
 
@@ -64,7 +67,7 @@ public final class ChangeTrackPieceCompositeMove extends CompositeMove implement
 				direction.createRelocatedPoint(from),
 				direction.getOpposite(),
 				w);
-
+		
 		return new ChangeTrackPieceCompositeMove(a, b);
 	}
 	//utility method.
@@ -89,6 +92,7 @@ public final class ChangeTrackPieceCompositeMove extends CompositeMove implement
 			newTrackPiece = getTrackPieceWhenOldTrackPieceIsNull(direction, trackRule);
 			oldTrackPiece = NullTrackPiece.getInstance();
 		}
+		
 		return new ChangeTrackPieceMove(oldTrackPiece, newTrackPiece, p);
 	}
 
@@ -117,6 +121,8 @@ public final class ChangeTrackPieceCompositeMove extends CompositeMove implement
 			newTrackPiece = NullTrackPiece.getInstance();
 			oldTrackPiece = NullTrackPiece.getInstance();
 		}
+		
+		
 		ChangeTrackPieceMove m = new ChangeTrackPieceMove(oldTrackPiece, newTrackPiece, p);
 		
 		//If we are removing a station, we also need to remove the station from the staiton list.

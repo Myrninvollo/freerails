@@ -5,6 +5,8 @@
  */
 
 package jfreerails.client.view;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 
 import javax.swing.JMenuItem;
@@ -16,13 +18,13 @@ import jfreerails.world.station.StationModel;
 import jfreerails.world.top.KEY;
 import jfreerails.world.top.NonNullElements;
 import jfreerails.world.top.World;
-import jfreerails.world.train.Schedule;
-import jfreerails.world.train.TrainModel;
 import jfreerails.world.train.TrainOrdersModel;
 
 /**
  *
  * @author  Luke
+ *
+ * Represents a single entry in the TrainScheduleJPanel
  */
 public class TrainOrders extends javax.swing.JPanel {
 
@@ -34,62 +36,86 @@ public class TrainOrders extends javax.swing.JPanel {
 
 	private World w;
 
+	private ViewLists vl;
+
 	int orderNo = 0;
 
-	private int trainNumber = 0;
+	private int stationNumber = TrainOrdersModel.NO_STATION;
 
-	private int stationNumber = 0;
+	private TrainScheduleJPanel parentSchedule;
 
-	/** Creates new form TrainOrders */
-	public TrainOrders() {
+	private TrainOrdersModel trainOrdersModel;
+
+	private boolean waitUntilFull;
+
+	public String toString() {
+	    return "stationNumber = " + stationNumber + ", orderNo = " +
+	    orderNo; 
+	}
+
+	/**
+	 * Creates new form TrainOrders, with no set order
+	 */
+	public TrainOrders(TrainScheduleJPanel parent) {
+	    this(parent, null);
+	}
+	
+	/**
+	 * Creates new form TrainOrders
+	 * @param Model the TrainOrdersModel that this object represents 
+	 */
+	public TrainOrders(TrainScheduleJPanel parent, TrainOrdersModel model) {
+	    trainOrdersModel = model;
+	    parentSchedule = parent;
+	    if (trainOrdersModel != null) {
+		stationNumber = trainOrdersModel.getStationNumber();
+	    }
 		initComponents();
 	}
 
 	public void setup(World world, ViewLists vl) {
 		w = world;
+		this.vl = vl;
 		setupStationsInPopup();
 		setupWagonsPopup();
 		sideOnTrainViewJPanel1.setup(w, vl, null);
 	}
 
-	public void display(int trainNumber, int orderNumber) {
-		this.trainNumber = trainNumber;
-		this.orderNo = orderNumber;
-		TrainModel train = (TrainModel) w.get(KEY.TRAINS, trainNumber);
-		Schedule schedule = train.getSchedule();
-		TrainOrdersModel orders = schedule.getOrder(orderNumber);
-		stationNumber = orders.getStationNumber();
+	public void display(int orderNo) {
+		this.orderNo = orderNo;
 
-		if (0 == orderNumber) {
-			this.orderNumber.setText("P"); //order 0 is priority orders.
+		if (orderNo == 0) {
+		    orderNumber.setText("P."); //order 0 is priority orders.
 		} else {
-			String s = orderNumber + ".";
-			this.orderNumber.setText(s);
+		    orderNumber.setText(String.valueOf(orderNo) + ".");
 		}
 
 		this.setGotoStation(false);
 
 		this.sideOnTrainViewJPanel1.removeAllWagons();
 
-		if (orders.isNoConsistChange()) {
+		if (trainOrdersModel == null ||
+			trainOrdersModel.isNoConsistChange()) {
 			this.sideOnTrainViewJPanel1.setNoChange(true);
 		} else {
 			this.sideOnTrainViewJPanel1.setNoChange(false);
-			int[] consist = orders.getConsist();
+			int[] consist = trainOrdersModel.getConsist();
 			for (int i = 0; i < consist.length; i++) {
 				this.sideOnTrainViewJPanel1.addWagon(consist[i]);
 			}
 		}
+		if (trainOrdersModel != null) {
 		StationModel station =
-			(StationModel) w.get(KEY.STATIONS, orders.getStationNumber());
+			(StationModel) w.get(KEY.STATIONS, trainOrdersModel.getStationNumber());
 		this.stationName.setText(station.getStationName());
+		    setupWagonsPopup();
+		    setWaitUntilFull(trainOrdersModel.getWaitUntilFull());
+		} else {
+		    stationName.setText("No station selected");
+		    setWaitUntilFull(false);
+		}
 
 		setupStationsInPopup();
-		setupWagonsPopup();
-	}
-
-	public void setOrderID(String s) {
-		orderNumber.setText(s);
 	}
 
 	/** This sets the list of stations in the select station popup.
@@ -125,8 +151,27 @@ public class TrainOrders extends javax.swing.JPanel {
 
 		JMenuItem removeStation = new JMenuItem();
 		removeStation.setText("Remove Station");
+		removeStation.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+                            if (parentSchedule.stations.size() > 1) {
+                                // don't allow last station to be removed whilst we are unable to support this.
+                                parentSchedule.removeStation(TrainOrders.this);
+                                parentSchedule = null;
+                            }
+			}});
 		changeStation.add(removeStation);
 
+		JMenuItem addStation = new JMenuItem();
+		addStation.setText("Add Station");
+		addStation.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			TrainOrders o = new TrainOrders (parentSchedule,
+			getNewOrders());
+			o.setup(w, vl);
+			parentSchedule.addStation(orderNo, o);
+			}
+			});
+		changeStation.add(addStation);
 	}
 
 	private void setupWagonsPopup() {
@@ -202,6 +247,8 @@ public class TrainOrders extends javax.swing.JPanel {
 	 * always regenerated by the Form Editor.
 	 */
 	private void initComponents() { //GEN-BEGIN:initComponents
+        java.awt.GridBagConstraints gridBagConstraints;
+
 		changeWaitUntilFullOrders = new javax.swing.JPopupMenu();
 		wait = new javax.swing.JMenuItem();
 		dontWait = new javax.swing.JMenuItem();
@@ -209,9 +256,8 @@ public class TrainOrders extends javax.swing.JPanel {
 		changeConsist = new javax.swing.JPopupMenu();
 		orderNumber = new javax.swing.JLabel();
 		waitUntilFullOrders = new javax.swing.JLabel();
-		stationName = new javax.swing.JLabel();
-		sideOnTrainViewJPanel1 =
-			new jfreerails.client.view.SideOnTrainViewJPanel();
+        stationName = new javax.swing.JTextArea();
+        sideOnTrainViewJPanel1 = new jfreerails.client.view.SideOnTrainViewJPanel();
 
 		wait.setText("Wait Unitl Full");
 		wait.addActionListener(new java.awt.event.ActionListener() {
@@ -221,6 +267,7 @@ public class TrainOrders extends javax.swing.JPanel {
 		});
 
 		changeWaitUntilFullOrders.add(wait);
+
 		dontWait.setText("Don't Wait");
 		dontWait.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -230,9 +277,8 @@ public class TrainOrders extends javax.swing.JPanel {
 
 		changeWaitUntilFullOrders.add(dontWait);
 
-		setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+        setLayout(new java.awt.GridBagLayout());
 
-		setPreferredSize(new java.awt.Dimension(500, 26));
 		addFocusListener(new java.awt.event.FocusAdapter() {
 			public void focusGained(java.awt.event.FocusEvent evt) {
 				formFocusGained(evt);
@@ -241,13 +287,11 @@ public class TrainOrders extends javax.swing.JPanel {
 				formFocusLost(evt);
 			}
 		});
-
 		addKeyListener(new java.awt.event.KeyAdapter() {
 			public void keyPressed(java.awt.event.KeyEvent evt) {
 				formKeyPressed(evt);
 			}
 		});
-
 		addMouseListener(new java.awt.event.MouseAdapter() {
 			public void mouseEntered(java.awt.event.MouseEvent evt) {
 				formMouseEntered(evt);
@@ -256,41 +300,45 @@ public class TrainOrders extends javax.swing.JPanel {
 
 		orderNumber.setText("1.");
 		orderNumber.setPreferredSize(new java.awt.Dimension(16, 16));
-		add(orderNumber);
+        add(orderNumber, new java.awt.GridBagConstraints());
 
 		waitUntilFullOrders.setText("W");
 		waitUntilFullOrders.setToolTipText("Wait Until Full");
 		waitUntilFullOrders.setPreferredSize(new java.awt.Dimension(16, 16));
-		waitUntilFullOrders
-			.addMouseListener(new java.awt.event.MouseAdapter() {
+        waitUntilFullOrders.addMouseListener(new java.awt.event.MouseAdapter() {
 			public void mouseClicked(java.awt.event.MouseEvent evt) {
 				waitUntilFullOrdersMouseClicked(evt);
 			}
 		});
 
-		add(waitUntilFullOrders);
+        add(waitUntilFullOrders, new java.awt.GridBagConstraints());
 
-		stationName.setForeground(new java.awt.Color(102, 102, 102));
+        stationName.setEditable(false);
+        stationName.setLineWrap(true);
+        stationName.setRows(2);
 		stationName.setText("Bristol Temple Meades");
-		stationName.setPreferredSize(new java.awt.Dimension(200, 16));
+        stationName.setWrapStyleWord(true);
+        stationName.setMaximumSize(new java.awt.Dimension(100, 2147483647));
 		stationName.addMouseListener(new java.awt.event.MouseAdapter() {
 			public void mouseClicked(java.awt.event.MouseEvent evt) {
 				stationNameMouseClicked(evt);
 			}
 		});
 
-		add(stationName);
+        add(stationName, new java.awt.GridBagConstraints());
 
-		sideOnTrainViewJPanel1.setPreferredSize(
-			new java.awt.Dimension(240, 25));
-		sideOnTrainViewJPanel1
-			.addMouseListener(new java.awt.event.MouseAdapter() {
+        sideOnTrainViewJPanel1.setMinimumSize(new java.awt.Dimension(100, 34));
+        sideOnTrainViewJPanel1.setPreferredSize(new java.awt.Dimension(100, 34));
+        sideOnTrainViewJPanel1.addMouseListener(new java.awt.event.MouseAdapter() {
 			public void mouseClicked(java.awt.event.MouseEvent evt) {
 				sideOnTrainViewJPanel1MouseClicked(evt);
 			}
 		});
 
-		add(sideOnTrainViewJPanel1);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 1.0;
+        add(sideOnTrainViewJPanel1, gridBagConstraints);
 
 	} //GEN-END:initComponents
 
@@ -359,13 +407,13 @@ public class TrainOrders extends javax.swing.JPanel {
 	private void dontWaitActionPerformed(java.awt.event.ActionEvent evt) {
 		//GEN-FIRST:event_dontWaitActionPerformed
 		// Add your handling code here:
-		this.waitUntilFullOrders.setText("-");
+		setWaitUntilFull(false);
 	} //GEN-LAST:event_dontWaitActionPerformed
 
 	private void waitActionPerformed(
 		java.awt.event.ActionEvent evt) { //GEN-FIRST:event_waitActionPerformed
 		// Add your handling code here:
-		this.waitUntilFullOrders.setText("W");
+		setWaitUntilFull(true);
 	} //GEN-LAST:event_waitActionPerformed
 
 	private void stationNameMouseClicked(java.awt.event.MouseEvent evt) {
@@ -385,16 +433,23 @@ public class TrainOrders extends javax.swing.JPanel {
 			evt.getY());
 	} //GEN-LAST:event_waitUntilFullOrdersMouseClicked
 
+	/**
+	 * Generate a TrainOrdersModel from the state of this panel
+	 */
 	public TrainOrdersModel getNewOrders() {
-
 		int[] wagons;
+
+	    if (stationNumber == TrainOrdersModel.NO_STATION) {
+		return null;
+	    }
+
 		if (this.sideOnTrainViewJPanel1.isNoChange()) {
 			wagons = null; //null represents no change to the consist.
 		} else {
 			wagons = this.sideOnTrainViewJPanel1.getWagons();
 		}
 		TrainOrdersModel newOrders =
-			new TrainOrdersModel(this.stationNumber, wagons, false);
+		new TrainOrdersModel(this.stationNumber, wagons, waitUntilFull);
 		return newOrders;
 	}
 
@@ -415,16 +470,25 @@ public class TrainOrders extends javax.swing.JPanel {
 		this.orderNumber.setForeground(c);
 	}
 
+	private void setWaitUntilFull(boolean yesNo) {
+	    waitUntilFull = yesNo;
+	    if (yesNo == true) {
+		waitUntilFullOrders.setText("W");
+	    } else {
+		waitUntilFullOrders.setText("-");
+	    }
+	}
+
 	// Variables declaration - do not modify//GEN-BEGIN:variables
 	private javax.swing.JPopupMenu changeConsist;
 	private javax.swing.JPopupMenu changeStation;
-	private javax.swing.JLabel stationName;
-	private javax.swing.JLabel waitUntilFullOrders;
-	private javax.swing.JMenuItem dontWait;
-	private jfreerails.client.view.SideOnTrainViewJPanel sideOnTrainViewJPanel1;
 	private javax.swing.JPopupMenu changeWaitUntilFullOrders;
+    private javax.swing.JMenuItem dontWait;
 	private javax.swing.JLabel orderNumber;
+    private jfreerails.client.view.SideOnTrainViewJPanel sideOnTrainViewJPanel1;
+    private javax.swing.JTextArea stationName;
 	private javax.swing.JMenuItem wait;
+    private javax.swing.JLabel waitUntilFullOrders;
 	// End of variables declaration//GEN-END:variables
 
 }

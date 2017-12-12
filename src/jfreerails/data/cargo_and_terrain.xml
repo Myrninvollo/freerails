@@ -30,7 +30,7 @@
       <Tile id="City" Category="Urban" rgb="ef901e" right-of-way="0">
          <Produces Cargo="Mail" Rate="1" />
 
-         <Produces Cargo="Passengers" Rate="2" />
+         <Produces Cargo="Passengers" Rate="4" />
 
          <Consumes Cargo="Mail" Prerequisite="2" />
 
@@ -116,7 +116,7 @@
       </Tile>
 
       <Tile id="Sugar_Plant." Category="Urban" rgb="ef901f" right-of-way="0">
-         <Produces Cargo="Sugar" Rate="3" />
+         <Produces Cargo="Sugar" Rate="4" />
       </Tile>
 
       <Tile id="River" Category="River" rgb="0048d8" right-of-way="0"/>
@@ -133,7 +133,7 @@
          <Consumes Cargo="Sugar" />
       </Tile>
 
-      <Tile id="Terminal" Category="Special" rgb="40" right-of-way="0"/>
+      <Tile id="Terminal" Category="Special" rgb="1" right-of-way="0"/>
 
       <Tile id="Jungle" Category="Country" rgb="4890fc" right-of-way="0"/>
 

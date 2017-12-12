@@ -6,6 +6,11 @@
 
 package jfreerails.client.top;
 
+import java.awt.event.KeyEvent;
+import javax.swing.InputMap;
+import javax.swing.KeyStroke;
+import javax.swing.JSplitPane;
+
 /**
  *
  * @author  Luke
@@ -18,7 +23,27 @@ public class ClientJFrame extends javax.swing.JFrame {
     public ClientJFrame(GUIComponentFactory gcf) {
         this.gUIComponentFactory=gcf;
         initComponents();
+        //jSplitPane1.resetToPreferredSizes();
         gUIComponentFactory.createDateJLabel();
+    }
+    
+    public void setup() {
+	jSplitPane1.revalidate();
+        jSplitPane1.resetToPreferredSizes();
+
+    /* Hack to stop F8 grabbing the focus of the SplitPane (see javadoc for
+     * JSplitPane Key assignments */
+    InputMap im = jSplitPane1.getInputMap(JSplitPane.WHEN_IN_FOCUSED_WINDOW);
+    im.remove(KeyStroke.getKeyStroke(KeyEvent.VK_F8, 0));
+    jSplitPane1.setInputMap(JSplitPane.WHEN_IN_FOCUSED_WINDOW, im);
+    im = jSplitPane1.getInputMap(JSplitPane.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+    im.remove(KeyStroke.getKeyStroke(KeyEvent.VK_F8, 0));
+    jSplitPane1.setInputMap(JSplitPane.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT, im);
+    
+    jSplitPane1.setInputMap(JSplitPane.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT, null);
+	jSplitPane1.revalidate();
+	jSplitPane1.resetToPreferredSizes();
+	
     }
     
     /** This method is called from within the constructor to
@@ -29,13 +54,14 @@ public class ClientJFrame extends javax.swing.JFrame {
     private void initComponents() {//GEN-BEGIN:initComponents
         java.awt.GridBagConstraints gridBagConstraints;
 
+        jSplitPane1 = new javax.swing.JSplitPane();
+        mainMapView = gUIComponentFactory.createMainMap();
         rhsjPanel = new javax.swing.JPanel();
-        trainsJPanel = gUIComponentFactory.createTrainsJPanel();
         datejLabel = gUIComponentFactory.createDateJLabel();
         mapOverview = gUIComponentFactory.createOverviewMap();
         cashjLabel = gUIComponentFactory.createCashJLabel();
-        mainMapView = gUIComponentFactory.createMainMap();
-        messageJLabel = gUIComponentFactory.createMessagePanel();
+        trainsJTabPane1 = gUIComponentFactory.createTrainsJTabPane();
+
         jMenuBar1 = new javax.swing.JMenuBar();
         gameMenu = gUIComponentFactory.createGameMenu();
         buildMenu = gUIComponentFactory.createBuildMenu();
@@ -50,15 +76,13 @@ public class ClientJFrame extends javax.swing.JFrame {
             }
         });
 
-        rhsjPanel.setLayout(new java.awt.GridBagLayout());
+        jSplitPane1.setResizeWeight(0.8);
+        mainMapView.setAlignmentX(0.0F);
+        mainMapView.setAlignmentY(0.0F);
+        mainMapView.setPreferredSize(null);
+        jSplitPane1.setLeftComponent(mainMapView);
 
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 3;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 1.0;
-        rhsjPanel.add(trainsJPanel, gridBagConstraints);
+        rhsjPanel.setLayout(new java.awt.GridBagLayout());
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -73,11 +97,13 @@ public class ClientJFrame extends javax.swing.JFrame {
         rhsjPanel.add(cashjLabel, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.gridheight = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
-        getContentPane().add(rhsjPanel, gridBagConstraints);
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        rhsjPanel.add(trainsJTabPane1, gridBagConstraints);
+
+        jSplitPane1.setRightComponent(rhsjPanel);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -85,13 +111,7 @@ public class ClientJFrame extends javax.swing.JFrame {
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 1.0;
-        getContentPane().add(mainMapView, gridBagConstraints);
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        getContentPane().add(messageJLabel, gridBagConstraints);
+        getContentPane().add(jSplitPane1, gridBagConstraints);
 
         gameMenu.setText("Game");
         jMenuBar1.add(gameMenu);
@@ -107,7 +127,7 @@ public class ClientJFrame extends javax.swing.JFrame {
 
         setJMenuBar(jMenuBar1);
 
-        //pack();
+        pack();
     }//GEN-END:initComponents
     
     /** Exit the Application */
@@ -124,18 +144,18 @@ public class ClientJFrame extends javax.swing.JFrame {
     
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel datejLabel;
-    private javax.swing.JLabel cashjLabel;
-    private javax.swing.JPanel trainsJPanel;
-    private javax.swing.JMenu displayMenu;
-    private javax.swing.JScrollPane mainMapView;
     private javax.swing.JMenu buildMenu;
+    private javax.swing.JLabel cashjLabel;
+    private javax.swing.JLabel datejLabel;
+    private javax.swing.JMenu displayMenu;
     private javax.swing.JMenu gameMenu;
+    private javax.swing.JMenu helpMenu;
+    private javax.swing.JMenuBar jMenuBar1;
+    private javax.swing.JSplitPane jSplitPane1;
+    private javax.swing.JScrollPane mainMapView;
     private javax.swing.JPanel mapOverview;
     private javax.swing.JPanel rhsjPanel;
-    private javax.swing.JMenu helpMenu;
-    private javax.swing.JLabel messageJLabel;
-    private javax.swing.JMenuBar jMenuBar1;
+    private javax.swing.JTabbedPane trainsJTabPane1;
     // End of variables declaration//GEN-END:variables
     
 }

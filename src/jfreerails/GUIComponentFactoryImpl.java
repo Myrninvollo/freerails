@@ -12,6 +12,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
 
 import jfreerails.client.renderer.MapRenderer;
 import jfreerails.client.renderer.ViewLists;
@@ -21,6 +22,7 @@ import jfreerails.client.top.ClientJFrame;
 import jfreerails.client.top.GUIComponentFactory;
 import jfreerails.client.top.StationTypesPopup;
 import jfreerails.client.top.UserInputOnMapController;
+import jfreerails.client.view.TrainsJTabPane;
 import jfreerails.client.view.CashJLabel;
 import jfreerails.client.view.DateJLabel;
 import jfreerails.client.view.DetailMapView;
@@ -33,7 +35,7 @@ import jfreerails.client.view.OverviewMapJComponent;
 import jfreerails.controller.MoveChainFork;
 import jfreerails.controller.MoveReceiver;
 import jfreerails.controller.StationBuilder;
-import jfreerails.controller.TrackMoveExecutor;
+import jfreerails.controller.MoveExecuter;
 import jfreerails.controller.TrackMoveProducer;
 import jfreerails.server.ServerGameEngine;
 import jfreerails.world.top.World;
@@ -42,7 +44,12 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory {
 
 	private DateJLabel datejLabel;
 	private CashJLabel cashjLabel;
-	private javax.swing.JPanel trainsJPanel;
+	
+	/**
+	 * This is the panel at the bottom right of the screen
+	 */
+	private TrainsJTabPane trainsJTabPane;
+
 	private javax.swing.JMenu helpMenu;
 	private javax.swing.JLabel messageJLabel;
 
@@ -90,15 +97,15 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory {
 
 		//clientJFrame.setGlassPane(glassPanel);
 
-		trainsJPanel = new javax.swing.JPanel();
+		trainsJTabPane = new TrainsJTabPane();
 		datejLabel = new DateJLabel();
 
 		cashjLabel = new CashJLabel();
 		messageJLabel = new javax.swing.JLabel("Message");
-		trainsJPanel.setBackground(new java.awt.Color(255, 51, 51));
 
 		clientJFrame = new ClientJFrame(this);
 		dialogueBoxController = new DialogueBoxController(clientJFrame);
+		
 	}
 
 	public void setup(ViewLists vl, World w, ServerGameEngine ge) {
@@ -119,10 +126,10 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory {
 
 		MoveReceiver overviewmapMoveReceiver = new MapViewMoveReceiver(mainMap);
 
-		MoveChainFork moveFork = new MoveChainFork(overviewmapMoveReceiver);
+		MoveChainFork moveFork = MoveChainFork.getMoveChainFork();
+		moveFork.setPrimaryReceiver (overviewmapMoveReceiver);
 
-		TrackMoveExecutor trackMoveExecutor =
-			new TrackMoveExecutor(world, moveFork);
+		MoveExecuter trackMoveExecutor = MoveExecuter.getMoveExecuter();
 
 		MoveReceiver mainmapMoveReceiver = new MapViewMoveReceiver(overviewMap);
 		moveFork.add(mainmapMoveReceiver);
@@ -131,8 +138,8 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory {
 		StationBuilder sb = new StationBuilder(trackMoveExecutor, world);
 
 		stationTypesPopup.setup(sb, mainMap.getStationRadius());
-
-		this.cursor = new FreerailsCursor(mainMap);
+		FreerailsCursor.initCursor(mainMap);
+		this.cursor = FreerailsCursor.getCursor();
 		//setup the the main and overview map JComponents
 
 		((MapViewJComponentConcrete) mapViewJComponent).setup(mainMap, cursor);
@@ -149,10 +156,12 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory {
 
 		buildMenu.setup(world, trackBuilder);
 		mainMapScrollPane1.setViewportView(this.mapViewJComponent);
+		System.out.println("Viewport was set");
 		((OverviewMapJComponent) overviewMapContainer).setup(overviewMap);
 
 		datejLabel.setup(w, null, null);
 		cashjLabel.setup(w, null, null);
+		trainsJTabPane.setup(cursor, w, vl);
 	}
 
 	public JPanel createOverviewMap() {
@@ -217,42 +226,24 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory {
 		JMenuItem newGameJMenuItem = new JMenuItem("New game big map");
 
 		newGameJMenuItem.addActionListener(new ActionListener() {
-
 			String mapName = "south_america";
 
 			public void actionPerformed(ActionEvent e) {
-
-				gameEngine.newGame(
-					OldWorldImpl.createWorldFromMapFile(mapName));
-				World world = gameEngine.getWorld();
-				ViewLists viewLists = getViewLists();
-
-				if (!viewLists.validate(world)) {
-					throw new IllegalArgumentException();
-				}
-				setup(viewLists, world, gameEngine);
+			    gameEngine.newGame(OldWorldImpl.createWorldFromMapFile(mapName));
+			    worldModelChanged();
 			}
-
 		});
 
 		JMenuItem newGameJMenuItem2 = new JMenuItem("New game small map");
 
 		newGameJMenuItem2.addActionListener(new ActionListener() {
-
 			String mapName = "small_south_america";
 
 			public void actionPerformed(ActionEvent e) {
-
 				gameEngine.newGame(
 					OldWorldImpl.createWorldFromMapFile(mapName));
-				World world = gameEngine.getWorld();
-				ViewLists viewLists = getViewLists();
-
-				if (!viewLists.validate(world)) {
-					throw new IllegalArgumentException();
+					worldModelChanged();
 				}
-				setup(viewLists, world, gameEngine);
-			}
 
 		});
 
@@ -276,15 +267,7 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory {
 			public void actionPerformed(ActionEvent e) {
 
 				gameEngine.loadGame();
-				World w = gameEngine.getWorld();
-
-				ViewLists viewLists = getViewLists();
-
-				if (!viewLists.validate(world)) {
-					throw new IllegalArgumentException();
-				}
-				setup(viewLists, w, gameEngine);
-
+				worldModelChanged();
 			}
 
 		});
@@ -403,8 +386,8 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory {
 		return helpMenu;
 	}
 
-	public JPanel createTrainsJPanel() {
-		return trainsJPanel;
+	public JTabbedPane createTrainsJTabPane() {
+		return trainsJTabPane;
 	}
 
 	public JLabel createCashJLabel() {
@@ -419,4 +402,21 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory {
 		return datejLabel;
 	}
 
+	private void worldModelChanged() {
+	    /*
+	     * XXX this is temporary - we should have a formal object to store
+	     * the clients copy of the model, connections to the server, etc.
+	     */
+	    World world = gameEngine.getWorld();
+	    ViewLists viewLists = getViewLists();
+
+	    if (!viewLists.validate(world)) {
+		throw new IllegalArgumentException();
+	    }
+	    MoveChainFork.init();
+	    MoveChainFork mr =
+		MoveChainFork.getMoveChainFork();
+	    MoveExecuter.init(world, mr);
+	    setup(viewLists, world, gameEngine);
+	}
 }

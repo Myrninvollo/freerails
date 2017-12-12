@@ -4,7 +4,7 @@ import jfreerails.world.cargo.CargoType;
 
 /**
  *
- *
+ * FIXME Not implemented yet.
  *
  * @author lindsal
  */

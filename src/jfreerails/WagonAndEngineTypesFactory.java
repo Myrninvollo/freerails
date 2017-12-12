@@ -37,8 +37,8 @@ public class WagonAndEngineTypesFactory implements TypeFactory {
 		//Engine types
 		EngineType[] engineTypes =
 			new EngineType[] {
-				new EngineType("Grasshopper", 1000, new Money(10000), 10),
-				new EngineType("Norris", 1000, new Money(10000), 15),
+				new EngineType("Grasshopper", 1000, new Money(10000), 10, new Money(100)),
+				new EngineType("Norris", 1000, new Money(10000), 15, new Money(100)),
 				};
 
 		for (int i = 0; i < engineTypes.length; i++) {

@@ -16,6 +16,7 @@ import jfreerails.world.top.KEY;
 import jfreerails.world.top.World;
 import jfreerails.world.track.LegalTrackPlacement;
 import jfreerails.world.track.TrackRule;
+import jfreerails.world.track.TrackRuleProperties;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -123,14 +124,22 @@ public class Track_TilesHandlerImpl
 		} else {
 			stationRadius = 0;
 		}
+		String priceString = meta.getValue("price");
+		int price = Integer.parseInt(priceString);
+		
+		String maintenanceString = meta.getValue("maintenance");
+		int maintenance = Integer.parseInt(priceString);
+		
 		trackRuleProperties =
-			new jfreerails.world.track.TrackRuleProperties(
+			new TrackRuleProperties(
 				rGBvalue,
 				enableDoubleTrack,
 				typeName,
 				ruleNumber,
 				isStation,
-				stationRadius);
+				stationRadius,
+				price,
+				maintenance);
 
 	}
 

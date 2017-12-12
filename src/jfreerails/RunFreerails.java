@@ -4,6 +4,8 @@ import java.io.IOException;
 
 import javax.swing.JFrame;
 
+import jfreerails.controller.MoveExecuter;
+import jfreerails.controller.MoveChainFork;
 import jfreerails.client.common.GameLoop;
 import jfreerails.client.common.ScreenHandler;
 import jfreerails.client.renderer.ViewLists;
@@ -11,6 +13,10 @@ import jfreerails.server.ServerGameEngine;
 import jfreerails.world.top.World;
 
 public class RunFreerails {
+
+	private static MoveChainFork moveChainFork = null;
+
+	private static MoveExecuter moveExecuter = null;
 
 	/** @param args 
 	 */
@@ -49,6 +55,9 @@ public class RunFreerails {
 		long startTime = System.currentTimeMillis();		
 		World world = OldWorldImpl.createWorldFromMapFile(mapName);
 
+		MoveChainFork.init();
+		moveChainFork = MoveChainFork.getMoveChainFork();
+		MoveExecuter.init(world, moveChainFork);
 		ViewLists viewLists = new ViewListsImpl(world);
 		
 				

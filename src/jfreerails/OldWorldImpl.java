@@ -2,14 +2,15 @@ package jfreerails;
 
 import java.net.URL;
 
-import jfreerails.controller.MoveReceiver;
-import jfreerails.controller.TrackMoveExecutor;
+import jfreerails.world.accounts.BankAccount;
+import jfreerails.world.accounts.Receipt;
 import jfreerails.world.city.CityTilePositioner;
 import jfreerails.world.city.InputCityNames;
 import jfreerails.world.common.GameCalendar;
 import jfreerails.world.common.GameTime;
 import jfreerails.world.common.Money;
 import jfreerails.world.top.ITEM;
+import jfreerails.world.top.KEY;
 import jfreerails.world.top.World;
 import jfreerails.world.top.WorldImpl;
 
@@ -70,15 +71,17 @@ public class OldWorldImpl {
 	  	} catch (SAXException e) {}
 		
 		//Randomly position the city tiles
-			CityTilePositioner ctp = new CityTilePositioner(w);
-		
-		//Create the object that controls building track.
-		MoveReceiver trackMoveExecutor = new TrackMoveExecutor(w, null);
+		CityTilePositioner ctp = new CityTilePositioner(w);
 		
 		//Set the time..
 		w.set(ITEM.CALENDAR, new GameCalendar(1200, 1840));
 		w.set(ITEM.TIME, new GameTime(0));
-		w.set(ITEM.CASH, new Money(100000));
+		
+		//Set up bank account with initial balance of 1000,000.
+		BankAccount bankAccount = new BankAccount();
+		Receipt initialCredit = new Receipt(new Money(1000000));
+		bankAccount.addTransaction(initialCredit);
+		w.add(KEY.BANK_ACCOUNTS, bankAccount);		
 		
 		return w;
 	}
