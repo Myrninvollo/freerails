@@ -19,6 +19,18 @@ public class TerminalIO extends java.lang.Object {
 
     private java.io.InputStreamReader converter;
     
+    public String my_read_line( java.lang.String prompt ) {
+        System.out.println( prompt );
+        String  text = null;
+        try {
+            text = in.readLine();
+        }
+        catch( Exception e ) {
+            
+        }
+        return text;
+    }
+    
     public int my_read_int( java.lang.String prompt ) {
         System.out.println( prompt );
         String  text = null;
@@ -38,18 +50,6 @@ public class TerminalIO extends java.lang.Object {
     public TerminalIO() {
         converter = new java.io.InputStreamReader( System.in );
         in = new java.io.BufferedReader( converter );
-    }
-    
-    public String my_read_line( java.lang.String prompt ) {
-        System.out.println( prompt );
-        String  text = null;
-        try {
-            text = in.readLine();
-        }
-        catch( Exception e ) {
-            
-        }
-        return text;
     }
     
     /**

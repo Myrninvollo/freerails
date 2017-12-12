@@ -15,15 +15,15 @@ package jfreerails.client.event;
 
 public abstract class CursorAdapter implements jfreerails.client.event.CursorEventListener {
     
+    public void cursorJumped( CursorEvent ce ) {
+        
+    }
+    
     public void cursorKeyPressed( CursorEvent ce ) {
         
     }
     
     public void cursorOneTileMove( CursorEvent ce ) {
-        
-    }
-    
-    public void cursorJumped( CursorEvent ce ) {
         
     }
 }

@@ -15,9 +15,9 @@ package jfreerails.client.event;
 
 public interface CursorEventListener extends java.util.EventListener {
     
+    public void cursorOneTileMove( CursorEvent ce );
+    
     public void cursorJumped( CursorEvent ce );
     
     public void cursorKeyPressed( CursorEvent ce );
-    
-    public void cursorOneTileMove( CursorEvent ce );
 }

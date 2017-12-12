@@ -5,9 +5,17 @@
 * Created on 31 July 2001, 13:56
 */
 package jfreerails.client;
-import jfreerails.client.event.CursorEvent;
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
+import jfreerails.client.event.CursorEvent;
+import jfreerails.client.event.CursorEventListener;
+import jfreerails.move.source.TrackMoveProducer;
 /**
 *
 * @author  Luke Lindsay
@@ -17,7 +25,7 @@ import java.awt.*;
 
 public class MapViewJComponentConcrete extends MapViewJComponent implements jfreerails.client.event.CursorEventListener {
 
-    private jfreerails.common.trackmodel.TrackBuilder trackBuilder;
+    private TrackMoveProducer trackBuilder;
 
     private FreerailsCursor cursor;
     
@@ -33,14 +41,6 @@ public class MapViewJComponentConcrete extends MapViewJComponent implements jfre
         }
     }
     
-    public void updateTiles( Rectangle rect ) {
-        
-    }
-    
-    public void cursorKeyPressed( CursorEvent ce ) {
-        reactToCursorMovement( ce );
-    }
-    
     public void paint( java.awt.Graphics g ) {
         super.paint( g );
         java.awt.Graphics2D  g2 = (java.awt.Graphics2D)g;
@@ -51,42 +51,7 @@ public class MapViewJComponentConcrete extends MapViewJComponent implements jfre
         cursor.cursorRenderer.paintCursor( g2, new java.awt.Dimension( 30, 30 ) );
     }
     
-    public void updateTile( java.awt.Point tileCoodinate ) {
-        
-    }
-    
-    public void cursorJumped( CursorEvent ce ) {
-        try {
-            trackBuilder.performAction( ce.newPosition );
-            tiledBackgroundPainter.updateTile( ce.newPosition );
-            reactToCursorMovement( ce );
-        }
-        catch( jfreerails.common.exception.FreerailsException fe ) {
-            
-            //This should never happen!
-            fe.printStackTrace();
-        }
-    }
-    
-    public void cursorOneTileMove( CursorEvent ce ) {
-        if( null != trackBuilder ) {
-            try {
-                trackBuilder.performAction( ce.oldPosition, ce.vector );
-                tiledBackgroundPainter.updateTile( ce.oldPosition );
-            }
-            catch( jfreerails.common.exception.FreerailsException fe ) {
-                
-                //This should never happen!
-                fe.printStackTrace();
-            }
-        }
-        else {
-            System.out.println( "No track builder available!" );
-        }
-        reactToCursorMovement( ce );
-    }
-    
-    public MapViewJComponentConcrete( MapView mv, jfreerails.common.trackmodel.TrackBuilder trackBuilder ) {
+    public MapViewJComponentConcrete(MapView mv, TrackMoveProducer trackBuilder) {
         super( new SquareTileBackgroundPainter( mv ), mv );
         this.setBorder( null );
         this.trackBuilder = trackBuilder;
@@ -97,7 +62,40 @@ public class MapViewJComponentConcrete extends MapViewJComponent implements jfre
         this.requestFocus();
     }
     
-    private void reactToCursorMovement( CursorEvent ce ) {
+    public void cursorJumped(CursorEvent ce) {
+        
+            trackBuilder.doTrackBuilderAction( ce.newPosition );
+            tiledBackgroundPainter.refreshRectangleOfTiles( ce.newPosition.x-1,ce.newPosition.y-1,3,3 );
+            reactToCursorMovement( ce );
+        
+    }
+    
+    public void cursorOneTileMove(CursorEvent ce) {
+        if( null != trackBuilder ) {
+           
+                trackBuilder.performAction( ce.oldPosition, ce.vector );
+                tiledBackgroundPainter.refreshRectangleOfTiles( ce.oldPosition.x-1,ce.oldPosition.y-1,3,3 );
+            
+        }
+        else {
+            System.out.println( "No track builder available!" );
+        }
+        reactToCursorMovement( ce );
+    }
+    
+    public void cursorKeyPressed(CursorEvent ce) {
+        reactToCursorMovement( ce );
+    }
+    
+    public void updateTiles(java.awt.Rectangle rect) {
+        
+    }
+    
+    public void updateTile( java.awt.Point tileCoodinate ) {
+        
+    }
+    
+    private void reactToCursorMovement(CursorEvent ce) {
         java.awt.Dimension  tileSize = mapView.getTileSize();
         Rectangle  vr = this.getVisibleRect();
         Rectangle  rectangleSurroundingCursor = new Rectangle( 0, 0, 1, 1 );

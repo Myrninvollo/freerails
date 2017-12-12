@@ -18,6 +18,10 @@ public class TrackPieceViewList {
 
     private TrackPieceView[] trackPieceViewArray;
     
+    public TrackPieceView[] getTrackPieceViewArray() {
+        return trackPieceViewArray;
+    }
+    
     public TrackPieceView getTrackPieceView( int i ) {
         return trackPieceViewArray[ i ];
     }
@@ -26,9 +30,5 @@ public class TrackPieceViewList {
     
     public TrackPieceViewList( TrackPieceView[] trackPieceViewArray ) {
         this.trackPieceViewArray = trackPieceViewArray;
-    }
-    
-    public TrackPieceView[] getTrackPieceViewArray() {
-        return trackPieceViewArray;
     }
 }

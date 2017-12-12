@@ -5,6 +5,7 @@
 * Created on 07 July 2001, 12:36
 */
 package jfreerails.client.tileview;
+
 /**
 *
 * @author  Luke Lindsay
@@ -12,7 +13,7 @@ package jfreerails.client.tileview;
 */
 
 
-public class RiverStyleTileView extends jfreerails.client.tileview.TileView {
+public class RiverStyleTileView extends jfreerails.client.tileview.AbstractTileView {
 
     private static final int[] Y_LOOK_AT =  {
         0, 1, 0, -1
@@ -24,7 +25,7 @@ public class RiverStyleTileView extends jfreerails.client.tileview.TileView {
     
     /** Creates new RiverStyleTileView */
     
-    public RiverStyleTileView(jfreerails.lib.ImageSplitter imageSplitter, int[] rgbValues, jfreerails.common.TileModel tileModel) throws jfreerails.common.exception.FreerailsException {
+    public RiverStyleTileView( jfreerails.lib.ImageSplitter imageSplitter, int[] rgbValues, jfreerails.type.TileType tileModel ) throws jfreerails.common.exception.FreerailsException {
         imageSplitter.setTransparencyToOPAQUE();
         tileIcons = new java.awt.Image[ 16 ];
         for( int  i = 0;i < tileIcons.length;i++ ) {
@@ -34,7 +35,7 @@ public class RiverStyleTileView extends jfreerails.client.tileview.TileView {
         super.tileModel = tileModel;
     }
     
-    public int selectTileIcon( int x, int y, jfreerails.common.FreerailsMap.TerrainMap map ) {
+    public int selectTileIcon( int x, int y, jfreerails.map.TerrainMap map ) {
         int  iconNumber = 0;
         for( int  i = 0;i < 4;i++ ) {
             iconNumber = iconNumber << 1;

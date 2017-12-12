@@ -19,16 +19,6 @@ package jfreerails.client.event;
 public class CursorEvent extends java.util.EventObject {
 
     
-    /** The new cursor coordinate in tiles.
-    */
-    public java.awt.Point newPosition;
-
-    
-    /** The old cursor coordinate in tiles.
-    */
-    public java.awt.Point oldPosition;
-
-    
     /** If the event was triggered by a key press, this variable
     * stores the keyEvent.
     */
@@ -39,7 +29,17 @@ public class CursorEvent extends java.util.EventObject {
     * precisely one tile, its vector is stored in this
     * variable.
     */
-    public jfreerails.common.OneTileMoveVector vector;
+    public jfreerails.misc.OneTileMoveVector vector;
+
+    
+    /** The new cursor coordinate in tiles.
+    */
+    public java.awt.Point newPosition;
+
+    
+    /** The old cursor coordinate in tiles.
+    */
+    public java.awt.Point oldPosition;
     
     /** Creates new CursorEvent
     * @param obj The object that is firing the event.

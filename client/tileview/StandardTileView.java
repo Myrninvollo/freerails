@@ -5,6 +5,7 @@
 * Created on 07 July 2001, 12:11
 */
 package jfreerails.client.tileview;
+
 /**
 *
 * @author  Luke Lindsay
@@ -12,11 +13,11 @@ package jfreerails.client.tileview;
 */
 
 
-public class StandardTileView extends jfreerails.client.tileview.TileView {
+public class StandardTileView extends jfreerails.client.tileview.AbstractTileView {
     
     /** Creates new StandardTileIconSelecter */
     
-    public StandardTileView(jfreerails.lib.ImageSplitter imageSplitter, int[] rgbValues, jfreerails.common.TileModel tileModel) throws jfreerails.common.exception.FreerailsException {
+    public StandardTileView( jfreerails.lib.ImageSplitter imageSplitter, int[] rgbValues, jfreerails.type.TileType tileModel ) throws jfreerails.common.exception.FreerailsException {
         imageSplitter.setTransparencyToOPAQUE();
         tileIcons = new java.awt.Image[ 1 ];
         tileIcons[ 0 ] = imageSplitter.getTileFromSubGrid( 0, 0 );

@@ -13,16 +13,13 @@ package jfreerails.lib;
 */
 import jfreerails.common.exception.FreerailsException;
 import java.awt.Transparency;
-import java.awt.Image;
+import java.awt.*;
+import javax.swing.ImageIcon;
 
 
 public class ImageSplitter extends java.lang.Object {
 
-    private int subGridYoffset = 0;
-
-    private int tileGridWidth, tileGridHeight, gridXAxisOrigin, gridYAxisOrigin;
-
-    private java.awt.image.BufferedImage sourceBufferedImage;
+    private java.awt.Image sourceImage;
 
     private java.net.URL imageURL;
 
@@ -33,20 +30,12 @@ public class ImageSplitter extends java.lang.Object {
     private int transparency = Transparency.OPAQUE;
 
     private java.awt.GraphicsConfiguration defaultConfiguration = java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration();
+
+    private int subGridYoffset = 0;
+
+    private int tileGridWidth, tileGridHeight, gridXAxisOrigin, gridYAxisOrigin;
     
-    public void setTileGrid( int x, int y, int tileWidth, int tileHeight ) {
-        tileGridWidth = tileWidth;
-        tileGridHeight = tileHeight;
-        gridXAxisOrigin = x;
-        gridYAxisOrigin = y;
-    }
-    
-    public void setSubGridOffset( int x, int y ) {
-        subGridXOffset = x;
-        subGridYoffset = y;
-    }
-    
-    public Image getTileFromSubGrid( int gridX, int gridY ) throws FreerailsException {
+    public Image getTileFromSubGrid( int gridX, int gridY )  {
         Image  tile = getTile( ( ( gridXAxisOrigin + ( ( subGridXOffset + gridX ) * tileGridWidth ) ) ), ( ( gridYAxisOrigin + ( ( subGridYoffset + gridY ) * tileGridWidth ) ) ), tileGridWidth, tileGridHeight );
         if( tile == null ) {
             System.out.println( "Error in ImageSplitter.Image: tileIcon==null." );
@@ -66,36 +55,41 @@ public class ImageSplitter extends java.lang.Object {
         this.transparency = Transparency.TRANSLUCENT;
     }
     
-    public Image getTileFromGrid( int gridX, int gridY ) throws FreerailsException {
+    public Image getTileFromGrid( int gridX, int gridY ) {
         Image  tile = getTile( ( ( gridXAxisOrigin + ( gridX * tileGridWidth ) ) ), ( ( gridYAxisOrigin + ( gridY * tileGridWidth ) ) ), tileGridWidth, tileGridHeight );
         if( tile == null ) {
-            System.out.println( "Error in ImageSplitter.Image: tileIcon==null." );
+            throw new java.lang.NullPointerException("Error in ImageSplitter.Image: tileIcon==null." );
         }
         return tile;
     }
     
-    public Image getTile( int x, int y, int tileWidth, int tileHeight ) throws FreerailsException {
+    public Image getTile( int x, int y, int tileWidth, int tileHeight )  {
         try {
-            java.awt.image.BufferedImage  tileBufferedImage = defaultConfiguration.createCompatibleImage( tileWidth, tileHeight, transparency );
-            java.awt.Graphics  g = tileBufferedImage.getGraphics();
-            g.drawImage( sourceBufferedImage, -x, -y, null );
-            return tileBufferedImage;
+            java.awt.image.BufferedImage  tileImage = defaultConfiguration.createCompatibleImage( tileWidth, tileHeight, transparency );
+            java.awt.Graphics  g = tileImage.getGraphics();
+            g.drawImage( sourceImage, -x, -y, null );
+            return tileImage;
         }
         catch( Exception e ) {
-            throw new FreerailsException( "Tried to get tile from outside the image.\n" + "Source image: " + imageURL );
+            throw new java.lang.IllegalArgumentException( "Tried to get tile from outside the image.\n" + "Source image: " + imageURL );
         }
     }
     
     public ImageSplitter( java.net.URL url ) throws FreerailsException {
-        
-        //Load a picture and draw it on a buffered image.
         imageURL = url;
-        System.out.println( "\nLoading image: " + imageURL );
-        try {
-            sourceBufferedImage = javax.imageio.ImageIO.read( imageURL );
-        }
-        catch( java.io.IOException e ) {
-            throw new FreerailsException( "IOException loading " + imageURL );
-        }
+        System.out.println( "\nLoading image " + imageURL );
+        sourceImage = ( new ImageIcon( imageURL ) ).getImage();
+    }
+    
+    public void setTileGrid( int x, int y, int tileWidth, int tileHeight ) {
+        tileGridWidth = tileWidth;
+        tileGridHeight = tileHeight;
+        gridXAxisOrigin = x;
+        gridYAxisOrigin = y;
+    }
+    
+    public void setSubGridOffset( int x, int y ) {
+        subGridXOffset = x;
+        subGridYoffset = y;
     }
 }

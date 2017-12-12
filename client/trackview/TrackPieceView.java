@@ -1,55 +1,39 @@
-
-/*
-* TrackPieceView.java
-*
-* Created on 20 July 2001, 17:46
-*/
 package jfreerails.client.trackview;
 import java.awt.Image;
+import java.awt.Dimension;
 import jfreerails.common.exception.FreerailsException;
-import java.awt.Point;
-import jfreerails.common.trackmodel.EightRotationsOfTrackPieceProducer;
-import jfreerails.lib.ImageSplitter;
-import java.awt.Image;
+import java.awt.Graphics;
 
 /**
+*  Description of the Interface
 *
-* @author  Luke Lindsay
-* @version 
+*@author     Luke Lindsay
+*@created    09 October 2001
 */
 
 
-public class TrackPieceView {
-
-    Image[] trackPieceIcons = new Image[ 512 ];
+public interface TrackPieceView {
     
-    public Image getTrackPieceIcon( int trackTemplate ) throws FreerailsException {
-        if( ( trackTemplate > 511 ) || ( trackTemplate < 0 ) ) {
-            throw new FreerailsException( "trackTemplate = " + trackTemplate + ", it should be in the range 0-511" );
-        }
-        return trackPieceIcons[ trackTemplate ];
-    }
+    /**
+    *  Gets the trackPieceIcon attribute of the TrackPieceViewInterface object
+    *
+    *@param  trackTemplate           Description of Parameter
+    *@return                         The trackPieceIcon value
+    *@exception  FreerailsException  Description of Exception
+    */
     
-    /** Creates new TrackPieceView */
+    public Image getTrackPieceIcon( int trackTemplate ) throws FreerailsException;
     
-    public TrackPieceView( int[] trackTemplatesPrototypes, ImageSplitter trackImageSplitter ) throws FreerailsException {
-        trackImageSplitter.setTransparencyToBITMASK(); //Since track tiles have transparent regions.
-        for( int  i = 0;i < trackTemplatesPrototypes.length;i++ ) {
-            
-            /* Check for invalid parameters. */
-            if( ( trackTemplatesPrototypes[ i ] > 511 ) || ( trackTemplatesPrototypes[ i ] < 0 ) ) {
-                throw new FreerailsException( "trackTemplate = " + trackTemplatesPrototypes[ i ] + ", it should be in the range 0-511" );
-            }
-            
-            /* Grab the images for those track pieces that are legal. */
-            for( int  j = 0;j < trackTemplatesPrototypes.length;j++ ) {
-                int[]  rotationsOfTrackTemplate = EightRotationsOfTrackPieceProducer.getRotations( trackTemplatesPrototypes[ j ] );
-                for( int  k = 0;k < rotationsOfTrackTemplate.length;k++ ) {
-                    if( trackPieceIcons[ rotationsOfTrackTemplate[ k ] ] == null ) {
-                        trackPieceIcons[ rotationsOfTrackTemplate[ k ] ] = trackImageSplitter.getTileFromSubGrid( k, j );
-                    }
-                }
-            }
-        }
-    }
+    /**
+    *  Description of the Method
+    *
+    *@param  trackTemplate           Description of Parameter
+    *@param  g                       Description of Parameter
+    *@param  x                       Description of Parameter
+    *@param  y                       Description of Parameter
+    *@param  tileSize                Description of Parameter
+    *@exception  FreerailsException  Description of Exception
+    */
+    
+    public void drawTrackPieceIcon( int trackTemplate, java.awt.Graphics g, int x, int y, java.awt.Dimension tileSize ) throws FreerailsException;
 }

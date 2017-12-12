@@ -5,19 +5,18 @@
 * Created on 01 August 2001, 06:02
 */
 package jfreerails.client;
-import jfreerails.client.event.CursorEvent;
-import jfreerails.client.event.CursorEventListener;
-import jfreerails.common.OneTileMoveVector;
-import java.awt.Rectangle;
-import java.awt.Point;
-import java.awt.event.KeyEvent;
-
 /** This class represents the cursor for the map view.  It receives key
 * and mouse inputs and fires cursor events.
 *
 * @author Luke Lindsay
 * @version 1
 */
+import java.awt.*;
+import java.awt.event.*;
+import jfreerails.client.event.*;
+import jfreerails.common.*;
+import jfreerails.misc.*;
+import jfreerails.client.view.map.*;
 
 
 public class FreerailsCursor implements java.awt.event.KeyListener {
@@ -27,17 +26,14 @@ public class FreerailsCursor implements java.awt.event.KeyListener {
     */
     public jfreerails.client.FreerailsCursor.CursorRenderer cursorRenderer = new jfreerails.client.FreerailsCursor.CursorRenderer();
 
+    /**
+     * @associates CursorEventListener 
+     */
     protected java.util.Vector listeners = new java.util.Vector();
-
-    
-    //private jfreerails.common.trackmodel.TrackBuilder trackBuilder;
-    private Point cursorMapPosition = new Point( 0, 0 );
-
-    private MapView mapView;
 
     private Point oldCursorMapPosition = new Point( 0, 0 );
 
-    
+    private static int blinkValue=1;
     /*The cursor tile and one tile in each direction
     */
     private java.awt.BasicStroke stroke = new java.awt.BasicStroke( 3 );
@@ -45,6 +41,12 @@ public class FreerailsCursor implements java.awt.event.KeyListener {
     
     //The width of the rectangle used to draw the cursor
     private int paintCursor;
+
+    
+    //private jfreerails.common.trackmodel.TrackBuilder trackBuilder;
+    private Point cursorMapPosition = new Point( 0, 0 );
+
+    private NewMapView mapView;
     
     /** This inner class controls rendering of the cursor.
     */
@@ -61,18 +63,19 @@ public class FreerailsCursor implements java.awt.event.KeyListener {
         public void paintCursor( java.awt.Graphics g, java.awt.Dimension tileSize ) {
             java.awt.Graphics2D  g2 = (java.awt.Graphics2D)g;
             g2.setStroke( stroke );
+            if(1==blinkValue){
             g2.setColor( java.awt.Color.white ); //The colour of the cursor
+            }else{
+                g2.setColor( java.awt.Color.black ); 
+            }
             g2.drawRect( cursorMapPosition.x * tileSize.width, cursorMapPosition.y * tileSize.height, tileSize.width, tileSize.height );
         }
+        
+            
     }
-    
-    /** Creates a new FreerailsCursor.
-    * @param mapView The view that the curors moves across.
-    */
-    
-    public FreerailsCursor( MapView mapView ) {
-        this.mapView = mapView;
-    }
+    public static void blinkCursor(){
+            blinkValue=-blinkValue;
+        }
     
     /** Use this method rather than KeyTyped to process keyboard input.
     * @param keyEvent The key pressed.
@@ -119,22 +122,17 @@ public class FreerailsCursor implements java.awt.event.KeyListener {
     // component = (MapViewJComponent)keyEvent.getComponent();
     }
     
-    /** Removes a listener.
-    * @param l The listener.
-    */
-    
-    public void removeCursorEventListener( CursorEventListener l ) {
-        listeners.removeElement( l );
-    }
-    
     /** Moves the cursor provided the destination is a legal position.
     * @param tryThisPoint The cursor's destination.
     */
     
     public void TryMoveCursor( Point tryThisPoint ) {
-        java.awt.Dimension  mapSize = mapView.getMapSizeInTiles();
+    	Dimension tileSize=mapView.getTileSize();
+        Dimension  mapSizeInPixels = mapView.getMapSizeInPixels();
+       int maxX=(mapSizeInPixels.width/tileSize.width)-2;
+       int maxY=(mapSizeInPixels.height/tileSize.height)-2;
         Rectangle  legalRectangle; //The set of legal cursor positions.
-        legalRectangle = new Rectangle( 1, 1, mapSize.width - 2, mapSize.height - 2 );
+        legalRectangle = new Rectangle( 1, 1, maxX, maxY );
         if( true == legalRectangle.contains( tryThisPoint ) ) {
             
             /*Move the cursor. */
@@ -145,14 +143,9 @@ public class FreerailsCursor implements java.awt.event.KeyListener {
             
             /*Build track! */
             if( OneTileMoveVector.checkValidity( deltaX, deltaY ) ) {
-                try {
-                    fireOffCursorOneTileMove( new OneTileMoveVector( deltaX, deltaY ), oldCursorMapPosition );
-                }
-                
-                //This should never happen!
-                catch( jfreerails.common.exception.FreerailsException fe ) {
-                    fe.printStackTrace();
-                }
+
+                    fireOffCursorOneTileMove( OneTileMoveVector.getInstance( deltaX, deltaY ), oldCursorMapPosition );
+
             }
             else {
                 jfreerails.lib.TextMessageHandler.sendMessage( "Jumped to: " + cursorMapPosition.x + ", " + cursorMapPosition.y );
@@ -180,12 +173,41 @@ public class FreerailsCursor implements java.awt.event.KeyListener {
         
     }
     
+    /** Creates a new FreerailsCursor.
+    * @param mapView The view that the curors moves across.
+    */
+    
+    public FreerailsCursor( NewMapView mapView ) {
+        this.mapView = mapView;
+    }
+    
     /** Adds a listener.  Listeners could include: the trackbuild system, the view the cursor moves across, etc.
     * @param l The listener.
     */
     
     public void addCursorEventListener( CursorEventListener l ) {
         listeners.addElement( l );
+    }
+    
+    /** Removes a listener.
+    * @param l The listener.
+    */
+    
+    public void removeCursorEventListener( CursorEventListener l ) {
+        listeners.removeElement( l );
+    }
+    
+    private void moveCursor( OneTileMoveVector v ) {
+        TryMoveCursor( new Point( cursorMapPosition.x + v.getX(), cursorMapPosition.y + v.getY() ) );
+    }
+    
+    private void fireOffCursorJumped( Point oldPosition, Point newPosition ) {
+        CursorEvent  ce = new CursorEvent( this );
+        ce.oldPosition = oldCursorMapPosition;
+        ce.newPosition = newPosition;
+        for( int  i = 0;i < listeners.size();i++ ) {
+            ( (CursorEventListener)listeners.elementAt( i ) ).cursorJumped( ce );
+        }
     }
     
     private void fireOffCursorOneTileMove( OneTileMoveVector v, Point oldPosition ) {
@@ -205,19 +227,6 @@ public class FreerailsCursor implements java.awt.event.KeyListener {
         ce.newPosition = position;
         for( int  i = 0;i < listeners.size();i++ ) {
             ( (CursorEventListener)listeners.elementAt( i ) ).cursorKeyPressed( ce );
-        }
-    }
-    
-    private void moveCursor( OneTileMoveVector v ) {
-        TryMoveCursor( new Point( cursorMapPosition.x + v.getX(), cursorMapPosition.y + v.getY() ) );
-    }
-    
-    private void fireOffCursorJumped( Point oldPosition, Point newPosition ) {
-        CursorEvent  ce = new CursorEvent( this );
-        ce.oldPosition = oldCursorMapPosition;
-        ce.newPosition = newPosition;
-        for( int  i = 0;i < listeners.size();i++ ) {
-            ( (CursorEventListener)listeners.elementAt( i ) ).cursorJumped( ce );
         }
     }
 }

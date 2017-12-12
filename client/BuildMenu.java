@@ -5,7 +5,15 @@
 * Created on 30 July 2001, 06:49
 */
 package jfreerails.client;
-import jfreerails.common.trackmodel.TrackBuilder;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.ButtonGroup;
+import javax.swing.JMenu;
+import javax.swing.JRadioButtonMenuItem;
+import jfreerails.list.TrackRuleList;
+import jfreerails.move.source.TrackMoveProducer;
+
 
 /**
 *
@@ -17,11 +25,11 @@ jyuhg182*/
 
 public class BuildMenu extends javax.swing.JMenu {
 
-    private final TrackBuilder trackBuilder;
+    private final TrackMoveProducer trackBuilder;
     
     /** Creates new BuildMenu */
     
-    public BuildMenu( jfreerails.common.trackmodel.TrackRuleList trackRuleList, TrackBuilder tb ) {
+    public BuildMenu( jfreerails.list.TrackRuleList trackRuleList, TrackMoveProducer tb ) {
         super();
         this.trackBuilder = tb;
         this.setText( "Build" );
@@ -63,13 +71,13 @@ public class BuildMenu extends javax.swing.JMenu {
         this.add( upgradeTrackMenuItem );
         this.addSeparator();
         for( int  i = 0;i < trackRuleList.getLength();i++ ) {
-            final jfreerails.common.trackmodel.TrackRule  trackRule = trackRuleList.getTrackRule( i );
-            String  trackType = trackRule.getTypeName();
+            final int  trackRuleNumber = i;
+            String  trackType = trackRuleList.getTrackRule( i ).getTypeName();
             javax.swing.JRadioButtonMenuItem  rbMenuItem = new javax.swing.JRadioButtonMenuItem( "Build " + trackType );
             rbMenuItem.addActionListener( new java.awt.event.ActionListener()  {
                 
                 public void actionPerformed( java.awt.event.ActionEvent actionEvent ) {
-                    trackBuilder.setTrackRule( trackRule );
+                    trackBuilder.setTrackRule( trackRuleNumber );
                 }
             } );
             if( 0 == i ) {

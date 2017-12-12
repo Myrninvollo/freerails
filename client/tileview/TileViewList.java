@@ -1,51 +1,63 @@
-
-/*
-* TileViewList.java
-*
-* Created on 08 August 2001, 17:11
-*/
 package jfreerails.client.tileview;
-
-import java.util.HashMap;
+import java.util.Iterator;
 
 /**
+*  Description of the Interface
 *
-* @author  Luke Lindsay
-* @version 
+*@author     Luke Lindsay
+*@created    09 October 2001
 */
 
 
-public class TileViewList {
-
-    private HashMap tiles;
+public interface TileViewList {
     
-    public java.util.Iterator getIterator() {
-        return tiles.values().iterator();
-    }
+    /**
+    *  Description of the Method
+    *
+    *@return    Description of the Returned Value
+    */
     
-    /** Creates new TileViewList */
+    public TileView GetTileViewWithNumber();
     
-    public TileViewList(HashMap tiles) {
-        this.tiles = tiles;
-    }
+    /**
+    *  Description of the Method
+    *
+    *@param  rgb  Description of Parameter
+    *@return      Description of the Returned Value
+    */
     
-    public TileView getTileViewWithRGBValue( int rgb ) {
-        return (TileView)tiles.get( new Integer( rgb ) );
-    }
+    public boolean TestRGBValue( int rgb );
     
-    public TileView GetTileViewWithNumber() {
-        return null;
-    }
+    /**
+    *  Description of the Method
+    *
+    *@return    Description of the Returned Value
+    */
     
-    public boolean TestRGBValue( int rgb ) {
-        return tiles.containsKey( new Integer( rgb ) );
-    }
+    public boolean TestTileViewNumber();
     
-    public boolean TestTileViewNumber() {
-        return false;
-    }
+    /**
+    *  Gets the length attribute of the TVL object
+    *
+    *@return    The length value
+    */
     
-    public int getLength() {
-        return tiles.size();
-    }
+    public int getLength();
+    
+    /**
+    *  Gets the iterator attribute of the TVL object
+    *
+    *@return    The iterator value
+    */
+    
+    public Iterator getIterator();
+    
+    /**
+    *  Gets the tileViewWithRGBValue attribute of the TVL object
+    *
+    *@param  rgb  Description of Parameter
+    *@return      The tileViewWithRGBValue value
+    */
+    
+    public TileView getTileViewWithRGBValue( int rgb );
 }

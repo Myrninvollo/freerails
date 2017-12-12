@@ -5,8 +5,9 @@
 * Created on 07 July 2001, 12:02
 */
 package jfreerails.client.tileview;
+import jfreerails.map.TerrainMap;
+import jfreerails.map.*;
 
-import jfreerails.common.FreerailsMap.TerrainMap;
 
 /**
 *
@@ -34,11 +35,11 @@ public abstract class TileIconSelector extends java.lang.Object {
         }
     }
     
-    public int selectTileIcon(int x, int y, TerrainMap map) {
+    public int selectTileIcon( int x, int y, TerrainMap map ) {
         return 0;
     }
     
-    protected int checkTile(int x, int y, TerrainMap map) {
+    protected int checkTile( int x, int y, TerrainMap map ) {
         int  match = 1;
         
         /*0==match!  (0 is assigned to match because of the way the tiles are set up

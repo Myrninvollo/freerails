@@ -18,10 +18,6 @@ import java.awt.*;
 
 public class BuildTrainView extends java.awt.Frame {
 
-    private javax.swing.JButton OK;
-
-    private javax.swing.JPanel PanelButtons;
-
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JList TrainList;
@@ -31,6 +27,10 @@ public class BuildTrainView extends java.awt.Frame {
     private Object selected = null;
 
     private javax.swing.JButton Cancel;
+
+    private javax.swing.JButton OK;
+
+    private javax.swing.JPanel PanelButtons;
     
 
     private class TrainCellRenderer implements ListCellRenderer {
@@ -58,6 +58,19 @@ public class BuildTrainView extends java.awt.Frame {
         }
         return ( selected );
     }
+    
+    private void OKActionPerformed( java.awt.event.ActionEvent evt ) { //GEN-FIRST:event_OKActionPerformed
+        selected = TrainList.getSelectedValue();
+        synchronized( this ) {
+            notify();
+        }
+    } //GEN-LAST:event_OKActionPerformed
+    
+    /** Exit the Application */
+    
+    private void exitForm( java.awt.event.WindowEvent evt ) { //GEN-FIRST:event_exitForm
+        System.exit( 0 );
+    } //GEN-LAST:event_exitForm
     
     private void CancelActionPerformed( java.awt.event.ActionEvent evt ) { //GEN-FIRST:event_CancelActionPerformed
         synchronized( this ) {
@@ -104,17 +117,4 @@ public class BuildTrainView extends java.awt.Frame {
         add( PanelButtons, java.awt.BorderLayout.SOUTH );
         pack();
     } //GEN-END:initComponents
-    
-    private void OKActionPerformed( java.awt.event.ActionEvent evt ) { //GEN-FIRST:event_OKActionPerformed
-        selected = TrainList.getSelectedValue();
-        synchronized( this ) {
-            notify();
-        }
-    } //GEN-LAST:event_OKActionPerformed
-    
-    /** Exit the Application */
-    
-    private void exitForm( java.awt.event.WindowEvent evt ) { //GEN-FIRST:event_exitForm
-        System.exit( 0 );
-    } //GEN-LAST:event_exitForm
 }

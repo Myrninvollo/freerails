@@ -17,17 +17,15 @@ import java.awt.*;
 
 public interface MapView {
     
-    public void updateTiles( Rectangle tileMapRectangle );
+    public void paintTile( Graphics g, int x, int y);
     
-    public Dimension getTileSize();
-    
-    public void paintTile( Graphics g, Point tileMapCoordinate, Point screenPosition );
-    
-    public void paintTiles( Graphics g, Point tileMapCoordinate, Rectangle tilesToPaint );
+    public void paintRectangleOfTiles( Graphics g,  Rectangle tilesToPaint );
     
     public Dimension getMapSizeInTiles();
     
     public Dimension getMapSizeInPixels();
-    
-    public void updateTile( Point tileMapCoordinate );
+
+    public Dimension getTileSize();
+
+    public void paintRect(java.awt.Graphics g);
 }

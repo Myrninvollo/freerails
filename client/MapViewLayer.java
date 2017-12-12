@@ -16,9 +16,11 @@ import java.awt.*;
 
 public interface MapViewLayer {
     
+    public boolean aTileIsHere( Point mapCoordinate );
+    
     public Dimension getTileSize();
     
-    public void paintTile( Graphics g, Point tileMapCoordinate, Point screenPosition );
-    
-    public boolean aTileIsHere( Point mapCoordinate );
+    public void paintTile( Graphics g, int x, int y);
+
+    public void paintRectangleOfTiles(Graphics g, Rectangle tilesToPaint);
 }
