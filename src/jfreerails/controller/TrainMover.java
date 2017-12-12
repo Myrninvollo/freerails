@@ -9,7 +9,7 @@ import jfreerails.world.top.World;
 import jfreerails.world.train.PathWalker;
 import jfreerails.world.train.PathWalkerImpl;
 import jfreerails.world.train.TrainModel;
-import jfreerails.world.train.TrainPosition;
+import jfreerails.world.train.TrainPositionOnMap;
 
 /**
  * @author Luke Lindsay 27-Oct-2002
@@ -47,7 +47,7 @@ public class TrainMover  implements FreerailsServerSerializable{
 		int trainLength = train.getLength();
 		PathWalker fromPathWalker = new PathWalkerImpl(from);
 		fromPathWalker.stepForward(trainLength);
-		TrainPosition initialPosition = TrainPosition.createInSameDirectionAsPath(fromPathWalker);
+		TrainPositionOnMap initialPosition = TrainPositionOnMap.createInSameDirectionAsPath(fromPathWalker);
 		train.setPosition(initialPosition);
 		
 	}

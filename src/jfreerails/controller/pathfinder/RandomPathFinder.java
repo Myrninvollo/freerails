@@ -8,16 +8,16 @@ import jfreerails.world.common.PositionOnTrack;
  * @author Luke Lindsay 13-Oct-2002
  *
  */
-public class NewRandomPathFinder implements FreerailsPathIterator {
+public class RandomPathFinder implements FreerailsPathIterator {
 
-	NewFlatTrackExplorer trackExplorer;
+	FlatTrackExplorer trackExplorer;
 	
 	PositionOnTrack p1 = new PositionOnTrack();
 	PositionOnTrack p2 = new PositionOnTrack();
 
 	static final int tileSize=30;
 
-	public NewRandomPathFinder(NewFlatTrackExplorer tx){
+	public RandomPathFinder(FlatTrackExplorer tx){
 		trackExplorer=tx;
 	}
 

@@ -1,10 +1,12 @@
 package jfreerails;
 
+import java.io.IOException;
+
 import javax.swing.JFrame;
 
 import jfreerails.client.common.GameLoop;
 import jfreerails.client.common.ScreenHandler;
-import jfreerails.client.top.ViewLists;
+import jfreerails.client.renderer.ViewLists;
 import jfreerails.controller.ServerGameEngine;
 import jfreerails.world.top.World;
 
@@ -12,7 +14,7 @@ public class RunFreerails {
 
 	/** @param args 
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 
 		boolean nogameloop = false;
 		boolean fullscreen = false;
@@ -44,7 +46,7 @@ public class RunFreerails {
 	 * @param nogameloop 
 	 */
 
-	public static void createClient(String mapName, boolean fullscreen, boolean nogameloop) {
+	public static void createClient(String mapName, boolean fullscreen, boolean nogameloop) throws IOException {
 
 		World world = OldWorldImpl.createWorldFromMapFile(mapName);
 

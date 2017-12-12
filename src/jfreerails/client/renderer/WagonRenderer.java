@@ -8,8 +8,13 @@ import java.awt.GraphicsEnvironment;
 import java.awt.Point;
 import java.awt.Transparency;
 import java.awt.image.BufferedImage;
+import java.awt.image.RenderedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
+
+import javax.imageio.ImageIO;
 
 import jfreerails.world.common.OneTileMoveVector;
 import jfreerails.world.train.WagonType;
@@ -32,7 +37,7 @@ public class WagonRenderer {
 
 	private OneTileMoveVector direction = OneTileMoveVector.NORTH;
 
-	private BufferedImage[][] trains;
+	BufferedImage[][] trains;
 
 	public void rendererTrain(Graphics g, Point p) {
 
@@ -44,11 +49,10 @@ public class WagonRenderer {
 	}
 
 	private void rendererTrainWithoutBuffer(Graphics g, Point p) {
-		
-		
-		TrainTypeRenderer ttv =(TrainTypeRenderer)typeColors.get(new Integer(trainType));
+
+		TrainTypeRenderer ttv = (TrainTypeRenderer) typeColors.get(new Integer(trainType));
 		Color c = ttv.getColor();
-		
+
 		g.setColor(c);
 		if (ViewPerspective.OVERHEAD == viewPerspective) {
 
@@ -60,11 +64,7 @@ public class WagonRenderer {
 
 			int width = sideOnViewSize.getWidth();
 			int height = sideOnViewSize.getHeight();
-			g.fillRect(
-				p.x + 25 - width / 2,
-				p.y + 25 - width / 2,
-				width,
-				height);
+			g.fillRect(p.x + 25 - width / 2, p.y + 25 - width / 2, width, height);
 		}
 
 	}
@@ -102,8 +102,6 @@ public class WagonRenderer {
 	}
 
 	private void setup() {
-		
-	
 
 		trains = new BufferedImage[WagonType.NUMBER_OF_CATEGORIES][8];
 
@@ -112,50 +110,66 @@ public class WagonRenderer {
 		Iterator trainTypes = typeColors.keySet().iterator();
 		while (trainTypes.hasNext()) {
 			row = 0;
-			Integer typeNumber=(Integer)trainTypes.next();
+			Integer typeNumber = (Integer) trainTypes.next();
+			column = typeNumber.intValue();
 			this.setTrainTypes(typeNumber.intValue());
 			OneTileMoveVector[] vectors = OneTileMoveVector.getList();
 			for (int i = 0; i < vectors.length; i++) {
 				trains[column][row] =
-					defaultConfiguration.createCompatibleImage(
-						30,
-						30,
-						Transparency.TRANSLUCENT);
+					defaultConfiguration.createCompatibleImage(30, 30, Transparency.TRANSLUCENT);
 				Graphics g = trains[column][row].getGraphics();
 				row++;
 				this.setDirection(vectors[i]);
 				Point p = new Point(15, 15);
 				this.rendererTrainWithoutBuffer(g, p);
 			}
-			column++;
+			
 		}
 	}
 	public WagonRenderer() {
 
-		typeColors.put(
-			new Integer(WagonType.MAIL),
-			new TrainTypeRenderer(Color.WHITE));
+		typeColors.put(new Integer(WagonType.MAIL), new TrainTypeRenderer(Color.WHITE));
 
-		typeColors.put(
-			new Integer(WagonType.PASSENGER),
-			new TrainTypeRenderer(Color.BLUE));
+		typeColors.put(new Integer(WagonType.PASSENGER), new TrainTypeRenderer(Color.BLUE));
 
-		typeColors.put(
-			new Integer(WagonType.FAST_FREIGHT),
-			new TrainTypeRenderer(Color.YELLOW));
+		typeColors.put(new Integer(WagonType.FAST_FREIGHT), new TrainTypeRenderer(Color.YELLOW));
 
-		typeColors.put(
-			new Integer(WagonType.SLOW_FREIGHT),
-			new TrainTypeRenderer(Color.ORANGE));
+		typeColors.put(new Integer(WagonType.SLOW_FREIGHT), new TrainTypeRenderer(new Color(128, 0, 0)) );
 
-		typeColors.put(
-			new Integer(WagonType.BULK_FREIGHT),
-			new TrainTypeRenderer(Color.BLACK));
+		typeColors.put(new Integer(WagonType.BULK_FREIGHT), new TrainTypeRenderer(Color.BLACK));
 
-		typeColors.put(
-			new Integer(WagonType.ENGINE),
-			new TrainTypeRenderer(Color.LIGHT_GRAY));
+		typeColors.put(new Integer(WagonType.ENGINE), new TrainTypeRenderer(Color.LIGHT_GRAY));
 		setup();
+	}
+
+	public static void main(String[] args) {
+		try {
+			WagonRenderer wagonRenderer = new WagonRenderer();
+			
+			writeImages(wagonRenderer, "mail", WagonType.MAIL);
+			writeImages(wagonRenderer, "passenger", WagonType.PASSENGER);
+			writeImages(wagonRenderer, "goods", WagonType.FAST_FREIGHT);
+			writeImages(wagonRenderer, "steel", WagonType.SLOW_FREIGHT);
+			writeImages(wagonRenderer, "coal", WagonType.BULK_FREIGHT);
+			writeImages(wagonRenderer, "norris", WagonType.ENGINE);
+			writeImages(wagonRenderer, "grasshopper", WagonType.ENGINE);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	private static void writeImages(WagonRenderer wagonRenderer, String typeName, int type)
+		throws IOException {
+		OneTileMoveVector[] vectors = OneTileMoveVector.getList();
+		for (int i = 0; i < vectors.length; i++) {
+			String fileName = typeName+"_"+vectors[i].toAbrvString()+".png";
+			File file = new File("src/jfreerails/data/trains/"+fileName);
+		
+			RenderedImage image = (RenderedImage) wagonRenderer.trains[type][vectors[i].getNumber()];
+			ImageIO.write(image, "PNG", file);
+			System.out.println("Done" + file.getAbsolutePath());
+		}
 	}
 
 }

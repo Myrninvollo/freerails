@@ -11,6 +11,6 @@ o	Generate a train with a random set of wagons on F7
 o	Generate a train with the user selected engine and wagons on F7
 
 Documentation
-o	Finish move package documentation
+x	Finish move package documentation
 o	Write world package documentation
-o	Write overview documentation
+x	Write overview documentation

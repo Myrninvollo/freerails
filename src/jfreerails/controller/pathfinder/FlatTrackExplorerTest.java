@@ -17,7 +17,7 @@ import junit.framework.TestCase;
  * @author Luke Lindsay
  *
  */
-public class NewFlatTrackExplorerTest extends TestCase {
+public class FlatTrackExplorerTest extends TestCase {
 
 	World world;
 
@@ -25,7 +25,7 @@ public class NewFlatTrackExplorerTest extends TestCase {
 	 * Constructor for NewFlatTrackExplorerTest.
 	 * @param arg0
 	 */
-	public NewFlatTrackExplorerTest(String arg0) {
+	public FlatTrackExplorerTest(String arg0) {
 		super(arg0);
 	}
 
@@ -56,8 +56,8 @@ public class NewFlatTrackExplorerTest extends TestCase {
 		setUp();
 		PositionOnTrack p =
 			new PositionOnTrack(10, 10, OneTileMoveVector.SOUTH_WEST);
-		NewFlatTrackExplorer fte =
-			new NewFlatTrackExplorer(world, p);
+		FlatTrackExplorer fte =
+			new FlatTrackExplorer(world, p);
 		OneTileMoveVector v = fte.getFirstVectorToTry();
 		assertEquals(OneTileMoveVector.EAST, v);
 	}
@@ -67,11 +67,11 @@ public class NewFlatTrackExplorerTest extends TestCase {
 	*/
 	public void testGetPossibleDirections() {
 		setUp();
-		NewFlatTrackExplorer fte;
+		FlatTrackExplorer fte;
 
 		PositionOnTrack p =
 			new PositionOnTrack(10, 10, OneTileMoveVector.SOUTH_WEST);
-		fte = new NewFlatTrackExplorer(world, p);
+		fte = new FlatTrackExplorer(world, p);
 
 		//There should be 3 branches.
 		assertTrue(fte.hasNextBranch());
@@ -98,10 +98,10 @@ public class NewFlatTrackExplorerTest extends TestCase {
 
 		setUp();
 
-		NewFlatTrackExplorer fte;
+		FlatTrackExplorer fte;
 
 		PositionOnTrack p = new PositionOnTrack(10, 10, OneTileMoveVector.EAST);
-		fte = new NewFlatTrackExplorer(world, p);
+		fte = new FlatTrackExplorer(world, p);
 
 		PositionOnTrack pos = new PositionOnTrack(fte.getPosition());
 		assertEquals(10, pos.getX());
@@ -136,8 +136,8 @@ public class NewFlatTrackExplorerTest extends TestCase {
 
 	public void testHasNext() {
 		setUp();
-		NewFlatTrackExplorer explorer =
-			new NewFlatTrackExplorer(
+		FlatTrackExplorer explorer =
+			new FlatTrackExplorer(
 				world,
 				new PositionOnTrack(10, 10, OneTileMoveVector.EAST));
 		assertTrue(explorer.hasNextBranch());
@@ -147,7 +147,7 @@ public class NewFlatTrackExplorerTest extends TestCase {
 		setUp();
 
 		PositionOnTrack[] positions =
-			NewFlatTrackExplorer.getPossiblePositions(
+			FlatTrackExplorer.getPossiblePositions(
 				world,
 				new Point(10, 10));
 		assertNotNull(positions);

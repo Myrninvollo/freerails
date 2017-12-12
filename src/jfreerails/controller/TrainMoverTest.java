@@ -8,7 +8,7 @@ import jfreerails.world.top.KEY;
 import jfreerails.world.top.World;
 import jfreerails.world.train.PathWalker;
 import jfreerails.world.train.TrainModel;
-import jfreerails.world.train.TrainPosition;
+import jfreerails.world.train.TrainPositionOnMap;
 import junit.framework.TestCase;
 
 
@@ -49,7 +49,7 @@ public class TrainMoverTest extends TestCase {
 		
 		TrainModel t = (TrainModel)w.get(KEY.TRAINS, 0);
 
-		TrainPosition pos = t.getPosition();
+		TrainPositionOnMap pos = t.getPosition();
 
 		assertEquals(pos.getX(0), 0);
 		assertEquals(pos.getY(0), 0);
@@ -73,7 +73,7 @@ public class TrainMoverTest extends TestCase {
 		
 		TrainModel t = (TrainModel)w.get(KEY.TRAINS, 0);
 		
-		TrainPosition pos = t.getPosition();
+		TrainPositionOnMap pos = t.getPosition();
 				
 		
 		ChangeTrainPositionMove m= trainMover.update(30);

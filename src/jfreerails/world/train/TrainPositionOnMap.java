@@ -9,7 +9,7 @@ import jfreerails.world.common.IntLine;
  * @author Luke Lindsay 26-Oct-2002
  *
  */
-public class TrainPosition implements FreerailsSerializable{
+public class TrainPositionOnMap implements FreerailsSerializable {
 
 	private final int[] xpoints, ypoints;
 
@@ -20,8 +20,8 @@ public class TrainPosition implements FreerailsSerializable{
 		if (o == this) {
 			return true;
 		}
-		if (o instanceof TrainPosition) {
-			TrainPosition other = (TrainPosition) o;
+		if (o instanceof TrainPositionOnMap) {
+			TrainPositionOnMap other = (TrainPositionOnMap) o;
 			int thisLength = this.getLength();
 			int otherLength = other.getLength();
 
@@ -98,7 +98,7 @@ public class TrainPosition implements FreerailsSerializable{
 		return new SimplePathIteratorImpl(reversed_xpoints, reversed_ypoints);
 	}
 
-	private TrainPosition(int[] xpoints, int[] ypoints) {
+	private TrainPositionOnMap(int[] xpoints, int[] ypoints) {
 		if (xpoints.length != ypoints.length) {
 			throw new IllegalArgumentException();
 		}
@@ -107,20 +107,20 @@ public class TrainPosition implements FreerailsSerializable{
 		this.ypoints = ypoints;
 	}
 
-	public static TrainPosition createInstance(int[] xpoints, int[] ypoints) {
-		return new TrainPosition(
+	public static TrainPositionOnMap createInstance(int[] xpoints, int[] ypoints) {
+		return new TrainPositionOnMap(
 			(int[]) xpoints.clone(),
 			(int[]) ypoints.clone());
 	}
 
-	public TrainPosition addToHead(TrainPosition b) {
-		TrainPosition a = this;
+	public TrainPositionOnMap addToHead(TrainPositionOnMap b) {
+		TrainPositionOnMap a = this;
 
 		return addBtoHeadOfA(b, a);
 
 	}
 
-	private TrainPosition addBtoHeadOfA(TrainPosition b, TrainPosition a) {
+	private TrainPositionOnMap addBtoHeadOfA(TrainPositionOnMap b, TrainPositionOnMap a) {
 		if (aHeadEqualsBTail(a, b)) {
 
 			int newLength = a.getLength() + b.getLength() - 2;
@@ -142,26 +142,26 @@ public class TrainPosition implements FreerailsSerializable{
 				newXpoints[i + bLength - 2] = a.getX(i);
 				newYpoints[i + bLength - 2] = a.getY(i);
 			}
-			return new TrainPosition(newXpoints, newYpoints);
+			return new TrainPositionOnMap(newXpoints, newYpoints);
 		} else {
 			throw new IllegalArgumentException("Tried to add "+b.toString()+" to the head of "+a.toString());
 		}
 	}
 
-	public boolean canAddToHead(TrainPosition b) {
+	public boolean canAddToHead(TrainPositionOnMap b) {
 		return aHeadEqualsBTail(this, b);
 	}
 
-	public TrainPosition addToTail(TrainPosition a) {
-		TrainPosition b = this;
+	public TrainPositionOnMap addToTail(TrainPositionOnMap a) {
+		TrainPositionOnMap b = this;
 		return addBtoHeadOfA(b, a);
 	}
 
-	public boolean canAddToTail(TrainPosition b) {
+	public boolean canAddToTail(TrainPositionOnMap b) {
 		return aHeadEqualsBTail(b, this);
 	}
 
-	public TrainPosition removeFromHead(TrainPosition b) {
+	public TrainPositionOnMap removeFromHead(TrainPositionOnMap b) {
 
 		if (headsAreEqual(this, b)) {
 
@@ -186,13 +186,13 @@ public class TrainPosition implements FreerailsSerializable{
 				newYpoints[i] = this.getY(position);
 			}
 
-			return new TrainPosition(newXpoints, newYpoints);
+			return new TrainPositionOnMap(newXpoints, newYpoints);
 		} else {
 			throw new IllegalArgumentException();
 		}
 	}
 
-	public boolean canRemoveFromHead(TrainPosition b) {
+	public boolean canRemoveFromHead(TrainPositionOnMap b) {
 
 		if (headsAreEqual(this, b)) {
 			FreerailsPathIterator path = b.path();
@@ -212,7 +212,7 @@ public class TrainPosition implements FreerailsSerializable{
 		}
 	}
 
-	public TrainPosition removeFromTail(TrainPosition b) {
+	public TrainPositionOnMap removeFromTail(TrainPositionOnMap b) {
 		if (tailsAreEqual(this, b)) {
 			int newLength = this.getLength() - b.getLength() + 2;
 
@@ -234,13 +234,13 @@ public class TrainPosition implements FreerailsSerializable{
 			newXpoints[newLength - 1] = b.getX(0);
 			newYpoints[newLength - 1] = b.getY(0);
 
-			return new TrainPosition(newXpoints, newYpoints);
+			return new TrainPositionOnMap(newXpoints, newYpoints);
 		} else {
 			throw new IllegalArgumentException();
 		}
 	}
 
-	public boolean canRemoveFromTail(TrainPosition b) {
+	public boolean canRemoveFromTail(TrainPositionOnMap b) {
 
 		if (tailsAreEqual(this, b)) {
 			FreerailsPathIterator path = b.reversePath();
@@ -410,14 +410,14 @@ public class TrainPosition implements FreerailsSerializable{
 	}
 	*/
 
-	public static TrainPosition createInSameDirectionAsPath(FreerailsPathIterator path) {
+	public static TrainPositionOnMap createInSameDirectionAsPath(FreerailsPathIterator path) {
 		return createInstanceInDirection(path, true);
 	}
-	public static TrainPosition createInOppositeDirectionToPath(FreerailsPathIterator path) {
+	public static TrainPositionOnMap createInOppositeDirectionToPath(FreerailsPathIterator path) {
 		return createInstanceInDirection(path, false);
 	}
 
-	private static TrainPosition createInstanceInDirection(
+	private static TrainPositionOnMap createInstanceInDirection(
 		FreerailsPathIterator path,
 		boolean sameDirectionAsPath) {
 		IntArray xPointsIntArray = new IntArray();
@@ -452,10 +452,10 @@ public class TrainPosition implements FreerailsSerializable{
 				yPoints[k] = yPointsIntArray.get(j);
 			}
 		}
-		return new TrainPosition(xPoints, yPoints);
+		return new TrainPositionOnMap(xPoints, yPoints);
 	}
 
-	public static boolean headsAreEqual(TrainPosition a, TrainPosition b) {
+	public static boolean headsAreEqual(TrainPositionOnMap a, TrainPositionOnMap b) {
 
 		int aHeadX = a.getX(0);
 		int aHeadY = a.getY(0);
@@ -469,7 +469,7 @@ public class TrainPosition implements FreerailsSerializable{
 		}
 	}
 
-	public static boolean tailsAreEqual(TrainPosition a, TrainPosition b) {
+	public static boolean tailsAreEqual(TrainPositionOnMap a, TrainPositionOnMap b) {
 
 		int aTailX = a.getX(a.getLength() - 1);
 		int aTailY = a.getY(a.getLength() - 1);
@@ -484,7 +484,7 @@ public class TrainPosition implements FreerailsSerializable{
 
 	}
 
-	public static boolean aHeadEqualsBTail(TrainPosition a, TrainPosition b) {
+	public static boolean aHeadEqualsBTail(TrainPositionOnMap a, TrainPositionOnMap b) {
 		int aHeadX = a.getX(0);
 		int aHeadY = a.getY(0);
 
@@ -498,7 +498,7 @@ public class TrainPosition implements FreerailsSerializable{
 		}
 	}
 
-	public static boolean bHeadEqualsATail(TrainPosition a, TrainPosition b) {
+	public static boolean bHeadEqualsATail(TrainPositionOnMap a, TrainPositionOnMap b) {
 		return aHeadEqualsBTail(b, a);
 	}
 
@@ -514,5 +514,9 @@ public class TrainPosition implements FreerailsSerializable{
 		}
 		sb.append("}");
 		return sb.toString();
+	}
+
+	public boolean hasBeenBuilt() {	
+		return true;
 	}
 }

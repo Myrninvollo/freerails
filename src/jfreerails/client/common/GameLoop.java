@@ -10,9 +10,11 @@ import javax.swing.RepaintManager;
 import jfreerails.controller.GameModel;
 
 final public class GameLoop implements Runnable {
+	
+	Runnable r;
 
 	final boolean LOCK_FRAME_RATE = false;
-	final boolean USE_CUSTOM_EVENT_QUEUE = true;
+	final boolean USE_CUSTOM_EVENT_QUEUE = false;
 
 	boolean gameNotDone = true;
 
@@ -21,6 +23,8 @@ final public class GameLoop implements Runnable {
 	final int TARGET_FPS = 30;
 
 	final GameModel gameModel;
+
+	FPScounter fPScounter;
 
 	public GameLoop(ScreenHandler s) {
 		gameModel = GameModel.NULL_MODEL;
@@ -40,59 +44,75 @@ final public class GameLoop implements Runnable {
 
 		Toolkit awtToolkit = Toolkit.getDefaultToolkit();
 
-		CustomEventQueue customEventQueue = new CustomEventQueue();
+		
+		
+		EventQueue eventQueue = awtToolkit.getSystemEventQueue();
 
 		if (USE_CUSTOM_EVENT_QUEUE) {
-			EventQueue eventQueue = awtToolkit.getSystemEventQueue();
+			CustomEventQueue customEventQueue = new CustomEventQueue();
 
 			eventQueue.push(customEventQueue);
 		}
-		FPScounter fPScounter = new FPScounter();
+
+		fPScounter = new FPScounter();
 
 		long frameStartTime;
+		
+		r = new Runnable(){
+			public void run() {				
+				gameLoopIteration();
+				EventQueue.invokeLater(r);
+			}
+		};
+		EventQueue.invokeLater(r);
+//		while (gameNotDone) {
+//			Graphics g;
+//			gameLoopIteration();
+//		}
+	}
 
-		while (gameNotDone) {
+	private void gameLoopIteration() {
+		long frameStartTime;
 
-			frameStartTime = System.currentTimeMillis();
+		frameStartTime = System.currentTimeMillis();
 
-			gameModel.update();
+		gameModel.update();
 
-			Toolkit.getDefaultToolkit().sync();
-			if (USE_CUSTOM_EVENT_QUEUE) {
+		Toolkit.getDefaultToolkit().sync();
+		//			if (USE_CUSTOM_EVENT_QUEUE) {
+		//				try {
+		//					customEventQueue.dispatchAllEvents();
+		//				} catch (Exception e) {
+		//					e.printStackTrace();
+		//				}
+		//			}
+
+		Graphics g = screenHandler.getDrawGraphics();
+		;
+		try {
+
+			screenHandler.frame.paintComponents(g);
+
+			fPScounter.updateFPSCounter(frameStartTime, g);
+
+		} finally {
+			g.dispose();
+		}
+		screenHandler.swapScreens();
+
+		if (LOCK_FRAME_RATE) {
+			long deltatime = System.currentTimeMillis() - frameStartTime;
+
+			while (deltatime < (1000 / TARGET_FPS)) {
 				try {
-					customEventQueue.dispatchAllEvents();
+					long sleeptime = (1000 / TARGET_FPS) - deltatime;
+					Thread.sleep(sleeptime);
+
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
+				deltatime = System.currentTimeMillis() - frameStartTime;
 			}
-
-			Graphics g = screenHandler.getDrawGraphics();
-			;
-			try {
-
-				screenHandler.frame.paintComponents(g);
-
-				fPScounter.updateFPSCounter(frameStartTime, g);
-
-			} finally {
-				g.dispose();
-			}
-			screenHandler.swapScreens();
-
-			if (LOCK_FRAME_RATE) {
-				long deltatime = System.currentTimeMillis() - frameStartTime;
-
-				while (deltatime < (1000 / TARGET_FPS)) {
-					try {
-						long sleeptime = (1000 / TARGET_FPS) - deltatime;
-						Thread.sleep(sleeptime);
-
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-					deltatime = System.currentTimeMillis() - frameStartTime;
-				}
-			} 
 		}
 	}
 

@@ -172,7 +172,7 @@ public class TrainPathFinderTest extends TestCase {
 
 	public void assertNextPositionIs(PositionOnTrack position, Point target, PositionOnTrack nextPosition) {
 
-		NewFlatTrackExplorer explorer = new NewFlatTrackExplorer(world, position);
+		FlatTrackExplorer explorer = new FlatTrackExplorer(world, position);
 		TrainPathFinder.setTarget(target.x, target.y);
 
 		TrainPathFinder trainPathFinder = new TrainPathFinder(explorer);
@@ -184,8 +184,8 @@ public class TrainPathFinderTest extends TestCase {
 	}
 
 	public void assertCanMove(int x, int y, OneTileMoveVector v) {
-		PositionOnTrack pot = NewFlatTrackExplorer.getPossiblePositions(world, new Point(x, y))[0];
-		NewFlatTrackExplorer explorer = new NewFlatTrackExplorer(world, pot);
+		PositionOnTrack pot = FlatTrackExplorer.getPossiblePositions(world, new Point(x, y))[0];
+		FlatTrackExplorer explorer = new FlatTrackExplorer(world, pot);
 		boolean found = false;
 		while (explorer.hasNextBranch()) {
 			explorer.nextBranch();

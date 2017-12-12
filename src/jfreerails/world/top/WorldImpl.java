@@ -3,13 +3,13 @@ package jfreerails.world.top;
 import java.util.ArrayList;
 
 import jfreerails.world.common.FreerailsSerializable;
-import jfreerails.world.track.NullTrackPiece;
+import jfreerails.world.track.FreerailsTile;
 
 public class WorldImpl implements World {
 
 	private final ArrayList[] lists = new ArrayList[KEY.getNumberOfKeys()];
 
-	private FreerailsSerializable[][] map;
+	private FreerailsTile[][] map;
 
 	public WorldImpl() {
 		this.setupMap(0, 0);
@@ -22,10 +22,10 @@ public class WorldImpl implements World {
 	}
 
 	public void setupMap(int mapWidth, int mapHeight) {
-		map = new FreerailsSerializable[mapWidth][mapHeight];
+		map = new FreerailsTile[mapWidth][mapHeight];
 		for (int x = 0; x < mapWidth; x++) {
 			for (int y = 0; y < mapHeight; y++) {
-				map[x][y] = NullTrackPiece.getInstance();
+				map[x][y] = FreerailsTile.NULL;
 			}
 		}
 	}
@@ -66,11 +66,11 @@ public class WorldImpl implements World {
 		}
 	}
 
-	public void setTile(int x, int y, FreerailsSerializable element) {
+	public void setTile(int x, int y, FreerailsTile element) {
 		map[x][y] = element;
 	}
 
-	public FreerailsSerializable getTile(int x, int y) {
+	public FreerailsTile getTile(int x, int y) {
 		return map[x][y];
 	}
 
@@ -78,6 +78,14 @@ public class WorldImpl implements World {
 		if (x >= 0 && x < map.length && y >= 0 && y < map[0].length) {
 			return true;
 		} else {
+			return false;
+		}
+	}
+
+	public boolean boundsContain(KEY k, int index) {
+		if(index>=0 && index < this.size(k)){
+			return true;
+		}else{
 			return false;
 		}
 	}

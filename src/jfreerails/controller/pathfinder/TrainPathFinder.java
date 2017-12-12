@@ -20,7 +20,7 @@ public class TrainPathFinder implements IntIterator, FreerailsSerializable {
 		targetY = y;		
 	}
 
-	NewFlatTrackExplorer trackExplorer;
+	FlatTrackExplorer trackExplorer;
 	
 	SimpleAStarPathFinder pathFinder = new SimpleAStarPathFinder(); 
 	
@@ -29,7 +29,7 @@ public class TrainPathFinder implements IntIterator, FreerailsSerializable {
 
 	static final int tileSize=30;
 
-	public TrainPathFinder(NewFlatTrackExplorer tx){
+	public TrainPathFinder(FlatTrackExplorer tx){
 		trackExplorer=tx;		
 	}
 
@@ -51,14 +51,20 @@ public class TrainPathFinder implements IntIterator, FreerailsSerializable {
 	
 	public int nextInt(){
 		
-		PositionOnTrack[] t = NewFlatTrackExplorer.getPossiblePositions(trackExplorer.getWorld(), new Point(targetX, targetY));
-		int [] targets = new int [t.length];
-		for (int i =0; i<t.length; i++){
-			targets[i]=t[i].getOpposite().toInt();			
-		}
 		PositionOnTrack tempP = new PositionOnTrack(trackExplorer.getPosition());
 		int currentPosition = tempP.getOpposite().toInt();
-		NewFlatTrackExplorer tempExplorer = new NewFlatTrackExplorer(trackExplorer.getWorld(), tempP);
+		
+		PositionOnTrack[] t = FlatTrackExplorer.getPossiblePositions(trackExplorer.getWorld(), new Point(targetX, targetY));
+		int [] targets = new int [t.length];
+		for (int i =0; i<t.length; i++){
+			int target = t[i].getOpposite().toInt();
+			if(target == currentPosition){
+				 System.out.println("Reached target!"); 
+			}
+			targets[i]=	target;		
+		}
+		
+		FlatTrackExplorer tempExplorer = new FlatTrackExplorer(trackExplorer.getWorld(), tempP);
 		int next = pathFinder.findpath(currentPosition, targets, tempExplorer);
 		if(next==SimpleAStarPathFinder.PATH_NOT_FOUND){
 			trackExplorer.nextBranch();

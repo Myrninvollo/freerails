@@ -7,7 +7,6 @@ import jfreerails.world.common.FreerailsPathIterator;
 import jfreerails.world.top.KEY;
 import jfreerails.world.top.World;
 import jfreerails.world.top.WorldImpl;
-import jfreerails.world.train.EngineModel;
 import jfreerails.world.train.TrainModel;
 
 /**
@@ -28,7 +27,7 @@ public class TrainFixture {
 		points.add(new Point(80, 80));
 		points.add(new Point(150, 100));
 
-		TrainModel train = new TrainModel(new EngineModel());
+		TrainModel train = new TrainModel(0);
 
 		w.add(KEY.TRAINS, train);		
 

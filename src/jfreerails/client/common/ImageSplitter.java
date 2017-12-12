@@ -12,8 +12,9 @@ package jfreerails.client.common;
 */
 import java.awt.Image;
 import java.awt.Transparency;
+import java.io.IOException;
 
-import javax.swing.ImageIcon;
+import javax.imageio.ImageIO;
 
 final public class ImageSplitter extends java.lang.Object {
 
@@ -89,10 +90,10 @@ final public class ImageSplitter extends java.lang.Object {
 		}
 	}
 
-	public ImageSplitter(java.net.URL url) {
+	public ImageSplitter(java.net.URL url) throws IOException {
 		imageURL = url;
 		System.out.println("\nLoading image " + imageURL);
-		sourceImage = (new ImageIcon(imageURL)).getImage();
+		sourceImage = ImageIO.read(imageURL);
 	}
 
 	public void setTileGrid(int x, int y, int tileWidth, int tileHeight) {

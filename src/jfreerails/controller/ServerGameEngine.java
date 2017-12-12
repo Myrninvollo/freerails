@@ -1,5 +1,6 @@
 package jfreerails.controller;
 
+import java.awt.Point;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
@@ -10,6 +11,9 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import jfreerails.move.ChangeTrainPositionMove;
+import jfreerails.world.station.ProductionAtEngineShop;
+import jfreerails.world.station.StationModel;
+import jfreerails.world.top.KEY;
 import jfreerails.world.top.World;
 
 /**
@@ -19,6 +23,8 @@ import jfreerails.world.top.World;
 public class ServerGameEngine implements GameModel {
 
 	World world;
+	
+	TrainBuilder tb;
 
 	long lastTime = System.currentTimeMillis();
 
@@ -26,26 +32,51 @@ public class ServerGameEngine implements GameModel {
 
 	public ServerGameEngine(World w) {
 		this.world = w;
+		tb = new TrainBuilder(world, this);
 
 	}
 
 	
 	public void update() {
+		moveTrains();
+		
+		buildTrains();
+
+	}
+
+	/** Iterator over the stations  
+	 * and build trains at any that have their production
+	 * field set.
+	 *
+	 */
+	private void buildTrains() {
+		for(int i=0; i< world.size(KEY.STATIONS); i++){
+			StationModel station = (StationModel)world.get(KEY.STATIONS, i);
+			if(null !=station && null != station.getProduction()){
+				ProductionAtEngineShop production = station.getProduction();
+				Point p = new Point(station.x, station.y);
+				tb.buildTrain(production.getEngineType(), production.getWagonTypes(), p);
+				station.setProduction(null);	
+			}			
+		}
+	}
+
+
+	private void moveTrains() {
 		long now = System.currentTimeMillis();
 		long deltaTime = now - lastTime;
 		int deltaDistance = (int) (0.15 * deltaTime);
 		lastTime = now;
 		ChangeTrainPositionMove m = null;
-
+		
 		Iterator i = trainMovers.iterator();
-
+		
 		while (i.hasNext()) {
 			Object o = i.next();
 			TrainMover trainMover = (TrainMover) o;
 			m = trainMover.update(deltaDistance);
 			m.doMove(world);
 		}
-
 	}
 
 	public void addTrainMover(TrainMover m) {

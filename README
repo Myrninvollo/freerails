@@ -1,14 +1,9 @@
-Freerails Java - version 0.1.2
+Freerails Java - version 0.1.3
 
 What's new:
-o	you can scroll the map by dragging button2.
-	(thanks Karl-Heinz Pennemann)
-o	Mnemonics on menus	
-	(thanks Scott Bennett)
-o	Code refactored to use the new World interface
-	(see jfreerails.world.top.World).
-o	Better documentation
-	(see the javadoc distribution)		
+o	You can choose the type of engine and wagons that
+	a train has.
+o	Trains are built at stations.	
  
 Getting it, either:
 

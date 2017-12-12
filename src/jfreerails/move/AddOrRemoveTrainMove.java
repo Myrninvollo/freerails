@@ -1,41 +1,36 @@
-
 package jfreerails.move;
 
+import jfreerails.world.top.World;
+import jfreerails.world.train.TrainModel;
 
-import java.awt.Point;
+final public class AddOrRemoveTrainMove implements Move {
 
-import jfreerails.world.train.EngineType;
+	private final int trainNumber;
 
-/**
- *
- *
- *
- * @author lindsal
- */
+	private final TrainModel train;
 
-final public class AddOrRemoveTrainMove {
+	public AddOrRemoveTrainMove(TrainModel t, int index) {
+		this.train = t;
+		this.trainNumber = index;
+	}
 
+	public MoveStatus tryDoMove(World w) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
-    private final Point location;
+	public MoveStatus tryUndoMove(World w) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
+	public MoveStatus doMove(World w) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
-    private final EngineType engine;
-
-    public Point getLocation() {
-        return location;
-    }
-
-    public EngineType getEngine() {
-        return engine;
-    }
-
-    public AddOrRemoveTrainMove(Point p, EngineType e){
-    		location=p;
-    		engine=e;
-    }
+	public MoveStatus undoMove(World w) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
-
-
-
-
-

@@ -2,7 +2,7 @@ package jfreerails.controller;
 
 import java.awt.Point;
 
-import jfreerails.controller.pathfinder.NewFlatTrackExplorer;
+import jfreerails.controller.pathfinder.FlatTrackExplorer;
 import jfreerails.controller.pathfinder.TrainPathFinder;
 import jfreerails.world.common.FreerailsPathIterator;
 import jfreerails.world.common.PositionOnTrack;
@@ -11,7 +11,6 @@ import jfreerails.world.top.World;
 import jfreerails.world.track.FreerailsTile;
 import jfreerails.world.track.NullTrackType;
 import jfreerails.world.track.TrackRule;
-import jfreerails.world.train.EngineModel;
 import jfreerails.world.train.TrainModel;
 import jfreerails.world.train.TrainPathIterator;
 
@@ -29,7 +28,7 @@ public class TrainBuilder {
 		gameEngine = gm;
 	}
 
-	public void buildTrain(Point p) {
+	public void buildTrain(int engineType, int[]wagons, Point p) {
 		
 		FreerailsTile tile = (FreerailsTile)world.getTile(p.x, p.y); 
 		
@@ -40,8 +39,8 @@ public class TrainBuilder {
 
 			//Add train to train list.
 
-			TrainModel train = new TrainModel(new EngineModel(), null);
-
+			TrainModel train = new TrainModel(engineType, wagons, null);
+			System.out.println("Build train with engine type: "+engineType+" and wagons: "+wagons.toString());
 			
 
 			world.add(KEY.TRAINS, train);
@@ -80,12 +79,12 @@ public class TrainBuilder {
 	public FreerailsPathIterator getPathToFollow(Point p) {
 
 		PositionOnTrack pot =
-			NewFlatTrackExplorer.getPossiblePositions(
+			FlatTrackExplorer.getPossiblePositions(
 				world,
 				p)[0];
 
 		//NewFlatTrackExplorer explorer =new NewFlatTrackExplorer(world.getMap(), pot);
-		NewFlatTrackExplorer explorer = new NewFlatTrackExplorer(pot, world);
+		FlatTrackExplorer explorer = new FlatTrackExplorer(pot, world);
 
 		FreerailsPathIterator it;
 

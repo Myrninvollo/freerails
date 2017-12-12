@@ -17,7 +17,7 @@ import jfreerails.world.track.TrackPiece;
  */
 
 final public class ChangeTrackPieceMove
-	implements NewTrackMove, MapUpdateMove {
+	implements TrackMove, MapUpdateMove {
 
 	private final TrackPiece oldTrackPiece;
 

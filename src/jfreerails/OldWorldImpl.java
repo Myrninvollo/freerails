@@ -35,6 +35,9 @@ public class OldWorldImpl {
 			new jfreerails.TileSetFactoryImpl(tiles_xml_url);
 			
 		WorldImpl w = new WorldImpl();	
+		
+		WagonAndEngineTypesFactory wetf = new WagonAndEngineTypesFactory();
+		wetf.addTypesToWorld(w);
 
 		tileFactory.addTerrainTileTypesList(w);		
 				

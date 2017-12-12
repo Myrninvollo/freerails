@@ -13,7 +13,7 @@ import jfreerails.world.track.TrackConfiguration;
 import jfreerails.world.track.TrackPiece;
 
 
-public class NewFlatTrackExplorer implements Explorer, FreerailsSerializable {
+public class FlatTrackExplorer implements Explorer, FreerailsSerializable {
 
 	PositionOnTrack currentPosition = new PositionOnTrack(0, 0, OneTileMoveVector.NORTH);
 	PositionOnTrack currentBranch = new PositionOnTrack(0, 0, OneTileMoveVector.NORTH);
@@ -122,14 +122,14 @@ public class NewFlatTrackExplorer implements Explorer, FreerailsSerializable {
 		}
 	}
 
-	public NewFlatTrackExplorer(World world, PositionOnTrack p) {
+	public FlatTrackExplorer(World world, PositionOnTrack p) {
 		w = world;
 		this.currentPosition = new PositionOnTrack(p.getX(), p.getY(), p.getDirection());
 	}
 
 	/******************************************************************************************/
 	//scott bennett 15/03/03
-	public NewFlatTrackExplorer(PositionOnTrack p, World world) {
+	public FlatTrackExplorer(PositionOnTrack p, World world) {
 		this.currentPosition = new PositionOnTrack(p.getX(), p.getY(), p.getDirection());
 		this.w = world;
 	}

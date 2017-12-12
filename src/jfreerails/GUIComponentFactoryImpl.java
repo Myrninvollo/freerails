@@ -15,12 +15,13 @@ import jfreerails.client.common.MyGlassPanel;
 import jfreerails.client.menu.BuildMenu;
 import jfreerails.client.menu.StationTypesPopup;
 import jfreerails.client.renderer.MapRenderer;
+import jfreerails.client.renderer.ViewLists;
 import jfreerails.client.renderer.ZoomedOutMapRenderer;
 import jfreerails.client.top.ClientJFrame;
 import jfreerails.client.top.GUIComponentFactory;
 import jfreerails.client.top.UserInputOnMapController;
-import jfreerails.client.top.ViewLists;
 import jfreerails.client.view.DetailMapView;
+import jfreerails.client.view.DialogueBoxController;
 import jfreerails.client.view.FreerailsCursor;
 import jfreerails.client.view.MainMapAndOverviewMapMediator;
 import jfreerails.client.view.MapViewJComponentConcrete;
@@ -33,7 +34,6 @@ import jfreerails.controller.ServerGameEngine;
 import jfreerails.controller.StationBuilder;
 import jfreerails.controller.TrackMoveExecutor;
 import jfreerails.controller.TrackMoveProducer;
-import jfreerails.controller.TrainBuilder;
 import jfreerails.world.top.World;
 
 public class GUIComponentFactoryImpl implements GUIComponentFactory {
@@ -109,8 +109,7 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory {
 		MoveReceiver mainmapMoveReceiver = new MapViewMoveReceiver(overviewMap);
 		moveFork.add(mainmapMoveReceiver);
 
-		trackBuilder = new TrackMoveProducer(world, moveFork);
-		TrainBuilder tb = new TrainBuilder(world, gameEngine);
+		trackBuilder = new TrackMoveProducer(world, moveFork);	
 		StationBuilder sb = new StationBuilder(trackBuilder, world);
 
 		stationTypesPopup.setup(sb);
@@ -122,10 +121,10 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory {
 
 		userInputOnMapController.setup(
 			mapViewJComponent,
-			trackBuilder,
-			tb,
+			trackBuilder,			
 			stationTypesPopup,
-			cursor);
+			cursor,
+			new DialogueBoxController(glassPanel, w, viewLists));
 
 		buildMenu.setup(world, trackBuilder);
 		mainMapScrollPane1.setViewportView(this.mapViewJComponent);
