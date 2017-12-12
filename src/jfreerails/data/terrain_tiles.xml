@@ -1,0 +1,35 @@
+
+
+<!DOCTYPE Tiles SYSTEM "terrain_tiles.dtd">
+
+<!---->
+
+<Tiles>
+	<Tile_set X="0" Y="0" Height="30" Width="30" Class="Terrain">
+		<Tile Type="slums" X="2" Y="8" rgb="0" tileSelector="Chequered"/>
+		<Tile Type="Resource" X="8" Y="8" rgb="ef901d" tileSelector="Standard"/>
+		<Tile Type="Village" X="0" Y="8" rgb="d86c48" tileSelector="Chequered"/>
+		<Tile Type="Clear" X="0" Y="0" rgb="00b400" tileSelector="RiverStyle"/>
+		<Tile Type="Farm" X="0" Y="7" rgb="48fc48" tileSelector="Chequered"/>
+		<Tile Type="Desert" X="0" Y="1" rgb="b42400" tileSelector="RiverStyle"/>
+		<Tile Type="City" X="2" Y="7" rgb="fcfc48" tileSelector="Chequered"/>
+		<Tile Type="Ocean" X="0" Y="5" rgb="0000b4" tileSelector="RiverStyle">
+			<specials>
+				<Tile Type="Harbour" X="12" Y="7" rgb="1eead2" tileSelector="special"/>
+			</specials>
+		</Tile>
+		<Tile Type="River" X="0" Y="4" rgb="0048d8" tileSelector="RiverStyle">
+			<treatTheseAsTheSameType>
+				<Type rgb="0000b4"/>
+				<Type rgb="1eead2"/>
+			</treatTheseAsTheSameType>
+		</Tile>
+		<Tile Type="Resource" X="10" Y="8" rgb="ef901c" tileSelector="Standard"/>
+		<Tile Type="Terminal" X="4" Y="7" rgb="4" tileSelector="Standard"/>
+		<Tile Type="Jungle" X="0" Y="3" rgb="4890fc" tileSelector="RiverStyle"/>
+		<Tile Type="Hills" X="0" Y="6" rgb="b4b4b4" tileSelector="ForestStyle"/>
+		<Tile Type="Foothills" X="0" Y="6" rgb="90d8fc" tileSelector="ForestStyle"/>
+		<Tile Type="Mountain" X="8" Y="6" rgb="ffffff" tileSelector="ForestStyle"/>
+	</Tile_set>
+</Tiles>
+

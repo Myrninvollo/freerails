@@ -1,0 +1,75 @@
+
+
+<!DOCTYPE Tiles SYSTEM "Track_Tiles.dtd">
+
+<!--This file species the track (and station) types, and the legal track configurations for each of these types.-->
+
+<Tiles>
+	<TrackSet X="0" Y="0" Height="60" Width="60" Class="Track">
+		<TrackType type="standard track" X="0" Y="0" signalTower="false" doubleTrack="false" station="false" maxConsecuativePieces="-1" RGBvalue="000000">
+			<CannotBuildOnTheseTerrainTypes>
+				<TerrainType name="River"/>
+				<TerrainType name="Hills"/>
+
+
+
+
+			</CannotBuildOnTheseTerrainTypes>
+			<ListOfTrackPieceTemplates>
+				<TrackPieceTemplate trackTemplate="010010000">
+					<ListOfLegalRoutesAcrossNode>
+						<LegalRouteAcrossNode RouteTemplate="000111000"/>
+					</ListOfLegalRoutesAcrossNode>
+				</TrackPieceTemplate>
+				<TrackPieceTemplate trackTemplate="010010010">
+					<ListOfLegalRoutesAcrossNode>
+						<LegalRouteAcrossNode RouteTemplate="010011000"/>
+					</ListOfLegalRoutesAcrossNode>
+				</TrackPieceTemplate>
+
+
+
+
+
+
+
+			</ListOfTrackPieceTemplates>
+		</TrackType>
+		<TrackType type="bridge" X="0" Y="2" signalTower="false" doubleTrack="false" station="false" maxConsecuativePieces="1" RGBvalue="000001">
+			<CanOnlyBuildOnTheseTerrainTypes>
+				<TerrainType name="River"/>
+
+
+
+
+
+			</CanOnlyBuildOnTheseTerrainTypes>
+			<ListOfTrackPieceTemplates>
+				<TrackPieceTemplate trackTemplate="010010000">
+					<ListOfLegalRoutesAcrossNode>
+						<LegalRouteAcrossNode RouteTemplate="000111000"/>
+					</ListOfLegalRoutesAcrossNode>
+				</TrackPieceTemplate>
+				<TrackPieceTemplate trackTemplate="010010010">
+					<ListOfLegalRoutesAcrossNode>
+						<LegalRouteAcrossNode RouteTemplate="010011000"/>
+					</ListOfLegalRoutesAcrossNode>
+				</TrackPieceTemplate>
+
+
+
+
+			</ListOfTrackPieceTemplates>
+		</TrackType>
+
+
+
+
+
+
+
+
+
+	</TrackSet>
+</Tiles>
+
