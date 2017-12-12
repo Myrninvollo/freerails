@@ -14,7 +14,7 @@ import java.util.NoSuchElementException;
  * @author Luke
  *
  */
-public class TestNonNullElements extends TestCase {
+public class NonNullElementsTest extends TestCase {
     
     World w;
     StationModel station1, station2, station3;
@@ -24,7 +24,7 @@ public class TestNonNullElements extends TestCase {
     }
     
     public static Test suite() {
-        TestSuite testSuite = new TestSuite(TestNonNullElements.class);
+        TestSuite testSuite = new TestSuite(NonNullElementsTest.class);
         return testSuite;
     }
     

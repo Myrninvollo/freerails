@@ -5,7 +5,7 @@
  */
 
 package jfreerails.server.parser;
-import jfreerails.server.TrackSetFactory;
+import jfreerails.server.common.TrackSetFactory;
 import jfreerails.world.top.World;
 /**
  *

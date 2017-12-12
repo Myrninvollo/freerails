@@ -364,7 +364,7 @@ public class NewTrainScheduleJPanel extends javax.swing.JPanel implements NewVie
     
     private void enableButtons(){
         MutableSchedule s  = getSchedule();
-        System.out.println("s.canAddOrder()="+s.canAddOrder());
+       
         addStationJButton.setEnabled(s.canAddOrder());
         
         //Only one set of prority orders are allowed.
@@ -398,9 +398,7 @@ public class NewTrainScheduleJPanel extends javax.swing.JPanel implements NewVie
             stationMenuItem
             .addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent evt) {
-                    System.out.println(
-                    "Station set to " + stationModel.getStationName());
-                    setStationNumber(stationIndex);
+                   
                 }
             });
             changeStationJMenu.add(stationMenuItem);

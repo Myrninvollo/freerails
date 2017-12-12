@@ -2,63 +2,99 @@ package jfreerails;
 
 import java.awt.DisplayMode;
 import java.io.IOException;
+import java.net.InetAddress;
 
 import jfreerails.client.common.ScreenHandler;
-import jfreerails.client.renderer.ViewLists;
 import jfreerails.client.top.GUIClient;
-import jfreerails.client.top.ViewListsImpl;
-import jfreerails.controller.LocalConnection;
 import jfreerails.server.GameServer;
+import jfreerails.util.FreerailsProgressMonitor;
 
 /**
- * This class starts a server and a GUI client which connects to it.  It implements
- * Runnable so that it can be started in the AWT event thread without blocking other items in
- * the event queue.
+ * This class allows a server and/or client to be configured and started.
  */
-public class RunFreerails implements Runnable {
+public class RunFreerails {
+
+	boolean done = false;
+
+	FreerailsProgressMonitor monitor = FreerailsProgressMonitor.NULL_INSTANCE;
+
+	private InetAddress remoteServer;
 
 	int numberOfClients = 1;
 
 	int mode = ScreenHandler.WINDOWED_MODE;
 
 	DisplayMode displayMode = null;
+	
+	private GameServer localServer;
+
+	public RunFreerails() {
+	}
+
+	public RunFreerails(FreerailsProgressMonitor monitor) {
+		this.monitor = monitor;
+	}
 
 	public static void main(String[] args) throws IOException {
 		new RunFreerailsJFrame().show();
 	}
 
-	public void createClient(String mapName, int mode) throws IOException {
+	/**
+	 * Starts the server in a new thread.
+	 * @return a reference to the server
+	 */
+	public GameServer startServer() {
 		long startTime = System.currentTimeMillis();
-		GameServer gs = new GameServer(mapName);
-		
+		String map_name;
+		GameServer gs = null;
+		map_name = "south_america";
+		gs = createServer(map_name);
+		localServer = gs;
+		System.out.println("Time taken to start server: " +
+			(System.currentTimeMillis() - startTime) + "ms");
+		return gs;
+	}
 
-		System.out.println("Will start " + numberOfClients + " clients.");
-		ViewLists viewLists = null;
-		for (int i = 0; i < numberOfClients; i++) {	
-			
-			LocalConnection connection = gs.getLocalConnection();		
-			GUIClient gc = new GUIClient(connection);
-			
-			//We want to setup the screen handler before creating the view lists since  
-			//ViewListsImpl creates images that are compatible with the current display settings 
-			//and the screen handler may change the display settings.
-			ScreenHandler screenHandler = new ScreenHandler(gc.getClientJFrame(), mode, displayMode);
-			
-			//Only create the view lists on the first iteration.
-			if(null == viewLists){			
-			 	viewLists = new ViewListsImpl(gs.getWorld());
+	/**
+	 * Starts one or more clients in separate threads.
+	 */
+	public void startClients() {
+		try {
+			start();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
+	private void start() throws IOException {
+		long startTime = System.currentTimeMillis();
+		System.out.println("Will start "+numberOfClients+ " clients.");
+		for(int i = 0 ; i < numberOfClients; i ++){		
+		    String title = "Client " + (i + 1);
+		    if (remoteServer == null) {
+			if (localServer == null) {
+			    throw new IllegalStateException("Must start a "
+			    + "server unless connecting remotely!");
 			}
-			
-			//Add a title to the client's window so that we can distinguish between clients.
-			String title = "Client "+(i+1);			
-			gc.getClientJFrame().setTitle(title);
-						
-			gc.setViewLists(viewLists);
-			gc.setServerControls(gs.getServerControls());
-			gc.start(screenHandler);
+			GUIClient gc = new
+			    GUIClient(localServer.getLocalConnection(),
+				mode, displayMode, title, monitor);
+			gc.setServerControls(localServer.getServerControls());
+		    } else {
+			GUIClient gc = new GUIClient(remoteServer, mode,
+				displayMode, title, monitor);
+		    }
 		}
 		long deltaTime = System.currentTimeMillis() - startTime;
-		System.out.println("Time taken for startup: " + deltaTime + "ms");
+		System.out.println("Time taken to start clients: " +
+			deltaTime + "ms");
+	}
+	
+	private GameServer createServer(String mapName)
+	{
+		return new GameServer(mapName, monitor);
 	}
 
 	public DisplayMode getDisplayMode() {
@@ -86,17 +122,9 @@ public class RunFreerails implements Runnable {
 	}
 
 	public void run() {
-		String map_name;
-
-		map_name = "south_america";
-
-		try {
-			createClient(map_name, mode);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
 	}
 
+	public void setRemoteServer(InetAddress address) {
+	    remoteServer = address;
+	}
 }

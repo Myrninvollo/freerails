@@ -11,12 +11,14 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import jfreerails.controller.CalcSupplyAtStations;
-import jfreerails.controller.MoveExecuter;
 import jfreerails.controller.MoveReceiver;
 import jfreerails.controller.ServerControlInterface;
 import jfreerails.controller.TrainMover;
+import jfreerails.move.ChangeProductionAtEngineShopMove;
 import jfreerails.move.ChangeTrainPositionMove;
+import jfreerails.move.TimeTickMove;
 import jfreerails.move.WorldChangedEvent;
+import jfreerails.util.FreerailsProgressMonitor;
 import jfreerails.util.GameModel;
 import jfreerails.world.common.GameCalendar;
 import jfreerails.world.common.GameTime;
@@ -28,7 +30,7 @@ import jfreerails.world.top.World;
 
 /**
  *
- * This class takes care of the world simulation - i.e. "non-player" activities.
+ * This class takes care of the world simulation - for instance "non-player" activities.
  * @author Luke Lindsay 05-Nov-2002
  *
  */
@@ -87,9 +89,11 @@ public class ServerGameEngine
 	}
 
 	public void setTargetTicksPerSecond(int targetTicksPerSecond) {
-		synchronized (mutex) {
-			this.targetTicksPerSecond = targetTicksPerSecond;
-		}
+	    // Synchronize access to targetTicksPerSecond so we don't get divide
+	    // by zero during the update.			
+	    synchronized (mutex) {
+		this.targetTicksPerSecond = targetTicksPerSecond;
+	    }
 	}
 
 	public ServerGameEngine(World w, GameServer o, MoveReceiver r) {
@@ -99,12 +103,14 @@ public class ServerGameEngine
 		receiver = r;
 		setupGame();
 		CalcSupplyAtStations calcSupplyAtStations = new CalcSupplyAtStations(w);
+		
 	}
 
 	public void run() {
 		Thread.currentThread().setName("JFreerails server");
 		/*
-		 * bump this threads priority
+		 * bump this threads priority so we always gain control when the
+		 * client relinquishes lock on the mutex.
 		*/
 		Thread.currentThread().setPriority(
 			Thread.currentThread().getPriority() + 1);
@@ -115,9 +121,10 @@ public class ServerGameEngine
 
 	private void setupGame() {
 		gameServer.setWorld(world);
-		tb = new TrainBuilder(world, this);
+		tb = new TrainBuilder(world, this,
+		gameServer.getMoveExecuter());
 		nextModelUpdateDue = System.currentTimeMillis();
-		System.out.println("sending new world changed event");
+		
 		receiver.processMove(new WorldChangedEvent());
 	}
 
@@ -131,81 +138,122 @@ public class ServerGameEngine
 	/**
 	 * This is the main server update method, which does all the
 	 * "simulation".
-	 * TODO improve scheduling
-	     * Each tick scheduled to start at baseTime + 1000 * n / fps 
+	 * <p>Each tick scheduled to start at baseTime + 1000 * n / fps 
+	 * 
+	 * <p><b>Overview of Scheduling strategy</b>
+	 * <p><b>Goal of strategy</b>
+	 * <p> The goal of the scheduling is to achieve the desired number of
+	 * ticks (frames) per second or as many as possible if this is not
+	 * achievable and provide the maximum possible remaining time to
+	 * clients.
+	 * <p><b>Methodology</b>
+	 * <p>This method allows for a maximum "jitter" of +1 <i>client</i>
+	 * frame interval. (assuming we are the highest priority thread
+	 * competing when the client relinquishes control).
+	 * <ol>
+	 * <li>Server thread enters update loop for frame n.
+	 * <li>The server thread performs the required updates to the game
+	 * model.
+	 * <li>Server calculates the desired time at which frame n+1 should
+	 * start using t_(n+1) = t_0 + n * frame_interval. t_0 is the time at which
+	 * frame 0 was scheduled.
+	 * <li>Server then wait()s on mutex for t_(n+1) - current_time millis
+	 * (notifying any waiting thread).
+	 * <li>Server wakes up at some time not earlier than t_(n+1). Because it
+	 * has given up the mutex, it cannot reacquire it until some
+	 * whole-integer number of client frames has elapsed (client
+	 * relinquishes lock only at end of each client frame). Provided that
+	 * the desired server frame interval &lt; (time for server frame + time
+	 * for client frame), we should always achieve our target fps.
+	 * <li>repeat.
+	 * </ol>
 	 */
 	public void update() {
-		if (targetTicksPerSecond > 0) {
-			synchronized (mutex) {
-				if (targetTicksPerSecond > 0) {
-					//Note, targetTicksPerSecond can get set to 0 while we are waiting for the mutex.  If
-					// we continue when targetTicksPerSecond == 0 we get a 'java.lang.ArithmeticException: / by zero'
-					// in the code below.						
+	    if (targetTicksPerSecond > 0) {
+		synchronized (mutex) {
+		    if (targetTicksPerSecond > 0) {
+			/*
+			 * start of server world update
+			 */
 
-					buildTrains();
-					//update the time first, since other updates might need to know the current time.
-					updateGameTime();
+			buildTrains();
+			//update the time first, since other updates might need
+			//to know the current time.
+			updateGameTime();
 
-					//now do the other updates
-					moveTrains();
+			//now do the other updates
+			moveTrains();
 
-					//Check whether we have just started a new year..
-					GameTime time = (GameTime) world.get(ITEM.TIME);
-					GameCalendar calendar =
-						(GameCalendar) world.get(ITEM.CALENDAR);
-					int currentYear = calendar.getYear(time.getTime());
-					if (this.currentYearLastTick != currentYear) {
-						this.currentYearLastTick = currentYear;
-						newYear();
-					}
-
-					if (ticksSinceUpdate % aLongTime == 0) {
-						infrequentUpdate();
-					}
-
-					statUpdates++;
-					n++;
-					frameStartTime = System.currentTimeMillis();
-					if (statUpdates == 100) {
-						statUpdates = 0;
-
-						int updatesPerSec =
-							(int) (100000L
-								/ (frameStartTime - statLastTimestamp));
-
-						if (statLastTimestamp > 0) {
-							System.out.println(
-								"Updates per sec " + updatesPerSec);
-						}
-						statLastTimestamp = frameStartTime;
-						baseTime = frameStartTime;
-						n = 0;
-					}
-					nextModelUpdateDue =
-						baseTime + (1000 * n) / targetTicksPerSecond;
-					int delay = (int) (nextModelUpdateDue - frameStartTime);
-					mutex.notifyAll();
-					try {
-						if (delay > 0) {
-							mutex.wait(delay);
-						} else {
-							mutex.wait(1);
-						}
-					} catch (InterruptedException e) {
-						// do nothing
-					}
-				}
-				ticksSinceUpdate++;
+			//Check whether we have just started a new year..
+			GameTime time = (GameTime) world.get(ITEM.TIME);
+			GameCalendar calendar =
+			    (GameCalendar) world.get(ITEM.CALENDAR);
+			int currentYear = calendar.getYear(time.getTime());
+			if (this.currentYearLastTick != currentYear) {
+			    this.currentYearLastTick = currentYear;
+			    newYear();
 			}
-		} else {
-			nextModelUpdateDue = frameStartTime;
+
+			if (ticksSinceUpdate % aLongTime == 0) {
+			    infrequentUpdate();
+			}
+
+			/*
+			 * all world updates done... now schedule next tick
+			 */
+
+			statUpdates++;
+			n++;
+			frameStartTime = System.currentTimeMillis();
+			if (statUpdates == 100) {
+			    /* every 100 ticks, calculate some stats and reset
+			     * the base time */
+			    statUpdates = 0;
+
+			    int updatesPerSec =
+				(int) (100000L
+				       / (frameStartTime - statLastTimestamp));
+
+			    if (statLastTimestamp > 0) {
+				System.out.println(
+					"Updates per sec " + updatesPerSec);
+			    }
+			    statLastTimestamp = frameStartTime;
+
+			    baseTime = frameStartTime;
+			    n = 0;
+			}
+
+			/* calculate "ideal world" time for next tick */
+			nextModelUpdateDue =
+			    baseTime + (1000 * n) / targetTicksPerSecond;
+			int delay = (int) (nextModelUpdateDue - frameStartTime);
+			/* wake up any waiting client threads - we could be
+			 * more agressive, and only notify them if delay > 0? */
+			mutex.notifyAll();
 			try {
-				//When the game is frozen we don't want to be spinning in a loop.
-				Thread.sleep(200);
+			    if (delay > 0) {
+				mutex.wait(delay);
+			    } else {
+				mutex.wait(1);
+			    }
 			} catch (InterruptedException e) {
-
+			    // do nothing
 			}
+		    }
+		    ticksSinceUpdate++;
 		}
+	    } else {
+		// desired tick rate was 0
+		nextModelUpdateDue = frameStartTime;
+		try {
+		    //When the game is frozen we don't want to be spinning in a
+		    //loop.
+		    Thread.sleep(200);
+		} catch (InterruptedException e) {
+		    // do nothing
+		}
+	    }
 	}
 
 	private void addCargoToStations() {
@@ -215,9 +263,10 @@ public class ServerGameEngine
 
 	/** This is called at the start of each new year. */
 	private void newYear() {
-		TrackMaintenanceMoveGenerator.update(world);
+		TrackMaintenanceMoveGenerator tmmg = new TrackMaintenanceMoveGenerator(this.gameServer.getMoveExecuter());		
+		tmmg.update(world);
 		CargoAtStationsGenerator cargoAtStationsGenerator =
-			new CargoAtStationsGenerator();
+			new CargoAtStationsGenerator(this.gameServer.getMoveExecuter());
 		cargoAtStationsGenerator.update(world);
 	}
 
@@ -227,18 +276,21 @@ public class ServerGameEngine
 	 *
 	 */
 	private void buildTrains() {
-		for (int i = 0; i < world.size(KEY.STATIONS); i++) {
-			StationModel station = (StationModel) world.get(KEY.STATIONS, i);
-			if (null != station && null != station.getProduction()) {
-				ProductionAtEngineShop production = station.getProduction();
-				Point p = new Point(station.x, station.y);
-				tb.buildTrain(
-					production.getEngineType(),
-					production.getWagonTypes(),
-					p);
-				station.setProduction(null);
-			}
+	    for (int i = 0; i < world.size(KEY.STATIONS); i++) {
+		StationModel station = (StationModel) world.get(KEY.STATIONS, i);
+		if (null != station && null != station.getProduction()) {
+		    ProductionAtEngineShop production = station.getProduction();
+		    Point p = new Point(station.x, station.y);
+		    tb.buildTrain(
+			    production.getEngineType(),
+			    production.getWagonTypes(),
+			    p);
+
+			this.gameServer.getMoveExecuter().processMove(new
+			    ChangeProductionAtEngineShopMove(production,
+				null, i));
 		}
+	    }
 	}
 
 	private void moveTrains() {
@@ -253,15 +305,12 @@ public class ServerGameEngine
 			Object o = i.next();
 			TrainMover trainMover = (TrainMover) o;
 			m = trainMover.update(deltaDistance);
-			MoveExecuter.getMoveExecuter().processMove(m);
+			this.gameServer.getMoveExecuter().processMove(m);
 		}
 	}
 
 	private void updateGameTime() {
-		GameTime gt = (GameTime) world.get(ITEM.TIME);
-		int time = gt.getTime();
-		time += 1;
-		world.set(ITEM.TIME, new GameTime(time));
+		this.gameServer.getMoveExecuter().processMove(TimeTickMove.getMove(world));
 	}
 
 	public void addTrainMover(TrainMover m) {
@@ -278,8 +327,10 @@ public class ServerGameEngine
 			GZIPOutputStream zipout = new GZIPOutputStream(out);
 
 			ObjectOutputStream objectOut = new ObjectOutputStream(zipout);
-			objectOut.writeObject(trainMovers);
-			objectOut.writeObject(getWorld());
+			synchronized (mutex) {
+			    objectOut.writeObject(trainMovers);
+			    objectOut.writeObject(getWorld());
+			}
 			objectOut.flush();
 			objectOut.close();
 
@@ -297,10 +348,11 @@ public class ServerGameEngine
 			FileInputStream in = new FileInputStream("freerails.sav");
 			GZIPInputStream zipin = new GZIPInputStream(in);
 			ObjectInputStream objectIn = new ObjectInputStream(zipin);
-
-			this.trainMovers = (ArrayList) objectIn.readObject();
-
-			this.world = (World) objectIn.readObject();
+			synchronized (mutex) {
+			    this.trainMovers = (ArrayList)
+				objectIn.readObject();
+			    this.world = (World) objectIn.readObject();
+			}
 			setupGame();
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -308,8 +360,12 @@ public class ServerGameEngine
 
 	}
 
+	public String[] getMapNames() {
+	    return OldWorldImpl.getMapNames();
+	}
+
 	public void newGame(String mapName) {
-		newGame(OldWorldImpl.createWorldFromMapFile(mapName));
+		newGame(OldWorldImpl.createWorldFromMapFile(mapName, FreerailsProgressMonitor.NULL_INSTANCE));
 	}
 
 	public void newGame(World w) {

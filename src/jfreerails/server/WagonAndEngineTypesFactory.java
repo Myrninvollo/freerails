@@ -4,6 +4,7 @@
  */
 package jfreerails.server;
 
+import jfreerails.server.common.*;
 import jfreerails.world.common.Money;
 import jfreerails.world.top.KEY;
 import jfreerails.world.top.World;

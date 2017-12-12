@@ -1,7 +1,5 @@
-package jfreerails.server;
+package jfreerails.server.common;
 import jfreerails.world.top.World;
-
-
 
 /**
 *  Description of the Interface
@@ -10,14 +8,9 @@ import jfreerails.world.top.World;
 *     09 October 2001
 */
 
-
-public interface TileSetFactory {
-
+public interface TrackSetFactory {
 
 
-     void addTerrainTileTypesList(World w);
+	void addTrackRules(World w);
 
-
-
-    
 }

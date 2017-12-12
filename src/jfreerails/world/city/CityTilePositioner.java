@@ -3,15 +3,22 @@
  * Date: 7th April 2003
  *
  * Class to randomly position the city tiles on the game map, within a 5x5 tile
- * area around a city. A random number of between 1 and 5 tiles are initially 
+ * area around a city. A random number of between 1 and 6 tiles are initially 
  * chosen with the idea to have these increase over the period of a game. 
+ */
+
+/*	
+ * Updated 2nd November 2003 by Scott Bennett
+ *
+ * Class now randomly positions 1-6 urban tiles, 0-2 industry tiles and 0-2 
+ * resource tiles within the 5x5 grid that is a city. Subtypes of each of these 
+ * categories are randomly chosen also. The maximums for these categories
+ * are currently hard-coded, another solution would be preferable i think.
  */
 
 package jfreerails.world.city;
 
-import java.awt.Point;
 import java.util.ArrayList;
-import java.util.Vector;
 
 import jfreerails.world.city.CityModel;
 import jfreerails.world.terrain.TerrainType;
@@ -22,175 +29,168 @@ import jfreerails.world.track.FreerailsTile;
 public class CityTilePositioner {
 
 	private World w;
-	private int numberOfTiles = 0;
-	private double probability;
-	private int startX;
-	private int startY;
+	private double PROBABILITY_MULTIPLIER = 0.04; //Represents a 1/25 probability, ie. 1 tile, based on a 5x5 city
 	private TerrainType type;
 	private FreerailsTile tile;
-	private ArrayList terrainTypes;
+	private ArrayList urbanTerrainTypes;
+	private ArrayList industryTerrainTypes;
+	private ArrayList resourceTerrainTypes;
 
 	public CityTilePositioner(World world) {
-		this.w = world;
+	   
+	    this.w = world;
+		urbanTerrainTypes = new ArrayList();
+		industryTerrainTypes = new ArrayList();
+		resourceTerrainTypes = new ArrayList();
 
-		terrainTypes = new ArrayList();
-
-		//get the different types of Urban terrain
+		//get the different types of Urban/Industry/Resource terrain
 		for (int i = 0; i < w.size(KEY.TERRAIN_TYPES); i++) {
 			type = (TerrainType) w.get(KEY.TERRAIN_TYPES, i);
 
 			if (type.getTerrainCategory().equals("Urban")) {
-				terrainTypes.add(new Integer(i));
+				urbanTerrainTypes.add(new Integer(i));
+			}
+			else if (type.getTerrainCategory().equals("Industry")) {
+				industryTerrainTypes.add(new Integer(i));
+			}
+			else if (type.getTerrainCategory().equals("Resource")) {
+				resourceTerrainTypes.add(new Integer(i));
 			}
 		}
 
-		doTilePositioning();
+		doTilePositioning(6,2,2); 
+			//hard-coded limits at the moment (urban, industry, resource)
 	}
 
-	public void doTilePositioning() {
+
+	public void doTilePositioning(int urbMax, int indMax, int resMax) {
 
 		for (int i = 0; i < w.size(KEY.CITIES); i++) {
 
-			//0.04 represents a 1/25 probability, ie. 1 tile, based on a 5x5 city 
-			numberOfTiles = calcNumberOfInitialTiles();
-			probability = 0.04 * numberOfTiles;
-
 			CityModel tempCity = (CityModel) w.get(KEY.CITIES, i);
 
-			startX = tempCity.getCityX();
-			if (startX < 2) {
-				startX = 2;
-			}
-
-			startY = tempCity.getCityY();
-			if (startY < 2) {
-				startY = 2;
-			}
-
-			processCityTiles(calcTilesToBuildOn());
+			calculateAndPositionTiles(
+				tempCity.getCityX(),
+				tempCity.getCityY(),
+				calcNumberOfInitialTiles(urbMax),
+				calcNumberOfInitialTiles(indMax+1)-1,
+				calcNumberOfInitialTiles(resMax+1)-1
+			);
+			
 		}
 	}
 
-	public int calcNumberOfInitialTiles() {
 
+	public int calcNumberOfInitialTiles(int max) {
+
+		int max_tiles = max;
+		double low = 0;
+		double high;
 		double myRand = Math.random();
-		int numberInitialTiles = 10;
-
-		if (myRand < 0.8) {
-			numberInitialTiles = 8;
-		}
-		if (myRand < 0.6) {
-			numberInitialTiles = 6;
-		}
-		if (myRand < 0.4) {
-			numberInitialTiles = 4;
-		}
-		if (myRand < 0.2) {
-			numberInitialTiles = 2;
-		}
-
-		return numberInitialTiles;
-	}
-
-	public void processCityTiles(Vector v) {
-
-		Vector tiles = v;
-
-		int x = 0;
-		int y = 0;
-		String category = null;
-		double randValue;
-		double scale = 0.0;
-		double size = 0.0;
-		int index = 0;
-
-		for (int j = 0; j < tiles.size(); j++) {
-
-			Point p = (Point) tiles.elementAt(j);
-			x = (int) p.getX();
-			y = (int) p.getY();
-
-			//We need to check whether p is on the map before we process the tile, LL
-			if (w.boundsContain(x, y)) {
-
-				int tileTypeNumber = w.getTile(x, y).getTerrainTypeNumber();
-				category = ((TerrainType)w.get(KEY.TERRAIN_TYPES,tileTypeNumber)).getTerrainCategory();
-
-				//if the tile has a Country terrain, then build a tile on it, otherwise ignore
-				if (category.equals("Country")) {
-
-					//randomly select an Urban terrain type
-					randValue = Math.random();
-
-					size = terrainTypes.size();
-					scale = 1 / size;
-
-					for (int k = (int) size; k > 0; k--) {
-
-						if (randValue <= scale * k) {
-							index = k - 1;
-						} else {
-							break;
-						}
-					}
-					Integer typeToAdd = (Integer)terrainTypes.get(index);
-					tile = new FreerailsTile(typeToAdd.intValue());
-					w.setTile(x, y, tile);
-
-					//if the category isn't Country then:	
-					//we can't build a tile here because there's something in the way
-					//which may be a Resource, another Urban tile or Water.
-
-					//the situation may arise where this would've been the only tile
-					//to have been built for this city, if this is the case it will now
-					//have no urban tiles, this is a consideration for positioning cities
-					//initially i guess. Positioning a city in water or a clump of resources
-					//may cause this issue.
-
-				} //end if
-
-			} //end if
-
-		} //end for loop
-
-	}
-
-	public Vector calcTilesToBuildOn() {
-
-		int tilesBuiltOnCount = 0;
-		double randomTileValue;
-		Vector tileLocations = new Vector();
-
-		for (int Y = startY - 2; Y < startY + 3; Y++) {
-
-			for (int X = startX - 2; X < startX + 3; X++) {
-
-				randomTileValue = Math.random();
-
-				if (randomTileValue < probability) {
-					Point p = new Point(X, Y);
-					tileLocations.addElement(p);
-
-					tilesBuiltOnCount++;
-					if (tilesBuiltOnCount == numberOfTiles) {
-						break;
-					}
-				}
-			} //end X for loop
-
-			if (tilesBuiltOnCount == numberOfTiles) {
-				break;
+		
+		for (int i=1; i<max_tiles+1; i++){
+			high = (double)i/max_tiles;
+			if ( (myRand >= low) && (myRand < high) ) {
+				return i;
 			}
-
-		} //end Y for loop
-
-		//in going through the probability process and no tiles were created,
-		//we need at least 1 tile, so we'll just add one at the centre
-		if (tilesBuiltOnCount == 0) {
-			Point p = new Point(startX, startY);
-			tileLocations.addElement(p);
+			low = high;
 		}
 
-		return tileLocations;
+		return 1;
 	}
-}
+
+
+	public int randomSelector(int max, double randValue) {
+		double low = 0;
+		double high;
+		
+		for (int i=1; i<max+1; i++){
+			high = (double)i/max;
+			if ( (randValue >= low) && (randValue < high) ) {
+				return i;
+			}
+			low = high;
+		}
+		return 1;
+	}
+	
+	
+	public String getCategoryForTile(int x, int y){
+		
+		int tileTypeNumber = w.getTile(x, y).getTerrainTypeNumber();
+		String category = ((TerrainType)w.get(KEY.TERRAIN_TYPES,tileTypeNumber)).getTerrainCategory();
+		
+		return category;
+	}
+
+		
+	public void calculateAndPositionTiles(int x, int y, int urbNo, int indNo, int resNo) {
+		
+		int cityX = x;
+		int cityY = y;
+		int urbanTiles = urbNo;
+		int industryTiles = indNo;
+		int resourceTiles = resNo;
+		
+		double tileProbability = 
+			(double)PROBABILITY_MULTIPLIER * (urbanTiles + industryTiles + resourceTiles);
+
+		/*
+		 * loop until the correct amount of tiles have been built, sometimes
+		 * all the tiles may not get built due to ocean or something else
+		 * getting in the way, looping round tries a couple more times.
+		 */
+		  
+		int loopCount = 0;
+		
+		while( ((urbanTiles + industryTiles + resourceTiles) > 0) && (loopCount < 3) ) {
+		
+			for (int Y = cityY - 2; Y < cityY + 3; Y++) {
+				for (int X = cityX - 2; X < cityX + 3; X++) {
+					
+				   if (w.boundsContain(X, Y)) {
+					  
+						if (Math.random() < tileProbability) {
+							//tile is selected, now select a tile to build
+							
+							//if the tile has a Country terrain, then build a tile on it, otherwise ignore
+							if (getCategoryForTile(X,Y).equals("Country")) {
+								
+								Integer typeToAdd = null;								
+								int tileTypeToBuild = randomSelector(3,Math.random());
+								double myRand = Math.random();
+							
+								if ( (tileTypeToBuild == 1) && (urbanTiles > 0) ) {
+									urbanTiles--;
+									typeToAdd = (Integer)urbanTerrainTypes.get(randomSelector(urbanTerrainTypes.size(),myRand)-1);
+						
+								}
+								else if ( (tileTypeToBuild == 2) && (industryTiles > 0) ) {
+									industryTiles--;
+									typeToAdd = (Integer)industryTerrainTypes.get(randomSelector(industryTerrainTypes.size(),myRand)-1);
+																	 
+								}
+								else if ( (tileTypeToBuild == 3) && (resourceTiles > 0) ) {
+									resourceTiles--;
+									typeToAdd = (Integer)resourceTerrainTypes.get(randomSelector(resourceTerrainTypes.size(),myRand)-1);										
+								}
+								
+								if (typeToAdd != null) {
+									tile = new FreerailsTile(typeToAdd.intValue());
+									w.setTile(X, Y, tile);
+								}
+								
+							} //end 'Country' check
+						}
+					} //end bounds check
+				
+				} //end inner loop
+			} //end outer loop
+		
+		loopCount += 1;
+		
+		} //end while
+			
+	} //end calculateAndPositionTiles method
+
+} //end CityTilePositioner class

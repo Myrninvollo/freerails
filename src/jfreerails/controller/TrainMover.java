@@ -2,16 +2,20 @@ package jfreerails.controller;
 
 import java.util.Random;
 
+import jfreerails.move.Move;
 import jfreerails.move.ChangeTrainPositionMove;
+import jfreerails.move.InitialiseTrainPositionMove;
 import jfreerails.world.common.FreerailsPathIterator;
 import jfreerails.world.top.KEY;
-import jfreerails.world.top.World;
+import jfreerails.world.top.ReadOnlyWorld;
 import jfreerails.world.train.PathWalker;
 import jfreerails.world.train.PathWalkerImpl;
 import jfreerails.world.train.TrainModel;
 import jfreerails.world.train.TrainPositionOnMap;
 
 /**
+ * Responsible for moving the trains.
+ * 
  * @author Luke Lindsay 27-Oct-2002
  *
  */
@@ -25,30 +29,34 @@ public class TrainMover  implements FreerailsServerSerializable{
 
 	final int trainNumber;
 	
-	final World w;
+	final ReadOnlyWorld w;
 	
 
-	public TrainMover(FreerailsPathIterator from, FreerailsPathIterator to, World world, int trainNo) {							
+	/**
+	 * Constructor.
+	 * @param from TrainPathIterator describing initial train position.
+	 * @param to TrainPathIterator - not sure why we need this second
+	 * parameter since it is initialised with the same info as the 1st....
+	 */
+	public TrainMover(FreerailsPathIterator to,
+	ReadOnlyWorld world, int trainNo) {							
 		
 		this.trainNumber=trainNo;
 		this.w=world;
-		
-		setInitialTrainPosition(from);
 		walker = new PathWalkerImpl(to);				
 
 	}
 
-	private void setInitialTrainPosition(
+	public Move setInitialTrainPosition(TrainModel train,
 		FreerailsPathIterator from) {
-		TrainModel train = (TrainModel)w.get(KEY.TRAINS, trainNumber);
 		int trainLength = train.getLength();
 		PathWalker fromPathWalker = new PathWalkerImpl(from);
 		fromPathWalker.stepForward(trainLength);
 		TrainPositionOnMap initialPosition = TrainPositionOnMap.createInSameDirectionAsPath(fromPathWalker);
-		train.setPosition(initialPosition);
-		
+		return new InitialiseTrainPositionMove(trainNumber,
+			initialPosition);
 	}
-	
+
 	public PathWalker getWalker(){
 		return walker;	
 	}

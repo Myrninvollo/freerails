@@ -1,5 +1,9 @@
 package jfreerails.world.common;
 
+/**
+ * Instances of this class represent CLOCKWISE rotations by the specified
+ * amount.
+ */
 public class Rotation {
 
 	public int i;

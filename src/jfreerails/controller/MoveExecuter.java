@@ -2,7 +2,6 @@ package jfreerails.controller;
 
 import java.util.LinkedList;
 
-import jfreerails.move.CompositeMove;
 import jfreerails.move.Move;
 import jfreerails.move.MoveStatus;
 import jfreerails.world.top.World;
@@ -45,55 +44,56 @@ final public class MoveExecuter implements UncommittedMoveReceiver {
 
 	private final MoveReceiver moveReceiver;	
 
-	private static final LinkedList moveStack = new LinkedList();
-
-	private static MoveExecuter moveExecuter = null;
+	private final LinkedList moveStack = new LinkedList();
 	
-	private MoveExecuter(World w, MoveReceiver mr) {
+	private Object mutex;
+	
+	public MoveExecuter(World w, MoveReceiver mr, Object mutex) {
 		world = w;
 		moveReceiver = mr;
+		this.mutex = mutex;
 	}
 
 	/**
 	 * Call this once before using this class
 	 */
-	public static void init(World w, MoveReceiver mr) {
-		moveExecuter = new MoveExecuter(w, mr);
-	}
+//	public static void init(World w, MoveReceiver mr, Object mutex) {
+//		moveExecuter = new MoveExecuter(w, mr, mutex);
+//	}
 
 	/**
 	 * Submit Moves to the MoveExecuter returned from this method for
 	 * execution, rather than calling the doMove() method directly.
 	 * @return a publicly available MoveExecuter.
 	 */
-	public static MoveExecuter getMoveExecuter() {
-	    return moveExecuter;
-	}
+	//public static MoveExecuter getMoveExecuter() {
+	//    return moveExecuter;
+	//}
 
 	/*
 	 * @see MoveReceiver#processMove(Move)
 	 */
 	public void processMove(Move move) {
-	    moveStack.add(move);
-	    if (moveStack.size() > MAX_UNDOS) {
-		moveStack.removeFirst();
-	    }
-	    MoveStatus ms = move.doMove(world);
-	    if (ms == MoveStatus.MOVE_OK) {
-		forwardMove(move);
-	    } else {
-		System.out.println("Couldn't commit move: "+ms.message);
-	    }
+		moveStack.add(move);
+		if (moveStack.size() > MAX_UNDOS) {
+			moveStack.removeFirst();
+		}
+		MoveStatus ms;
+		synchronized(mutex) {			
+			ms = move.doMove(world);
+		}
+		if (ms == MoveStatus.MOVE_OK) {			
+			forwardMove(move);
+		} else {
+			System.err.println("Couldn't commit move: "+ms.message);
+		}
 	}
 
 	private void forwardMove(Move move) {
+	    if (moveReceiver == null)
+		return;
+
 	    moveReceiver.processMove(move);
-	    if (move instanceof CompositeMove) {
-		Move[] moves = ((CompositeMove) move).getMoves();
-		for (int i = 0; i < moves.length; i++) {
-		    forwardMove(moves[i]);
-		}
-	    }
 	}
 
 	/**
@@ -102,9 +102,12 @@ final public class MoveExecuter implements UncommittedMoveReceiver {
 	public void undoLastMove() {
 		if (moveStack.size() > 0) {
 			Move m = (Move) moveStack.removeLast();
-			MoveStatus ms = m.undoMove(world);
+			MoveStatus ms;
+			synchronized(mutex) {
+			    ms = m.undoMove(world);
+			}
 			if (ms != MoveStatus.MOVE_OK) {
-			    System.out.println("Couldn't undo move!");
+			    System.err.println("Couldn't undo move!");
 			    /* push it back on the stack to prevent further
 			     * out-of-order undos */
 			    moveStack.add(m);
@@ -113,7 +116,7 @@ final public class MoveExecuter implements UncommittedMoveReceiver {
 			forwardMove(m);
 
 		} else {
-			System.out.println("No moves on stack.");
+			System.err.println("No moves on stack.");
 		}
 	}
 

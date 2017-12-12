@@ -5,8 +5,12 @@ import jfreerails.world.common.FreerailsPathIterator;
 import jfreerails.world.common.FreerailsSerializable;
 import jfreerails.world.common.IntLine;
 
-/**This class represents the position of a train as a series of 
+/**
+ * This class represents the position of a train as a series of 
  * straight lines connecting a series of points on a plane.
+ *
+ * Coordinates are expressed in display coordinates relative to the map origin
+ * (as opposed to map squares).
  * 
  * 
 <p>Train positions can be combined and divided as illustrated below (notice what 
@@ -116,7 +120,7 @@ public class TrainPositionOnMap implements FreerailsSerializable {
 			path.nextSegment(line);
 			int sumOfSquares =
 				(line.x1 - line.x2) * (line.x1 - line.x2)
-					+ (line.y1 - line.y2) * (line.x1 - line.x2);
+					+ (line.y1 - line.y2) * (line.y1 - line.y2);
 			distance += Math.sqrt((double) sumOfSquares);
 		}
 		return distance;

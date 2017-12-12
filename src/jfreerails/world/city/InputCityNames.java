@@ -35,9 +35,9 @@ public class InputCityNames {
 			saxParser.parse(is, handler);
 			
 		} catch (IOException e) {
-			System.out.println("There was a IOException, in jfreerails.world.city.InputCityNames");
+			e.printStackTrace();
 		} catch (ParserConfigurationException pce) {
-			System.out.println("There was a ParserConfigurationException, in jfreerails.world.city.InputCityNames");
+			pce.printStackTrace();
 		}
 
 		System.out.println("\nLoading XML " + filename);

@@ -1,3 +1,31 @@
+Nov 18, 2003 11:36:38 PM Luke
+	o Applied Robert Tuck's patch to fix the bug that occurred with 1 local client 
+	and 1 networked client in a 2nd VM.
+Nov 10, 2003 3:25:23 PM Luke
+	o Made MoveExecuter non-static.
+	o Fixed bug 835337.
+	o Remove debug console output.
+Nov 9, 2003 5:47:15 PM Luke
+	o Applied Robert Tuck's to fix bug 835241.
+Nov 3, 2003 10:02:54 PM Luke
+	o Added Scott Bennett's enhanced city tile positioner.
+03-Nov-2003 17:58:00 Luke
+	o Applied Robert Tuck's patches to update the launcher gui.
+	o Added Scott Bennett's extra Cities
+18-Oct-2003 00:36:59 Luke
+	o Applied Robert Tuck's patch adding comments to ServerGameEngine.
+	o Other javadoc updates.
+13-Oct-2003 21:59:01 Luke
+	o Applied Robert Tuck's network patch.
+06-Oct-2003 23:45:23 Luke
+	o Fixed, I think, bug where trains went off the track.
+04-Oct-2003 22:58:37 Luke
+	o Update CVS write permissions.
+12-Sep-2003 21:00:00 Luke
+	o Add Robert Tuck's 'build' tab patch.
+07-Sep-2003 22:00:00 Luke
+	o Added progess bar to show what is happening while 
+	the game is loading.
 03-Sep-2003 21:50:00 Luke
 	o Added GUI to select display mode and number of clients.
 28-Aug-2003 23:00:00 Luke

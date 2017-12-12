@@ -3,8 +3,11 @@ package jfreerails.client.top;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Enumeration;
 
+import javax.swing.Action;
 import javax.swing.ButtonGroup;
+import javax.swing.ButtonModel;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -13,7 +16,10 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
+import javax.swing.event.MenuEvent;
+import javax.swing.event.MenuListener;
 
+import jfreerails.client.common.ActionAdapter;
 import jfreerails.client.renderer.MapRenderer;
 import jfreerails.client.renderer.ViewLists;
 import jfreerails.client.renderer.ZoomedOutMapRenderer;
@@ -25,13 +31,13 @@ import jfreerails.client.view.MainMapAndOverviewMapMediator;
 import jfreerails.client.view.MapCursor;
 import jfreerails.client.view.MapViewJComponentConcrete;
 import jfreerails.client.view.MapViewMoveReceiver;
+import jfreerails.client.view.ModelRoot;
 import jfreerails.client.view.OverviewMapJComponent;
+import jfreerails.client.view.StationPlacementCursor;
 import jfreerails.client.view.TrainsJTabPane;
 import jfreerails.controller.MoveChainFork;
 import jfreerails.controller.MoveReceiver;
-import jfreerails.controller.ServerControlInterface;
 import jfreerails.controller.StationBuilder;
-import jfreerails.controller.TrackMoveProducer;
 import jfreerails.controller.UntriedMoveReceiver;
 import jfreerails.move.Move;
 import jfreerails.move.WorldChangedEvent;
@@ -40,6 +46,10 @@ import jfreerails.world.top.ReadOnlyWorld;
 public class GUIComponentFactoryImpl
 	implements GUIComponentFactory, MoveReceiver {
 
+	private ModelRoot modelRoot;
+	private StationPlacementCursor stationPlacementCursor;
+	private ServerControlModel sc;
+	
 	private DateJLabel datejLabel;
 	private CashJLabel cashjLabel;
 
@@ -67,17 +77,19 @@ public class GUIComponentFactoryImpl
 	JPanel overviewMapContainer;
 	JScrollPane mainMapContainer;
 	MapViewJComponentConcrete mapViewJComponent;
-	TrackMoveProducer trackBuilder;
 	private JScrollPane mainMapScrollPane1;
 	MapRenderer overviewMap;
 	DetailMapView mainMap;
 
 	Rectangle r = new Rectangle(10, 10, 10, 10);
 
-	JFrame clientJFrame;
+	ClientJFrame clientJFrame;
 
-	public GUIComponentFactoryImpl() {
-		userInputOnMapController = new UserInputOnMapController();
+	public GUIComponentFactoryImpl(GUIClient c) {
+	    client = c;
+	    modelRoot = client.getModelRoot();
+		userInputOnMapController = new
+		    UserInputOnMapController(modelRoot);
 		buildMenu = new jfreerails.client.top.BuildMenu();
 		mapViewJComponent = new MapViewJComponentConcrete();
 		mainMapScrollPane1 = new JScrollPane();
@@ -102,16 +114,21 @@ public class GUIComponentFactoryImpl
 		messageJLabel = new javax.swing.JLabel("Message");
 
 		clientJFrame = new ClientJFrame(this);
-		dialogueBoxController = new DialogueBoxController(clientJFrame);
+		dialogueBoxController = new DialogueBoxController(clientJFrame,
+			modelRoot);
 
 	}
 
-	public void setup(ViewLists vl, GUIClient c) {
-		
-		
+	public void setup(ViewLists vl) {
 		viewLists = vl;
-		client = c;
 		world = client.getWorld();
+
+		UntriedMoveReceiver receiver = client.getReceiver();
+		/* create the models */
+		modelRoot.setWorld(world, receiver, viewLists);
+
+		clientJFrame.setup();
+
 		if (!vl.validate(world)) {
 			throw new IllegalArgumentException(
 				"The specified"
@@ -135,12 +152,9 @@ public class GUIComponentFactoryImpl
 		MoveReceiver mainmapMoveReceiver = new MapViewMoveReceiver(overviewMap);
 		moveFork.add(mainmapMoveReceiver);
 
-		UntriedMoveReceiver receiver = client.getReceiver();
-
-		trackBuilder = new TrackMoveProducer(world, receiver);
 		StationBuilder sb = new StationBuilder(receiver, client.getWorld());
 
-		stationTypesPopup.setup(sb, mainMap.getStationRadius());
+		stationTypesPopup.setup(modelRoot, mainMap.getStationRadius());
 
 		mapViewJComponent.setup(mainMap, client.getWorld());
 		client.setCursor(mapViewJComponent.getMapCursor());
@@ -151,24 +165,28 @@ public class GUIComponentFactoryImpl
 
 		userInputOnMapController.setup(
 			mapViewJComponent,
-			trackBuilder,
+			modelRoot.getTrackMoveProducer(),
 			stationTypesPopup,
 			client,
 			dialogueBoxController,
 			receiver);
 
-		buildMenu.setup(world, trackBuilder);
+		buildMenu.setup(world, modelRoot);
 		mainMapScrollPane1.setViewportView(this.mapViewJComponent);
-		System.out.println("Viewport was set");
+		
 		((OverviewMapJComponent) overviewMapContainer).setup(overviewMap);
 
 		datejLabel.setup(world, null, null);
 		cashjLabel.setup(world, null, null);
-		trainsJTabPane.setup(world, vl);
-		MapCursor mapCursor = c.getCursor();
+		trainsJTabPane.setup(world, vl, modelRoot);
+		MapCursor mapCursor = client.getCursor();
 		mapCursor.addCursorEventListener(trainsJTabPane);
 		trainsJTabPane.setMapCursor(mapCursor);		
-		dialogueBoxController.setup(world, vl, client.moveChainFork, mapCursor);
+		dialogueBoxController.setup(world, vl,
+			client.getMoveChainFork(), client.getReceiver(),
+			mapCursor);
+		stationPlacementCursor = new StationPlacementCursor(modelRoot,
+		mainMap.getStationRadius(), mapViewJComponent);
 	}
 
 	public JPanel createOverviewMap() {
@@ -207,167 +225,94 @@ public class GUIComponentFactoryImpl
 					}
 		});
 		
-		//		I've moved the processing to the menu item above, LL		
-		//		JMenuItem stationInfoCalculations = new JMenuItem("Calculate Station Info");
-		//		stationInfoCalculations.addActionListener(new ActionListener() {
-		//			public void actionPerformed(ActionEvent e) {
-		//				CalcSupplyAtStations cSAS = new CalcSupplyAtStations(world);
-		//				cSAS.doProcessing();
-		//			}
-		//		});
-
 		displayMenu.add(trainOrdersJMenuItem);
 		displayMenu.add(stationInfoJMenuItem);
 		displayMenu.add(trainListJMenuItem);
-		//displayMenu.add(stationInfoCalculations);
 
 		return displayMenu;
 	}
 
-	public class GameSpeedListener implements ActionListener {
-		private int speed;
-
-		public GameSpeedListener(int speed) {
-			this.speed = speed;
-		}
-
-		public void actionPerformed(ActionEvent e) {
-			ServerControlInterface sc = client.getServerControls();
-			if (sc != null) {
-				sc.setTargetTicksPerSecond(speed);
-			}
-		}
-	}
-
 	public JMenu createGameMenu() {
+	    sc = client.getServerControls();
 
-		JMenu gameMenu = new JMenu("Game");
-		gameMenu.setMnemonic(71);
+	    JMenu gameMenu = new JMenu("Game");
+	    gameMenu.setMnemonic(71);
 
-		JMenuItem quitJMenuItem = new JMenuItem("Exit Game");
-		quitJMenuItem.setMnemonic(88);
+	    JMenuItem quitJMenuItem = new JMenuItem("Exit Game");
+	    quitJMenuItem.setMnemonic(88);
 
-		quitJMenuItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				System.exit(0);
-			}
+	    quitJMenuItem.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+		    System.exit(0);
+		    }
 
-		});
+		    });
 
-		JMenuItem newGameJMenuItem = new JMenuItem("New game big map");
+	    final JMenu newGameJMenu = new JMenu(sc.getNewGameAction());
+	    newGameJMenu.addMenuListener(new MenuListener() {
+		public void menuSelected(MenuEvent e) {
+		    newGameJMenu.removeAll();
+		    Enumeration actions = sc.getMapNames().getActions();
+		    ButtonGroup bg = new ButtonGroup();
+		    while (actions.hasMoreElements()) {
+			JMenuItem mi = new JMenuItem((Action)
+			actions.nextElement());
+			newGameJMenu.add(mi);
+		    }
+		 }
 
-		newGameJMenuItem.addActionListener(new ActionListener() {
-			String mapName = "south_america";
+		 public void menuCanceled(MenuEvent e) {
+		 }
 
-			public void actionPerformed(ActionEvent e) {
-				ServerControlInterface sc = client.getServerControls();
-				if (sc != null) {
-					sc.newGame(mapName);
-					worldModelChanged();
-				}
-			}
-		});
+		 public void menuDeselected(MenuEvent e) {
+		 }
+	    });
 
-		JMenuItem newGameJMenuItem2 = new JMenuItem("New game small map");
+	    JMenuItem saveGameJMenuItem = new
+		JMenuItem(sc.getSaveGameAction());
 
-		newGameJMenuItem2.addActionListener(new ActionListener() {
-			String mapName = "small_south_america";
+	    JMenuItem loadGameJMenuItem = new
+		JMenuItem(sc.getLoadGameAction());
 
-			public void actionPerformed(ActionEvent e) {
-				ServerControlInterface sc = client.getServerControls();
-				if (sc != null) {
-					sc.newGame(mapName);
-					worldModelChanged();
-				}
-			}
+	    JMenuItem newspaperJMenuItem = new JMenuItem("Newspaper");
+	    newspaperJMenuItem.setMnemonic(78);
 
-		});
+	    newspaperJMenuItem.addActionListener(new ActionListener() {
 
-		JMenuItem saveGameJMenuItem = new JMenuItem("Save game");
-		saveGameJMenuItem.setMnemonic(83);
+		    public void actionPerformed(ActionEvent e) {
+		    dialogueBoxController.showNewspaper("Headline");
+		    //glassPanel.setVisible(true);
+		    }
 
-		saveGameJMenuItem.addActionListener(new ActionListener() {
+		    });
 
-			public void actionPerformed(ActionEvent e) {
-				ServerControlInterface sc = client.getServerControls();
-				if (sc != null) {
-					sc.saveGame();
-				}
-			}
+	    //Set up the gamespeed submenu.
+	    ButtonGroup group = new ButtonGroup();
+	    ActionAdapter speedActions =
+		sc.getSetTargetTickPerSecondActions();
+	    JMenu gameSpeedSubMenu = new JMenu("Game Speed...");
 
-		});
+	    Enumeration buttonModels = speedActions.getButtonModels();
+	    Enumeration actions = speedActions.getActions();
+	    while (buttonModels.hasMoreElements()) {
+		JRadioButtonMenuItem mi = new JRadioButtonMenuItem((Action)
+		actions.nextElement());
+		mi.setModel((ButtonModel) buttonModels.nextElement());
+		group.add(mi);
+		gameSpeedSubMenu.add(mi);
+	    }
 
-		JMenuItem loadGameJMenuItem = new JMenuItem("Load game");
-		loadGameJMenuItem.setMnemonic(76);
+	    gameMenu.add(newGameJMenu);
+	    gameMenu.addSeparator();
+	    gameMenu.add(loadGameJMenuItem);
+	    gameMenu.add(saveGameJMenuItem);
+	    gameMenu.addSeparator();
+	    gameMenu.add(gameSpeedSubMenu);
+	    gameMenu.add(newspaperJMenuItem);
+	    gameMenu.addSeparator();
+	    gameMenu.add(quitJMenuItem);
 
-		loadGameJMenuItem.addActionListener(new ActionListener() {
-
-			public void actionPerformed(ActionEvent e) {
-				ServerControlInterface sc = client.getServerControls();
-				if (sc != null) {
-					sc.loadGame();
-					worldModelChanged();
-				}
-			}
-
-		});
-
-		JMenuItem newspaperJMenuItem = new JMenuItem("Newspaper");
-		newspaperJMenuItem.setMnemonic(78);
-
-		newspaperJMenuItem.addActionListener(new ActionListener() {
-
-			public void actionPerformed(ActionEvent e) {
-				dialogueBoxController.showNewspaper("Headline");
-				//glassPanel.setVisible(true);
-			}
-
-		});
-
-		//Set up the gamespeed submenu.
-		ButtonGroup group = new ButtonGroup();
-		JMenu gameSpeedSubMenu = new JMenu("Game Speed...");
-
-		JRadioButtonMenuItem paused = new JRadioButtonMenuItem("Frozen");
-		group.add(paused);
-		gameSpeedSubMenu.add(paused);
-		paused.addActionListener(new GameSpeedListener(0));
-
-		JRadioButtonMenuItem slow = new JRadioButtonMenuItem("Slow");
-		group.add(slow);
-		gameSpeedSubMenu.add(slow);
-		slow.addActionListener(new GameSpeedListener(10));
-
-		JRadioButtonMenuItem moderate = new JRadioButtonMenuItem("Moderate");
-		group.add(moderate);
-		gameSpeedSubMenu.add(moderate);
-		moderate.addActionListener(new GameSpeedListener(30));
-
-		//Set the initial game speed to moderate.
-		moderate.setSelected(true);
-
-		JRadioButtonMenuItem fast = new JRadioButtonMenuItem("Fast");
-		group.add(fast);
-		gameSpeedSubMenu.add(fast);
-		fast.addActionListener(new GameSpeedListener(50));
-
-		JRadioButtonMenuItem turbo = new JRadioButtonMenuItem("Turbo");
-		group.add(turbo);
-		gameSpeedSubMenu.add(turbo);
-		turbo.addActionListener(new GameSpeedListener(50));
-
-		gameMenu.add(newGameJMenuItem);
-		gameMenu.add(newGameJMenuItem2);
-		gameMenu.addSeparator();
-		gameMenu.add(loadGameJMenuItem);
-		gameMenu.add(saveGameJMenuItem);
-		gameMenu.addSeparator();
-		gameMenu.add(gameSpeedSubMenu);
-		gameMenu.add(newspaperJMenuItem);
-		gameMenu.addSeparator();
-		gameMenu.add(quitJMenuItem);
-
-		return gameMenu;
+	    return gameMenu;
 	}
 
 	private void addMainMapAndOverviewMapMediatorIfNecessary() {
@@ -387,9 +332,9 @@ public class GUIComponentFactoryImpl
 		return this.world;
 	}
 
-	public JFrame createClientJFrame() {
+	public JFrame createClientJFrame(String title) {
+		clientJFrame.setTitle(title);
 		return clientJFrame;
-
 	}
 
 	public JMenu createHelpMenu() {
@@ -433,11 +378,11 @@ public class GUIComponentFactoryImpl
 		if (!viewLists.validate(world)) {
 			throw new IllegalArgumentException();
 		}
-		setup(viewLists, client);
+		setup(viewLists);
 	}
 
 	public void processMove(Move m) {
-		if (m instanceof WorldChangedEvent) {
+		if (m instanceof WorldChangedEvent) {		   
 			worldModelChanged();
 		}
 	}

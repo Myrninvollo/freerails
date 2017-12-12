@@ -46,7 +46,7 @@ final public class ImageSplitter extends java.lang.Object {
 				tileGridWidth,
 				tileGridHeight);
 		if (tile == null) {
-			System.out.println("Error in ImageSplitter.Image: tileIcon==null.");
+			System.err.println("Error in ImageSplitter.Image: tileIcon==null.");
 		}
 		return tile;
 	}

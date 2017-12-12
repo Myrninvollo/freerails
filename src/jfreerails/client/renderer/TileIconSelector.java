@@ -30,7 +30,7 @@ public abstract class TileIconSelector extends java.lang.Object {
             this.rgbValues = rgbValues;
         }
         else {
-            System.out.println( "Error: TileIconSelector - int[] rgbValues == null" );
+            System.err.println( "Error: TileIconSelector - int[] rgbValues == null" );
         }
     }
 

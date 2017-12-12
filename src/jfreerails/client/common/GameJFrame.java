@@ -63,7 +63,7 @@ public class GameJFrame extends javax.swing.JFrame {
     }
 
 	public void startGameLoop() {
-		ScreenHandler screenHandler = new ScreenHandler(this, mode, null);
+		ScreenHandler screenHandler = new ScreenHandler(this, mode);
 		//GameLoop gameLoop = new GameLoop(screenHandler, this.model);
 		//Thread t = new Thread(gameLoop);
 		//t.start();

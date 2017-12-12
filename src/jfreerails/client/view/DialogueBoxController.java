@@ -21,7 +21,7 @@ import javax.swing.border.LineBorder;
 import jfreerails.client.common.MyGlassPanel;
 import jfreerails.client.renderer.ViewLists;
 import jfreerails.controller.MoveChainFork;
-import jfreerails.controller.MoveExecuter;
+import jfreerails.controller.UntriedMoveReceiver;
 import jfreerails.move.ChangeProductionAtEngineShopMove;
 import jfreerails.move.Move;
 import jfreerails.world.station.ProductionAtEngineShop;
@@ -55,6 +55,8 @@ public class DialogueBoxController {
 	private TrainDialogueJPanel trainDialogueJPanel;
 	private ReadOnlyWorld world;
 	private ViewLists viewLists;
+	private UntriedMoveReceiver moveReceiver;
+	private ModelRoot modelRoot;
 
 	private Component defaultFocusOwner = null;
 
@@ -78,13 +80,14 @@ public class DialogueBoxController {
 		}
 
 		public void processMove(Move m) {
-			MoveExecuter.getMoveExecuter().processMove(m);
+			moveReceiver.processMove(m);
 		}
 	};
 
 	/** Creates new DialogueBoxController */
 
-	public DialogueBoxController(JFrame frame) {
+	public DialogueBoxController(JFrame frame, ModelRoot mr) {
+		modelRoot = mr;
 		//Setup glass panel..
 		glassPanel = new MyGlassPanel();
 		glassPanel.setSize(frame.getSize());
@@ -109,7 +112,10 @@ public class DialogueBoxController {
 		ReadOnlyWorld w,
 		ViewLists vl,
 		MoveChainFork moveChainFork,
+		UntriedMoveReceiver mr,
 		MapCursor mapCursor) {
+		
+		moveReceiver = mr;
 
 		if (w == null)
 			throw new NullPointerException();
@@ -179,7 +185,7 @@ public class DialogueBoxController {
 							before,
 							after,
 							wi.getIndex());
-					MoveExecuter.getMoveExecuter().processMove(m);
+					moveReceiver.processMove(m);
 				}
 				closeContent();
 			}
@@ -199,8 +205,9 @@ public class DialogueBoxController {
 	public void showTrainOrders() {
 		WorldIterator wi = new NonNullElements(KEY.TRAINS, world);
 		if (!wi.next()) {
-			System.out.println(
-				"Cannot show train orders since there are no trains!");
+			modelRoot.getUserMessageLogger().println("Cannot" +
+				" show train orders since there are no" +
+				" trains!");
 		} else {
 			trainDialogueJPanel.display(0);
 			this.showContent(trainDialogueJPanel);
@@ -210,9 +217,10 @@ public class DialogueBoxController {
 	public void showSelectEngine() {
 		WorldIterator wi = new NonNullElements(KEY.STATIONS, world);
 		if (!wi.next()) {
-			System.out.println("Can't build train since there are no stations");
+			modelRoot.getUserMessageLogger().println("Can't" +
+			" build train since there are no stations");
 		} else {
-			System.out.println("showSelectEngine()");
+			
 			showContent(selectEngine);
 		}
 	}
@@ -245,7 +253,7 @@ public class DialogueBoxController {
 			stationInfo.setStation(stationNumber);
 			showContent(stationInfo);
 		} catch (NoSuchElementException e) {
-			System.out.println("Station " + stationNumber + " does not exist!");
+			System.err.println("Station " + stationNumber + " does not exist!");
 		}
 	}
 
@@ -258,7 +266,8 @@ public class DialogueBoxController {
 			trainView.setHeight(50);
 			showContent(trainList);
 		} else {
-			System.out.println("There are no trains to display!");
+			modelRoot.getUserMessageLogger().println("There are" +
+				" no trains to display!");
 		}
 	}
 

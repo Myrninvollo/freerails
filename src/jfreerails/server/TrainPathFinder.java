@@ -1,28 +1,33 @@
 package jfreerails.server;
 
 import java.awt.Point;
+import java.util.Vector;
 
-import jfreerails.controller.MoveExecuter;
+import jfreerails.controller.MoveReceiver;
 import jfreerails.controller.pathfinder.FlatTrackExplorer;
 import jfreerails.controller.pathfinder.SimpleAStarPathFinder;
 import jfreerails.move.ChangeTrainMove;
 import jfreerails.move.ChangeTrainScheduleMove;
+import jfreerails.move.CompositeMove;
 import jfreerails.move.Move;
 import jfreerails.util.FreerailsIntIterator;
 import jfreerails.world.common.FreerailsSerializable;
 import jfreerails.world.common.PositionOnTrack;
 import jfreerails.world.station.StationModel;
 import jfreerails.world.top.KEY;
-import jfreerails.world.top.World;
+import jfreerails.world.top.ReadOnlyWorld;
 import jfreerails.world.train.ImmutableSchedule;
 import jfreerails.world.train.MutableSchedule;
 import jfreerails.world.train.Schedule;
 import jfreerails.world.train.TrainModel;
 
 /**
+ * This class provides methods that generate a path to a target as a series of 
+ * PositionOnTrack objects encoded as ints.  
  *
- * 28-Nov-2002
+ * 
  * @author Luke Lindsay
+ * 28-Nov-2002
  */
 public class TrainPathFinder
 	implements FreerailsIntIterator, FreerailsSerializable {
@@ -31,7 +36,9 @@ public class TrainPathFinder
 
 	private final int trainId;
 
-	private final World world;
+	private final ReadOnlyWorld world;
+	
+	private final MoveReceiver moveReceiver;
 
 	FlatTrackExplorer trackExplorer;
 
@@ -42,19 +49,54 @@ public class TrainPathFinder
 
 	static final int TILE_SIZE = 30;
 
-	public TrainPathFinder(FlatTrackExplorer tx, World w, int trainNumber) {
+	/**
+	 * Constructor.
+	 * 
+	 * @param tx the track explorer this pathfinder is to use.
+	 */
+	public TrainPathFinder(FlatTrackExplorer tx, ReadOnlyWorld w, int
+		trainNumber, MoveReceiver mr) {
+		this.moveReceiver = mr;
 		this.trackExplorer = tx;
 		this.trainId = trainNumber;
 		this.world = w;
-
-		updateTarget();
 	}
 
 	public boolean hasNextInt() {
 		return trackExplorer.hasNextEdge();
 	}
 
-	/** updates the targetX and targetY values based on the train's schedule */
+	/**
+	 * @return a move that initialises the trains schedule.
+	 */
+	public Move initTarget(TrainModel train, ImmutableSchedule
+		currentSchedule ) {
+		Vector moves = new Vector();
+		int scheduleID = train.getScheduleID();
+		MutableSchedule schedule = new MutableSchedule(currentSchedule);
+		StationModel station = null;
+		int stationNumber = schedule.getStationToGoto();
+		station = (StationModel) world.get(KEY.STATIONS, stationNumber);
+		int[] wagonsToAdd = schedule.getWagonsToAdd();
+		if (null != wagonsToAdd) {
+			int engine = train.getEngineType();
+			moves.add(ChangeTrainMove.generateMove(this.trainId,
+				    train, engine, wagonsToAdd));
+		}
+		schedule.gotoNextStaton();
+		ImmutableSchedule newSchedule = schedule.toImmutableSchedule();
+		
+		ChangeTrainScheduleMove move= new
+		ChangeTrainScheduleMove(scheduleID,currentSchedule,
+			newSchedule);
+		moves.add(move);
+		return new CompositeMove((Move []) moves.toArray(new Move[1]));
+	}
+
+	/**
+	 * Issues a ChangeTrainScheduleMove to set the train to move to the next
+	 * station.
+	 */
 	private void updateTarget() {
 		TrainModel train = (TrainModel) world.get(KEY.TRAINS, this.trainId);		
 		int scheduleID = train.getScheduleID();
@@ -66,12 +108,12 @@ public class TrainPathFinder
 		ImmutableSchedule newSchedule = schedule.toImmutableSchedule();
 		
 		ChangeTrainScheduleMove move= new ChangeTrainScheduleMove(scheduleID,currentSchedule, newSchedule);
-		MoveExecuter.getMoveExecuter().processMove(move);
+		moveReceiver.processMove(move);
 		
 		int stationNumber = schedule.getStationToGoto();
 		station = (StationModel) world.get(KEY.STATIONS, stationNumber);
 		if (null == station) {
-			System.out.println(
+			System.err.println(
 				"null == station, train "
 					+ trainId
 					+ " doesn't know where to go next!");
@@ -81,7 +123,10 @@ public class TrainPathFinder
 		}
 	}
 	
-
+	/**
+	 * @return the location of the station the train is currently heading
+	 * towards.
+	 */
 	private Point getTarget() {
 		TrainModel train = (TrainModel) world.get(KEY.TRAINS, this.trainId);
 		Schedule schedule = (ImmutableSchedule)world.get(KEY.TRAIN_SCHEDULES, train.getScheduleID());
@@ -101,21 +146,24 @@ public class TrainPathFinder
 		if (null != wagonsToAdd) {
 			int engine = train.getEngineType();
 			Move m = ChangeTrainMove.generateMove(this.trainId, train, engine, wagonsToAdd);
-			MoveExecuter.getMoveExecuter().processMove(m);
+			moveReceiver.processMove(m);
 		}
 	}
 
 	private void loadAndUnloadCargo(int stationId) {
-		System.out.println("Train " + trainId + " is at station " + stationId);
 		//train is at a station so do the cargo processing
 
 		DropOffAndPickupCargoMoveGenerator transfer =
 			new DropOffAndPickupCargoMoveGenerator(trainId, stationId, world);
 
 		Move m = transfer.generateMove();
-		m.doMove(this.world);
+		moveReceiver.processMove(m);
 	}
 
+	/**
+	 * @return the number of the station the train is currently at, or -1 if
+	 * no current station.
+	 */
 	public int getStationNumber(int x, int y) {
 
 		//loop thru the station list to check if train is at the same Point as a station
@@ -131,6 +179,9 @@ public class TrainPathFinder
 		//there are no stations that exist where the train is currently
 	}
 
+	/**
+	 * @return a PositionOnTrack packed into an int
+	 */
 	public int nextInt() {
 
 		PositionOnTrack tempP =
@@ -158,8 +209,7 @@ public class TrainPathFinder
 		int[] targets = new int[t.length];
 		for (int i = 0; i < t.length; i++) {
 			int target = t[i].getOpposite().toInt();
-			if (target == currentPosition) {
-				System.out.println("Reached target!");
+			if (target == currentPosition) {				
 				updateTarget();
 			}
 			targets[i] = target;

@@ -1,11 +1,4 @@
-/**
- * Class to transfer cargo between train and the stations it stops at - it also 
- * handles cargo converions that occur when cargo is dropped off. 
- * 
- * @author Scott Bennett
- * Date Created: 4 June 2003
- * 
- */
+
 
 package jfreerails.server;
 
@@ -22,12 +15,21 @@ import jfreerails.world.station.ConvertedAtStation;
 import jfreerails.world.station.DemandAtStation;
 import jfreerails.world.station.StationModel;
 import jfreerails.world.top.KEY;
-import jfreerails.world.top.World;
+import jfreerails.world.top.ReadOnlyWorld;
 import jfreerails.world.train.TrainModel;
+
+/**
+ * This class generates moves that transfer cargo between train and the stations it stops at - it also 
+ * handles cargo converions that occur when cargo is dropped off. 
+ * 
+ * @author Scott Bennett
+ * Date Created: 4 June 2003
+ * 
+ */
 
 public class DropOffAndPickupCargoMoveGenerator {
 
-	private World w;
+	private ReadOnlyWorld w;
 
 	private TrainModel train;
 	private int trainId;
@@ -52,7 +54,7 @@ public class DropOffAndPickupCargoMoveGenerator {
 	public DropOffAndPickupCargoMoveGenerator(
 		int trainNo,
 		int stationNo,
-		World world) {
+		ReadOnlyWorld world) {
 		trainId = trainNo;
 		stationId = stationNo;
 		w = world;
@@ -64,10 +66,7 @@ public class DropOffAndPickupCargoMoveGenerator {
 		processTrainBundle(); //ie. unload train / dropoff cargo
 		processStationBundle(); //ie. load train / pickup cargo
 
-		//test output
-		System.out.println(
-			"train and station bundles have been processed, now do the move\n");
-
+		
 	}
 
 	public Move generateMove() {
@@ -155,13 +154,7 @@ public class DropOffAndPickupCargoMoveGenerator {
 
 	public void processStationBundle() {
 
-		//test output
-		System.out.println(
-			"train #"
-				+ trainId
-				+ " has "
-				+ train.getNumberOfWagons()
-				+ " wagons");
+		
 
 		int[] spaceAvailable = getSpaceAvailableOnTrain();
 
@@ -181,8 +174,6 @@ public class DropOffAndPickupCargoMoveGenerator {
 		for (int j=0; j<train.getNumberOfWagons(); j++) {
 			CargoType wagonCargoType = (CargoType)w.get(KEY.CARGO_TYPES,train.getWagon(j));
 			
-			//test output
-			System.out.println("train #" + trainId + " has a " + wagonCargoType.getCategory() + " wagon for wagon #" + j);
 				
 			//for each cargo type, compare wagon category with cargo waiting at station
 			for (int k=0; k<w.size(KEY.CARGO_TYPES); k++) {
@@ -194,9 +185,6 @@ public class DropOffAndPickupCargoMoveGenerator {
 					//check if there is any cargo of this type waiting	
 					if (stationBefore.getAmount(k) > 0) {
 						
-						//test output 
-						//System.out.println(stationBefore.getAmount(k) + " wagons of " + wagonCargoType.getCategory() + " available for pickup");
-						System.out.println(stationAfter.getAmount(k) + " wagons of " + wagonCargoType.getCategory() + " available for pickup");
 						//transfer cargo to the current wagon
 						transferCargo(k);
 					}

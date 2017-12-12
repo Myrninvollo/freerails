@@ -1,12 +1,11 @@
-Freerails Java - version 0.1.7
+Freerails Java - version 0.1.9
 
 What's new:
-o	Improved train orders dialogue.
-o	Station, train, info tabs on RHS
-o	Cargo conversions at station.
-o	Charges for track maintenance
-o	Payments for delivering cargo.
-o	Charges for building track.
+o	Network play.
+o	Cities have better distribution of industry, resource, and city tiles.
+o	More cities.
+o	progress bar to show whats happening while the game is loading.
+o	'Build' tab that letters you select track and station types.
 
 Getting it, either:
 
@@ -16,7 +15,7 @@ or
 
 
 Requires: 
-JDK 1.4 or later, which can be downloaded from:
+JDK 1.4.2 or later, which can be downloaded from:
 http://java.sun.com/j2se/
 
 To run the binary distribution

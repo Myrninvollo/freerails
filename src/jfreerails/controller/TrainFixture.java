@@ -3,6 +3,7 @@ package jfreerails.controller;
 import java.awt.Point;
 import java.util.ArrayList;
 
+import jfreerails.controller.MoveExecuter;
 import jfreerails.world.common.FreerailsPathIterator;
 import jfreerails.world.top.KEY;
 import jfreerails.world.top.World;
@@ -21,7 +22,12 @@ public class TrainFixture {
 
 	World w = new WorldImpl(0, 0);
 
-	public TrainFixture() {
+	Object mutex = new Integer (1);
+
+	MoveExecuter moveExecuter;
+
+	public TrainFixture() {	    
+	    moveExecuter =  new MoveExecuter(w, null, mutex);
 
 		points.add(new Point(0, 0));
 		points.add(new Point(80, 80));
@@ -35,9 +41,11 @@ public class TrainFixture {
 			throw new NullPointerException();
 		}
 
-		FreerailsPathIterator from = pathIterator();
 		FreerailsPathIterator to = pathIterator();
-		trainMover = new TrainMover(from, to, w, 0);
+		FreerailsPathIterator from = pathIterator();
+		trainMover = new TrainMover(to, w, 0);
+		moveExecuter.processMove(trainMover.setInitialTrainPosition(train,
+		from));
 	}
 
 	public FreerailsPathIterator pathIterator() {

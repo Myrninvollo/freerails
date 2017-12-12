@@ -97,7 +97,7 @@ public class CalcCargoSupplyRateAtStation {
 			if(demand[i] >= PREREQUISITE_FOR_DEMAND){
 				demandboolean[i] = true;
 				CargoType ct = (CargoType)w.get(KEY.CARGO_TYPES, i);
-				System.out.println("Station demands "+ct.getDisplayName()); 
+				 
 			}
 		}
 		return new DemandAtStation(demandboolean);

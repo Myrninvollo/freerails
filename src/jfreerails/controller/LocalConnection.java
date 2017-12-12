@@ -11,6 +11,8 @@ public class LocalConnection implements ConnectionToServer {
     private MoveReceiver moveReceiver;
     private LocalConnection peer;
     private World world;
+    private ConnectionListener connectionListener;
+    private ConnectionState state = ConnectionState.CLOSED;
     
     /**
      * Indicates whether the connection should forward moves the the remote side
@@ -23,8 +25,20 @@ public class LocalConnection implements ConnectionToServer {
      */
     private Object mutex;
 
+    public void flush() {
+	// do nothing
+    }
+
     public Object getMutex() {
 	return mutex;
+    }
+
+    public void addConnectionListener(ConnectionListener l) {
+	connectionListener = l;
+    }
+
+    public void removeConnectionListener(ConnectionListener l) {
+	connectionListener = null;
     }
 
     public void addMoveReceiver(MoveReceiver m) {
@@ -62,6 +76,7 @@ public class LocalConnection implements ConnectionToServer {
     public LocalConnection(World w, Object mutex) {
 	world = w;
 	this.mutex = mutex;
+	setState(ConnectionState.WAITING);
     }
 
     /**
@@ -72,7 +87,8 @@ public class LocalConnection implements ConnectionToServer {
     }
 
     protected void sendMove(Move move) {
-	moveReceiver.processMove(move);
+	if (moveReceiver != null)
+	    moveReceiver.processMove(move);
     }
     
     /**
@@ -99,18 +115,26 @@ public class LocalConnection implements ConnectionToServer {
     protected void disconnect() {
 	sendMoves = false;
 	this.peer = null;
+	if (connectionListener != null)
+	    connectionListener.connectionClosed(this);
     }
 
     public World loadWorldFromServer() {
 	sendMoves = true;
+	/* set the state on the server connection to say that the client is
+	 * ready to receive moves */
+	setState(ConnectionState.READY);
+	peer.setState(ConnectionState.READY);
 	return world;
     }
 
     public void open() {
 	peer.connect(this);
 	mutex = peer.mutex;
-	System.out.println("got mutex from remote side: " + mutex);
+	
 	world = peer.world;
+	setState(ConnectionState.WAITING);
+	peer.setState(ConnectionState.WAITING);
     }
 
     public void close() {
@@ -118,6 +142,9 @@ public class LocalConnection implements ConnectionToServer {
 	world = null;
 	mutex = null;
 	peer.disconnect();
+	setState(ConnectionState.CLOSED);
+	if (connectionListener != null)
+	    connectionListener.connectionClosed(this);
     }
 
     /**
@@ -125,5 +152,15 @@ public class LocalConnection implements ConnectionToServer {
      */
     public void setWorld(World w) {
 	world = w;
+    }
+
+    public ConnectionState getConnectionState() {
+	return state;
+    }
+
+    private void setState(ConnectionState s) {
+	state = s;
+	if (connectionListener != null)
+	    connectionListener.connectionStateChanged(this);
     }
 }

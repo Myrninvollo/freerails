@@ -3,7 +3,7 @@
  */
 
 /*
- * $Id: TrainsJTabPane.java,v 1.4 2003/08/25 22:26:14 lindsal Exp $
+ * $Id: TrainsJTabPane.java,v 1.6 2003/11/10 16:26:55 lindsal Exp $
  */
 
 package jfreerails.client.view;
@@ -20,6 +20,7 @@ public class TrainsJTabPane extends JTabbedPane implements CursorEventListener {
     private StationInfoJPanel stationInfoPanel;
     //private TrainScheduleJPanel trainSchedulePanel;
     private ReadOnlyWorld world;
+    private BuildJPane buildJPane;
 
     public TrainsJTabPane() {
 	/* set up trainsJTabbedPane */
@@ -34,17 +35,20 @@ public class TrainsJTabPane extends JTabbedPane implements CursorEventListener {
        // trainSchedulePanel = new TrainScheduleJPanel();
        // addTab("Train Schedule", trainSchedulePanel);
         
+	buildJPane = new BuildJPane();
+ 	addTab("Build", buildJPane);
     }
     
     public void setMapCursor(MapCursor mapCursor){
 		stationInfoPanel.setMapCursor(mapCursor);
     }
 	
-    public void setup(ReadOnlyWorld w,  ViewLists vl) {	
+    public void setup(ReadOnlyWorld w,  ViewLists vl, ModelRoot modelRoot) {	
 	world = w;
 	terrainInfoPanel.setup(world, vl);
 	stationInfoPanel.setup(world, vl);
 	//trainSchedulePanel.setup(world, vl);
+ 	buildJPane.setup(vl, modelRoot);
         
     //    trainSchedulePanel.displayFirst();
 	stationInfoPanel.display();
@@ -52,7 +56,7 @@ public class TrainsJTabPane extends JTabbedPane implements CursorEventListener {
     }
 
     private void updateTerrainInfo(CursorEvent e) {
-        System.out.println("Updating terrain Info");
+        
 	Point p = e.newPosition;
 	terrainInfoPanel.setTerrainType(world.getTile(p.x,
 		    p.y).getTerrainTypeNumber());
