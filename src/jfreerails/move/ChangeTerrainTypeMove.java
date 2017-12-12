@@ -12,7 +12,7 @@ import jfreerails.world.terrain.TerrainType;
  * @author lindsal
  */
 
-final public class ChangeTerrainTypeMove implements MapMove {
+final public class ChangeTerrainTypeMove  {
 
 
 

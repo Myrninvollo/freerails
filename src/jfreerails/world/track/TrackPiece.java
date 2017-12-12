@@ -1,11 +1,12 @@
 package jfreerails.world.track;
-import jfreerails.world.common.Tile;
 
-public interface TrackPiece extends Tile {
+import jfreerails.world.common.FreerailsSerializable;
+
+/** Defines the interface of a the track on a tile. */
+
+public interface TrackPiece extends FreerailsSerializable{
     int getTrackGraphicNumber();    
-    
-    int getRGB();
-    
+      
     TrackRule getTrackRule();
     
     TrackConfiguration getTrackConfiguration();

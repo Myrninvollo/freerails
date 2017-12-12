@@ -29,15 +29,15 @@
    </target>
 
    <target name="copydata" depends="init" description="Copy data files">
-      <copy todir="${build}/jfreerails/data">
-         <fileset dir="${src}/jfreerails/data">
-            <include name="*.xml" />
+      <copy todir="${build}/jfreerails">
+         <fileset dir="${src}/jfreerails">
+            <include name="**/*.xml" />
 
-            <include name="*.png" />
+            <include name="**/*.png" />
 
-            <include name="*.dtd" />
+            <include name="**/*.dtd" />
             
-             <include name="*.gif" />
+             <include name="**/*.gif" />
          </fileset>
       </copy>
 
@@ -81,28 +81,28 @@
    </target>
 
    <target name="bindist" depends="compile, mkdirs" description="Generate binary distribution">
-      <jar destfile="${dist}/lib/jFreeRails-${DSTAMP}-bin.jar" basedir="${build}">
+      <jar destfile="${dist}/lib/jFreeRails-${DSTAMP}-${TSTAMP}-bin.jar" basedir="${build}">
          <manifest>
             <attribute name="Main-Class" value="jfreerails.RunFreerails" />
          </manifest>
       </jar>
    </target>
 
-   <target name="srcdist" depends="init" description="Generate source distribution">
-      <jar destfile="${dist}/lib/jFreeRails-${DSTAMP}-src.jar" basedir=".">
+   <target name="srcdist" depends="mkdirs" description="Generate source distribution">
+      <jar destfile="${dist}/lib/jFreeRails-${DSTAMP}-${TSTAMP}-src.jar" basedir=".">
          <include name="src/**/*.java" />
          
          <include name="src/**/*.html" />
 
          <include name="build.xml" />
 
-         <include name="src/jfreerails/data/*.xml" />
+         <include name="src/jfreerails/**/*.xml" />
 
-         <include name="src/jfreerails/data/*.png" />
+         <include name="src/**/*.png" />
 
-         <include name="src/jfreerails/data/*.dtd" />
+         <include name="src/**/*.dtd" />
          
-         <include name="src/jfreerails/data/*.gif" />
+         <include name="src/**/*.gif" />
 
          <include name="README" />
 
@@ -131,7 +131,7 @@
    </target>
 
    <target name="rundist" depends="bindist" description="Test run based on bindist">
-      <java jar="${dist}/lib/jFreeRails-${DSTAMP}-bin.jar" fork="true" />
+      <java jar="${dist}/lib/jFreeRails-${DSTAMP}-${TSTAMP}-bin.jar" fork="true" />
    </target>
 
    <target name="javadoc" depends="mkdirs, init">
@@ -156,7 +156,7 @@
 
   <!--  depends="javadoc" -->
    <target name="jar_doc" depends="javadoc" description="Jar up javadoc">
-      <jar destfile="${dist}/lib/jFreeRails-${DSTAMP}-javadoc.jar" basedir=".">
+      <jar destfile="${dist}/lib/jFreeRails-${DSTAMP}-${TSTAMP}-javadoc.jar" basedir=".">
          <include name="javadoc/**/*" />
       </jar>
    </target>

@@ -35,18 +35,18 @@ public class MapFactory {
 		HashMap rgb2TerrainType = new HashMap();
 		for(int i=0; i< w.size(KEY.TERRAIN_TYPES);i++ ){
 			TerrainType tilemodel = (TerrainType) w.get(KEY.TERRAIN_TYPES, i);
-			rgb2TerrainType.put(new Integer(tilemodel.getRGB()), tilemodel);						
+			rgb2TerrainType.put(new Integer(tilemodel.getRGB()), new Integer(i));						
 		}
 
 		for (int x = 0; x < mapRect.width; x++) {
 			for (int y = 0; y < mapRect.height; y++) {
 				int rgb = mapBufferedImage.getRGB(x, y);				
 				FreerailsTile tile;
-				TerrainType type = (TerrainType)rgb2TerrainType.get(new Integer(rgb));		
+				Integer type = (Integer)rgb2TerrainType.get(new Integer(rgb));					
 				if(null==type){
 					throw new NullPointerException("There is no terrain type mapped to rgb value "+rgb+" at location "+x+", "+y);		 
 				}
-				tile = new FreerailsTile(type);
+				tile = new FreerailsTile(type.intValue());
 				w.setTile(x, y, tile);
 			}
 		}

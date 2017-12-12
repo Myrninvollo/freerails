@@ -181,7 +181,7 @@ final public class MapBackgroundRender implements MapLayerRenderer {
 		 * @param g The graphics context
 		 */
 		public void paintTile(Graphics g, Point tile) {
-
+			
 			int screenX = tileSize.width * tile.x;
 			int screenY = tileSize.height * tile.y;
 			if ((tile.x >= 0)
@@ -190,14 +190,21 @@ final public class MapBackgroundRender implements MapLayerRenderer {
 				&& (tile.y < mapSize.height)) {
 					
 				TerrainTile tt = (TerrainTile)w.getTile(tile.x, tile.y);	
-				int rgb = tt.getTerrainType().getRGB();
-				tiles.getTileViewWithRGBValue(rgb).renderTile(
+
+				int typeNumber = tt.getTerrainTypeNumber();
+				TileRenderer tr = tiles.getTileViewWithNumber(typeNumber);
+				if(null == tr){					
+					System.out.println("No tile renderer for "+typeNumber);
+				}else{
+				
+				tr.renderTile(
 					g,
 					screenX,
 					screenY,
 					tile.x,
 					tile.y,
 					w);
+				}
 			}
 		}
 

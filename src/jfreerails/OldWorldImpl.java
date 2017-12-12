@@ -34,8 +34,8 @@ public class OldWorldImpl {
 			RunFreerails.class.getResource(
 				"/jfreerails/data/terrain_tiles.xml");
 
-		TileSetFactory tileFactory =
-			new jfreerails.TileSetFactoryImpl(tiles_xml_url);
+		TileSetFactory tileFactory = new NewTileSetFactoryImpl();
+		//	new jfreerails.TileSetFactoryImpl(tiles_xml_url);
 			
 		WorldImpl w = new WorldImpl();	
 		
@@ -53,12 +53,13 @@ public class OldWorldImpl {
 		trackSetFactory.addTrackRules(w);
 						
 		//Load the terrain map
-		URL map_url = RunFreerails.class.getResource("/jfreerails/data/" + mapName);		
+		URL map_url = RunFreerails.class.getResource("/jfreerails/data/" + mapName + ".png");		
 		MapFactory.setupMap(map_url, w);
 		
 		//Load the city names
 	  	URL cities_xml_url = 
-		  	RunFreerails.class.getResource("/jfreerails/data/south_america_cities.xml");
+		  	//RunFreerails.class.getResource("/jfreerails/data/south_america_cities.xml");
+		  	RunFreerails.class.getResource("/jfreerails/data/" + mapName + "_cities.xml");
 	  	try {
 		  	InputCityNames r = new InputCityNames(w,cities_xml_url);
 	  	} catch (SAXException e) {}

@@ -2,6 +2,7 @@ package jfreerails;
 
 import java.util.HashSet;
 
+import jfreerails.world.terrain.TerrainType;
 import jfreerails.world.top.KEY;
 import jfreerails.world.top.World;
 import jfreerails.world.top.WorldImpl;
@@ -95,6 +96,11 @@ public class MapFixtureFactory {
 		for(int i=0; i<trackRulesArray.length; i++){
 			world.add(KEY.TRACK_RULES, trackRulesArray[i]);			 
 		}
+		
+		//Add a single terrain type..		
+		//We need this since when we built track, the terrain type gets check to see if we can
+		//built track on it and an exception is thrown if terrain type 0 does not exist.
+		world.add(KEY.TERRAIN_TYPES, TerrainType.NULL);  
 	}
 
 }

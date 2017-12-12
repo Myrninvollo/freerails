@@ -27,6 +27,7 @@ final public class Track_Tiles_View_Handler
 	Point tilePosition;
 	ImageSplitter trackImageSplitter;
 	TrackPieceRendererList trackPieceViewList;
+	String typeName;
 
     /**
      *  TrackPieceViewImpl
@@ -75,6 +76,7 @@ final public class Track_Tiles_View_Handler
 		tilePosition = new Point();
 		tilePosition.x = (int) Integer.parseInt(meta.getValue("X"));
 		tilePosition.y = (int) Integer.parseInt(meta.getValue("Y"));
+		typeName = meta.getValue("type");
 		trackImageSplitter.setSubGridOffset(tilePosition.x , tilePosition.y );
 	}
 	public void end_ListOfTrackPieceTemplates() throws SAXException {
@@ -94,7 +96,7 @@ final public class Track_Tiles_View_Handler
 
 	public void end_TrackType() throws SAXException {
 		trackPieceViews.add(
-			new jfreerails.client.renderer.TrackPieceRendererImpl(trackPieceTemplateArray, trackImageSplitter));
+			new jfreerails.client.renderer.TrackPieceRendererImpl(trackPieceTemplateArray, trackImageSplitter, typeName));
 		trackPieceTemplateArray = null;
 		super.end_TrackType();
 		tilePosition = null;

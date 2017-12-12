@@ -33,16 +33,18 @@ public class ServerGameEngine implements GameModel {
 
 	public ServerGameEngine(World w) {
 		this.world = w;
-		tb = new TrainBuilder(world, this);
+		setupGame();
+	}
 
+
+	private void setupGame() {
+		tb = new TrainBuilder(world, this);
 	}
 
 	
 	public void update() {
-		moveTrains();
-		
+		moveTrains();		
 		buildTrains();
-
 	}
 
 	/** Iterator over the stations  
@@ -118,8 +120,9 @@ public class ServerGameEngine implements GameModel {
 
 			this.world = (World) objectIn.readObject();
 			
-			System.out.println("done.");
+			
 			lastTime = System.currentTimeMillis();
+			setupGame();
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
@@ -132,6 +135,7 @@ public class ServerGameEngine implements GameModel {
 
 		trainMovers = new ArrayList();
 		lastTime = System.currentTimeMillis();
+		setupGame();
 	}
 
 	/**

@@ -51,7 +51,7 @@ public class TrainPathFinder implements FreerailsIntIterator, FreerailsSerializa
     }
     
     public boolean hasNextInt() {
-        return trackExplorer.hasNextBranch();
+        return trackExplorer.hasNextEdge();
     }
     
     /** updates the targetX and targetY values based on the train's schedule */
@@ -114,9 +114,9 @@ public class TrainPathFinder implements FreerailsIntIterator, FreerailsSerializa
         FlatTrackExplorer tempExplorer = new FlatTrackExplorer(trackExplorer.getWorld(), tempP);
         int next = pathFinder.findpath(currentPosition, targets, tempExplorer);
         if (next == SimpleAStarPathFinder.PATH_NOT_FOUND) {
-            trackExplorer.nextBranch();
+            trackExplorer.nextEdge();
             trackExplorer.moveForward();
-            return trackExplorer.getBranchPosition();
+            return trackExplorer.getVertexConnectedByEdge();
         } else {
             tempP.setValuesFromInt(next);
             tempP = tempP.getOpposite();

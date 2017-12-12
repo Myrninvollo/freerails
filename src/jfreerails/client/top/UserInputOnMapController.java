@@ -23,9 +23,7 @@ public class UserInputOnMapController implements CursorEventListener {
 
 	private DialogueBoxController dialogueBoxController;
 
-	/**
-	 * @see jfreerails.client.event.CursorEventListener#cursorOneTileMove(jfreerails.client.event.CursorEvent)
-	 */
+	
 	public void cursorOneTileMove(CursorEvent ce) {
 		if (null != trackBuilder) {
 
@@ -60,16 +58,12 @@ public class UserInputOnMapController implements CursorEventListener {
 
 	}
 
-	/**
-	 * @see jfreerails.client.event.CursorEventListener#cursorJumped(jfreerails.client.event.CursorEvent)
-	 */
+	
 	public void cursorJumped(CursorEvent ce) {
 		trackBuilder.upgradeTrack(ce.newPosition);
 	}
 
-	/**
-	 * @see jfreerails.client.event.CursorEventListener#cursorKeyPressed(jfreerails.client.event.CursorEvent)
-	 */
+	
 	public void cursorKeyPressed(CursorEvent ce) {
 
 		switch (ce.keyEvent.getKeyCode()) {
@@ -80,7 +74,7 @@ public class UserInputOnMapController implements CursorEventListener {
 				}
 			case KeyEvent.VK_F8 :
 				{
-					System.out.println("Build station");
+					
 					float scale = mapView.getScale();
 					Point tile = new Point(ce.newPosition); //defensive copy.
 					Dimension tileSize = new Dimension((int) scale, (int) scale);
@@ -90,12 +84,17 @@ public class UserInputOnMapController implements CursorEventListener {
 					break;
 
 				}
-			
+                    case KeyEvent.VK_I :
+                    {
+                        System.out.println("Show terrain info");                        
+                        dialogueBoxController.showTerrainInfo(ce.newPosition.x, ce.newPosition.y);
+                        break;
+                    }			
 		}
 	}
 
 	private void buildTrain(CursorEvent ce) {
-		System.out.println("Build train");
+		
 		dialogueBoxController.showSelectEngine();
 		//trainBuilder.buildTrain(ce.newPosition);
 	}

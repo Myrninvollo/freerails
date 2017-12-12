@@ -40,7 +40,7 @@ public class CityTilePositioner {
 			type = (TerrainType) w.get(KEY.TERRAIN_TYPES, i);
 
 			if (type.getTerrainCategory().equals("Urban")) {
-				terrainTypes.add(type);
+				terrainTypes.add(new Integer(i));
 			}
 		}
 
@@ -113,7 +113,8 @@ public class CityTilePositioner {
 			//We need to check whether p is on the map before we process the tile, LL
 			if (w.boundsContain(x, y)) {
 
-				category = w.getTile(x, y).getTerrainCategory();
+				int tileTypeNumber = w.getTile(x, y).getTerrainTypeNumber();
+				category = ((TerrainType)w.get(KEY.TERRAIN_TYPES,tileTypeNumber)).getTerrainCategory();
 
 				//if the tile has a Country terrain, then build a tile on it, otherwise ignore
 				if (category.equals("Country")) {
@@ -132,8 +133,8 @@ public class CityTilePositioner {
 							break;
 						}
 					}
-
-					tile = new FreerailsTile((TerrainType) terrainTypes.get(index));
+					Integer typeToAdd = (Integer)terrainTypes.get(index);
+					tile = new FreerailsTile(typeToAdd.intValue());
 					w.setTile(x, y, tile);
 
 					//if the category isn't Country then:	

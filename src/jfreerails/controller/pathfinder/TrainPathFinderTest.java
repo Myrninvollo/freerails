@@ -189,9 +189,9 @@ public class TrainPathFinderTest extends TestCase {
 		PositionOnTrack pot = FlatTrackExplorer.getPossiblePositions(world, new Point(x, y))[0];
 		FlatTrackExplorer explorer = new FlatTrackExplorer(world, pot);
 		boolean found = false;
-		while (explorer.hasNextBranch()) {
-			explorer.nextBranch();
-			int i = explorer.getBranchPosition();
+		while (explorer.hasNextEdge()) {
+			explorer.nextEdge();
+			int i = explorer.getVertexConnectedByEdge();
 			PositionOnTrack pot2 = new PositionOnTrack(i);
 			if (pot2.getDirection() == v) {
 				found = true;

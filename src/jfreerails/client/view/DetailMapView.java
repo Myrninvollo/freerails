@@ -11,8 +11,7 @@ import jfreerails.client.renderer.MapLayerRenderer;
 import jfreerails.client.renderer.MapRenderer;
 import jfreerails.client.renderer.SquareTileBackgroundRenderer;
 import jfreerails.client.renderer.StationNamesRenderer;
-import jfreerails.client.renderer.TileRendererList;
-import jfreerails.client.renderer.TrackPieceRendererList;
+import jfreerails.client.renderer.ViewLists;
 import jfreerails.world.top.World;
 
 public class DetailMapView implements MapRenderer {
@@ -29,10 +28,9 @@ public class DetailMapView implements MapRenderer {
 
 	public DetailMapView(
 		World world,
-		TileRendererList tiles,
-		TrackPieceRendererList trackPieceViewList) {
-		trainsview = new TestOverHeadTrainView(world);
-		background = new SquareTileBackgroundRenderer(new MapBackgroundRender(world, tiles, trackPieceViewList), 30);
+		ViewLists vl) {									
+		trainsview = new TestOverHeadTrainView(world, vl);
+		background = new SquareTileBackgroundRenderer(new MapBackgroundRender(world, vl.getTileViewList(), vl.getTrackPieceViewList()), 30);
 		Dimension mapSize=new Dimension(world.getMapWidth(), world.getMapHeight());
 		mapSizeInPixels=new Dimension(mapSize.width*30,mapSize.height*30);
 		

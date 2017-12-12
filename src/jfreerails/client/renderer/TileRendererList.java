@@ -1,6 +1,4 @@
 package jfreerails.client.renderer;
-import java.util.Iterator;
-
 import jfreerails.world.top.World;
 
 
@@ -14,17 +12,17 @@ import jfreerails.world.top.World;
 
 public interface TileRendererList {
 
-	TileRenderer getTileViewWithNumber();
+	TileRenderer getTileViewWithNumber(int i);
 
-	boolean TestRGBValue(int rgb);
+	//boolean TestRGBValue(int rgb);
 
 	boolean TestTileViewNumber();
 
 	int getLength();
 
-	Iterator getIterator();
+	//Iterator getIterator();
 
-	TileRenderer getTileViewWithRGBValue(int rgb);
+	//TileRenderer getTileViewWithRGBValue(int rgb);
 
 	/** Checks whether this tile view list has tile views for all
 	 * the terrain types in the specifed list.

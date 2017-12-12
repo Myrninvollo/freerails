@@ -8,6 +8,7 @@ package jfreerails.client.view;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.NoSuchElementException;
 
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -25,15 +26,16 @@ import jfreerails.world.top.KEY;
 import jfreerails.world.top.NonNullElements;
 import jfreerails.world.top.World;
 import jfreerails.world.top.WorldIterator;
+import jfreerails.world.track.FreerailsTile;
 import jfreerails.world.train.Schedule;
 import jfreerails.world.train.TrainModel;
 
-/**	This class is responsible for displaying dialogue boxes, adding borders to them as appropriate, and 
+/**	This class is responsible for displaying dialogue boxes, adding borders to them as appropriate, and
  *  returning focus to the last focus owner after a dialogue box has been closed.  Currently dialogue boxes
- * are not separate windows.  Instead, they are drawn on the modal layer of the main JFrames LayerPlane.  This 
- * allows dialogue boxes with transparent regions to be used. 
+ * are not separate windows.  Instead, they are drawn on the modal layer of the main JFrames LayerPlane.  This
+ * allows dialogue boxes with transparent regions to be used.
  *
- * @author  lindsal8 
+ * @author  lindsal8
  */
 public class DialogueBoxController {
 
@@ -42,7 +44,9 @@ public class DialogueBoxController {
 	private NewsPaperJPanel newspaper;
 	private SelectWagonsJPanel selectWagons;
 	private TrainScheduleJPanel trainSchedule;
-        private GameControlsJPanel showControls;
+	private GameControlsJPanel showControls;
+	private TerrainInfoJPanel terrainInfo;
+	private StationInfoJPanel stationInfo;
 
 	private World w;
 
@@ -59,27 +63,40 @@ public class DialogueBoxController {
 	};
 
 	/** Creates new DialogueBoxController */
-	public DialogueBoxController(JFrame frame, World world, ViewLists vl) {
-		this.w = world;
 
-		//Setup glass panel..    	    	    
+	public DialogueBoxController(JFrame frame) {
+		//Setup glass panel..
 		glassPanel = new MyGlassPanel();
+		glassPanel.setSize(frame.getSize());
 		frame.getLayeredPane().add(glassPanel, JLayeredPane.MODAL_LAYER);
+		glassPanel.revalidate();
+		glassPanel.setVisible(false);
 
 		//We need to resize the glass panel when its parent resizes.
 		frame.getLayeredPane().addComponentListener(new java.awt.event.ComponentAdapter() {
 			public void componentResized(java.awt.event.ComponentEvent evt) {
 				glassPanel.setSize(glassPanel.getParent().getSize());
-				glassPanel.validate();
+				glassPanel.revalidate();
 			}
 		});
-		glassPanel.setVisible(false);
+	}
+
+	public void setup(World world, ViewLists vl) {
+		this.w = world;
 
 		//Setup the various dialogue boxes.
-                
-                // setup the 'show controls' dialogue
-                showControls = new GameControlsJPanel();
-                showControls.setup(w, vl, this.closeCurrentDialogue);
+
+		// setup the terrain info dialogue.
+		terrainInfo = new TerrainInfoJPanel();
+		terrainInfo.setup(w, vl, this.closeCurrentDialogue);
+
+		// setup the supply and demand at station dialogue.
+		stationInfo = new StationInfoJPanel();
+		stationInfo.setup(w, vl, this.closeCurrentDialogue);
+
+		// setup the 'show controls' dialogue
+		showControls = new GameControlsJPanel();
+		showControls.setup(w, vl, this.closeCurrentDialogue);
 
 		//Set up train orders dialogue
 		trainSchedule = new TrainScheduleJPanel();
@@ -87,14 +104,13 @@ public class DialogueBoxController {
 			public void actionPerformed(ActionEvent arg0) {
 				int trainNumber = trainSchedule.getTrainNumber();
 				Schedule schedule = trainSchedule.getNewSchedule();
-				TrainModel train = (TrainModel)w.get(KEY.TRAINS,trainNumber);
+				TrainModel train = (TrainModel) w.get(KEY.TRAINS, trainNumber);
 				train.setSchedule(schedule);
 				closeContent();
 			}
 
 		});
 
-		
 		//Set up select engine dialogue.
 		selectEngine = new SelectEngineJPanel(this);
 		selectEngine.setup(w, vl, new ActionListener() {
@@ -161,20 +177,42 @@ public class DialogueBoxController {
 			showContent(selectEngine);
 		}
 	}
-        
-        public void showGameControls(){
-            System.out.println("showGameControls");
-            showContent(this.showControls);
-        }
+
+	public void showGameControls() {
+		
+		showContent(this.showControls);
+	}
 
 	public void showSelectWagons() {
-		System.out.println("showSelectWagons");
+		
+		selectWagons.resetSelectedWagons();
+		selectWagons.setEngineType(selectEngine.getEngineType());
 		showContent(selectWagons);
+	}
+
+	public void showTerrainInfo(int terrainType) {
+		this.terrainInfo.setTerrainType(terrainType);
+		showContent(terrainInfo);
+	}
+
+	public void showTerrainInfo(int x, int y) {
+		FreerailsTile tile = w.getTile(x, y);
+		int terrainType = tile.getTerrainTypeNumber();
+		showTerrainInfo(terrainType);
+	}
+
+	public void showStationInfo(int stationNumber) {
+		try{		
+			stationInfo.setStation(stationNumber);
+			showContent(stationInfo);
+		}catch (NoSuchElementException e){
+			System.out.println("Station "+stationNumber+" does not exist!");
+		}
 	}
 
 	public void showContent(JComponent component) {
 		component.setBorder(defaultBorder);
-		//		if(!glassPanel.isVisible()){					
+		//		if(!glassPanel.isVisible()){
 		//			KeyboardFocusManager keyboardFocusManager =
 		//			KeyboardFocusManager.getCurrentKeyboardFocusManager();
 		//			lastFocusOwner = keyboardFocusManager.getFocusOwner();
@@ -198,5 +236,4 @@ public class DialogueBoxController {
 		this.defaultFocusOwner = defaultFocusOwner;
 	}
 
-        
 }

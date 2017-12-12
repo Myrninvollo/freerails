@@ -31,7 +31,7 @@ public class GameControlsJPanel extends javax.swing.JPanel implements View {
 
         setLayout(new javax.swing.BoxLayout(this, javax.swing.BoxLayout.Y_AXIS));
 
-        jLabel1.setText("<html>\n<h3>On the map view</h3>\n<table >\n<tr>\n    <td>Build Track</td>\n    <td>Mouse or number pad with Num Lock down</td>\n  </tr>\n  <tr>\n    <td>Build Station</td>\n    <td>'F8' (on existing track)</td>\n  </tr>\n  <tr>\n    <td>Build Train</td>\n    <td>'F7' (after building a station)</td>\n  </tr>\n  \n  </table>\n  \n<h3>On the train orders screen</h3>\n  <table>\n  <tr>\n    <td>Goto Station</td>\n    <td>'G'</td>\n  </tr>\n  <tr>\n    <td>Change station</td>\n    <td>'S'</td>\n  </tr>\n   <tr>\n    <td>Change consist</td>\n    <td>'C'</td>\n  </tr>\n</table>\n</html>");
+        jLabel1.setText("<html>\n<h3>On the map view</h3>\n<table >\n<tr>\n    <td>Build Track</td>\n    <td>Mouse or number pad with Num Lock down</td>\n  </tr>\n  <tr>\n    <td>Build Station</td>\n    <td>'F8' (on existing track)</td>\n  </tr>\n  <tr>\n    <td>Build Train</td>\n    <td>'F7' (after building a station)</td>\n  </tr>\n <tr>\n    <td>Terrain Info</td>\n    <td>'I'</td>\n  </tr>\n  \n  </table>\n  \n<h3>On the train orders screen</h3>\n  <table>\n  <tr>\n    <td>Goto Station</td>\n    <td>'G'</td>\n  </tr>\n  <tr>\n    <td>Change station</td>\n    <td>'S'</td>\n  </tr>\n   <tr>\n    <td>Change consist</td>\n    <td>'C'</td>\n  </tr>\n</table>\n</html>");
         add(jLabel1);
 
         done.setText("Close");

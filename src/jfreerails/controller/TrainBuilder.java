@@ -57,7 +57,7 @@ public class TrainBuilder {
 			}									
 
 			TrainModel train = new TrainModel(engineType, wagons, null, s);
-			System.out.println("Build train with engine type: "+engineType+" and wagons: "+wagons.toString());
+			
 			
 
 			world.add(KEY.TRAINS, train);

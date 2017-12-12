@@ -3,12 +3,24 @@ package jfreerails;
 import java.awt.Image;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 
+import jfreerails.client.common.ImageManager;
+import jfreerails.client.common.ImageManagerImpl;
 import jfreerails.client.common.ImageSplitter;
+import jfreerails.client.renderer.ChequeredTileRenderer;
+import jfreerails.client.renderer.ForestStyleTileRenderer;
+import jfreerails.client.renderer.RiverStyleTileRenderer;
 import jfreerails.client.renderer.SideOnTrainTrainViewImages;
+import jfreerails.client.renderer.StandardTileRenderer;
+import jfreerails.client.renderer.TileRenderer;
 import jfreerails.client.renderer.TileRendererList;
+import jfreerails.client.renderer.TileRendererListImpl;
 import jfreerails.client.renderer.TrackPieceRendererList;
+import jfreerails.client.renderer.TrainImages;
 import jfreerails.client.renderer.ViewLists;
+import jfreerails.world.terrain.TerrainType;
+import jfreerails.world.top.KEY;
 import jfreerails.world.top.World;
 
 public class ViewListsImpl implements ViewLists {
@@ -18,55 +30,120 @@ public class ViewListsImpl implements ViewLists {
 
 	private final SideOnTrainTrainViewImages sideOnTrainTrainView;
 
-	public ViewListsImpl() throws IOException {
+	private final TrainImages trainImages;
 
-		//Load the xml file specifying terrain types.
-		URL tiles_xml_url = ViewListsImpl.class.getResource("/jfreerails/data/terrain_tiles.xml");
+	private final ImageManager imageManager;
 
-		//Load the picture containing the tile graphics.
-		URL tiles_url = ViewListsImpl.class.getResource("/jfreerails/data/terrain_tiles.png");
-		ImageSplitter terrain = new ImageSplitter(tiles_url);
+	public ViewListsImpl(World w) throws IOException {
 
-		TileSetFactory tileFactory = new jfreerails.TileSetFactoryImpl(tiles_xml_url, terrain);
+		URL out = ViewListsImpl.class.getResource("/experimental");
+		URL in = ViewListsImpl.class.getResource("/jfreerails/client/graphics");
 
-		//Get tile images from the picture as specified by the xml file.
-		tiles = tileFactory.getTileViewList();
-		java.awt.Point tilesSize = tileFactory.getTileSize();
+		imageManager = new ImageManagerImpl("/jfreerails/client/graphics/", out.getPath());
 
+		//tiles = new QuickRGBTileRendererList(w);
+		tiles = loadNewTileViewList(w);
+
+		trackPieceViewList = loadTrackViews(w);
+
+		//engine views
+
+		sideOnTrainTrainView = addTrainViews();
+
+		trainImages = new TrainImages(w, imageManager);
+	}
+
+	public static TrackPieceRendererList loadTrackViews() throws IOException {
 		//Load the track graphics and create the trackset
 		URL track_tiles_url = ViewListsImpl.class.getResource("/jfreerails/data/track_tiles.png");
-		
-		
+
 		URL track_xml_url = ViewListsImpl.class.getResource("/jfreerails/data/track_tiles.xml");
 		ImageSplitter track = new ImageSplitter(track_tiles_url);
 		TrackSetFactory trackSetFactory = new SAX2TracksetFactoryImpl(track_xml_url, track);
 
 		//Get the track graphics and track rules.
-		trackPieceViewList = trackSetFactory.getTrackViewList(track);
+		return trackSetFactory.getTrackViewList(track);
+	}
 
+	public TrackPieceRendererList loadTrackViews(World w) throws IOException {		
+		return new TrackPieceRendererList(w, imageManager);
+	}
+
+	private static SideOnTrainTrainViewImages addTrainViews() {
 		//wagon views
-		Image tempImage=null;
+		Image tempImage = null;
 
-		sideOnTrainTrainView = new SideOnTrainTrainViewImages(5, 3);
+		SideOnTrainTrainViewImages sideOnTrainTrainView = new SideOnTrainTrainViewImages(5, 3);
 		URL wagon = ViewListsImpl.class.getResource("/jfreerails/data/wagon_151x100.png");
 		System.out.println(wagon);
-		tempImage = (new javax.swing.ImageIcon(wagon) ).getImage();
+		tempImage = (new javax.swing.ImageIcon(wagon)).getImage();
 		sideOnTrainTrainView.setWagonImage(0, tempImage);
 		sideOnTrainTrainView.setWagonImage(1, tempImage);
 		sideOnTrainTrainView.setWagonImage(2, tempImage);
 		sideOnTrainTrainView.setWagonImage(3, tempImage);
 		sideOnTrainTrainView.setWagonImage(4, tempImage);
-
-		//engine views
-		
 		URL engine = ViewListsImpl.class.getResource("/jfreerails/data/engine_350x100.png");
 		System.out.println(engine);
 		tempImage = (new javax.swing.ImageIcon(engine)).getImage();
 		sideOnTrainTrainView.setEngineImage(0, tempImage);
 		sideOnTrainTrainView.setEngineImage(1, tempImage);
 		sideOnTrainTrainView.setEngineImage(2, tempImage);
-		System.out.println("Done");
+		return sideOnTrainTrainView;
+	}
 
+	public TileRendererList loadNewTileViewList(World w) throws IOException {
+		ArrayList tileRenderers = new ArrayList();
+		
+		for (int i = 0; i < w.size(KEY.TERRAIN_TYPES); i++) {
+
+			TerrainType t = (TerrainType) w.get(KEY.TERRAIN_TYPES, i);
+			int[] typesTreatedAsTheSame = new int[] { i };
+
+			TileRenderer tr = null;
+			Integer rgb = new Integer(t.getRGB());
+			try {
+				tr = new RiverStyleTileRenderer(imageManager, typesTreatedAsTheSame, t);
+				tileRenderers.add(tr);
+				continue;
+			} catch (IOException io) {
+			}
+			try {
+				tr = new ForestStyleTileRenderer(imageManager, typesTreatedAsTheSame, t);
+				tileRenderers.add(tr);
+				continue;
+			} catch (IOException io) {
+			}
+			try {
+				tr = new ChequeredTileRenderer(imageManager, typesTreatedAsTheSame, t);
+				tileRenderers.add(tr);
+				continue;
+			} catch (IOException io) {
+			}
+			try {
+				tr = new StandardTileRenderer(imageManager, typesTreatedAsTheSame, t);
+				tileRenderers.add(tr);
+				continue;
+			} catch (IOException io) {
+				// If the image is missing, we generate it.
+
+				System.out.println("No tile renderer for " + t.getTerrainTypeName());
+				String filename = StandardTileRenderer.generateFilename(t.getTerrainTypeName());
+				Image image = QuickRGBTileRendererList.createImageFor(t);
+				imageManager.setImage(filename, image);
+				//generatedImages.setImage(filename, image);
+				try {
+
+					tr = new StandardTileRenderer(imageManager, typesTreatedAsTheSame, t);
+					tileRenderers.add(tr);
+					continue;
+				} catch (IOException io2) {
+					io2.printStackTrace();
+					throw new IllegalStateException();
+				}
+			}
+
+		}
+		return new TileRendererListImpl(tileRenderers);
 	}
 
 	public TileRendererList getTileViewList() {
@@ -90,6 +167,10 @@ public class ViewListsImpl implements ViewLists {
 
 	public SideOnTrainTrainViewImages getSideOnTrainTrainViewImages() {
 		return sideOnTrainTrainView;
+	}
+
+	public TrainImages getTrainImages() {		
+		return trainImages;
 	}
 
 }

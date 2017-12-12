@@ -32,8 +32,7 @@ public class RunFreerails {
 
 		String map_name;
 
-		map_name = "south_america.png";
-
+		map_name = "south_america";
 		createClient(map_name, fullscreen, nogameloop);
 
 	}
@@ -47,15 +46,18 @@ public class RunFreerails {
 	 */
 
 	public static void createClient(String mapName, boolean fullscreen, boolean nogameloop) throws IOException {
-
+		long startTime = System.currentTimeMillis();		
 		World world = OldWorldImpl.createWorldFromMapFile(mapName);
 
-		ViewLists viewLists = new ViewListsImpl();
+		ViewLists viewLists = new ViewListsImpl(world);
 		
+				
 		GUIComponentFactoryImpl gUIComponentFactory = new GUIComponentFactoryImpl();
 
 
        	createClient(fullscreen, nogameloop, world, viewLists, gUIComponentFactory);
+		long deltaTime = System.currentTimeMillis()-startTime;
+		System.out.println("Time taken for startup: "+deltaTime+"ms");
 
 	}
 
@@ -89,6 +91,7 @@ public class RunFreerails {
 				Thread t = new Thread(gameLoop);
 				t.start();
 			}
+			
 	}
 
 }

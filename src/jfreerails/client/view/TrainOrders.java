@@ -6,11 +6,19 @@
 
 package jfreerails.client.view;
 import java.awt.event.KeyEvent;
-import jfreerails.world.top.*;
-import jfreerails.world.station.*;
-import jfreerails.world.train.*;
-import javax.swing.*;
+
+import javax.swing.JMenuItem;
+import javax.swing.JSeparator;
+
 import jfreerails.client.renderer.ViewLists;
+import jfreerails.world.cargo.CargoType;
+import jfreerails.world.station.StationModel;
+import jfreerails.world.top.KEY;
+import jfreerails.world.top.NonNullElements;
+import jfreerails.world.top.World;
+import jfreerails.world.train.Schedule;
+import jfreerails.world.train.TrainModel;
+import jfreerails.world.train.TrainOrdersModel;
 
 /**
  *
@@ -34,7 +42,7 @@ public class TrainOrders extends javax.swing.JPanel {
     
     /** Creates new form TrainOrders */
     public TrainOrders() {
-        initComponents();
+        initComponents();       
     }
     
     public void setup(World world, ViewLists vl){
@@ -115,15 +123,15 @@ public class TrainOrders extends javax.swing.JPanel {
     private void setupWagonsPopup(){
         changeConsist.removeAll();  //Remove existing menu items.
         
-        NonNullElements wagonTypes = new NonNullElements(KEY.WAGON_TYPES, w);
-        while(wagonTypes.next()){
-            final WagonType wagonType = (WagonType)wagonTypes.getElement();
+        NonNullElements cargoTypes = new NonNullElements(KEY.CARGO_TYPES, w);
+        while(cargoTypes.next()){
+            final CargoType wagonType = (CargoType)cargoTypes.getElement();
             JMenuItem wagonMenuItem = new JMenuItem();
-            final int wagonTypeNumber = wagonTypes.getIndex();
-            wagonMenuItem.setText(wagonType.getName());
+            final int wagonTypeNumber = cargoTypes.getIndex();
+            wagonMenuItem.setText(wagonType.getDisplayName());
             wagonMenuItem.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent evt) {
-                    System.out.println("Add "+wagonType.getName());
+                    
                     addWagon(wagonTypeNumber);
                 }
             });
@@ -270,11 +278,11 @@ public class TrainOrders extends javax.swing.JPanel {
                 this.changeStation.show(this.stationName, this.stationName.getX(), this.stationName.getY());
                 break;
             case KeyEvent.VK_UP:
-                System.out.println("Up pressed");
+                
                 this.getParent().getParent().dispatchEvent(evt);
                 break;
             case KeyEvent.VK_DOWN:
-                System.out.println("Down pressed");
+                
                 this.getParent().getParent().dispatchEvent(evt);
                 break;
         }

@@ -1,3 +1,46 @@
+19-May-2003 04:02:00 Scott
+	o Fixed the problem and deviation from the design ;-) of the station
+	cargo calculations, there's now a temporary menu item on the display menu.
+	Use this to manually update the cargo supply rates.
+18-May-2003 20:16:40 Luke
+	o Uses the new engine and wagon images on the
+	select wagon, select engine, and train info dialogue boxes. 
+18-May-2003 00:52:00 Scott
+	o The cargo supplied to a station can now be viewed from the menu,
+	although some more work is needed.
+16-May-2003 22:51:07 Luke
+	o Now loads tile sized track images instead of grabbing
+	them from the big image.
+12-May-2003 00:16:25 Luke
+	o Now prints out the time it takes to startup.
+11-May-2003 20:24:44 Luke
+	o Track is shown on the overview map again.
+	o Rules about on what terrain track can be built have been added,
+	this is driven by terrain category.	
+10-May-2003 00:02:13 Luke
+	o Rejig track and terrain graphics filenames following discussion
+	on mailing list.
+	o Generated side-on and overhead train graphics.
+05-May-2003 23:02:28 Luke
+	o Added station info dialogue.
+	o Fixed some bugs related to loading games and
+	starting new games.
+05-May-2003 18:00:53 Luke
+	o Changed map view classes to use a VolatileImage for 
+	a backbuffer.
+05-May-2003 00:47:52 Luke
+	o Added terrain info dialogue.
+03-May-2003 13:39:59 Luke
+	o Fixed river drawing bug.
+02-May-2003 00:19:53 Luke
+	o The terrain graphics now get loaded correctly although
+	there is a bug in the code that picks the right image
+	for rivers and other types that are drawn in the same way.
+01-May-2003 00:39:49 Luke
+	o Split up track and terrain images.
+28-Apr-2003 22:18:03 Luke
+	o Integrate new terrain and cargo xml into game.
+	Temporarily lost terrain graphics.
 19-Apr-2003 18:07:22 Luke
 	o More work on schedule GUI, you can set 
 	change the station that a train is going to.

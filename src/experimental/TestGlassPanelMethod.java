@@ -3,7 +3,7 @@ package experimental;
 import java.awt.Dimension;
 import java.io.IOException;
 
-import jfreerails.ViewListsImpl;
+import jfreerails.*;
 import jfreerails.WagonAndEngineTypesFactory;
 import jfreerails.client.common.JFrameMinimumSizeEnforcer;
 import jfreerails.client.common.MyGlassPanel;
@@ -12,6 +12,7 @@ import jfreerails.client.view.DialogueBoxController;
 import jfreerails.world.top.*;
 import jfreerails.world.station.*;
 import jfreerails.world.train.*;
+import java.util.Random;
 /**
  *
  * @author  lindsal8
@@ -19,18 +20,27 @@ import jfreerails.world.train.*;
  */
 public class TestGlassPanelMethod extends javax.swing.JFrame {
     
-    private DialogueBoxController dialogueBoxController;
+    private final DialogueBoxController dialogueBoxController;
+    
+    private Random randy = new Random(System.currentTimeMillis());
+    
+    private World w;
     
     /** Creates new form TestGlassPanelMethod */
     public TestGlassPanelMethod() {
-        World w = new WorldImpl();
+		dialogueBoxController=new DialogueBoxController(this);
+        w = new WorldImpl();
         WagonAndEngineTypesFactory wetf = new WagonAndEngineTypesFactory();
+        TileSetFactory tileFactory = new NewTileSetFactoryImpl();
+        tileFactory.addTerrainTileTypesList(w);
         wetf.addTypesToWorld(w);
-        w.add(KEY.STATIONS, new StationModel(10, 10, "Bristol"));
-        w.add(KEY.STATIONS, new StationModel(10, 10, "Bath"));
-        w.add(KEY.STATIONS, new StationModel(10, 10, "Cardiff"));
-        w.add(KEY.STATIONS, new StationModel(10, 10, "London"));
-        w.add(KEY.STATIONS, new StationModel(10, 10, "Swansea"));
+        int numberOfCargoTypes = w.size(KEY.CARGO_TYPES);
+        
+        w.add(KEY.STATIONS, new StationModel(10, 10, "Bristol", numberOfCargoTypes));
+        w.add(KEY.STATIONS, new StationModel(10, 10, "Bath", numberOfCargoTypes));
+        w.add(KEY.STATIONS, new StationModel(10, 10, "Cardiff", numberOfCargoTypes));
+        w.add(KEY.STATIONS, new StationModel(10, 10, "London", numberOfCargoTypes));
+        w.add(KEY.STATIONS, new StationModel(10, 10, "Swansea", numberOfCargoTypes));
         
         Schedule schedule = new Schedule();
         TrainOrdersModel order = new TrainOrdersModel(0, new int[]{0,0,0}, false);
@@ -49,10 +59,10 @@ public class TestGlassPanelMethod extends javax.swing.JFrame {
         
         ViewLists vl;
         try {
-            vl = new ViewListsImpl();
+            vl = new ViewListsImpl(w);//new ViewListsImpl();
             
             final MyGlassPanel glassPanel = new MyGlassPanel();
-            dialogueBoxController = new DialogueBoxController(this, w, vl);
+            dialogueBoxController.setup(w, vl);
             initComponents();
             
             
@@ -81,6 +91,8 @@ public class TestGlassPanelMethod extends javax.swing.JFrame {
         selectWagons = new javax.swing.JMenuItem();
         selectTrainOrders = new javax.swing.JMenuItem();
         showControls = new javax.swing.JMenuItem();
+        showTerrainInfo = new javax.swing.JMenuItem();
+        showStationInfo = new javax.swing.JMenuItem();
 
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent evt) {
@@ -100,6 +112,7 @@ public class TestGlassPanelMethod extends javax.swing.JFrame {
         });
 
         show.add(newspaper);
+
         selectEngine.setText("Select Engine");
         selectEngine.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -108,6 +121,7 @@ public class TestGlassPanelMethod extends javax.swing.JFrame {
         });
 
         show.add(selectEngine);
+
         selectWagons.setText("Select Wagons");
         selectWagons.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -116,6 +130,7 @@ public class TestGlassPanelMethod extends javax.swing.JFrame {
         });
 
         show.add(selectWagons);
+
         selectTrainOrders.setText("Train Orders");
         selectTrainOrders.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -124,6 +139,7 @@ public class TestGlassPanelMethod extends javax.swing.JFrame {
         });
 
         show.add(selectTrainOrders);
+
         showControls.setText("Show game controls");
         showControls.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -132,10 +148,42 @@ public class TestGlassPanelMethod extends javax.swing.JFrame {
         });
 
         show.add(showControls);
+
+        showTerrainInfo.setText("Show Terrain Info");
+        showTerrainInfo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                showTerrainInfoActionPerformed(evt);
+            }
+        });
+
+        show.add(showTerrainInfo);
+
+        showStationInfo.setText("Show Station Info");
+        showStationInfo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                showStationInfoActionPerformed(evt);
+            }
+        });
+
+        show.add(showStationInfo);
+
         jMenuBar1.add(show);
+
         setJMenuBar(jMenuBar1);
 
     }//GEN-END:initComponents
+
+    private void showStationInfoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showStationInfoActionPerformed
+        // Add your handling code here:
+        int stationNumber = randy.nextInt(w.size(KEY.STATIONS) -1 ); 
+        dialogueBoxController.showStationInfo(stationNumber);
+    }//GEN-LAST:event_showStationInfoActionPerformed
+
+    private void showTerrainInfoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showTerrainInfoActionPerformed
+        // Add your handling code here:
+        int terrainType = randy.nextInt(w.size(KEY.TERRAIN_TYPES) -1 );        
+        dialogueBoxController.showTerrainInfo(terrainType);
+    }//GEN-LAST:event_showTerrainInfoActionPerformed
     
     private void showControlsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showControlsActionPerformed
         // Add your handling code here:
@@ -186,7 +234,9 @@ public class TestGlassPanelMethod extends javax.swing.JFrame {
     private javax.swing.JMenuItem selectWagons;
     private javax.swing.JMenuItem selectEngine;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JMenuItem showStationInfo;
     private javax.swing.JMenuItem newspaper;
+    private javax.swing.JMenuItem showTerrainInfo;
     private javax.swing.JMenuItem showControls;
     private javax.swing.JMenu show;
     private javax.swing.JMenuBar jMenuBar1;

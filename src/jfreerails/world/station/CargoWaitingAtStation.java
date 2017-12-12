@@ -1,17 +1,27 @@
 package jfreerails.world.station;
 
-import jfreerails.world.cargo.CargoBundle;
+import jfreerails.world.common.FreerailsSerializable;
 
-public class CargoWaitingAtStation {
+/** This class represents the cargo waiting at a station. */
 
-	private final CargoBundle[] m_cargoWaiting;
+public class CargoWaitingAtStation implements FreerailsSerializable{
 
-	public CargoBundle[] getCargoWaiting() {
-		return m_cargoWaiting;
+	final int[] m_cargoWaiting;
+		
+	public CargoWaitingAtStation(int[] cargoWaiting) {
+		m_cargoWaiting = (int[]) cargoWaiting.clone();
+	}
+	
+	public int getAmountWeighting(int cargoType){
+		return m_cargoWaiting[cargoType];
 	}
 
-	public CargoWaitingAtStation(CargoBundle[] cargoWaiting) {
-		m_cargoWaiting = (CargoBundle[]) cargoWaiting.clone();
+	public boolean equals(Object o) {		
+		if(o instanceof CargoWaitingAtStation){
+			CargoWaitingAtStation test = (CargoWaitingAtStation)o;
+			return this.m_cargoWaiting.equals(test.m_cargoWaiting);
+		}else{		
+			return false;
+		}
 	}
-
 }
