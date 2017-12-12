@@ -2,14 +2,14 @@ package jfreerails.controller;
 
 import java.util.ArrayList;
 
-import experimental.TrainFixture;
-
 import jfreerails.move.ChangeTrainPositionMove;
 import jfreerails.world.misc.IntLine;
 import jfreerails.world.train.PathWalker;
 import jfreerails.world.train.TrainList;
 import jfreerails.world.train.TrainPosition;
 import junit.framework.TestCase;
+
+import experimental.TrainFixture;
 
 /**
  * @author Luke Lindsay 30-Oct-2002

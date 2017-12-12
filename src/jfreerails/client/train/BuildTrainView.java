@@ -5,21 +5,13 @@
 * Created on 14 de julio de 2001, 05:30 PM
 */
 package jfreerails.client.train;
-import javax.swing.JEditorPane;
-import javax.swing.JPanel;
-import javax.swing.ListCellRenderer;
-import javax.swing.ListSelectionModel;
-import javax.swing.JList;
-import javax.swing.JLabel;
-import javax.swing.AbstractButton;
-import javax.swing.JButton;
-import javax.swing.ImageIcon;
-import javax.swing.SwingConstants;
-import java.awt.Container;
 import java.awt.Component;
-import java.awt.BorderLayout;
-import java.awt.Window;
-import java.awt.Frame;
+
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.ListCellRenderer;
+import javax.swing.SwingConstants;
 
 /**
 *

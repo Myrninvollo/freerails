@@ -8,12 +8,12 @@
 
 package jfreerails.world.track;
 
-import junit.framework.TestSuite;
-import junit.framework.Assert;
-import junit.framework.TestCase;
-import junit.framework.Test;
 import java.awt.Dimension;
 import java.awt.Point;
+
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 /**
  *
  * @author lindsal

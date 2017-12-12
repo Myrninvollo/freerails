@@ -1,11 +1,11 @@
 package jfreerails.world.train;
 
-import jfreerails.world.misc.IntLine;
-import jfreerails.world.misc.FreerailsPathIterator;
-import jfreerails.world.misc.FreerailsPathIteratorImpl;
 import java.awt.Point;
 import java.util.LinkedList;
-import java.util.NoSuchElementException;
+
+import jfreerails.world.misc.FreerailsPathIterator;
+import jfreerails.world.misc.FreerailsPathIteratorImpl;
+import jfreerails.world.misc.IntLine;
 
 /* This class stores a series of points.  Points can
  * be added and removed from either end, and the coordinates

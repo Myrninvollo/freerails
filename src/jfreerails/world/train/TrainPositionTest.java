@@ -1,7 +1,5 @@
 package jfreerails.world.train;
 
-import java.awt.Point;
-
 import jfreerails.world.misc.FreerailsPathIterator;
 import jfreerails.world.misc.IntLine;
 import junit.framework.TestCase;

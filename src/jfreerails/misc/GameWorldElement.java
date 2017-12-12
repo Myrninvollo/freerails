@@ -1,8 +1,5 @@
 package jfreerails.misc;
 
-import java.util.*;
-
-import jfreerails.world.financial.*;
 import jfreerails.world.financial.Company;
 
 /**

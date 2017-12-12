@@ -6,10 +6,9 @@
  */
 package jfreerails.world.track;
 
-import jfreerails.world.misc.OneTileMoveVector;
 import java.util.Iterator;
 
-import jfreerails.world.terrain.TerrainType;
+import jfreerails.world.misc.OneTileMoveVector;
 
 /**
  *  This class encapsulates the rules that apply to a type of track node. They
@@ -95,6 +94,10 @@ implements TrackRule {
 
     public boolean trackPieceIsLegal(TrackConfiguration config) {
         return legalConfigurations.trackConfigurationIsLegal(config);
+    }
+    
+    public boolean isStation(){
+    	return properties.isStation();
     }
 
 }

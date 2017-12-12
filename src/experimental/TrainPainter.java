@@ -1,22 +1,14 @@
 package experimental;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
-import java.util.ArrayList;
 
-import jfreerails.client.train.TrainTypeView;
 import jfreerails.client.train.TrainView;
 import jfreerails.client.train.ViewPerspective;
-import jfreerails.lib.GameModel;
-import jfreerails.world.misc.OneTileMoveVector;
-import jfreerails.world.misc.FreerailsPathIterator;
-import jfreerails.world.misc.FreerailsPathIteratorImpl;
 import jfreerails.world.misc.IntLine;
+import jfreerails.world.misc.OneTileMoveVector;
 import jfreerails.world.train.PathWalker;
-import jfreerails.world.train.PathWalkerImpl;
 import jfreerails.world.train.WagonType;
 
 /**

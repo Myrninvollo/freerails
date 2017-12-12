@@ -6,7 +6,6 @@
 */
 package jfreerails.client.view;
 import java.awt.Graphics;
-import java.awt.Point;
 import java.awt.Rectangle;
 
 /**

@@ -5,7 +5,6 @@
  */
 
 package jfreerails.world.track;
-import java.awt.Dimension;
 import java.awt.Point;
 
 import jfreerails.world.tilemap.TileMap;

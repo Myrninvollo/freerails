@@ -3,12 +3,6 @@ package jfreerails;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -18,6 +12,7 @@ import javax.swing.JScrollPane;
 import jfreerails.client.BuildMenu;
 import jfreerails.client.GUIComponentFactory;
 import jfreerails.client.ViewLists;
+import jfreerails.client.menu.StationTypesPopup;
 import jfreerails.client.view.DetailMapView;
 import jfreerails.client.view.MainMapAndOverviewMapMediator;
 import jfreerails.client.view.MapView;
@@ -28,6 +23,7 @@ import jfreerails.client.view.ZoomedOutMapView;
 import jfreerails.controller.MoveChainFork;
 import jfreerails.controller.MoveReceiver;
 import jfreerails.controller.ServerGameEngine;
+import jfreerails.controller.StationBuilder;
 import jfreerails.controller.TrackMoveExecutor;
 import jfreerails.controller.TrackMoveProducer;
 import jfreerails.controller.TrainBuilder;
@@ -40,6 +36,7 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory {
 	private MainMapAndOverviewMapMediator mediator;
 	private ServerGameEngine gameEngine;
 
+	StationTypesPopup stationTypesPopup;
 	BuildMenu buildMenu;
 	JComponent overviewMapContainer;
 	JComponent mainMapContainer;
@@ -55,40 +52,42 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory {
 		mapViewJComponent = new MapViewJComponentConcrete();
 		mainMapScrollPane1 = new JScrollPane();
 		overviewMapContainer = new NewOverviewMapJComponent(r);
-		this.mediator =
-			new MainMapAndOverviewMapMediator(
-				overviewMapContainer,
-				mainMapScrollPane1.getViewport(),
-				mapViewJComponent,
-				r);
+		stationTypesPopup = new StationTypesPopup();
+		this.mediator = new MainMapAndOverviewMapMediator(overviewMapContainer, mainMapScrollPane1.getViewport(), mapViewJComponent, r);
 
 	}
 
-	public void setup(ViewLists vl, World w, ServerGameEngine gameEngine) {
+	public void setup(ViewLists vl, World w, ServerGameEngine ge) {
 		if (!vl.validate(w)) {
 			throw new IllegalArgumentException("The specified ViewLists are not comaptible with the specified world!");
 		}
 		viewLists = vl;
 		world = w;
+		this.gameEngine = ge;
 
 		//create the main and overview maps
-		mainMap =
-			new DetailMapView(
-				world.getMap(),
-				viewLists.getTileViewList(),
-				viewLists.getTrackPieceViewList(),
-				world.getTrainList());
+		mainMap = new DetailMapView(world.getMap(), viewLists.getTileViewList(), viewLists.getTrackPieceViewList(), world.getTrainList());
 		overviewMap = new ZoomedOutMapView(world.getMap());
 
 		//init the move handlers
+
 		MoveReceiver trackMoveExecutor = new TrackMoveExecutor(world.getMap());
-		MoveReceiver mapViewMoveReceiver = new MapViewMoveReceiver(overviewMap);
-		MoveReceiver moveFork = new MoveChainFork(trackMoveExecutor, mapViewMoveReceiver);		
+		MoveChainFork moveFork = new MoveChainFork(trackMoveExecutor);
+
+		MoveReceiver overviewmapMoveReceiver = new MapViewMoveReceiver(mainMap);
+		moveFork.add(overviewmapMoveReceiver);
+
+		MoveReceiver mainmapMoveReceiver = new MapViewMoveReceiver(overviewMap);
+		moveFork.add(mainmapMoveReceiver);
+
 		trackBuilder = new TrackMoveProducer(world.getMap(), moveFork);
 		TrainBuilder tb = new TrainBuilder(world, gameEngine);
+		StationBuilder sb = new StationBuilder(trackBuilder, world.getTrackRuleList());
+
+		stationTypesPopup.setup(sb);
 
 		//setup the the main and overview map JComponents
-		 ((MapViewJComponentConcrete) mapViewJComponent).setup(mainMap, trackBuilder, tb);
+		 ((MapViewJComponentConcrete) mapViewJComponent).setup(mainMap, trackBuilder, tb, stationTypesPopup);
 		buildMenu.setup(world.getTrackRuleList(), trackBuilder);
 		mainMapScrollPane1.setViewportView(this.mapViewJComponent);
 		((NewOverviewMapJComponent) overviewMapContainer).setup(overviewMap);
@@ -140,13 +139,14 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory {
 
 			public void actionPerformed(ActionEvent e) {
 
-				World world = WorldImpl.createWorldFromMapFile(mapName);
+				gameEngine.newGame(mapName);
+				World world = gameEngine.getWorld();
 				ViewLists viewLists = getViewLists();
-				ServerGameEngine ge = new ServerGameEngine(world);
+
 				if (!viewLists.validate(world)) {
 					throw new IllegalArgumentException();
 				}
-				setup(viewLists, world, ge);
+				setup(viewLists, world, gameEngine);
 			}
 
 		});
@@ -160,13 +160,14 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory {
 
 			public void actionPerformed(ActionEvent e) {
 
-				World world = WorldImpl.createWorldFromMapFile(mapName);
+				gameEngine.newGame(mapName);
+				World world = gameEngine.getWorld();
 				ViewLists viewLists = getViewLists();
-				ServerGameEngine ge = new ServerGameEngine(world);
+
 				if (!viewLists.validate(world)) {
 					throw new IllegalArgumentException();
 				}
-				setup(viewLists, world, ge);
+				setup(viewLists, world, gameEngine);
 			}
 
 		});
@@ -178,21 +179,7 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory {
 
 			public void actionPerformed(ActionEvent e) {
 
-				try {
-
-					System.out.print("Saving game..  ");
-					FileOutputStream out = new FileOutputStream("freerails.sav");
-					GZIPOutputStream zipout = new GZIPOutputStream(out);
-					
-					ObjectOutputStream objectOut = new ObjectOutputStream(zipout);
-					objectOut.writeObject(getWorld());
-					objectOut.flush();					
-      				objectOut.close();
-      				                 
-					System.out.println("done.");
-				} catch (Exception ex) {
-					ex.printStackTrace();
-				}
+				gameEngine.saveGame();
 			}
 
 		});
@@ -203,25 +190,16 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory {
 		loadGameJMenuItem.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
+				
+				gameEngine.loadGame();
+				World w = gameEngine.getWorld();
 
-				try {
+				ViewLists viewLists = getViewLists();
 
-					System.out.print("Loading game..  ");
-					FileInputStream in = new FileInputStream("freerails.sav");
-					GZIPInputStream zipin=new GZIPInputStream(in);
-					ObjectInputStream objectIn = new ObjectInputStream(zipin);
-
-					World world = (World) objectIn.readObject();
-					ViewLists viewLists = getViewLists();
-					ServerGameEngine ge = new ServerGameEngine(world);
-					if (!viewLists.validate(world)) {
-						throw new IllegalArgumentException();
-					}
-					setup(viewLists, world, ge);
-					System.out.println("done.");
-				} catch (Exception ex) {
-					ex.printStackTrace();
+				if (!viewLists.validate(world)) {
+					throw new IllegalArgumentException();
 				}
+				setup(viewLists, w, gameEngine);
 
 			}
 

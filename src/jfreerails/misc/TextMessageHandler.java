@@ -11,7 +11,6 @@ package jfreerails.misc;
 /**
 *
 * @author  Luke Lindsay
-* @version 
 */
 
 

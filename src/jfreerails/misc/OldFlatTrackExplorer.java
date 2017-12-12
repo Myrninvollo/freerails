@@ -1,17 +1,18 @@
 package jfreerails.misc;
 
+import java.awt.Point;
+import java.util.NoSuchElementException;
+
+import jfreerails.world.misc.OneTileMoveVector;
 import jfreerails.world.track.NullTrackPiece;
 import jfreerails.world.track.PositionOnTrack;
 import jfreerails.world.track.TrackConfiguration;
 import jfreerails.world.track.TrackExplorer;
 import jfreerails.world.track.TrackPiece;
 import jfreerails.world.track.TrackTileMap;
-import jfreerails.world.misc.OneTileMoveVector;
-import java.awt.Point;
-import java.util.NoSuchElementException;
 
 
-public class FlatTrackExplorer implements TrackExplorer {
+public class OldFlatTrackExplorer implements TrackExplorer {
 	
 	static final int NO_MORE_BRANCHES=-99;
 
@@ -66,7 +67,7 @@ public class FlatTrackExplorer implements TrackExplorer {
 	}
 
 	public PositionOnTrack getCurrentPosition() {
-		return new PositionOnTrack(position.x, position.y, 0,0);
+		return new PositionOnTrack(position.x, position.y, OneTileMoveVector.NORTH);
 	}
 
 	public void nextBranch() {
@@ -92,7 +93,7 @@ public class FlatTrackExplorer implements TrackExplorer {
 		return null;
 	}
 
-	public FlatTrackExplorer(TrackTileMap m, Point l) {
+	public OldFlatTrackExplorer(TrackTileMap m, Point l) {
 
 		this.map = m;
 		this.position = new Point(l);
@@ -104,6 +105,10 @@ public class FlatTrackExplorer implements TrackExplorer {
 					+ l.y
 					+ " since there is no track there.");
 		}
+	}
+	
+	public void setPosition(PositionOnTrack p){
+		
 	}
 
 }

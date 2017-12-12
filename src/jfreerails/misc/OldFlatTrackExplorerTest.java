@@ -1,24 +1,23 @@
 package jfreerails.misc;
 
+import java.awt.Dimension;
+import java.awt.Point;
+
+import jfreerails.move.ChangeTrackPieceCompositeMove;
+import jfreerails.world.misc.OneTileMoveVector;
 import jfreerails.world.track.MapFixtureFactory;
 import jfreerails.world.track.PositionOnTrack;
 import jfreerails.world.track.TrackRule;
 import jfreerails.world.track.TrackRuleList;
 import jfreerails.world.track.TrackTileMap;
 import jfreerails.world.track.TrackTileMapImpl;
-import jfreerails.world.misc.OneTileMoveVector;
-import java.awt.Dimension;
-import java.awt.Point;
-
-import jfreerails.move.ChangeTrackPieceCompositeMove;
-import jfreerails.move.MoveStatus;
 import junit.framework.TestCase;
 
 /**
  * This class 
  * @author Luke Lindsay
  */
-public class FlatTrackExplorerTest extends TestCase {
+public class OldFlatTrackExplorerTest extends TestCase {
 
 	TrackRuleList trackRules;
 	TrackTileMap map;
@@ -27,7 +26,7 @@ public class FlatTrackExplorerTest extends TestCase {
 	 * Constructor for FlatTrackExplorerTest.
 	 * @param arg0
 	 */
-	public FlatTrackExplorerTest(String arg0) {
+	public OldFlatTrackExplorerTest(String arg0) {
 		super(arg0);
 
 	}
@@ -62,9 +61,9 @@ public class FlatTrackExplorerTest extends TestCase {
 	 */
 	public void testJumpOntoMap() {
 		setUp();
-		FlatTrackExplorer fte;
+		OldFlatTrackExplorer fte;
 		try {
-			fte = new FlatTrackExplorer(map, new Point(10, 10));
+			fte = new OldFlatTrackExplorer(map, new Point(10, 10));
 			assertNotNull(fte);
 			PositionOnTrack pos = fte.getCurrentPosition();
 			assertEquals(10, pos.getX());
@@ -74,7 +73,7 @@ public class FlatTrackExplorerTest extends TestCase {
 			assertTrue(false);
 		}
 		try {
-			fte = new FlatTrackExplorer(map, new Point(15, 15));
+			fte = new OldFlatTrackExplorer(map, new Point(15, 15));
 			assertTrue(false);
 		} catch (IllegalArgumentException iae) {
 
@@ -87,9 +86,9 @@ public class FlatTrackExplorerTest extends TestCase {
 	 */
 	public void testGetPossibleDirections() {
 		setUp();
-		FlatTrackExplorer fte;
+		OldFlatTrackExplorer fte;
 
-		fte = new FlatTrackExplorer(map, new Point(10, 10));
+		fte = new OldFlatTrackExplorer(map, new Point(10, 10));
 
 		//There should be 3 branches.
 		assertTrue(fte.hasNextBranch());
@@ -109,9 +108,9 @@ public class FlatTrackExplorerTest extends TestCase {
 	 */
 	public void testMoveTrackExplorer() {
 		setUp();
-		FlatTrackExplorer fte;
+		OldFlatTrackExplorer fte;
 
-		fte = new FlatTrackExplorer(map, new Point(10, 10));
+		fte = new OldFlatTrackExplorer(map, new Point(10, 10));
 		PositionOnTrack pos = fte.getCurrentPosition();
 		assertEquals(10, pos.getX());
 		assertEquals(10, pos.getY());

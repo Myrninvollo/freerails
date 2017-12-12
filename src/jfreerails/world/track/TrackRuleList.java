@@ -6,10 +6,10 @@
 */
 package jfreerails.world.track;
 
-import jfreerails.world.misc.FreerailsSerializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import jfreerails.world.misc.FreerailsSerializable;
 import jfreerails.world.terrain.TerrainType;
 
 

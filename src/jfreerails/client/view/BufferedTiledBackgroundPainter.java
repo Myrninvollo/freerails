@@ -5,7 +5,6 @@
  *  Created on 31 July 2001, 16:22
  */
 package jfreerails.client.view;
-import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
 

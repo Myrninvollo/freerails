@@ -1,12 +1,18 @@
 package jfreerails.controller;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
+import jfreerails.WorldImpl;
 import jfreerails.lib.GameModel;
 import jfreerails.move.ChangeTrainPositionMove;
 import jfreerails.world.World;
-
 
 /**
  * @author Luke Lindsay 05-Nov-2002
@@ -14,7 +20,7 @@ import jfreerails.world.World;
  */
 public class ServerGameEngine implements GameModel {
 
-	final World world;
+	World world;
 
 	long lastTime = System.currentTimeMillis();
 
@@ -39,16 +45,74 @@ public class ServerGameEngine implements GameModel {
 
 		while (i.hasNext()) {
 			Object o = i.next();
-			TrainMover trainMover = (TrainMover)o; 
+			TrainMover trainMover = (TrainMover) o;
 			m = trainMover.update(deltaDistance);
 			m.doMove(world.getTrainList());
 		}
 
 	}
-	
-	public void addTrainMover(TrainMover m){
+
+	public void addTrainMover(TrainMover m) {
 		trainMovers.add(m);
-		
+
+	}
+
+	public void saveGame() {
+
+		try {
+
+			System.out.print("Saving game..  ");
+			FileOutputStream out = new FileOutputStream("freerails.sav");
+			GZIPOutputStream zipout = new GZIPOutputStream(out);
+
+			ObjectOutputStream objectOut = new ObjectOutputStream(zipout);
+			objectOut.writeObject(trainMovers);
+			objectOut.writeObject(getWorld());
+			objectOut.flush();
+			objectOut.close();
+
+			System.out.println("done.");
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+	}
+
+	public void loadGame() {
+
+		try {
+
+			System.out.print("Loading game..  ");
+			FileInputStream in = new FileInputStream("freerails.sav");
+			GZIPInputStream zipin = new GZIPInputStream(in);
+			ObjectInputStream objectIn = new ObjectInputStream(zipin);
+
+			this.trainMovers = (ArrayList) objectIn.readObject();
+
+			this.world = (World) objectIn.readObject();
+			System.out.println(world.getMap().getMapSize().toString());
+			
+			System.out.println("done.");
+			lastTime = System.currentTimeMillis();
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+
+	}
+
+	public void newGame(String mapFileName) {
+
+		this.world = WorldImpl.createWorldFromMapFile(mapFileName);
+
+		trainMovers = new ArrayList();
+		lastTime = System.currentTimeMillis();
+	}
+
+	/**
+	 * Returns the world.
+	 * @return World
+	 */
+	public World getWorld() {
+		return world;
 	}
 
 }

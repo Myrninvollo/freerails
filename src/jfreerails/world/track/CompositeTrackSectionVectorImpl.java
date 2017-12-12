@@ -1,9 +1,10 @@
 package jfreerails.world.track;
 
-import jfreerails.world.misc.TrackSectionVector;
 import java.awt.Dimension;
 import java.awt.Point;
+
 import jfreerails.world.misc.PointOnTile;
+import jfreerails.world.misc.TrackSectionVector;
 public class CompositeTrackSectionVectorImpl implements TrackSectionVector {
 	public PointOnTile getEnd() {
 		return null;

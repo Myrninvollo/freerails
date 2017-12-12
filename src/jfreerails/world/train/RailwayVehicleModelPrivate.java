@@ -2,9 +2,9 @@ package jfreerails.world.train;
 
 import java.util.Iterator;
 
-import jfreerails.world.cargo.CargoType;
 import jfreerails.world.cargo.CargoBundle;
 import jfreerails.world.cargo.CargoContainer;
+import jfreerails.world.cargo.CargoType;
 
 abstract public class RailwayVehicleModelPrivate implements CargoContainer {
 	

@@ -12,9 +12,9 @@ import java.awt.Rectangle;
 
 import jfreerails.client.tileview.TileViewList;
 import jfreerails.client.trackview.TrackPieceViewList;
+import jfreerails.world.terrain.TerrainMap;
 import jfreerails.world.track.TrackAndTerrainTileMap;
 import jfreerails.world.track.TrackTileMap;
-import jfreerails.world.terrain.TerrainMap;
 
 /** This class encapsulates the objects that make-up and paint the background
  * of the map view. At present it is composed of two layers: the terrain layer

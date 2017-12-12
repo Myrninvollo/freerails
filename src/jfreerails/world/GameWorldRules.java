@@ -7,7 +7,6 @@
  */
 package jfreerails.world;
 
-import java.util.*;
 
 
 /**

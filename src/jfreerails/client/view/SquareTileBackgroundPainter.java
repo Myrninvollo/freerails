@@ -5,10 +5,7 @@
  *  Created on 31 July 2001, 16:36
  */
 package jfreerails.client.view;
-import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.Point;
-import java.awt.Rectangle;
 
 /**
  *  This class stores a buffer containing the terrain and track layers of

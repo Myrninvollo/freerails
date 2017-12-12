@@ -9,13 +9,12 @@ import java.awt.Graphics;
 import java.awt.Point;
 import java.util.ArrayList;
 
-import jfreerails.controller.*;
+import jfreerails.controller.TrainMover;
 import jfreerails.lib.GameModel;
 import jfreerails.move.ChangeTrainPositionMove;
 import jfreerails.world.misc.FreerailsPathIterator;
 import jfreerails.world.misc.FreerailsPathIteratorImpl;
 import jfreerails.world.misc.IntLine;
-import jfreerails.world.train.EngineModel;
 import jfreerails.world.train.PathWalker;
 import jfreerails.world.train.PathWalkerImpl;
 import jfreerails.world.train.TrainList;

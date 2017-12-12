@@ -2,13 +2,14 @@ package jfreerails.world.train;
 
 import jfreerails.util.IntArray;
 import jfreerails.world.misc.FreerailsPathIterator;
+import jfreerails.world.misc.FreerailsSerializable;
 import jfreerails.world.misc.IntLine;
 
 /**
  * @author Luke Lindsay 26-Oct-2002
  *
  */
-public class TrainPosition {
+public class TrainPosition implements FreerailsSerializable{
 
 	private final int[] xpoints, ypoints;
 
@@ -143,7 +144,7 @@ public class TrainPosition {
 			}
 			return new TrainPosition(newXpoints, newYpoints);
 		} else {
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Tried to add "+b.toString()+" to the head of "+a.toString());
 		}
 	}
 

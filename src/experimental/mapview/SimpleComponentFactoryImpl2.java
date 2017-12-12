@@ -6,7 +6,6 @@
 
 package experimental.mapview;
 
-import jfreerails.client.view.MainMapAndOverviewMapMediator;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -17,6 +16,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JScrollPane;
 import jfreerails.client.view.BlankMapView;
+import jfreerails.client.view.MainMapAndOverviewMapMediator;
 import jfreerails.client.view.MapViewJComponentConcrete;
 import jfreerails.client.view.NewOverviewMapJComponent;
 /**

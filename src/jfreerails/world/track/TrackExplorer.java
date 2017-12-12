@@ -21,5 +21,7 @@ public interface TrackExplorer {
    
     Point getBranchTrackSectionLocation();
     
+    void setPosition(PositionOnTrack p);
+    
 }
 

@@ -5,8 +5,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import jfreerails.world.train.WagonType;
-
 public class TrainTypeView {
 	
 	private static int numberOfTypes=0;

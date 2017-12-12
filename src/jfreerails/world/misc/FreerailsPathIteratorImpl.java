@@ -7,7 +7,8 @@
 package jfreerails.world.misc;
 
 import java.awt.Point;
-import java.util.*;
+import java.util.List;
+import java.util.NoSuchElementException;
 /**
  *
  * @author  Luke Lindsay

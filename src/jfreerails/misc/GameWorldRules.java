@@ -7,7 +7,6 @@
  */
 package jfreerails.misc;
 
-import java.util.*;
 
 
 /**

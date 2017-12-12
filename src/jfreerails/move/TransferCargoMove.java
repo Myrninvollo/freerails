@@ -2,8 +2,8 @@
 package jfreerails.move;
 
 
-import jfreerails.world.cargo.CompositeCargoBundle;
 import jfreerails.world.cargo.CargoContainer;
+import jfreerails.world.cargo.CompositeCargoBundle;
 
 /**
  *

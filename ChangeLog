@@ -1,3 +1,40 @@
+01-Dec-2002 15:53:02 Luke Lindsay
+	o Prepare for release.
+01-Dec-2002 00:02:25 Luke Lindsay
+	o The trains no longer all move at the same speed.
+30-Nov-2002 23:00:36 Luke Lindsay
+	o Load, save, and new game now work again.
+30-Nov-2002 20:45:18 Luke Lindsay
+	o The path finder now controls train movement.  Press
+	t with the cursor over the track and all the trains will
+	head for that point on the track.
+27-Nov-2002 23:45:40 Luke Lindsay
+	o Wrote SimpleAStarPathFinder and a unit test for it.
+	It seems to work.  The next step is use it together with 
+	NewFlatTrackExplorer to control train movement.
+26-Nov-2002 21:32:20 Luke Lindsay
+	o More or less finished NewFlatTrackExplorer and 
+	incorporated it into the main game code.
+26-Nov-2002 00:17:15 Luke Lindsay
+	o Wrote NewFlatTrackExplorer and NewFlatTrackExplorerTest, 
+	in preparation for writing a pathfinder.
+24-Nov-2002 23:19:10 Luke Lindsay
+	o Rewrote PositionOnTrack and added PositionOnTrackTest.
+	track positions can now be store as a single int.
+24-Nov-2002 00:04:54 Luke Lindsay
+	o Organise imports.	
+09-Nov-2002 01:13:47 Luke Lindsay 
+   o Changes to how the mainmap's buffer gets refreshed.
+   Instead of the refresh being driven by the cursor moving,
+   it is now driven by moves being received.  This means that 
+   it it will refresh even if the moves are generate by another 
+   player.
+08-Nov-2002 23:05:39 Luke Lindsay 
+   o Stations can be built by pressing F8.
+   o The station types no longer appear with the track
+   types on the build menu.
+06-Nov-2002 20:24:10 Luke Lindsay 
+   oFixed 'jar_doc' task in build.xml
 05-Nov-2002 22:53:11 Luke Lindsay 
    o Moving trains: the class ServerGameEngine
    has a list of TrainMover objects, which control the 

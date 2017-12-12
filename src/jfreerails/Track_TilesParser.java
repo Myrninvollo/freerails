@@ -7,10 +7,12 @@
  */
 package jfreerails;
 
+import java.io.IOException;
+
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
 
 /**
  * The class reads XML documents according to specified DTD and

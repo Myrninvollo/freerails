@@ -122,7 +122,7 @@ final public class OneTileMoveVector
 	* @return the name.
 	*/
 
-	public String getVectorName() {
+	public String toString() {
 		String name;
 		switch (deltaY) {
 			case 1 :
@@ -165,6 +165,10 @@ final public class OneTileMoveVector
 		template = t;
 		int sumOfSquares = (x * x * 100 * 100 + y * y * 100 * 100);
 		length = (int) Math.sqrt((double) sumOfSquares);
+	}
+	
+	public static OneTileMoveVector getInstance(int number){
+		return list[number];	
 	}
 
 	public static OneTileMoveVector getInstance(int x, int y) {

@@ -8,7 +8,7 @@ package jfreerails.world.misc;
  * retrieved without revealing the underlying objects
  * that represent the track.
  */
-public interface FreerailsPathIterator {
+public interface FreerailsPathIterator extends FreerailsSerializable {
 
 	/** Tests whether the path has another segment.
 	 */

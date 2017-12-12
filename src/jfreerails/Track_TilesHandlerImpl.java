@@ -93,8 +93,10 @@ public class Track_TilesHandlerImpl implements Track_TilesHandler, TrackSetFacto
 		 *  by the the BufferedImage that stores the map.  See jfreerails.common.Map
 		 */
 		rGBvalue = new java.awt.Color(rGBvalue).getRGB();
-
-		boolean enableDoubleTrack = Boolean.getBoolean(meta.getValue("doubleTrack"));
+		
+		boolean isStation = Boolean.valueOf(meta.getValue("station")).booleanValue();
+		
+		boolean enableDoubleTrack = Boolean.valueOf(meta.getValue("doubleTrack")).booleanValue();
 		String typeName = meta.getValue("type");
 		int ruleNumber = ruleList.size();
 		maxConsequ = (int) Integer.parseInt(meta.getValue("maxConsecuativePieces"));
@@ -103,7 +105,8 @@ public class Track_TilesHandlerImpl implements Track_TilesHandler, TrackSetFacto
 				rGBvalue,
 				enableDoubleTrack,
 				typeName,
-				ruleNumber);
+				ruleNumber,
+				isStation);
 
 	}
 

@@ -4,7 +4,6 @@ package jfreerails.world.track;
 import java.util.Iterator;
 import java.util.Vector;
 
-
 import jfreerails.world.misc.Player;
 
 

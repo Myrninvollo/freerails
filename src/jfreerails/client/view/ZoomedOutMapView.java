@@ -9,13 +9,9 @@ import java.awt.Rectangle;
 import java.awt.Transparency;
 import java.awt.image.BufferedImage;
 
-import jfreerails.move.MapUpdateMove;
-import jfreerails.move.Move;
-import jfreerails.move.MoveStatus;
-import jfreerails.controller.MoveReceiver;
+import jfreerails.world.terrain.TerrainMap;
 import jfreerails.world.track.TrackAndTerrainTileMap;
 import jfreerails.world.track.TrackTileMap;
-import jfreerails.world.terrain.TerrainMap;
 
 final public class ZoomedOutMapView implements MapView {
 

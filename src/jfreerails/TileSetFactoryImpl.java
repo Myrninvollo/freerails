@@ -13,12 +13,12 @@ import java.util.ArrayList;
 import jfreerails.client.tileview.StandardTileView;
 import jfreerails.client.tileview.TileView;
 import jfreerails.client.tileview.TileViewList;
-
 import jfreerails.lib.ImageSplitter;
-import jfreerails.world.terrain.TileTypeImpl;
 import jfreerails.world.terrain.TerrainTileTypesList;
 import jfreerails.world.terrain.TerrainTileTypesListImpl;
 import jfreerails.world.terrain.TerrainType;
+import jfreerails.world.terrain.TileTypeImpl;
+
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 

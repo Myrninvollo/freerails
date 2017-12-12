@@ -1,7 +1,6 @@
 package experimental;
 
 import javax.swing.JFrame;
-
 import jfreerails.lib.GameLoop;
 import jfreerails.lib.ScreenHandler;
 

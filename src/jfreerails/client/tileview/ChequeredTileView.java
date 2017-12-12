@@ -7,7 +7,6 @@
 package jfreerails.client.tileview;
 
 import jfreerails.world.terrain.TerrainType;
-import jfreerails.world.terrain.TerrainMap;
 
 /**
 *
