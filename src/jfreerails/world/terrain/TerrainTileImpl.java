@@ -12,7 +12,7 @@ public class TerrainTileImpl implements TerrainTile {
 	private final TerrainType terrainType;
 
 	public int getRGB() {
-		return 0;
+		return terrainType.getRGB();
 	}
 	public String getTypeName(){
 		return terrainType.getTerrainTypeName();
@@ -24,5 +24,10 @@ public class TerrainTileImpl implements TerrainTile {
 	public TerrainTileImpl(TerrainType terrainType){
 		this.terrainType=terrainType;
 	}
+	public int terrainRgb() {		
+		return terrainType.getRGB();
+	}
+	
+	
 
 }

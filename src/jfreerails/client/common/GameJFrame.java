@@ -5,7 +5,7 @@ import java.awt.Graphics2D;
 
 import javax.swing.JComponent;
 
-import jfreerails.controller.GameModel;
+import jfreerails.util.GameModel;
 
 /**
  *

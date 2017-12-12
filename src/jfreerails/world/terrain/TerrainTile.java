@@ -4,7 +4,7 @@
  */
 package jfreerails.world.terrain;
 
-import jfreerails.world.tilemap.Tile;
+import jfreerails.world.common.Tile;
 
 /**
  * @version 	1.0
@@ -12,5 +12,6 @@ import jfreerails.world.tilemap.Tile;
 public interface TerrainTile extends Tile {
 	String getTypeName();
 	TerrainType getTerrainType();
+	int terrainRgb();
 
 }

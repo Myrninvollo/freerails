@@ -6,7 +6,6 @@
 */
 package jfreerails.client.renderer;
 
-import jfreerails.world.terrain.TerrainTile;
 import jfreerails.world.top.World;
 
 
@@ -38,17 +37,17 @@ public abstract class TileIconSelector extends java.lang.Object {
     public int selectTileIcon( int x, int y, World w ) {
         return 0;
     }
-
+	/* This seems to be duplicated in AbstractTileRenderer
     protected int checkTile( int x, int y,  World w  ) {
         int  match = 1;
 
-        /*0==match!  (0 is assigned to match because of the way the tiles are set up
-        *in the image from which they are grabbed.)
-        */
+       //0==match!  (0 is assigned to match because of the way the tiles are set up
+       //in the image from which they are grabbed.)
+       //
         if( ( ( x < w.getMapWidth() ) && ( x >= 0 ) ) && ( y < w.getMapHeight() ) && ( y >= 0 ) ) {
             for( int  i = 0;i < rgbValues.length;i++ ) {
             	TerrainTile tt = (TerrainTile)w.getTile(x, y);
-                if( tt.getRGB() == rgbValues[ i ] ) {
+                if( tt.terrainRgb() == rgbValues[ i ] ) {
                     match = 0;
 
                 //A match
@@ -58,10 +57,11 @@ public abstract class TileIconSelector extends java.lang.Object {
         else {
             match = 0; //A match
 
-        /*If the tile we are checking is off the map, let it be a match.
-        This stops coast appearing where the ocean meets the map edge.
-        */
+        //If the tile we are checking is off the map, let it be a match.
+        //This stops coast appearing where the ocean meets the map edge.
+        //
         }
         return match;
     }
+    */
 }

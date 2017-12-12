@@ -4,7 +4,7 @@
  * Created on 21 December 2002, 22:19
  */
 package jfreerails.client.common;
-import javax.swing.JPanel;
+import javax.swing.JComponent;
 
 /**
  *
@@ -16,7 +16,11 @@ public class MyGlassPanel extends javax.swing.JPanel {
     /** Creates new form MyGlassPanel */
     public MyGlassPanel() {
         initComponents ();
+        
+        
     }
+    
+   
 
     /** This method is called from within the constructor to
      * initialize the form.
@@ -66,7 +70,7 @@ public class MyGlassPanel extends javax.swing.JPanel {
   private void formMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_formMousePressed
 // Add your handling code here:
       System.out.println("Glass panel mouse pressed");
-     closeContent();
+    
   }//GEN-LAST:event_formMousePressed
 
   private void formKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_formKeyPressed
@@ -74,7 +78,7 @@ public class MyGlassPanel extends javax.swing.JPanel {
        System.out.println("Glass panel key pressed");
   }//GEN-LAST:event_formKeyPressed
 
-    public void showContent(JPanel panel){
+    public void showContent(JComponent panel){
     	
         this.remove(contentPanel);		
         contentPanel = panel;
@@ -82,19 +86,16 @@ public class MyGlassPanel extends javax.swing.JPanel {
         java.awt.GridBagConstraints gridBagConstraints1 = new java.awt.GridBagConstraints();
         gridBagConstraints1.gridx = 2;
         gridBagConstraints1.gridy = 1;
-        add(contentPanel, gridBagConstraints1);      
+        add(contentPanel, gridBagConstraints1);   
+		 
         this.revalidate();
-        this.requestFocus();
-    }
+        this.requestFocus();		
+    }  
     
-    public void closeContent(){
-		
-		
-        this.setVisible(false);
-    }
+   
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JPanel contentPanel;
+    private javax.swing.JComponent contentPanel;
     // End of variables declaration//GEN-END:variables
 
 }

@@ -42,7 +42,10 @@ public class MapFactory {
 			for (int y = 0; y < mapRect.height; y++) {
 				int rgb = mapBufferedImage.getRGB(x, y);				
 				FreerailsTile tile;
-				TerrainType type = (TerrainType)rgb2TerrainType.get(new Integer(rgb));				 
+				TerrainType type = (TerrainType)rgb2TerrainType.get(new Integer(rgb));		
+				if(null==type){
+					throw new NullPointerException("There is no terrain type mapped to rgb value "+rgb+" at location "+x+", "+y);		 
+				}
 				tile = new FreerailsTile(type);
 				w.setTile(x, y, tile);
 			}

@@ -7,7 +7,7 @@ import java.awt.Toolkit;
 
 import javax.swing.RepaintManager;
 
-import jfreerails.controller.GameModel;
+import jfreerails.util.GameModel;
 
 final public class GameLoop implements Runnable {
 	

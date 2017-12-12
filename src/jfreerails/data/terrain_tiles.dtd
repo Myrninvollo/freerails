@@ -23,6 +23,7 @@
   <!ATTLIST Tile
     tileSelector (Standard | Chequered | RiverStyle | special | ForestStyle ) #REQUIRED
     Type CDATA #REQUIRED
+    Category CDATA #REQUIRED
     rgb CDATA #REQUIRED
     Y CDATA #REQUIRED
     X CDATA #REQUIRED

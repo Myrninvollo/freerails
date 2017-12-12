@@ -2,16 +2,22 @@ package jfreerails.controller;
 
 import java.awt.Point;
 
+
+
 import jfreerails.controller.pathfinder.FlatTrackExplorer;
 import jfreerails.controller.pathfinder.TrainPathFinder;
 import jfreerails.world.common.FreerailsPathIterator;
 import jfreerails.world.common.PositionOnTrack;
 import jfreerails.world.top.KEY;
+import jfreerails.world.top.NonNullElements;
 import jfreerails.world.top.World;
+import jfreerails.world.top.WorldIterator;
 import jfreerails.world.track.FreerailsTile;
 import jfreerails.world.track.NullTrackType;
 import jfreerails.world.track.TrackRule;
+import jfreerails.world.train.Schedule;
 import jfreerails.world.train.TrainModel;
+import jfreerails.world.train.TrainOrdersModel;
 import jfreerails.world.train.TrainPathIterator;
 
 /**
@@ -38,8 +44,19 @@ public class TrainBuilder {
 			!= tr.getRuleNumber()) {
 
 			//Add train to train list.
+			WorldIterator wi = new NonNullElements(KEY.STATIONS, world);
+			
+			Schedule s = new Schedule();
+			for(int i = 0; i< 5 ;i++){
+				if(!wi.next()){
+					wi.reset();
+					wi.next();
+				}
+				TrainOrdersModel orders = new TrainOrdersModel(wi.getIndex(), new int[i], false);
+				s.setOrder(i, orders);
+			}									
 
-			TrainModel train = new TrainModel(engineType, wagons, null);
+			TrainModel train = new TrainModel(engineType, wagons, null, s);
 			System.out.println("Build train with engine type: "+engineType+" and wagons: "+wagons.toString());
 			
 
@@ -49,8 +66,8 @@ public class TrainBuilder {
 
 			TrainMover trainMover =
 				new TrainMover(
-					getPathToFollow(p),
-					getPathToFollow(p),
+					getPathToFollow(p, world, trainNumber),
+					getPathToFollow(p, world, trainNumber),
 					world,
 					trainNumber);
 
@@ -76,7 +93,7 @@ public class TrainBuilder {
 		}
 	}
 
-	public FreerailsPathIterator getPathToFollow(Point p) {
+	public FreerailsPathIterator getPathToFollow(Point p, World w, int trainNumber) {
 
 		PositionOnTrack pot =
 			FlatTrackExplorer.getPossiblePositions(
@@ -88,7 +105,7 @@ public class TrainBuilder {
 
 		FreerailsPathIterator it;
 
-		it = new TrainPathIterator(new TrainPathFinder(explorer));
+		it = new TrainPathIterator(new TrainPathFinder(explorer, w, trainNumber));
 
 		return it;
 

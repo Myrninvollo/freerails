@@ -41,7 +41,7 @@ public class WorldImpl implements World {
 	}
 
 	public void set(KEY key, int index, FreerailsSerializable element) {
-		lists[key.getKeyNumber()].get(index);
+		lists[key.getKeyNumber()].set(index, element);
 	}
 
 	public void add(KEY key, FreerailsSerializable element) {
@@ -88,6 +88,12 @@ public class WorldImpl implements World {
 		}else{
 			return false;
 		}
+	}
+
+	public FreerailsSerializable removeLast(KEY key) {
+		int size = lists[key.getKeyNumber()].size();
+		int index = size - 1;
+		return (FreerailsSerializable)lists[key.getKeyNumber()].remove(index);
 	}
 
 }

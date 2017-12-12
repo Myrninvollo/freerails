@@ -39,12 +39,6 @@ public class TrainReport extends javax.swing.JFrame {
 
         getContentPane().setLayout(new javax.swing.BoxLayout(getContentPane(), javax.swing.BoxLayout.Y_AXIS));
 
-        addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyPressed(java.awt.event.KeyEvent evt) {
-                formKeyPressed(evt);
-            }
-        });
-
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent evt) {
                 exitForm(evt);
@@ -171,25 +165,7 @@ public class TrainReport extends javax.swing.JFrame {
             this.trainOrders2.requestFocus();
         }
     }//GEN-LAST:event_trainOrders1KeyPressed
-    
-    private void formKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_formKeyPressed
-        // Add your handling code here:
-        switch (evt.getKeyCode()){
-            case KeyEvent.VK_UP:
-                System.out.println("Parent: Up pressed");
-                if(evt.getComponent()==this.trainOrders2){
-                    this.trainOrders1.requestFocus();
-                }
-                break;
-            case KeyEvent.VK_DOWN:
-                System.out.println("Parent: Down pressed");
-                if(evt.getComponent()==this.trainOrders1){
-                    this.trainOrders2.requestFocus();
-                }
-                break;
-        }
-    }//GEN-LAST:event_formKeyPressed
-    
+        
     
     
     /** Exit the Application */

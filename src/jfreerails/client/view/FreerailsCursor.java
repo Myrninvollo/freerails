@@ -12,8 +12,6 @@ import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
-import jfreerails.client.event.CursorEvent;
-import jfreerails.client.event.CursorEventListener;
 import jfreerails.client.renderer.MapRenderer;
 import jfreerails.world.common.OneTileMoveVector;
 
@@ -65,7 +63,8 @@ final public class FreerailsCursor implements KeyListener  {
 				cursorMapPosition.x * tileSize.width,
 				cursorMapPosition.y * tileSize.height,
 				tileSize.width,
-				tileSize.height);
+				tileSize.height);	
+			
 		}
 
 	}
@@ -179,6 +178,7 @@ final public class FreerailsCursor implements KeyListener  {
 	* @param mapView The view that the curors moves across.
 	*/
 
+	//public FreerailsCursor(MapRenderer mv) {
 	public FreerailsCursor(MapRenderer mv) {
 		this.mapView = mv;
 	}

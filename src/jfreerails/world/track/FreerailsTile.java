@@ -16,6 +16,9 @@ public class FreerailsTile
 			return null;
 		}
 
+		public String getTerrainCategory() {
+			return null;
+		}
 		public int getRGB() {
 			// TODO Auto-generated method stub
 			return 0;
@@ -79,8 +82,15 @@ public class FreerailsTile
 	public TerrainType getTerrainType() {
 		return terrainType;
 	}
+	
+	public String getTerrainCategory() {
+		return terrainType.getTerrainCategory();
+	}
 	public String getTypeName(){
 		return terrainType.getTerrainTypeName();
+	}
+	public int terrainRgb() {
+		return terrainType.getRGB();
 	}
 
 }

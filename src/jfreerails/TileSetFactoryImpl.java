@@ -187,15 +187,19 @@ final public class TileSetFactoryImpl extends java.lang.Object implements TileSe
     /**
     *  Gets the tileModel attribute of the TileFactoryImpl object
     *
-    *@param  tile  Description of Parameter
+    *@param  tile  A TILE element
     *@return       The tileModel value
     */
 
     private TerrainType getTileModel( Element tile ) {
         String  terrainType = tile.getAttribute( "Type" );
+        String  terrainCategory = tile.getAttribute( "Category" );
         String  temp_number = tile.getAttribute( "rgb" );
+        
         int  rgb = string2RGBValue( temp_number );
-        TerrainType  tileModel = new TileTypeImpl( rgb, terrainType );
+                
+        TerrainType  tileModel = new TileTypeImpl( rgb, terrainCategory, terrainType );
+        
         return tileModel;
     }
 
