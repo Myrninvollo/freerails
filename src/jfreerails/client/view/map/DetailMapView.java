@@ -40,7 +40,7 @@ public class DetailMapView implements MapView {
 
 	public void paintTile(Graphics g, int tileX, int tileY) {
 		background.paintTile(g, tileX, tileY);
-		//trainsview.paint((Graphics2D)g);
+		trainsview.paint((Graphics2D)g);
 	}
 
 	public void paintRectangleOfTiles(
@@ -50,7 +50,7 @@ public class DetailMapView implements MapView {
 		int width,
 		int height) {
 		background.paintRectangleOfTiles(g, x, y, width, height);
-		//	trainsview.paint((Graphics2D)g);
+		trainsview.paint((Graphics2D)g);
 	}
 
 	public void refreshTile(int x, int y) {
@@ -63,6 +63,6 @@ public class DetailMapView implements MapView {
 
 	public void paintRect(Graphics g, Rectangle visibleRect) {
 		background.paintRect(g, visibleRect);
-		//	trainsview.paint((Graphics2D)g);
+		trainsview.paint((Graphics2D)g);
 	}
 }

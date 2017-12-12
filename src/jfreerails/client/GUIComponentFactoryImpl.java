@@ -25,6 +25,7 @@ import jfreerails.move.receiver.MoveChainFork;
 import jfreerails.move.receiver.MoveReceiver;
 import jfreerails.move.receiver.TrackMoveExecutor;
 import jfreerails.move.source.TrackMoveProducer;
+import jfreerails.move.source.TrainBuilder;
 import jfreerails.world.World;
 import jfreerails.world.WorldImpl;
 
@@ -79,11 +80,12 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory {
 		//init the move handlers
 		MoveReceiver trackMoveExecutor = new TrackMoveExecutor(world.getMap());
 		MoveReceiver mapViewMoveReceiver = new MapViewMoveReceiver(overviewMap);
-		MoveReceiver moveFork = new MoveChainFork(trackMoveExecutor, mapViewMoveReceiver);
+		MoveReceiver moveFork = new MoveChainFork(trackMoveExecutor, mapViewMoveReceiver);		
 		trackBuilder = new TrackMoveProducer(world.getMap(), moveFork);
+		TrainBuilder tb = new TrainBuilder(world);
 
 		//setup the the main and overview map JComponents
-		 ((MapViewJComponentConcrete) mapViewJComponent).setup(mainMap, trackBuilder);
+		 ((MapViewJComponentConcrete) mapViewJComponent).setup(mainMap, trackBuilder, tb);
 		buildMenu.setup(world.getTrackRuleList(), trackBuilder);
 		mainMapScrollPane1.setViewportView(this.mapViewJComponent);
 		((NewOverviewMapJComponent) overviewMapContainer).setup(overviewMap);

@@ -24,4 +24,8 @@ public class TrainModelPublic implements FreerailsSerializable{
     public Snake getPosition(){
         return  trainposition;
     }
+    
+     public  void setPosition(Snake s){
+          trainposition=s;
+    }
 }

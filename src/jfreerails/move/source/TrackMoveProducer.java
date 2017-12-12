@@ -84,7 +84,7 @@ final public class TrackMoveProducer {
 		}
 		if (trackBuilderMode == UPGRADE_TRACK) {
 			Point point =
-				new Point(from.x + trackVector.getX(), from.y + trackVector.getY());
+				new Point(from.x + trackVector.getDx(), from.y + trackVector.getDy());
 			upgradeTrack(point, trackRule);
 
 			return true;

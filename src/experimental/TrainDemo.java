@@ -28,7 +28,9 @@ import jfreerails.world.train.PathWalkerImpl;
  */
 public class TrainDemo extends javax.swing.JPanel implements GameModel {
 
-	TrainView trainView = new TrainView();
+	//TrainView trainView = new TrainView();
+
+	TrainPainter trainPainter = new TrainPainter();
 
 	int distanceTravelled = 0;
 
@@ -36,15 +38,7 @@ public class TrainDemo extends javax.swing.JPanel implements GameModel {
 
 	ArrayList points = new ArrayList();
 
-	TrainTypeView[] train =
-		{
-			TrainTypeView.SLOW_FREIGHT,
-			TrainTypeView.BULK_FREIGHT,
-			TrainTypeView.FAST_FREIGHT,
-			TrainTypeView.PASSENGER,
-			TrainTypeView.PASSENGER,
-			TrainTypeView.MAIL,
-			TrainTypeView.ENGINE };
+	
 
 	/** Creates new form TrackView */
 	public TrainDemo() {
@@ -60,19 +54,22 @@ public class TrainDemo extends javax.swing.JPanel implements GameModel {
 
 	protected void paintComponent(Graphics g) {
 
-		trainView.setViewPerspective(ViewPerspective.OVERHEAD);
+		
 
 		super.paintComponent(g);
-		g.drawString("Lay track by clicking the mouse on the area below!", 10, 15);
+		g.drawString(
+			"Lay track by clicking the mouse on the area below!",
+			10,
+			15);
 		FreerailsPathIterator it = pathIterator();
 		IntLine line = new IntLine();
 		while (it.hasNext()) {
 			it.nextSegment(line);
 			g.drawLine(line.x1, line.y1, line.x2, line.y2);
 		}
-
+		
 		PathWalker pw = new PathWalkerImpl(pathIterator());
-
+		
 		pw.stepForward(distanceTravelled);
 		double actualDistance = 0;
 		while (pw.hasNext()) {
@@ -82,46 +79,8 @@ public class TrainDemo extends javax.swing.JPanel implements GameModel {
 		if (actualDistance + 10 < distanceTravelled) {
 			distanceTravelled = 0;
 		}
-		Graphics2D g2 = (Graphics2D) g;
 
-		IntLine wagon = new IntLine();
-		for (int i = 0; i < train.length; i++) {
-			/*
-			g2.setStroke(new BasicStroke(3));
-			if (0 == (i % 2)) {
-				g2.setColor(Color.red);
-			} else {
-				g2.setColor(Color.green);
-			}
-			*/
-			trainView.setTrainTypes(train[i]);
-			pw.stepForward(16);
-			boolean firstIteration = true;
-			while (pw.hasNext()) {
-
-				pw.nextSegment(line);
-				if (firstIteration) {
-					wagon.x1 = line.x1;
-					wagon.y1 = line.y1;
-					firstIteration = false;
-				}
-
-				//g2.drawLine(line.x1, line.y1, line.x2, line.y2);
-			}
-			wagon.x2 = line.x2;
-			wagon.y2 = line.y2;
-			OneTileMoveVector v =
-				OneTileMoveVector.getNearestVector(wagon.x2 - wagon.x1, wagon.y2 - wagon.y1);
-			trainView.setDirection(v);
-			Point p = new Point((wagon.x2 + wagon.x1) / 2, (wagon.y2 + wagon.y1) / 2);
-			trainView.drawTrain(g, p);
-
-			//The gap between wagons
-			pw.stepForward(8);
-			while (pw.hasNext()) {
-				pw.nextSegment(line);
-			}
-		}
+		trainPainter.paintTrain(g, pw);
 
 	}
 

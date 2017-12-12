@@ -92,13 +92,13 @@ final public class OneTileMoveVector
 
 	/** Returns the X component of the vector.    */
 
-	public int getX() {
+	public int getDx() {
 		return deltaX;
 	}
 
 	/** Returns the Y component of the vector.    */
 
-	public int getY() {
+	public int getDy() {
 		return deltaY;
 	}
 

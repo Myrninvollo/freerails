@@ -44,10 +44,7 @@ final public class TrackConfiguration implements FlatTrackTemplate {
 		return trackGraphicNumber;
 	}
 
-	public boolean hasTrackSection(OneTileMoveVector rail) {
-		return false;
-	}
-
+	
 	private final int configuration;
 	//private TrackSectionVector[] vectors;
 
@@ -116,7 +113,12 @@ final public class TrackConfiguration implements FlatTrackTemplate {
 	}
 
 	public boolean contains(FlatTrackTemplate ftt) {
-		if ((ftt.getTemplate() | this.configuration) == this.configuration) {
+		int template = ftt.getTemplate();
+		return contains(template);
+	}
+
+	public boolean contains(int template) {
+		if ((template | this.configuration) == this.configuration) {
 			return true;
 		} else {
 			return false;

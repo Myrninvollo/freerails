@@ -19,6 +19,23 @@ public class SnakeImpl implements Snake {
         linkedList.add(new Point(0, 0));
     }
     
+    public SnakeImpl(FreerailsPathIterator path) {
+    	IntLine line=new IntLine();
+    	if(path.hasNext()){
+    		path.nextSegment(line);
+    		this.addToHead(line.x1, line.y1);
+    		this.addToTail(line.x2, line.y2);
+    	}else{
+    		throw new IllegalStateException("The snake must have at least two points");
+    	}
+    	
+    	while(path.hasNext()){
+    		path.nextSegment(line);
+    		this.addToTail(line.x2, line.y2);
+    	}
+    			
+    }
+    
     public void addToHead(int x, int y) {
         Point p=new Point(x,y);
         linkedList.addFirst(p);

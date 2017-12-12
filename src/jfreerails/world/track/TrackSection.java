@@ -4,6 +4,8 @@ package jfreerails.world.track;
 
 import java.awt.Point;
 
+import jfreerails.world.train.FreerailsPathIterator;
+
 
 public interface TrackSection {
 
@@ -12,7 +14,7 @@ public interface TrackSection {
 
     PositionOnTrack getEnd(Point p);
 
-    PositionOnTrack getLocation(Point p, int distance);
+    FreerailsPathIterator getPath();
 
     int getLength();
 

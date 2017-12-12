@@ -49,7 +49,7 @@ public class TrackTileMapTest extends TestCase {
       
        assertNotNull(trackPiece);
        int n=trackPiece.getTrackGraphicNumber();
-       assertEquals(NullTrackType.NULL_TRACK_TYPE_RULE_NUMBER, n);
+       assertEquals(0, n);
    }
    
    

@@ -36,7 +36,7 @@ public class WorldImpl implements World {
 		this.terrainTileTypesList = tileFactory.getTerrainTileTypesList();
 		this.trackRuleList = trackSetFactory.getTrackRuleList();
 		trainList= new TrainList();
-		TestOverHeadTrainView.addtrainsTotrainlist(trainList);
+		//TestOverHeadTrainView.addtrainsTotrainlist(trainList);
 		
 	}
 	

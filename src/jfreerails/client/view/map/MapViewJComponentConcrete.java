@@ -9,12 +9,14 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.event.KeyEvent;
 
 import javax.swing.SwingUtilities;
 import jfreerails.client.FreerailsCursor;
 import jfreerails.client.event.CursorEvent;
 import jfreerails.client.event.CursorEventListener;
 import jfreerails.move.source.TrackMoveProducer;
+import jfreerails.move.source.TrainBuilder;
 
 /**
  *
@@ -27,6 +29,8 @@ final public class MapViewJComponentConcrete
 	implements CursorEventListener {
 
 	private TrackMoveProducer trackBuilder;
+	
+	private TrainBuilder trainBuilder;
 
 	private FreerailsCursor cursor;
 
@@ -67,8 +71,9 @@ final public class MapViewJComponentConcrete
 		this.addMouseListener(new MapViewJComponentMouseAdapter());
 	}
 
-	public void setup(MapView mv, TrackMoveProducer trackBuilder) {
+	public void setup(MapView mv, TrackMoveProducer trackBuilder, TrainBuilder tb) {
 		super.mapView=mv;
+		this.trainBuilder=tb;
 		this.setBorder(null);
 		this.trackBuilder = trackBuilder;
 		
@@ -126,6 +131,10 @@ final public class MapViewJComponentConcrete
 	}
 
 	public void cursorKeyPressed(CursorEvent ce) {
+		if(ce.keyEvent.getKeyCode()==KeyEvent.VK_F7){
+			System.out.println("Build train");
+			trainBuilder.buildTrain(ce.newPosition);
+		}
 		reactToCursorMovement(ce);
 	}
 

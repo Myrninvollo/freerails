@@ -9,11 +9,15 @@ import jfreerails.lib.GameJFrame;
 import jfreerails.lib.Painter;
 import jfreerails.world.train.FreerailsPathIterator;
 import jfreerails.world.train.IntLine;
+import jfreerails.world.train.PathWalker;
+import jfreerails.world.train.PathWalkerImpl;
 import jfreerails.world.train.Snake;
 import jfreerails.world.train.TrainList;
 import jfreerails.world.train.TrainModelPublic;
 
 public class TestOverHeadTrainView implements Painter {
+	
+	TrainPainter trainPainter=new TrainPainter();
 
 	TrainList trainList = new TrainList();
 
@@ -67,12 +71,16 @@ public class TestOverHeadTrainView implements Painter {
 			Snake s = train.getPosition();
 			IntLine line = new IntLine();
 			FreerailsPathIterator it = s.pathIterator();
-			int j = 0;
-			while (it.hasNext()) {
-				j++;
-				it.nextSegment(line);
-				g.drawLine(line.x1, line.y1, line.x2, line.y2);
-			}
+			
+			PathWalker pw = new PathWalkerImpl(it);
+			
+			trainPainter.paintTrain(g, pw);
+			//int j = 0;
+			//while (it.hasNext()) {
+			//	j++;
+			//	it.nextSegment(line);
+			//	g.drawLine(line.x1, line.y1, line.x2, line.y2);
+			//}
 		}
 
 	}

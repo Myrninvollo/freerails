@@ -15,7 +15,7 @@ final public class TrackRuleProperties implements FreerailsSerializable {
 		return number;
 	}
 	private final int rGBvalue;
-	private final int number;
+	private final int number;		//This rule's position in the track rule list.
 
 	private final boolean enableDoubleTrack;
 	private final String typeName;

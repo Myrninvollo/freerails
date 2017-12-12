@@ -118,9 +118,8 @@ final public class FreerailsCursor implements java.awt.event.KeyListener {
 				System.out.println("Undo last move");
 				break;
 			case KeyEvent.VK_ENTER :
-				System.out.println("Send moves to server");	
-				
-
+				System.out.println("Send moves to server");
+							
 			default :
 				fireOffCursorKeyPressed(keyEvent, cursorMapPosition);
 		}
@@ -206,7 +205,7 @@ final public class FreerailsCursor implements java.awt.event.KeyListener {
 
 	private void moveCursor(OneTileMoveVector v) {
 		TryMoveCursor(
-			new Point(cursorMapPosition.x + v.getX(), cursorMapPosition.y + v.getY()));
+			new Point(cursorMapPosition.x + v.getDx(), cursorMapPosition.y + v.getDy()));
 	}
 
 	private void fireOffCursorJumped(Point oldPosition, Point newPosition) {

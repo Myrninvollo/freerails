@@ -48,10 +48,8 @@ public class OneTileMoveVectorTest extends TestCase {
 		//Each vector should be the nearest to itself!
 		OneTileMoveVector[] vectors = OneTileMoveVector.getList();
 		for (int i = 0; i < vectors.length; i++) {
-			OneTileMoveVector v = vectors[i];
-			System.out.println("The vector is " + v.getVectorName());
+			OneTileMoveVector v = vectors[i];	
 			OneTileMoveVector v2 = OneTileMoveVector.getNearestVector(v.deltaX, v.deltaY);
-			System.out.println("The nearest is " + v2.getVectorName());
 			assertEquals(v, v2);
 		}
 
@@ -72,9 +70,7 @@ public class OneTileMoveVectorTest extends TestCase {
 	}
 
 	private void assertNearest(OneTileMoveVector v, int dx, int dy) {
-		System.out.println("The vector is " + v.getVectorName());
 		OneTileMoveVector v2 = OneTileMoveVector.getNearestVector(dx, dy);
-		System.out.println("The nearest is " + v2.getVectorName());
 		assertEquals(v, v2);
 	}
 
