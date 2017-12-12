@@ -14,7 +14,7 @@ import java.awt.Graphics2D;
 */
 
 
-public class LineDrawTrackPieceView implements jfreerails.client.trackview.TrackPieceView {
+public class LineDrawTrackPieceView implements jfreerails.client.renderer.TrackPieceRenderer {
 
     int[] xx =  {
         -1, 0, 1, -1, 0, 1, -1, 0, 1

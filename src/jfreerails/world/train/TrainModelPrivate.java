@@ -1,7 +1,7 @@
 package jfreerails.world.train;
 
-import jfreerails.world.misc.GameTime;
-import jfreerails.world.station.StationModel;
+import jfreerails.world.common.GameTime;
+
 /**
  *
  *
@@ -10,23 +10,23 @@ import jfreerails.world.station.StationModel;
  */
 
 public class TrainModelPrivate {
-
-
-
-    private StationModel lastStation;
-
+    
+    
+    
+    private int lastStation;
+    
     private GameTime timeDepartedFromLastStation;
-
+    
     private int distanceTraveledSinceLastStation;
-
+    
     public Schedule schedule;
-
-private TrainModel trainModelPublic;
-
-    public StationModel getLastStation() {
+    
+    private TrainModel trainModelPublic;
+    
+    public int getLastStation() {
         return lastStation;
     }
-    public void setLastStation(StationModel lastStation) {
+    public void setLastStation(int lastStation) {
         this.lastStation = lastStation;
     }
     public GameTime getTimeDepartedFromLastStation() {
@@ -41,12 +41,12 @@ private TrainModel trainModelPublic;
     public void setDistanceTraveledSinceLastStation(int distanceTraveledSinceLastStation) {
         this.distanceTraveledSinceLastStation = distanceTraveledSinceLastStation;
     }
-
-
+    
+    
     public TrainModel getTrainModelPublic() {
         return trainModelPublic;
     }
-
+    
     public Schedule getSchedule() {
         return schedule;
     }
@@ -58,9 +58,9 @@ private TrainModel trainModelPublic;
             }
         }
     }
-
-
-
+    
+    
+    
 }
 
 

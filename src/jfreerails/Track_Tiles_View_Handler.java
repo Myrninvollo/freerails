@@ -9,8 +9,8 @@ package jfreerails;
 import java.awt.Point;
 import java.util.ArrayList;
 
-import jfreerails.client.trackview.TrackPieceViewList;
-import jfreerails.lib.ImageSplitter;
+import jfreerails.client.common.ImageSplitter;
+import jfreerails.client.renderer.TrackPieceRendererList;
 
 import org.xml.sax.SAXException;
 
@@ -26,7 +26,7 @@ final public class Track_Tiles_View_Handler
 	Point grapOrigin;
 	Point tilePosition;
 	ImageSplitter trackImageSplitter;
-	TrackPieceViewList trackPieceViewList;
+	TrackPieceRendererList trackPieceViewList;
 
     /**
      *  TrackPieceViewImpl
@@ -35,7 +35,7 @@ final public class Track_Tiles_View_Handler
 	int[] trackPieceTemplateArray;
 
 	/** Creates new Track_Tiles_View_Handler */
-	public Track_Tiles_View_Handler(jfreerails.lib.ImageSplitter imageSplitter, java.net.URL trackXmlUrl) {
+	public Track_Tiles_View_Handler(jfreerails.client.common.ImageSplitter imageSplitter, java.net.URL trackXmlUrl) {
 		trackImageSplitter = imageSplitter;
 
 		if (null == imageSplitter) {
@@ -65,7 +65,7 @@ final public class Track_Tiles_View_Handler
 
 	public void end_TrackSet() throws SAXException {
 
-		trackPieceViewList = new jfreerails.client.trackview.TrackPieceViewList(trackPieceViews);
+		trackPieceViewList = new jfreerails.client.renderer.TrackPieceRendererList(trackPieceViews);
 		trackPieceViews = null;
 		super.end_TrackSet();
 	}
@@ -94,12 +94,12 @@ final public class Track_Tiles_View_Handler
 
 	public void end_TrackType() throws SAXException {
 		trackPieceViews.add(
-			new jfreerails.client.trackview.TrackPieceViewImpl(trackPieceTemplateArray, trackImageSplitter));
+			new jfreerails.client.renderer.TrackPieceRendererImpl(trackPieceTemplateArray, trackImageSplitter));
 		trackPieceTemplateArray = null;
 		super.end_TrackType();
 		tilePosition = null;
 	}
-	public jfreerails.client.trackview.TrackPieceViewList getTrackPieceViewList() {
+	public jfreerails.client.renderer.TrackPieceRendererList getTrackPieceViewList() {
 		return trackPieceViewList;
 	}
 }

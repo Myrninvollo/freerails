@@ -1,7 +1,7 @@
 package jfreerails.world.station;
 
 
-import jfreerails.world.misc.Money;
+import jfreerails.world.common.Money;
 
 /**
  * Defining operations expected of ...

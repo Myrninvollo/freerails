@@ -2,8 +2,8 @@ package jfreerails.world.train;
 
 import java.util.NoSuchElementException;
 
-import jfreerails.world.misc.FreerailsPathIterator;
-import jfreerails.world.misc.IntLine;
+import jfreerails.world.common.FreerailsPathIterator;
+import jfreerails.world.common.IntLine;
 
 public class PathWalkerImpl implements PathWalker {
 
@@ -29,7 +29,7 @@ public class PathWalkerImpl implements PathWalker {
 		}
 	}
 
-	public void stepForward(int distance) {
+	public void stepForward(double distance) {
 		distanceOfThisStepRemaining += distance;
 	}
 

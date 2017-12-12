@@ -1,9 +1,9 @@
 package jfreerails.world.train;
 
 import jfreerails.util.IntArray;
-import jfreerails.world.misc.FreerailsPathIterator;
-import jfreerails.world.misc.FreerailsSerializable;
-import jfreerails.world.misc.IntLine;
+import jfreerails.world.common.FreerailsPathIterator;
+import jfreerails.world.common.FreerailsSerializable;
+import jfreerails.world.common.IntLine;
 
 /**
  * @author Luke Lindsay 26-Oct-2002

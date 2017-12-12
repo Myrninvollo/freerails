@@ -1,8 +1,9 @@
 package experimental;
 
 import javax.swing.JFrame;
-import jfreerails.lib.GameLoop;
-import jfreerails.lib.ScreenHandler;
+
+import jfreerails.client.common.GameLoop;
+import jfreerails.client.common.ScreenHandler;
 
 public class ScreenHandlerExpt extends JFrame {
 

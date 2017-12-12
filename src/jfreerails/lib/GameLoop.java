@@ -90,16 +90,7 @@ final public class GameLoop implements Runnable {
 					}
 					deltatime = System.currentTimeMillis() - frameStartTime;
 				}
-			} else {
-
-				try {
-					Thread.sleep(5);
-
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-
-			}
+			} 
 		}
 	}
 

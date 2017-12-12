@@ -2,16 +2,16 @@ package jfreerails;
 
 import java.net.URL;
 
-import jfreerails.client.ViewLists;
-import jfreerails.client.tileview.TileViewList;
-import jfreerails.client.trackview.TrackPieceViewList;
-import jfreerails.lib.ImageSplitter;
-import jfreerails.world.Types;
+import jfreerails.client.common.ImageSplitter;
+import jfreerails.client.renderer.TileRendererList;
+import jfreerails.client.renderer.TrackPieceRendererList;
+import jfreerails.client.top.ViewLists;
+import jfreerails.world.top.World;
 
 public class ViewListsImpl implements ViewLists {
 
-	private final TileViewList tiles;
-	private final TrackPieceViewList trackPieceViewList;
+	private final TileRendererList tiles;
+	private final TrackPieceRendererList trackPieceViewList;
 
 	public ViewListsImpl() {
 
@@ -47,20 +47,20 @@ public class ViewListsImpl implements ViewLists {
 
 	}
 	
-	public TileViewList getTileViewList(){
+	public TileRendererList getTileViewList(){
 		return this.tiles;
 	}
 		
-	public TrackPieceViewList getTrackPieceViewList(){
+	public TrackPieceRendererList getTrackPieceViewList(){
 		return this.trackPieceViewList;
 	}
 	
-	public boolean validate(Types t){
+	public boolean validate(World w){
 		boolean okSoFar=true;
-		if(!this.tiles.validate(t.getTerrainTileTypesList())){
+		if(!this.tiles.validate(w)){
 			okSoFar=false;
 		}
-		if(!this.trackPieceViewList.validate(t.getTrackRuleList())){
+		if(!this.trackPieceViewList.validate(w)){
 			okSoFar=false;
 		}
 		return okSoFar;

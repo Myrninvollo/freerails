@@ -1,5 +1,7 @@
 package jfreerails.world.misc;
 
+import jfreerails.world.common.FreerailsSerializable;
+
 
 
 /** This interface lets the caller retrieve a path made

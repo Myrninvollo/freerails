@@ -1,18 +1,18 @@
 package experimental;
 
 import jfreerails.GUIComponentFactoryImpl;
+import jfreerails.OldWorldImpl;
 import jfreerails.RunFreerails;
 import jfreerails.ViewListsImpl;
-import jfreerails.WorldImpl;
-import jfreerails.client.ViewLists;
-import jfreerails.world.World;
+import jfreerails.client.top.ViewLists;
+import jfreerails.world.top.World;
 
 public class ExptRunFreerails {
 
 	public static void main(String[] args) {
 	
         
-        World world = WorldImpl.createWorldFromMapFile("south_america.png");
+        World world = OldWorldImpl.createWorldFromMapFile("south_america.png");
 
         ViewLists viewLists = new ViewListsImpl();
         

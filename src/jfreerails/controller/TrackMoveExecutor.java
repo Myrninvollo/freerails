@@ -1,22 +1,23 @@
 package jfreerails.controller;
 
+
 import jfreerails.move.Move;
 import jfreerails.move.MoveStatus;
 import jfreerails.move.NewTrackMove;
-import jfreerails.world.track.TrackTileMap;
+import jfreerails.world.top.World;
 
 /**
  * @version 	1.0
- * @author
+ * 
  */
 final public class TrackMoveExecutor implements MoveReceiver {
 
-	private final TrackTileMap TrackTileMap;
+	private final World world;
 
 	private Class trackMoveClass;
 
-	public TrackMoveExecutor(TrackTileMap TrackTileMap) {
-		this.TrackTileMap = TrackTileMap;
+	public TrackMoveExecutor(World w) {
+		this.world = w;
 		try {
 			trackMoveClass = Class.forName("jfreerails.move.NewTrackMove");
 
@@ -31,7 +32,7 @@ final public class TrackMoveExecutor implements MoveReceiver {
 	 */
 	public MoveStatus processMove(Move move) {
 		if (trackMoveClass.isInstance(move)) {
-			return ((NewTrackMove)move).doMove(TrackTileMap);
+			return ((NewTrackMove)move).doMove(world);
 		} else {
 			System.out.println("is not a track move");
 			return MoveStatus.MOVE_RECEIVED;

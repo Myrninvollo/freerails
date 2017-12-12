@@ -1,5 +1,7 @@
 package jfreerails.world.misc;
 
+import jfreerails.world.common.FreerailsSerializable;
+
 public class IntLine implements FreerailsSerializable {
 	
 	public int x1, x2, y1, y2;

@@ -2,16 +2,15 @@ package jfreerails.world.train;
 
 import java.util.Vector;
 
-import jfreerails.world.station.StationModel;
 
 final public class TrainRoute {
 
-	private final StationModel stationModel;
+	private final int stationModel;
 	private final WaitUntilFullOrders waitUntilFullOrders;
 	private final Vector schedule = new Vector();
 	private final Vector schedule_1 = new Vector();
 
-	public StationModel getStationModel() {
+	public int getStationModel() {
 		return stationModel;
 	}
 
@@ -41,7 +40,7 @@ final public class TrainRoute {
 	
 	public TrainRoute(){
 		waitUntilFullOrders=null;
-		stationModel=null;
+		stationModel=0;
 	}
 		
 

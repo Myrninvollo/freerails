@@ -1,7 +1,8 @@
 package jfreerails.world.track;
 
-import jfreerails.world.misc.FreerailsPathIterator;
-import jfreerails.world.misc.IntLine;
+import jfreerails.world.common.FreerailsPathIterator;
+import jfreerails.world.common.IntLine;
+import jfreerails.world.common.PositionOnTrack;
 
 /**
  * @author Luke Lindsay 13-Oct-2002

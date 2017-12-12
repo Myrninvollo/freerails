@@ -1,12 +1,12 @@
 package jfreerails;
 
 import javax.swing.JFrame;
-import jfreerails.client.ClientJFrame;
-import jfreerails.client.ViewLists;
+
+import jfreerails.client.common.GameLoop;
+import jfreerails.client.common.ScreenHandler;
+import jfreerails.client.top.ViewLists;
 import jfreerails.controller.ServerGameEngine;
-import jfreerails.lib.GameLoop;
-import jfreerails.lib.ScreenHandler;
-import jfreerails.world.World;
+import jfreerails.world.top.World;
 
 public class RunFreerails {
 
@@ -46,7 +46,7 @@ public class RunFreerails {
 
 	public static void createClient(String mapName, boolean fullscreen, boolean nogameloop) {
 
-		World world = WorldImpl.createWorldFromMapFile(mapName);
+		World world = OldWorldImpl.createWorldFromMapFile(mapName);
 
 		ViewLists viewLists = new ViewListsImpl();
 		
@@ -75,7 +75,7 @@ public class RunFreerails {
 		
 			ServerGameEngine gameEngine = new ServerGameEngine(world); 
 			gUIComponentFactory.setup(viewLists, world, gameEngine);
-			JFrame client = new ClientJFrame(gUIComponentFactory);
+			JFrame client = gUIComponentFactory.createClientJFrame();
 		
 			if (nogameloop) {
 				client.setSize(740, 500);

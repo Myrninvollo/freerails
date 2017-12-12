@@ -8,7 +8,7 @@
 package jfreerails.world.stats;
 
 
-import jfreerails.world.misc.GameTime;
+import jfreerails.world.common.GameTime;
 
 /**
  *

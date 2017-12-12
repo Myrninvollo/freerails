@@ -1,10 +1,14 @@
-Freerails Java - version 0.1.1
+Freerails Java - version 0.1.2
 
 What's new:
--	Build stations by pressing F8
--	Trains now use a simple A* pathfinder:
-	press 't' with the cursor over the track
-	and all trains will head for that point.
+o	you can scroll the map by dragging button2.
+	(thanks Karl-Heinz Pennemann)
+o	Mnemonics on menus	
+	(thanks Scott Bennett)
+o	Code refactored to use the new World interface
+	(see jfreerails.world.top.World).
+o	Better documentation
+	(see the javadoc distribution)		
  
 Getting it, either:
 
@@ -14,10 +18,8 @@ or
 
 
 Requires: 
-(1) JDK 1.4, which can be downloaded from:
+JDK 1.4, which can be downloaded from:
 http://java.sun.com/j2se/1.4/
-(2) fastUtil.jar, which can be downloaded from:
-http://gongolo.usr.dsi.unimi.it/~vigna/fastUtil/
 
 To run the binary distribution
 

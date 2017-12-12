@@ -8,7 +8,7 @@
 package jfreerails.world.stats;
 
 
-import jfreerails.world.misc.Money;
+import jfreerails.world.common.Money;
 
 /**
  *

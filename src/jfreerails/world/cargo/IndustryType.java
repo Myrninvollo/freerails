@@ -1,6 +1,6 @@
 package jfreerails.world.cargo;
 
-import jfreerails.world.misc.Money;
+import jfreerails.world.common.Money;
 
 final public class IndustryType {
 

@@ -2,17 +2,16 @@ package jfreerails.controller;
 
 import java.awt.Point;
 
-import jfreerails.misc.NewFlatTrackExplorer;
-import jfreerails.misc.OldFlatTrackExplorer;
-import jfreerails.misc.TrainPathFinder;
-import jfreerails.world.World;
-import jfreerails.world.misc.FreerailsPathIterator;
+import jfreerails.controller.pathfinder.NewFlatTrackExplorer;
+import jfreerails.controller.pathfinder.TrainPathFinder;
+import jfreerails.world.common.FreerailsPathIterator;
+import jfreerails.world.common.PositionOnTrack;
+import jfreerails.world.top.KEY;
+import jfreerails.world.top.World;
+import jfreerails.world.track.FreerailsTile;
 import jfreerails.world.track.NullTrackType;
-import jfreerails.world.track.PositionOnTrack;
-import jfreerails.world.track.RandomPathFinder;
-import jfreerails.world.track.TrackTileMap;
+import jfreerails.world.track.TrackRule;
 import jfreerails.world.train.EngineModel;
-import jfreerails.world.train.TrainList;
 import jfreerails.world.train.TrainModel;
 import jfreerails.world.train.TrainPathIterator;
 
@@ -31,20 +30,30 @@ public class TrainBuilder {
 	}
 
 	public void buildTrain(Point p) {
-		TrackTileMap trackMap = world.getMap();
-		if (NullTrackType.NULL_TRACK_TYPE_RULE_NUMBER != trackMap.getTrackTypeNumber(p)) {
+		
+		FreerailsTile tile = (FreerailsTile)world.getTile(p.x, p.y); 
+		
+		TrackRule tr = tile.getTrackRule();
+	
+		if (NullTrackType.NULL_TRACK_TYPE_RULE_NUMBER
+			!= tr.getRuleNumber()) {
 
 			//Add train to train list.
 
 			TrainModel train = new TrainModel(new EngineModel(), null);
 
-			TrainList trainList = world.getTrainList();
+			
 
-			trainList.addTrain(train);
+			world.add(KEY.TRAINS, train);
 
-			int trainNumber = trainList.size() - 1;
+			int trainNumber = world.size(KEY.TRAINS) - 1;
 
-			TrainMover trainMover = new TrainMover(getPathToFollow(p), getPathToFollow(p), trainList, trainNumber);
+			TrainMover trainMover =
+				new TrainMover(
+					getPathToFollow(p),
+					getPathToFollow(p),
+					world,
+					trainNumber);
 
 			gameEngine.addTrainMover(trainMover);
 			//FreerailsPathIterator it = getPath(p);
@@ -69,27 +78,20 @@ public class TrainBuilder {
 	}
 
 	public FreerailsPathIterator getPathToFollow(Point p) {
-		boolean useNewFlatTrackExplorer = true;
 
-		if (useNewFlatTrackExplorer) {
+		PositionOnTrack pot =
+			NewFlatTrackExplorer.getPossiblePositions(
+				world,
+				p)[0];
 
-			PositionOnTrack pot = NewFlatTrackExplorer.getPossiblePositions(world.getMap(), p)[0];
+		//NewFlatTrackExplorer explorer =new NewFlatTrackExplorer(world.getMap(), pot);
+		NewFlatTrackExplorer explorer = new NewFlatTrackExplorer(pot, world);
 
-			NewFlatTrackExplorer explorer = new NewFlatTrackExplorer(world.getMap(), pot);
+		FreerailsPathIterator it;
 
-			FreerailsPathIterator it;
+		it = new TrainPathIterator(new TrainPathFinder(explorer));
 
-			//it = new TrainPathIterator(new TrainPathIntIterator(explorer));
-			it = new TrainPathIterator(new TrainPathFinder(explorer));
-			//it = new TrainPathFinder(explorer);
-			return it;
-		} else {
+		return it;
 
-			OldFlatTrackExplorer explorer = new OldFlatTrackExplorer(world.getMap(), p);
-
-			FreerailsPathIterator it = new RandomPathFinder(explorer);
-
-			return it;
-		}
 	}
 }

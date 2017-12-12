@@ -1,8 +1,8 @@
 package jfreerails.world.station;
 
-import jfreerails.world.misc.GameTime;
+import jfreerails.world.common.GameTime;
 
-final public class StationModelPublic implements StationModel {
+final public class StationModelPublic extends StationModel {
 
 	private final GameTime builtDate;
 

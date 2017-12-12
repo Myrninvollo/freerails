@@ -10,9 +10,12 @@ package jfreerails;
 import java.awt.Point;
 import java.util.ArrayList;
 
-import jfreerails.client.trackview.TrackPieceViewList;
-import jfreerails.lib.ImageSplitter;
+import jfreerails.client.common.ImageSplitter;
+import jfreerails.client.renderer.TrackPieceRendererList;
+import jfreerails.world.top.KEY;
+import jfreerails.world.top.World;
 import jfreerails.world.track.LegalTrackPlacement;
+import jfreerails.world.track.TrackRule;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -20,15 +23,12 @@ import org.xml.sax.SAXException;
 public class Track_TilesHandlerImpl implements Track_TilesHandler, TrackSetFactory {
 
 	int maxConsequ;
-
-	/**
-	 *  Object
-	 */
+	
 	protected ArrayList ruleList;
 	protected jfreerails.world.track.TrackRuleProperties trackRuleProperties;
 	protected jfreerails.world.track.LegalTrackConfigurations legalTrackConfigurations;
 	public static final boolean DEBUG = false;
-	protected jfreerails.world.track.TrackRuleList trackRuleList;
+	protected World w;
 	protected ArrayList legalTemplates;
 	protected java.util.HashSet terrainTypes;
 	protected LegalTrackPlacement legalTrackPlacement;
@@ -148,9 +148,7 @@ public class Track_TilesHandlerImpl implements Track_TilesHandler, TrackSetFacto
 	}
 
 	public void end_TrackSet() throws SAXException {
-		trackRuleList = new jfreerails.world.track.TrackRuleList(ruleList);
-
-		ruleList = null;
+		
 	}
 
 	public Track_TilesHandlerImpl(java.net.URL trackXmlUrl) {
@@ -162,16 +160,20 @@ public class Track_TilesHandlerImpl implements Track_TilesHandler, TrackSetFacto
 	}
 	protected Track_TilesHandlerImpl() {
 	}
+	
 
-	public jfreerails.world.track.TrackRuleList getTrackRuleList() {
-		return trackRuleList;
-	}
-
-	public TrackPieceViewList getTrackViewList(ImageSplitter trackImageSplitter) {
+	public TrackPieceRendererList getTrackViewList(ImageSplitter trackImageSplitter) {
 		throw new UnsupportedOperationException();
 	}
 
 	public Point getTrackPieceSize() {
 		throw new UnsupportedOperationException();
+	}
+
+	public void addTrackRules(World w) {
+		for(int i = 0; i< this.ruleList.size(); i++){
+			TrackRule r = (TrackRule)ruleList.get(i);
+			w.add(KEY.TRACK_RULES, r);			
+		}
 	}
 }

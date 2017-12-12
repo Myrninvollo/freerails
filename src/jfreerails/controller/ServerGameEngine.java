@@ -9,10 +9,8 @@ import java.util.Iterator;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import jfreerails.WorldImpl;
-import jfreerails.lib.GameModel;
 import jfreerails.move.ChangeTrainPositionMove;
-import jfreerails.world.World;
+import jfreerails.world.top.World;
 
 /**
  * @author Luke Lindsay 05-Nov-2002
@@ -31,9 +29,7 @@ public class ServerGameEngine implements GameModel {
 
 	}
 
-	/**
-	 * @see jfreerails.lib.GameModel#update()
-	 */
+	
 	public void update() {
 		long now = System.currentTimeMillis();
 		long deltaTime = now - lastTime;
@@ -47,7 +43,7 @@ public class ServerGameEngine implements GameModel {
 			Object o = i.next();
 			TrainMover trainMover = (TrainMover) o;
 			m = trainMover.update(deltaDistance);
-			m.doMove(world.getTrainList());
+			m.doMove(world);
 		}
 
 	}
@@ -89,7 +85,6 @@ public class ServerGameEngine implements GameModel {
 			this.trainMovers = (ArrayList) objectIn.readObject();
 
 			this.world = (World) objectIn.readObject();
-			System.out.println(world.getMap().getMapSize().toString());
 			
 			System.out.println("done.");
 			lastTime = System.currentTimeMillis();
@@ -98,10 +93,10 @@ public class ServerGameEngine implements GameModel {
 		}
 
 	}
+	
+	public void newGame(World w) {
 
-	public void newGame(String mapFileName) {
-
-		this.world = WorldImpl.createWorldFromMapFile(mapFileName);
+		this.world = w;
 
 		trainMovers = new ArrayList();
 		lastTime = System.currentTimeMillis();

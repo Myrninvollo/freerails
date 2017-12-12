@@ -1,7 +1,6 @@
 package jfreerails.move;
 
 import jfreerails.world.financial.ListedCompany;
-
 /**
  *
  *

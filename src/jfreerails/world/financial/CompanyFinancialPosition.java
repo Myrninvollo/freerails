@@ -2,7 +2,7 @@
 
 package jfreerails.world.financial;
 
-import jfreerails.world.misc.Money;
+import jfreerails.world.common.Money;
 
 
 public class CompanyFinancialPosition {

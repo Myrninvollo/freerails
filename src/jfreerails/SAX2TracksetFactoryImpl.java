@@ -8,8 +8,8 @@ package jfreerails;
 import java.awt.Point;
 import java.net.URL;
 
-import jfreerails.lib.ImageSplitter;
-import jfreerails.world.track.TrackRuleList;
+import jfreerails.client.common.ImageSplitter;
+import jfreerails.world.top.World;
 /**
  *
  * @author  lindsal
@@ -34,15 +34,7 @@ final public class SAX2TracksetFactoryImpl
 		return new Point(30, 30);
 	}
 
-	/**
-	 * Gets the trackRuleList attribute of the TRackSetFactInterface object
-	 *
-	 * @return                         The trackRuleList value
-	 * @exception  FreerailsException  Description of Exception
-	 */
-	public TrackRuleList getTrackRuleList() {
-		return track_Tiles_View_Handler.getTrackRuleList();
-	}
+	
 
 	/**
 	 * Gets the trackViewList attribute of the TRackSetFactInterface object
@@ -51,9 +43,15 @@ final public class SAX2TracksetFactoryImpl
 	 * @return                         The trackViewList value
 	 * @exception  FreerailsException  Description of Exception
 	 */
-	public jfreerails.client.trackview.TrackPieceViewList getTrackViewList(
+	public jfreerails.client.renderer.TrackPieceRendererList getTrackViewList(
 		ImageSplitter trackImageSplitter) {
 		return track_Tiles_View_Handler.getTrackPieceViewList();
+	}
+
+	public void addTrackRules(World w) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("not implemented yet");
+		
 	}
 
 }

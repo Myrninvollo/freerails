@@ -1,9 +1,9 @@
 
 package jfreerails.move;
 
+import jfreerails.world.common.Money;
 import jfreerails.world.financial.DebitTransactionType;
 import jfreerails.world.financial.ListedCompany;
-import jfreerails.world.misc.Money;
 
 /**
  *

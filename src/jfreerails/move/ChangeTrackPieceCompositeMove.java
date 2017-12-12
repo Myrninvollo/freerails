@@ -8,23 +8,24 @@ package jfreerails.move;
 import java.awt.Point;
 import java.awt.Rectangle;
 
-import jfreerails.world.misc.OneTileMoveVector;
+import jfreerails.world.common.OneTileMoveVector;
+import jfreerails.world.top.World;
 import jfreerails.world.track.NullTrackPiece;
 import jfreerails.world.track.NullTrackType;
 import jfreerails.world.track.TrackConfiguration;
 import jfreerails.world.track.TrackPiece;
 import jfreerails.world.track.TrackRule;
-import jfreerails.world.track.TrackTileMap;
 
 /**
- *
+ * This class represents the change that occurs when track between two tiles is 
+ * built, removed, or upgraded. 
+ * 
  * @author  lindsal
- * @version
+ * 
  */
 public final class ChangeTrackPieceCompositeMove
 	implements NewTrackMove, MapUpdateMove {
 
-	
 	private final ChangeTrackPieceMove moveA, moveB;
 
 	/** Creates new ChangeTrackPieceCompositeMove */
@@ -35,21 +36,24 @@ public final class ChangeTrackPieceCompositeMove
 		moveB = b;
 	}
 
-	public MoveStatus doMove(TrackTileMap trackTileMap) {
-		MoveStatus moveStatus = tryDoMove(trackTileMap);
+	public MoveStatus doMove(World w) {
+		
+		MoveStatus moveStatus = tryDoMove(w);
 		if (moveStatus.ok) {
-			moveA.doMove(trackTileMap);
-			moveB.doMove(trackTileMap);
+			moveA.doMove(w);
+			moveB.doMove(w);
 			return moveStatus;
 		} else {
 			return moveStatus;
 		}
 	}
 
-	public MoveStatus tryDoMove(TrackTileMap trackTileMap) {
+	public MoveStatus tryDoMove(World w) {
+
+		
 		MoveStatus moveStatusA, moveStatusB;
-		moveStatusA = moveA.tryDoMove(trackTileMap);
-		moveStatusB = moveB.tryDoMove(trackTileMap);
+		moveStatusA = moveA.tryDoMove(w);
+		moveStatusB = moveB.tryDoMove(w);
 		if (moveStatusA.isOk() && moveStatusB.isOk()) {
 			return MoveStatus.MOVE_ACCEPTED;
 		} else {
@@ -58,19 +62,22 @@ public final class ChangeTrackPieceCompositeMove
 
 	}
 
-	public MoveStatus tryUndoMove(TrackTileMap trackTileMap) {
+	public MoveStatus tryUndoMove(World w) {
+	
 		return MoveStatus.MOVE_RECEIVED;
 	}
 
-	public MoveStatus undoMove(TrackTileMap trackTileMap) {
+	public MoveStatus undoMove(World w) {
+
 		return MoveStatus.MOVE_RECEIVED;
 	}
 	public static ChangeTrackPieceCompositeMove generateBuildTrackMove(
 		Point from,
 		OneTileMoveVector direction,
 		TrackRule trackRule,
-		TrackTileMap trackTileMap) {
-
+		World w) {
+			
+			
 		ChangeTrackPieceMove a, b;
 
 		a =
@@ -78,13 +85,13 @@ public final class ChangeTrackPieceCompositeMove
 				from,
 				direction,
 				trackRule,
-				trackTileMap);
+				w);
 		b =
 			getBuildTrackChangeTrackPieceMove(
 				direction.createRelocatedPoint(from),
 				direction.getOpposite(),
 				trackRule,
-				trackTileMap);
+				w);
 
 		return new ChangeTrackPieceCompositeMove(a, b);
 	}
@@ -92,15 +99,17 @@ public final class ChangeTrackPieceCompositeMove
 	public static ChangeTrackPieceCompositeMove generateRemoveTrackMove(
 		Point from,
 		OneTileMoveVector direction,
-		TrackTileMap trackTileMap) {
+		World w) {
+
+	
 		ChangeTrackPieceMove a, b;
 
-		a = getRemoveTrackChangeTrackPieceMove(from, direction, trackTileMap);
+		a = getRemoveTrackChangeTrackPieceMove(from, direction, w);
 		b =
 			getRemoveTrackChangeTrackPieceMove(
 				direction.createRelocatedPoint(from),
 				direction.getOpposite(),
-				trackTileMap);
+				w);
 
 		return new ChangeTrackPieceCompositeMove(a, b);
 	}
@@ -109,12 +118,12 @@ public final class ChangeTrackPieceCompositeMove
 		Point p,
 		OneTileMoveVector direction,
 		TrackRule trackRule,
-		TrackTileMap trackTileMap) {
+		World w) {
 
 		TrackPiece oldTrackPiece, newTrackPiece;
 
-		if (trackTileMap.boundsContain(p)) {
-			oldTrackPiece = trackTileMap.getTrackPiece(p);
+		if (w.boundsContain(p.x, p.y)) {
+			oldTrackPiece = (TrackPiece)w.getTile(p.x, p.y);
 			if (oldTrackPiece.getTrackRule() != NullTrackType.getInstance()) {
 				TrackConfiguration trackConfiguration =
 					TrackConfiguration.add(
@@ -139,12 +148,12 @@ public final class ChangeTrackPieceCompositeMove
 	private static ChangeTrackPieceMove getRemoveTrackChangeTrackPieceMove(
 		Point p,
 		OneTileMoveVector direction,
-		TrackTileMap trackTileMap) {
+		World w) {
 
 		TrackPiece oldTrackPiece, newTrackPiece;
 
-		if (trackTileMap.boundsContain(p)) {
-			oldTrackPiece = trackTileMap.getTrackPiece(p);
+		if (w.boundsContain(p.x, p.y)) {
+			oldTrackPiece = (TrackPiece)w.getTile(p.x, p.y);
 			if (oldTrackPiece.getTrackRule() != NullTrackType.getInstance()) {
 				TrackConfiguration trackConfiguration =
 					TrackConfiguration.subtract(

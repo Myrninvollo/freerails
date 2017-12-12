@@ -5,27 +5,30 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 
-import jfreerails.client.tileview.TileViewList;
-import jfreerails.client.trackview.TrackPieceViewList;
-import jfreerails.world.track.TrackAndTerrainTileMap;
-import jfreerails.world.train.TrainList;
+import jfreerails.client.renderer.MapBackgroundRender;
+import jfreerails.client.renderer.MapLayerRenderer;
+import jfreerails.client.renderer.MapRenderer;
+import jfreerails.client.renderer.SquareTileBackgroundRenderer;
+import jfreerails.client.renderer.TileRendererList;
+import jfreerails.client.renderer.TrackPieceRendererList;
+import jfreerails.world.top.World;
 
 
-public class DetailMapView implements MapView {
+public class DetailMapView implements MapRenderer {
 
-	private final MapViewLayer background;
+	private final MapLayerRenderer background;
 	
 	private final Dimension mapSizeInPixels;
 	
 	private final TestOverHeadTrainView trainsview;
 
 	public DetailMapView(
-		TrackAndTerrainTileMap map,
-		TileViewList tiles,
-		TrackPieceViewList trackPieceViewList, TrainList trainList) {
-		trainsview = new TestOverHeadTrainView(trainList);
-		background = new SquareTileBackgroundPainter(new BackgroundMapView(map, tiles, trackPieceViewList), 30);
-		Dimension mapSize=map.getMapSize();
+		World world,
+		TileRendererList tiles,
+		TrackPieceRendererList trackPieceViewList) {
+		trainsview = new TestOverHeadTrainView(world);
+		background = new SquareTileBackgroundRenderer(new MapBackgroundRender(world, tiles, trackPieceViewList), 30);
+		Dimension mapSize=new Dimension(world.getMapWidth(), world.getMapHeight());
 		mapSizeInPixels=new Dimension(mapSize.width*30,mapSize.height*30);
 	}
 

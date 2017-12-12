@@ -9,15 +9,17 @@ import java.awt.Point;
 import java.text.NumberFormat;
 import java.util.HashSet;
 
-import jfreerails.client.trackview.TrackPieceView;
-import jfreerails.lib.ImageSplitter;
+import jfreerails.client.common.ImageSplitter;
+import jfreerails.client.renderer.TrackPieceRenderer;
+import jfreerails.world.top.KEY;
+import jfreerails.world.top.World;
 import jfreerails.world.track.TrackRule;
-import jfreerails.world.track.TrackRuleList;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
 
 /**
  *  This class provides methods to generate a set of track rules whose
@@ -61,7 +63,7 @@ public class TrackSetFactoryImpl
 
 	public TrackSetFactoryImpl(java.net.URL xml_url) {
 		Element trackRules;
-		org.w3c.dom.Document document = jfreerails.lib.DOMLoader.get_dom(xml_url);
+		org.w3c.dom.Document document = jfreerails.client.common.DOMLoader.get_dom(xml_url);
 		trackRules = document.getDocumentElement();
 		trackRules.normalize();
 		NodeList trackRulesetNodeList = trackRules.getElementsByTagName("TrackSet");
@@ -77,19 +79,20 @@ public class TrackSetFactoryImpl
 	 *@exception  FreerailsException  Description of Exception
 	 */
 
-	public TrackRuleList getTrackRuleList() {
-		TrackRule[] trackRuleList = new TrackRule[trackRulesNodeList.getLength()];
+	public void addTrackRules(World w) {
+		//TrackRule[] trackRuleList = new TrackRule[trackRulesNodeList.getLength()];
 		for (int i = 0; i < trackRulesNodeList.getLength(); i++) {
 			Node trackRuleNode = trackRulesNodeList.item(i);
-			trackRuleList[i] = createTrackRule(trackRuleNode, i);
+			//trackRuleList[i] = createTrackRule(trackRuleNode, i);
+			w.add(KEY.TRACK_RULES, createTrackRule(trackRuleNode, i));					
 		}
-		return new TrackRuleList(trackRuleList);
+		//return new TrackRuleList(trackRuleList);
 	}
 
-	public jfreerails.client.trackview.TrackPieceViewList getTrackViewList(
+	public jfreerails.client.renderer.TrackPieceRendererList getTrackViewList(
 		ImageSplitter trackImageSplitter) {
-		TrackPieceView[] trackPieceViewList =
-			new TrackPieceView[trackRulesNodeList.getLength()];
+		TrackPieceRenderer[] trackPieceViewList =
+			new TrackPieceRenderer[trackRulesNodeList.getLength()];
 		try {
 
 			//Get values, then setup the ImageSplitter.
@@ -113,7 +116,7 @@ public class TrackSetFactoryImpl
 			Node trackViewNode = trackRulesNodeList.item(i);
 			trackPieceViewList[i] = createTrackPieceView(trackViewNode, trackImageSplitter);
 		}
-		return new jfreerails.client.trackview.TrackPieceViewList(trackPieceViewList);
+		return new jfreerails.client.renderer.TrackPieceRendererList(trackPieceViewList);
 	}
 
 	/**
@@ -137,7 +140,7 @@ public class TrackSetFactoryImpl
 		return terrainTypes;
 	}
 
-	private TrackPieceView createTrackPieceView(
+	private TrackPieceRenderer createTrackPieceView(
 		Node trackTypeNode,
 		ImageSplitter trackImageSplitter) {
 		String nodeValue;
@@ -167,7 +170,7 @@ public class TrackSetFactoryImpl
 		if (null == trackImageSplitter) {
 			throw new NullPointerException("null==trackImageSplitter, cannot get track icons");
 		}
-		return new jfreerails.client.trackview.TrackPieceViewImpl(
+		return new jfreerails.client.renderer.TrackPieceRendererImpl(
 			trackPieceTemplateArray,
 			trackImageSplitter);
 	}

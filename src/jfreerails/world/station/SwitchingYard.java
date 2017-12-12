@@ -1,7 +1,7 @@
 package jfreerails.world.station;
 
 
-import jfreerails.world.misc.GameTime;
+import jfreerails.world.common.GameTime;
 
 /**
  * Defining operations expected of ...

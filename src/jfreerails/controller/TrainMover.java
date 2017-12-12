@@ -3,11 +3,11 @@ package jfreerails.controller;
 import java.util.Random;
 
 import jfreerails.move.ChangeTrainPositionMove;
-import jfreerails.server.FreerailsServerSerializable;
-import jfreerails.world.misc.FreerailsPathIterator;
+import jfreerails.world.common.FreerailsPathIterator;
+import jfreerails.world.top.KEY;
+import jfreerails.world.top.World;
 import jfreerails.world.train.PathWalker;
 import jfreerails.world.train.PathWalkerImpl;
-import jfreerails.world.train.TrainList;
 import jfreerails.world.train.TrainModel;
 import jfreerails.world.train.TrainPosition;
 
@@ -25,33 +25,25 @@ public class TrainMover  implements FreerailsServerSerializable{
 
 	final int trainNumber;
 	
-	final TrainList trainList;
+	final World w;
 	
-	int trainSpeed;
+	double trainSpeed;
 
-	double remainder; 
-
-	public TrainMover(FreerailsPathIterator from, FreerailsPathIterator to, TrainList trains, int trainNo) {
-		
-		
-		
-		trainSpeed = rand.nextInt(100)+50;
-		
-		System.out.println("Train speed = "+trainSpeed);
+	public TrainMover(FreerailsPathIterator from, FreerailsPathIterator to, World world, int trainNo) {
+					
+		trainSpeed = rand.nextDouble()+1;			
 		
 		this.trainNumber=trainNo;
-		this.trainList=trains;
+		this.w=world;
 		
 		setInitialTrainPosition(from);
-		walker = new PathWalkerImpl(to);
-		
-		//Set current train position using from path and length of train.
+		walker = new PathWalkerImpl(to);				
 
 	}
 
 	private void setInitialTrainPosition(
 		FreerailsPathIterator from) {
-		TrainModel train = trainList.getTrain(trainNumber);
+		TrainModel train = (TrainModel)w.get(KEY.TRAINS, trainNumber);
 		int trainLength = train.getLength();
 		PathWalker fromPathWalker = new PathWalkerImpl(from);
 		fromPathWalker.stepForward(trainLength);
@@ -66,13 +58,9 @@ public class TrainMover  implements FreerailsServerSerializable{
 	
 	
 	public ChangeTrainPositionMove update(int distanceTravelled) {
-		double  distance = distanceTravelled * trainSpeed;
-		distance = distance/100+remainder;
-		
-		int intDistance =(int)distance;
-		remainder = distance - intDistance;		
-		walker.stepForward(intDistance);
-		return ChangeTrainPositionMove.generate(trainList, walker, trainNumber);		
+		double  distance = distanceTravelled * trainSpeed;					
+		walker.stepForward(distance);
+		return ChangeTrainPositionMove.generate(w, walker, trainNumber);		
 	}
 
 
@@ -81,7 +69,7 @@ public class TrainMover  implements FreerailsServerSerializable{
 	 * Returns the trainSpeed.
 	 * @return int
 	 */
-	public int getTrainSpeed() {
+	public double getTrainSpeed() {
 		return trainSpeed;
 	}
 
@@ -89,7 +77,7 @@ public class TrainMover  implements FreerailsServerSerializable{
 	 * Sets the trainSpeed.
 	 * @param trainSpeed The trainSpeed to set
 	 */
-	public void setTrainSpeed(int trainSpeed) {
+	public void setTrainSpeed(double trainSpeed) {
 		this.trainSpeed = trainSpeed;
 	}
 

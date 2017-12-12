@@ -1,91 +1,35 @@
-/**
- *
- *
- *
- *
- *
- */
 package jfreerails.world.financial;
-
-
-
-/**
- *
- *
- *
- * @author lindsal
- */
 
 public class StockBroker {
 
+	public FinancialMarket financialMarket;
+	public int rRCompany;
 
-   // associations
+	public FinancialMarket getFinancialMarket() {
+		return financialMarket;
+	}
+	public void setFinancialMarket(FinancialMarket financialMarket) {
+		if (this.financialMarket != financialMarket) {
+			this.financialMarket = financialMarket;
+			if (financialMarket != null)
+				financialMarket.setStockBroker(this);
+		}
+	}
 
-    public FinancialMarket financialMarket;
-    public RRCompany rRCompany;
+	public int getRRCompany() {
+		return rRCompany;
+	}
 
+	public void buyStock(ListedCompany company) {
+	}
 
+	public void sellStock(ListedCompany company) {
+	}
 
-   // access methods for associations
+	public void sellBond() {
+	}
 
-
-    public FinancialMarket getFinancialMarket() {
-        return financialMarket;
-    }
-    public void setFinancialMarket(FinancialMarket financialMarket) {
-        if (this.financialMarket != financialMarket) {
-            this.financialMarket = financialMarket;
-            if (financialMarket != null)
-                financialMarket.setStockBroker(this);
-        }
-    }
-
-    public RRCompany getRRCompany() {
-        return rRCompany;
-    }
-
-
-
-  // operations
-
-/**
- * Does ...
- *
- * @param company ...
- */
-
-    public void buyStock(ListedCompany company) {
-    }
-/**
- * Does ...
- *
- * @param company ...
- */
-
-    public void sellStock(ListedCompany company) {
-    }
-/**
- * Does ...
- *
-
- */
-
-    public void sellBond() {
-    }
-/**
- * Does ...
- *
-
- */
-
-    public void repayBond() {
-    }
-
-
+	public void repayBond() {
+	}
 
 }
-
-
-
-
-

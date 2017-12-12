@@ -4,7 +4,7 @@ import jfreerails.world.cargo.CargoBundle;
 import jfreerails.world.cargo.CargoContainer;
 import jfreerails.world.cargo.CargoType;
 public abstract class StationModelPrivate
-	implements CargoContainer, StationModel {
+	extends  StationModel implements CargoContainer{
 
 	public SupplyAtStation stationCargoSupplyAndDemand;
 	public StationModel stationModelPublic;

@@ -11,11 +11,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JComponent;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JScrollPane;
-import jfreerails.client.view.BlankMapView;
+
+import jfreerails.client.renderer.BlankMapRenderer;
 import jfreerails.client.view.MainMapAndOverviewMapMediator;
 import jfreerails.client.view.MapViewJComponentConcrete;
 import jfreerails.client.view.NewOverviewMapJComponent;
@@ -23,7 +25,7 @@ import jfreerails.client.view.NewOverviewMapJComponent;
  *
  * @author  Luke Lindsay
  */
-public class SimpleComponentFactoryImpl2 implements jfreerails.client.GUIComponentFactory {
+public class SimpleComponentFactoryImpl2 implements jfreerails.client.top.GUIComponentFactory {
 
 	NewOverviewMapJComponent overviewMap;
 	JScrollPane mainMapScrollPane1;
@@ -69,7 +71,7 @@ public class SimpleComponentFactoryImpl2 implements jfreerails.client.GUICompone
 
 			public void actionPerformed(ActionEvent e) {
 
-				overviewMap.setup(new BlankMapView(scale));
+				overviewMap.setup(new BlankMapRenderer(scale));
 
 			}
 
@@ -86,7 +88,7 @@ public class SimpleComponentFactoryImpl2 implements jfreerails.client.GUICompone
 				Rectangle visRect = mainMap.getVisibleRect();
 
 				int oldWidth = mainMap.getWidth();
-				mainMap.setup(new BlankMapView(scale));
+				mainMap.setup(new BlankMapRenderer(scale));
 				int newWidth = mainMap.getPreferredSize().width;
 
 				int oldCenterX = visRect.x + (visRect.width / 2);
@@ -129,7 +131,7 @@ public class SimpleComponentFactoryImpl2 implements jfreerails.client.GUICompone
 		if (null == this.overviewMap) {
 			//this.overviewMap = new OverviewMapJPanel();
 			this.overviewMap = new NewOverviewMapJComponent(r);
-			this.overviewMap.setup(new BlankMapView(0.4F));
+			this.overviewMap.setup(new BlankMapRenderer(0.4F));
 			addMainMapAndOverviewMapMediatorIfNecessary();
 		}
 		return overviewMap;
@@ -146,6 +148,10 @@ public class SimpleComponentFactoryImpl2 implements jfreerails.client.GUICompone
 					mainMap,
 					r);
 		}
+	}
+	
+	public JFrame createClientJFrame(){
+		return new JFrame();	
 	}
 
 }

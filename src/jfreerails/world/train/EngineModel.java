@@ -1,6 +1,6 @@
 package jfreerails.world.train;
 
-import jfreerails.world.misc.FreerailsSerializable;
+import jfreerails.world.common.FreerailsSerializable;
 
 final public class EngineModel implements FreerailsSerializable{
 

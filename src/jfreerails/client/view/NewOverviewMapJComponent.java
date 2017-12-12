@@ -6,9 +6,12 @@ import java.awt.Rectangle;
 
 import javax.swing.JComponent;
 
+import jfreerails.client.renderer.BlankMapRenderer;
+import jfreerails.client.renderer.MapRenderer;
+
 public class NewOverviewMapJComponent extends JComponent {
 
-	protected MapView mapView=new BlankMapView(0.4F);
+	protected MapRenderer mapView=new BlankMapRenderer(0.4F);
 
 	protected Rectangle mainMapVisRect;
 	
@@ -16,7 +19,7 @@ public class NewOverviewMapJComponent extends JComponent {
 		this.setPreferredSize(mapView.getMapSizeInPixels());
 		mainMapVisRect=r;	
 	}	
-	public void setup(MapView mv){
+	public void setup(MapRenderer mv){
 		mapView=mv;					
 		this.setPreferredSize(mapView.getMapSizeInPixels());
 		this.setMinimumSize(this.getPreferredSize());

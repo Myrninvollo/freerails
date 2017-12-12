@@ -10,14 +10,14 @@ import java.net.URL;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 
-import jfreerails.client.tileview.StandardTileView;
-import jfreerails.client.tileview.TileView;
-import jfreerails.client.tileview.TileViewList;
-import jfreerails.lib.ImageSplitter;
-import jfreerails.world.terrain.TerrainTileTypesList;
-import jfreerails.world.terrain.TerrainTileTypesListImpl;
+import jfreerails.client.common.ImageSplitter;
+import jfreerails.client.renderer.StandardTileRenderer;
+import jfreerails.client.renderer.TileRenderer;
+import jfreerails.client.renderer.TileRendererList;
 import jfreerails.world.terrain.TerrainType;
 import jfreerails.world.terrain.TileTypeImpl;
+import jfreerails.world.top.KEY;
+import jfreerails.world.top.World;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -38,9 +38,11 @@ import org.w3c.dom.NodeList;
 
 final public class TileSetFactoryImpl extends java.lang.Object implements TileSetFactory {
 
-    private TerrainTileTypesList terrainTileTypesList;
+    private World w;
 
-    private TileViewList tileViewList;
+    private TileRendererList tileViewList;
+    
+    private ArrayList tileTypes;
 
     private Element tileSet;
 
@@ -55,7 +57,7 @@ final public class TileSetFactoryImpl extends java.lang.Object implements TileSe
         /**
         *  Description of the Field
         */
-        public TileView parentTileView;
+        public TileRenderer parentTileView;
 
 
         /**
@@ -85,7 +87,7 @@ final public class TileSetFactoryImpl extends java.lang.Object implements TileSe
         /**
         *  Description of the Field
         */
-        public TileView thisTileView;
+        public TileRenderer thisTileView;
 
 
         /**
@@ -113,7 +115,7 @@ final public class TileSetFactoryImpl extends java.lang.Object implements TileSe
     *      file.
     */
 
-    public TileViewList getTileViewList()  {
+    public TileRendererList getTileViewList()  {
         return this.tileViewList;
     }
 
@@ -126,7 +128,7 @@ final public class TileSetFactoryImpl extends java.lang.Object implements TileSe
 
     public TileSetFactoryImpl( URL xml_url )  {
         org.w3c.dom.Element  tiles;
-        org.w3c.dom.Document  document = jfreerails.lib.DOMLoader.get_dom( xml_url );
+        org.w3c.dom.Document  document = jfreerails.client.common.DOMLoader.get_dom( xml_url );
         tiles = document.getDocumentElement();
         tiles.normalize();
         org.w3c.dom.NodeList  tilesetNodeList = tiles.getElementsByTagName( "Tile_set" );
@@ -141,8 +143,11 @@ final public class TileSetFactoryImpl extends java.lang.Object implements TileSe
     *@return    The set of tile models.
     */
 
-    public TerrainTileTypesList getTerrainTileTypesList() {
-        return terrainTileTypesList;
+    public void  addTerrainTileTypesList(World w) {
+		for (int i=0; i < tileTypes.size() ; i++){
+			 TerrainType tm = (TerrainType)tileTypes.get(i);
+			 w.add(KEY.TERRAIN_TYPES, tm);        	
+		 }    
     }
 
     /**
@@ -224,8 +229,8 @@ final public class TileSetFactoryImpl extends java.lang.Object implements TileSe
                 for( int  ii = 0;ii < children.getLength();ii++ ) {
                     String  childName = children.item( ii ).getNodeName();
                     if( childName.equalsIgnoreCase( "specials" ) ) {
-                        TileView  tempThis = parsingVariables.thisTileView;
-                        TileView  tempParent = parsingVariables.parentTileView;
+                        TileRenderer  tempThis = parsingVariables.thisTileView;
+                        TileRenderer  tempParent = parsingVariables.parentTileView;
                         parsingVariables.parentTileView = parsingVariables.thisTileView;
                         processList( children.item( ii ).getChildNodes(), parsingVariables );
                         parsingVariables.thisTileView = tempThis;
@@ -262,10 +267,10 @@ final public class TileSetFactoryImpl extends java.lang.Object implements TileSe
     *@exception  FreerailsException  Description of Exception
     */
 
-    private void generateTileLists( NodeList tilesToProcess, ParsingVariables parsingVariables ) {
+    private void generateTileLists( NodeList tilesToProcess, ParsingVariables parsingVariables) {
         processList( tilesToProcess, parsingVariables );
-        this.tileViewList = new jfreerails.client.tileview.TileViewListImpl( parsingVariables.tileViewHashMap );
-        this.terrainTileTypesList = new TerrainTileTypesListImpl( parsingVariables.tileModelList );
+        this.tileViewList = new jfreerails.client.renderer.TileRendererListImpl( parsingVariables.tileViewHashMap );
+        this.tileTypes = parsingVariables.tileModelList;          
     }
 
     /**
@@ -295,8 +300,8 @@ final public class TileSetFactoryImpl extends java.lang.Object implements TileSe
         }
     }
 
-    private TileView getTileView( Element tile, ImageSplitter imageSplitter, TerrainType tileModel, TileView parentTileView )  {
-        TileView  tileView;
+    private TileRenderer getTileView( Element tile, ImageSplitter imageSplitter, TerrainType tileModel, TileRenderer parentTileView )  {
+        TileRenderer  tileView;
         int  x;
         int  y;
 
@@ -313,34 +318,34 @@ final public class TileSetFactoryImpl extends java.lang.Object implements TileSe
         imageSplitter.setSubGridOffset( x, y );
         int[]  rgbValues = getRGBValuesToCheckFor( tileModel, tile );
         java.awt.Image[]  tileIcons;
-        jfreerails.client.tileview.TileIconSelector  tileIconSelector;
+        jfreerails.client.renderer.TileIconSelector  tileIconSelector;
         String  tileSelectorName = tile.getAttribute( "tileSelector" );
         tileSelectorName.equalsIgnoreCase( "Standard" );
         if( tileSelectorName.equalsIgnoreCase( "Standard" ) ) {
-            tileView = new StandardTileView( imageSplitter, rgbValues, tileModel );
+            tileView = new StandardTileRenderer( imageSplitter, rgbValues, tileModel );
         }
         else {
             if( tileSelectorName.equalsIgnoreCase( "Chequered" ) ) {
-                tileView = new jfreerails.client.tileview.ChequeredTileView( imageSplitter, rgbValues, tileModel );
+                tileView = new jfreerails.client.renderer.ChequeredTileRenderer( imageSplitter, rgbValues, tileModel );
             }
             else {
                 if( tileSelectorName.equalsIgnoreCase( "ForestStyle" ) ) {
-                    tileView = new jfreerails.client.tileview.ForestStyleTileView( imageSplitter, rgbValues, tileModel );
+                    tileView = new jfreerails.client.renderer.ForestStyleTileRenderer( imageSplitter, rgbValues, tileModel );
                 }
                 else {
                     if( tileSelectorName.equalsIgnoreCase( "RiverStyle" ) ) {
-                        tileView = new jfreerails.client.tileview.RiverStyleTileView( imageSplitter, rgbValues, tileModel );
+                        tileView = new jfreerails.client.renderer.RiverStyleTileRenderer( imageSplitter, rgbValues, tileModel );
                     }
                     else {
                         if( tileSelectorName.equalsIgnoreCase( "special" ) ) {
-                            tileView = new jfreerails.client.tileview.SpecialTileView( imageSplitter, rgbValues, tileModel, parentTileView );
+                            tileView = new jfreerails.client.renderer.SpecialTileRenderer( imageSplitter, rgbValues, tileModel, parentTileView );
                         }
 
                         //Insert more TileIconSelector types here..
                         else {
                             System.out.println( "Error: the TileIconSelector's type was either not recognised or not specified" );
                             System.out.println( "Forced to use Standard TileIconSelector" );
-                            tileView = new StandardTileView( imageSplitter, rgbValues, tileModel );
+                            tileView = new StandardTileRenderer( imageSplitter, rgbValues, tileModel );
                         }
                     }
                 }

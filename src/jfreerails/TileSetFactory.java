@@ -1,8 +1,8 @@
 package jfreerails;
 import java.awt.Point;
 
-import jfreerails.client.tileview.TileViewList;
-import jfreerails.world.terrain.TerrainTileTypesList;
+import jfreerails.client.renderer.TileRendererList;
+import jfreerails.world.top.World;
 
 
 
@@ -18,7 +18,7 @@ public interface TileSetFactory {
 
 
 
-     TerrainTileTypesList getTerrainTileTypesList();
+     void addTerrainTileTypesList(World w);
 
 
 
@@ -26,5 +26,5 @@ public interface TileSetFactory {
 
 
 
-     TileViewList getTileViewList();
+     TileRendererList getTileViewList();
 }

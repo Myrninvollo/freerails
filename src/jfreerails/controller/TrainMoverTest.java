@@ -3,13 +3,14 @@ package jfreerails.controller;
 import java.util.ArrayList;
 
 import jfreerails.move.ChangeTrainPositionMove;
-import jfreerails.world.misc.IntLine;
+import jfreerails.world.common.IntLine;
+import jfreerails.world.top.KEY;
+import jfreerails.world.top.World;
 import jfreerails.world.train.PathWalker;
-import jfreerails.world.train.TrainList;
+import jfreerails.world.train.TrainModel;
 import jfreerails.world.train.TrainPosition;
 import junit.framework.TestCase;
 
-import experimental.TrainFixture;
 
 /**
  * @author Luke Lindsay 30-Oct-2002
@@ -21,7 +22,7 @@ public class TrainMoverTest extends TestCase {
 
 	TrainMover trainMover;
 
-	TrainList trainList;
+	World w;
 
 	/**
 	 * Constructor for TrainMoverTest.
@@ -38,15 +39,17 @@ public class TrainMoverTest extends TestCase {
 
 		trainMover = trainFixture.getTrainMover();
 
-		trainList = trainFixture.getTrainList();
+		w = trainFixture.getWorld();
 
 	}
 
 	public void testTrainMover() {
 
 		setUp();
+		
+		TrainModel t = (TrainModel)w.get(KEY.TRAINS, 0);
 
-		TrainPosition pos = trainList.getTrain(0).getPosition();
+		TrainPosition pos = t.getPosition();
 
 		assertEquals(pos.getX(0), 0);
 		assertEquals(pos.getY(0), 0);
@@ -68,13 +71,14 @@ public class TrainMoverTest extends TestCase {
 		
 		setUp();
 		
-		TrainPosition pos = trainList.getTrain(0).getPosition();
+		TrainModel t = (TrainModel)w.get(KEY.TRAINS, 0);
 		
-		System.out.println(pos.toString());
+		TrainPosition pos = t.getPosition();
+				
 		
 		ChangeTrainPositionMove m= trainMover.update(30);
 		
-		m.doMove(trainList);
+		m.doMove(w);
 
 	}
 

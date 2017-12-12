@@ -1,6 +1,6 @@
 package jfreerails.world.tilemap;
 
-import jfreerails.world.misc.FreerailsSerializable;
+import jfreerails.world.common.FreerailsSerializable;
 
 /**
 *  Description of the Interface
