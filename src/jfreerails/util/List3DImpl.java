@@ -88,8 +88,7 @@ public class List3DImpl<T> implements List3D<T> {
 	
 	@Override
 	public boolean equals(Object obj) {
-        if (!(obj instanceof List3D))
-            return false;
+		if(!(obj instanceof List3D)) return false;						
 		return Lists.equals(this, (List3D)obj);
 	}
 

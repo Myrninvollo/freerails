@@ -37,7 +37,8 @@ public class Receipt implements Transaction {
 		if (o instanceof Receipt) {
 			Receipt test = (Receipt) o;
 
-            return test.amount.equals(amount) && category == test.category;
+			return test.amount.equals(amount)
+					&& category == test.category;
 		}
 		return false;
 	}

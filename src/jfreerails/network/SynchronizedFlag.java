@@ -10,8 +10,8 @@ package jfreerails.network;
  * 
  * @author Luke
  */
-public class SynchronizedFlag {
-	public SynchronizedFlag(boolean b) {
+class SynchronizedFlag {
+	SynchronizedFlag(boolean b) {
 		this.isOpen = b;
 	}
 

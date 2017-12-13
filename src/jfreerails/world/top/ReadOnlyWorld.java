@@ -1,6 +1,5 @@
 package jfreerails.world.top;
 
-import jfreerails.util.Pair;
 import jfreerails.world.accounts.Transaction;
 import jfreerails.world.common.ActivityIterator;
 import jfreerails.world.common.FreerailsMutableSerializable;
@@ -100,7 +99,7 @@ public interface ReadOnlyWorld extends FreerailsMutableSerializable {
 	int getNumberOfPlayers();
 
 	int getNumberOfTransactions(FreerailsPrincipal p);
-
+	
 	int getNumberOfActiveEntities(FreerailsPrincipal p);
 
 	Player getPlayer(int i);
@@ -113,9 +112,6 @@ public interface ReadOnlyWorld extends FreerailsMutableSerializable {
 	Transaction getTransaction(FreerailsPrincipal p, int i);
 
 	GameTime getTransactionTimeStamp(FreerailsPrincipal p, int i);
-
-	public Pair<Transaction, GameTime> getTransactionAndTimeStamp(
-			FreerailsPrincipal p, int i);
 
 	boolean isPlayer(FreerailsPrincipal p);
 

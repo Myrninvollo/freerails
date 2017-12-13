@@ -155,7 +155,7 @@ final public class ScreenHandler {
 				
 	}
 
-    private synchronized void createBufferStrategy() {
+	private void createBufferStrategy() {
 		// Use 2 backbuffers to avoid using too much VRAM.
 		frame.createBufferStrategy(2);
 		bufferStrategy = frame.getBufferStrategy();
@@ -230,8 +230,4 @@ final public class ScreenHandler {
 	public synchronized static void exitFullScreenMode(){
 		device.setFullScreenWindow(null);
 	}
-
-    public boolean contentsRestored() {
-        return bufferStrategy.contentsRestored();
-    }
 }

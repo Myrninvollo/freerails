@@ -37,7 +37,8 @@ public class Bill implements Transaction {
 		if (o instanceof Bill) {
 			Bill test = (Bill) o;
 
-            return test.amount.equals(amount) && category == test.category;
+			return test.amount.equals(amount)
+					&& category == test.category;
 		}
 		return false;
 	}

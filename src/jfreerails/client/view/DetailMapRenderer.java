@@ -16,7 +16,6 @@ import jfreerails.client.renderer.StationBoxRenderer;
 import jfreerails.client.renderer.StationRadiusRenderer;
 import jfreerails.client.renderer.RenderersRoot;
 import jfreerails.controller.ModelRoot;
-import jfreerails.world.Constants;
 import jfreerails.world.top.ReadOnlyWorld;
 
 /**
@@ -58,10 +57,10 @@ public class DetailMapRenderer implements MapRenderer {
 
 		Dimension mapSize = new Dimension(world.getMapWidth(), world
 				.getMapHeight());
-        mapSizeInPixels = new Dimension(mapSize.width * Constants.TILE_SIZE,
-                mapSize.height * Constants.TILE_SIZE);
+		mapSizeInPixels = new Dimension(mapSize.width * 30, mapSize.height * 30);
 		stationRadius = new StationRadiusRenderer(modelRoot);
-        buildTrackRenderer = new BuildTrackRenderer(rr, modelRoot);
+		buildTrackRenderer = new BuildTrackRenderer(rr,
+				modelRoot);
 		buildTrackController = new BuildTrackController(world, modelRoot);
 		stationBoxes = new StationBoxRenderer(world, rr, modelRoot);
 	}
@@ -75,7 +74,7 @@ public class DetailMapRenderer implements MapRenderer {
 	}
 
 	public float getScale() {
-        return Constants.TILE_SIZE;
+		return 30;
 	}
 
 	public Dimension getMapSizeInPixels() {
@@ -84,11 +83,11 @@ public class DetailMapRenderer implements MapRenderer {
 
 	public void paintTile(Graphics g, int tileX, int tileY) {
 		background.paintTile(g, tileX, tileY);
-		trainsview.paint((Graphics2D) g);
-		stationRadius.paint((Graphics2D) g);
-		stationBoxes.paint((Graphics2D) g);
+		trainsview.paint((Graphics2D) g, null);
+		stationRadius.paint((Graphics2D) g, null);
+		stationBoxes.paint((Graphics2D) g, null);
 
-		buildTrackRenderer.paint((Graphics2D) g);
+		buildTrackRenderer.paint((Graphics2D) g, null);
 	}
 
 	public void refreshTile(int x, int y) {
@@ -97,10 +96,10 @@ public class DetailMapRenderer implements MapRenderer {
 
 	public void paintRect(Graphics g, Rectangle visibleRect) {
 		background.paintRect(g, visibleRect);
-		trainsview.paint((Graphics2D) g);
-		stationRadius.paint((Graphics2D) g);
-		stationBoxes.paint((Graphics2D) g);
-		buildTrackRenderer.paint((Graphics2D) g);
+		trainsview.paint((Graphics2D) g, visibleRect);
+		stationRadius.paint((Graphics2D) g, null);
+		stationBoxes.paint((Graphics2D) g, visibleRect);
+		buildTrackRenderer.paint((Graphics2D) g, null);
 	}
 
 	public void refreshAll() {

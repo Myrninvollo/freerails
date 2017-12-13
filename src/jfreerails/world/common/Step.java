@@ -7,8 +7,6 @@ package jfreerails.world.common;
 
 import java.io.ObjectStreamException;
 
-import jfreerails.world.Constants;
-
 /**
  * This class represents a movement from a tile to any one of the surrounding
  * eight tiles.
@@ -19,7 +17,7 @@ import jfreerails.world.Constants;
 final public class Step implements FlatTrackTemplate {
 	private static final long serialVersionUID = 3256444698640921912L;
 
-    public static final int TILE_DIAMETER = Constants.TILE_SIZE;
+	public static final int TILE_DIAMETER = 30;
 
 	public static final double TILE_DIAGONAL = StrictMath.hypot(TILE_DIAMETER,
 			TILE_DIAMETER);

@@ -12,7 +12,7 @@ import jfreerails.move.ChangeTrainMove;
 import jfreerails.move.ChangeTrainScheduleMove;
 import jfreerails.move.CompositeMove;
 import jfreerails.move.Move;
-import jfreerails.network.specifics.MoveReceiver;
+import jfreerails.network.MoveReceiver;
 import jfreerails.world.common.FreerailsPathIterator;
 import jfreerails.world.common.ImInts;
 import jfreerails.world.common.ImList;
@@ -280,38 +280,37 @@ public class TrainUpdater implements ServerAutomaton {
 			//If a train is moving, we want it to keep moving rather than stop
 			//to allow an already stationary train to start moving.  To achieve this
 			//we process moving trains first.
-			ArrayList<Integer> movingTrains = new ArrayList<Integer>();
-			ArrayList<Integer> stoppedTrains = new ArrayList<Integer>();
+			ArrayList<MoveTrainPreMove> movingTrains = new ArrayList<MoveTrainPreMove>();
+			ArrayList<MoveTrainPreMove> stoppedTrains = new ArrayList<MoveTrainPreMove>();
 			
-			for (int i = 0; i < world.size(principal, KEY.TRAINS); i++) {												
+			for (int i = 0; i < world.size(principal, KEY.TRAINS); i++) {
+								
+				
 				TrainModel train = (TrainModel) world.get(principal,
 						KEY.TRAINS, i);
 				if (null == train)
 					continue;
-							
-				TrainAccessor ta = new TrainAccessor(world, principal, i);
-				if(ta.isMoving(time)){
-					movingTrains.add(i);
-				}else{
-					stoppedTrains.add(i);
-				}
+
+				MoveTrainPreMove moveTrain = new MoveTrainPreMove(i, principal);
+				if (moveTrain.isUpdateDue(world)) {	
+					TrainAccessor ta = new TrainAccessor(world, principal, i);
+					if(ta.isMoving(time)){
+						movingTrains.add(moveTrain);
+					}else{
+						stoppedTrains.add(moveTrain);
+					}
 					
+				}
 			}
-			for (int trainId : movingTrains) {
-				moveTrain(world, principal, trainId);
+			for (MoveTrainPreMove preMove : movingTrains) {
+				Move m = preMove.generateMove(world);
+				moveReceiver.processMove(m);
 			}
-			for (int trainId  : stoppedTrains) {
-				moveTrain(world, principal, trainId);
+			for (MoveTrainPreMove preMove : stoppedTrains) {
+				Move m = preMove.generateMove(world);
+				moveReceiver.processMove(m);
 			}
 		}
 
-	}
-
-	private void moveTrain(ReadOnlyWorld world, FreerailsPrincipal principal, int trainId) {
-		MoveTrainPreMove preMove = new MoveTrainPreMove(trainId, principal);
-		if (preMove.isUpdateDue(world)) {	
-			Move m = preMove.generateMove(world);
-			moveReceiver.processMove(m);
-		}
 	}
 }

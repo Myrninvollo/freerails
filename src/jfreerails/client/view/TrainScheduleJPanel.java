@@ -424,19 +424,8 @@ public class TrainScheduleJPanel extends javax.swing.JPanel implements View,
 
 	private void removeStationJMenuItemActionPerformed(
 			java.awt.event.ActionEvent evt) {// GEN-FIRST:event_removeStationJMenuItemActionPerformed
-		
 		MutableSchedule s = getSchedule();
-		if(s.getNumOrders() ==0){
-			logger.warning("Can't remove orders since non exist!");
-			return;
-		}
-	
-		
 		int i = orders.getSelectedIndex();
-		if(s.getNumOrders() <= i){
-			logger.warning("Order #"+String.valueOf(i)+" does not exist!");
-			return;
-		}
 		s.removeOrder(i);
 		sendUpdateMove(s);
 	}// GEN-LAST:event_removeStationJMenuItemActionPerformed
@@ -666,12 +655,6 @@ public class TrainScheduleJPanel extends javax.swing.JPanel implements View,
 		int orderNumber = this.orders.getSelectedIndex();
 		oldOrders = s.getOrder(orderNumber);
 		ImInts oldConsist = oldOrders.consist;
-		if( null == oldConsist){
-			//consist can be null if there is no
-			//scheduled change of wagons.
-			//Fixes freerails bug 1687677 and freerails2 bug 2014234 
-			return;
-		}
 		int newLength = oldConsist.size() - 1;
 		if (newLength < 0) {
 			//No wagons to remove!

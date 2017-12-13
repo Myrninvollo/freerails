@@ -125,8 +125,7 @@ public class CargoAndTerrainHandlerImpl implements CargoAndTerrainHandler {
 		String cargoID = meta.getValue("id");
 		String cargoCategory = meta.getValue("Category");
 		int unitWeight = Integer.parseInt(meta.getValue("unitWeight"));
-        CargoType cargoType = new CargoType(unitWeight, cargoID, Categories
-                .getCategory(cargoCategory));
+		CargoType cargoType = new CargoType(unitWeight, cargoID, Categories.getCategory(cargoCategory));
 
 		int cargoNumber = world.size(SKEY.CARGO_TYPES);
 		cargoName2cargoTypeNumber.put(cargoID, new Integer(cargoNumber));

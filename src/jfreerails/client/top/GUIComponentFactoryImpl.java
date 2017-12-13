@@ -47,7 +47,7 @@ import jfreerails.move.ChangeGameSpeedMove;
 import jfreerails.move.ChangeProductionAtEngineShopMove;
 import jfreerails.move.Move;
 import jfreerails.network.LocalConnection;
-import jfreerails.network.specifics.MoveReceiver;
+import jfreerails.network.MoveReceiver;
 import jfreerails.world.common.GameSpeed;
 import jfreerails.world.common.ImList;
 import jfreerails.world.common.ImPoint;
@@ -713,8 +713,7 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory,
 	 * refreshes the map views.
 	 */
 	public void tilesChanged(Rectangle tilesChanged) {
-		logger.fine("TilesChanged = " + tilesChanged);
-
+		logger.fine("TilesChanged = " + tilesChanged);	
 		// If lots of tiles have changed, do a complete refresh.
 		int size = tilesChanged.width * tilesChanged.height;
 

@@ -14,90 +14,89 @@ import jfreerails.world.common.FreerailsSerializable;
  * 
  */
 public class LocalConnection implements Connection2Client, Connection2Server {
+	public static final String SERVER_IN_SAME_JVM = "server in same JVM";
 
-    public static final String SERVER_IN_SAME_JVM = "server in same JVM";
-    private final SychronizedQueue fromServer = new SychronizedQueue();
-    private final SychronizedQueue fromClient = new SychronizedQueue();
-    private final SynchronizedFlag status = new SynchronizedFlag(true);
+	private final SychronizedQueue fromServer = new SychronizedQueue();
 
-    public LocalConnection() {
-    }
+	private final SychronizedQueue fromClient = new SychronizedQueue();
 
-    public FreerailsSerializable[] readFromClient() throws IOException {
-        if (status.isOpen()) {
-            return fromClient.read();
-        }
-        throw new IOException();
-    }
+	private final SynchronizedFlag status = new SynchronizedFlag(true);
 
-    public FreerailsSerializable waitForObjectFromClient() throws IOException,
-            InterruptedException {
-        synchronized (fromClient) {
-            if (fromClient.size() == 0) {
-                fromClient.wait();
-            }
+	public FreerailsSerializable[] readFromClient() throws IOException {
+		if (status.isOpen()) {
+			return fromClient.read();
+		}
+		throw new IOException();
+	}
 
-            if (status.isOpen()) {
-                return fromClient.getFirst();
-            }
-            throw new IOException();
-        }
-    }
+	public FreerailsSerializable waitForObjectFromClient() throws IOException,
+			InterruptedException {
+		synchronized (fromClient) {
+			if (fromClient.size() == 0) {
+				fromClient.wait();
+			}
 
-    public void writeToClient(FreerailsSerializable object) throws IOException {
-        if (status.isOpen()) {
-            synchronized (fromServer) {
-                fromServer.write(object);
-                fromServer.notifyAll();
-            }
-        } else {
-            throw new IOException();
-        }
-    }
+			if (status.isOpen()) {
+				return fromClient.getFirst();
+			}
+			throw new IOException();
+		}
+	}
 
-    public FreerailsSerializable[] readFromServer() throws IOException {
-        if (status.isOpen()) {
-            return fromServer.read();
-        }
-        throw new IOException();
-    }
+	public void writeToClient(FreerailsSerializable object) throws IOException {
+		if (status.isOpen()) {
+			synchronized (fromServer) {
+				fromServer.write(object);
+				fromServer.notifyAll();
+			}
+		} else {
+			throw new IOException();
+		}
+	}
 
-    public FreerailsSerializable waitForObjectFromServer() throws IOException,
-            InterruptedException {
-        if (status.isOpen()) {
-            synchronized (fromServer) {
-                if (fromServer.size() == 0) {
-                    fromServer.wait();
-                }
+	public FreerailsSerializable[] readFromServer() throws IOException {
+		if (status.isOpen()) {
+			return fromServer.read();
+		}
+		throw new IOException();
+	}
 
-                return fromServer.getFirst();
-            }
-        }
-        throw new IOException();
-    }
+	public FreerailsSerializable waitForObjectFromServer() throws IOException,
+			InterruptedException {
+		if (status.isOpen()) {
+			synchronized (fromServer) {
+				if (fromServer.size() == 0) {
+					fromServer.wait();
+				}
 
-    public void writeToServer(FreerailsSerializable object) throws IOException {
-        if (status.isOpen()) {
-            synchronized (fromClient) {
-                fromClient.write(object);
-                fromClient.notifyAll();
-            }
-        } else {
-            throw new IOException();
-        }
-    }
+				return fromServer.getFirst();
+			}
+		}
+		throw new IOException();
+	}
 
-    public boolean isOpen() {
-        return status.isOpen();
-    }
+	public void writeToServer(FreerailsSerializable object) throws IOException {
+		if (status.isOpen()) {
+			synchronized (fromClient) {
+				fromClient.write(object);
+				fromClient.notifyAll();
+			}
+		} else {
+			throw new IOException();
+		}
+	}
 
-    public void flush() {
-        // No need to do anything.
-    }
+	public boolean isOpen() {
+		return status.isOpen();
+	}
 
-    public synchronized void disconnect() {
-        status.close();
-    }
+	public void flush() {
+		// No need to do anything.
+	}
+
+	public synchronized void disconnect() {
+		status.close();
+	}
 
     public String getServerDetails() {
         return SERVER_IN_SAME_JVM;

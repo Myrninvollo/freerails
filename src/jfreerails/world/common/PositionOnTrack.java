@@ -10,11 +10,11 @@ package jfreerails.world.common;
  * @author Luke
  */
 public final class PositionOnTrack implements FreerailsMutableSerializable {
-	private static final int BITS_FOR_COORDINATE = 14;
+    public static final int BITS_FOR_COORINATE = 14;
 
-	private static final int BITS_FOR_DIRECTION = 3;
+	public static final int BITS_FOR_DIRECTION = 3;
 
-	public static final int MAX_COORDINATE = (1 << BITS_FOR_COORDINATE) - 1;
+	public static final int MAX_COORINATE = (1 << BITS_FOR_COORINATE) - 1;
 
 	public static final int MAX_DIRECTION = (1 << BITS_FOR_DIRECTION) - 1;
 
@@ -60,11 +60,11 @@ public final class PositionOnTrack implements FreerailsMutableSerializable {
 	}
 
 	private PositionOnTrack(int x, int y, Step direction) {
-		if (x > MAX_COORDINATE || x < 0) {
+		if (x > MAX_COORINATE || x < 0) {
 			throw new IllegalArgumentException("x=" + x);
 		}
 
-		if (y > MAX_COORDINATE || y < 0) {
+		if (y > MAX_COORINATE || y < 0) {
 			throw new IllegalArgumentException("y=" + y);
 		}
 
@@ -145,13 +145,13 @@ public final class PositionOnTrack implements FreerailsMutableSerializable {
 	}
 
 	public void setValuesFromInt(int i) {
-		x = i & MAX_COORDINATE;
+		x = i & MAX_COORINATE;
 
-		int shiftedY = i & (MAX_COORDINATE << BITS_FOR_COORDINATE);
-		y = shiftedY >> BITS_FOR_COORDINATE;
+		int shiftedY = i & (MAX_COORINATE << BITS_FOR_COORINATE);
+		y = shiftedY >> BITS_FOR_COORINATE;
 
-		int shiftedDirection = i & (MAX_DIRECTION << (2 * BITS_FOR_COORDINATE));
-		int directionAsInt = shiftedDirection >> (2 * BITS_FOR_COORDINATE);
+		int shiftedDirection = i & (MAX_DIRECTION << (2 * BITS_FOR_COORINATE));
+		int directionAsInt = shiftedDirection >> (2 * BITS_FOR_COORINATE);
 		cameFrom = Step.getInstance(directionAsInt);
 	}
 
@@ -173,20 +173,20 @@ public final class PositionOnTrack implements FreerailsMutableSerializable {
 	 * @return an integer representing this PositionOnTrack object
 	 */
 	public int toInt() {
-        int i = x | (y << BITS_FOR_COORDINATE);
+	    int i = x | (y << BITS_FOR_COORINATE);
 
 		int directionAsInt = cameFrom.getID();
-		int shiftedDirection = (directionAsInt << (2 * BITS_FOR_COORDINATE));
+		int shiftedDirection = (directionAsInt << (2 * BITS_FOR_COORINATE));
 		i = i | shiftedDirection;
 
 		return i;
 	}
 
-    public static int toInt(int x, int y) {
-        int i = x | (y << BITS_FOR_COORDINATE);
-        return i;
-    }
-
+	public static int toInt(int x, int y) {
+        int i = x | (y << BITS_FOR_COORINATE);
+        return i;    
+	}
+	
 	@Override
 	public String toString() {
 		String s = "PositionOnTrack: " + x + ", " + y + " facing "

@@ -71,7 +71,8 @@ public class TimeTickMove implements Move {
 		if (time.equals(newTime)) {
 			return MoveStatus.MOVE_OK;
 		}
-        return MoveStatus.moveFailed("Expected " + newTime + ", found " + time);
+		return MoveStatus.moveFailed("Expected " + newTime + ", found "
+				+ time);
 	}
 
 	public MoveStatus doMove(World w, FreerailsPrincipal p) {

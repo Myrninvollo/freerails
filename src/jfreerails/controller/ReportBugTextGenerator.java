@@ -89,7 +89,9 @@ public class ReportBugTextGenerator {
 			Properties props = new Properties();			
 			InputStream in = ReportBugTextGenerator.class
 			.getResourceAsStream("/build.properties");
-			props.load(in);		
+			props.load(in);
+		
+			props.load(in);
 			in.close();
 			version = props.getProperty("freerails.build");
 			builtBy = props.getProperty("freerails.built.by");

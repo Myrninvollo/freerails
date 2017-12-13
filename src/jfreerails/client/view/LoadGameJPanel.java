@@ -16,7 +16,7 @@ import java.awt.event.ActionListener;
 import javax.swing.Action;
 
 import jfreerails.world.common.ImStringList;
-import jfreerails.network.specifics.*;
+import jfreerails.network.*;
 /**
  *
  * @author  Luke

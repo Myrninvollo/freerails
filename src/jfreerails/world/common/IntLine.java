@@ -9,15 +9,6 @@ import java.io.Serializable;
  */
 public class IntLine implements Serializable {
 	private static final long serialVersionUID = 3257853198755705393L;
-    private final static int MAX_SQUAREROOTS = 64 * 256;
-    private final static double squareRoots[];
-
-    static {
-        squareRoots = new double[MAX_SQUAREROOTS];
-        for (int i = 0; i < MAX_SQUAREROOTS; i++) {
-            squareRoots[i] = Math.sqrt(i);
-        }
-    }
 
 	public int x1;
 
@@ -43,9 +34,6 @@ public class IntLine implements Serializable {
 	 */
 	public double getLength() {
 		int sumOfSquares = (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2);
-        if(sumOfSquares < MAX_SQUAREROOTS) {
-            return squareRoots[sumOfSquares];
-        }
 		return Math.sqrt(sumOfSquares);
 	}
 
@@ -70,7 +58,7 @@ public class IntLine implements Serializable {
 	 * Default constructor - defines a dot at 0,0.
 	 */
 	public IntLine() {
-	}
+    }
 
 	@Override
 	public boolean equals(Object o) {

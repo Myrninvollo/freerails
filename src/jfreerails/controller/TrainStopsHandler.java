@@ -195,13 +195,7 @@ public class TrainStopsHandler implements Serializable {
 		if(stationId<0) throw new IllegalStateException();
 		
 		//The train's orders may have changed...
-		final int orderToGoto = schedule.getOrderToGoto();
-		if(-1 == orderToGoto){
-			//We end up here if all the orders are deleted.
-			return false;
-		}
-		
-		TrainOrdersModel order = schedule.getOrder(orderToGoto);
+		TrainOrdersModel order = schedule.getOrder(schedule.getOrderToGoto());
 		
 		//Should we go to another station?
 		if(stationId != order.stationId){

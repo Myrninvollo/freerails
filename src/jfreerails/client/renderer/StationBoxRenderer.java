@@ -9,7 +9,6 @@ import java.io.IOException;
 
 import jfreerails.client.common.Painter;
 import jfreerails.controller.ModelRoot;
-import jfreerails.world.Constants;
 import jfreerails.world.cargo.CargoType;
 import jfreerails.world.cargo.ImmutableCargoBundle;
 import jfreerails.world.player.FreerailsPrincipal;
@@ -38,6 +37,8 @@ public class StationBoxRenderer implements Painter {
 
     private final Color bgColor;
 
+    private final RenderersRoot vl;
+
     private final int wagonImageWidth;
 
     private final ModelRoot modelRoot;
@@ -49,6 +50,7 @@ public class StationBoxRenderer implements Painter {
     public StationBoxRenderer(ReadOnlyWorld world, RenderersRoot vl,
             ModelRoot modelRoot) {
         this.w = world;
+        this.vl = vl;
         this.bgColor = new Color(0, 0, 200, 60);
         this.modelRoot = modelRoot;
 
@@ -72,7 +74,8 @@ public class StationBoxRenderer implements Painter {
         }
     }
 
-    public void paint(Graphics2D g) {
+    
+    public void paint(Graphics2D g, Rectangle newVisibleRectectangle) {
         Boolean showCargoWaiting = (Boolean) modelRoot
                 .getProperty(ModelRoot.Property.SHOW_CARGO_AT_STATIONS);
 
@@ -83,13 +86,11 @@ public class StationBoxRenderer implements Painter {
 
             while (wi.next()) { // loop over non null stations
                 StationModel station = (StationModel) wi.getElement();
-                int positionX = (station.getStationX() * Constants.TILE_SIZE)
-                        + Constants.TILE_SIZE / 2;
-                int positionY = (station.getStationY() * Constants.TILE_SIZE)
-                        + Constants.TILE_SIZE * 2;
+                int positionX = (station.getStationX() * 30) + 15;
+                int positionY = (station.getStationY() * 30) + 60;
                 Rectangle r = new Rectangle(positionX, positionY, MAX_WIDTH,
                         MAX_HEIGHT);
-               
+                if (newVisibleRectectangle.intersects(r)) {
                     g.setColor(bgColor);
                     g.fillRect(positionX, positionY, MAX_WIDTH, MAX_HEIGHT);
                     g.setColor(Color.WHITE);
@@ -99,6 +100,7 @@ public class StationBoxRenderer implements Painter {
                     ImmutableCargoBundle cb = (ImmutableCargoBundle) w.get(
                             principal, KEY.CARGO_BUNDLES, station
                                     .getCargoBundleID());
+                   /** 666 do only if something changed */
                     int[][] carsLoads = calculateCarLoads(cb);
                     for (int category = 0; category < CargoType
                             .getNumberOfCategories(); category++) {
@@ -117,7 +119,7 @@ public class StationBoxRenderer implements Painter {
                         }
                     }
                 }
-            
+            }
         }
     }
 

@@ -1,16 +1,3 @@
-Sep 23 2010  
-	o Put junit tests in a separate directory.
-Apr 9 2009, Luke
-	Fixed bugs
-	1829444 Unexpected Exception: ImList.java line 74
-	1663152 Unexpected exception upon hitting "1" to resume movement
-Apr 9 2009, Luke
-	Fixed bug
-	1687677 Unexpected Exception: TrainScheduleJPanel.java line 658 
-Apr 9 2009, Luke
-	o Incorporate some changes from freerails2 project
-Feb 29 2008, Luke
-	o Separate the general network code and the freerails specific code into different packages.
 Sep 18, 2006, Luke
 	o Apply patch  1557521 (simple cleanups)
 Sep 3, 2006, Luke

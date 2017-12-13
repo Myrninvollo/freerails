@@ -4,8 +4,6 @@
  */
 package jfreerails.world.top;
 
-import java.util.NoSuchElementException;
-
 import jfreerails.world.common.FreerailsSerializable;
 
 /**
@@ -53,12 +51,7 @@ public interface WorldIterator {
 	/** Returns the number of rows. */
 	int size();
 
-    /**
-     * Moves the cursor to the specified index.
-     * 
-     * @throws NoSuchElementException
-     *             if index out of range
-     */
+	/** Moves the cursor to the specified index. */
 	void gotoIndex(int i);
 
 	/** Moves the cursor to the specified index. */

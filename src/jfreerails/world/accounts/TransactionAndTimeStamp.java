@@ -22,17 +22,13 @@ public class TransactionAndTimeStamp implements FreerailsSerializable {
 
     @Override
 	public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (!(o instanceof TransactionAndTimeStamp))
-            return false;
+        if (this == o) return true;
+        if (!(o instanceof TransactionAndTimeStamp)) return false;
 
         final TransactionAndTimeStamp transactionAndTimeStamp = (TransactionAndTimeStamp) o;
 
-        if (!t.equals(transactionAndTimeStamp.t))
-            return false;
-        if (!timeStamp.equals(transactionAndTimeStamp.timeStamp))
-            return false;
+        if (!t.equals(transactionAndTimeStamp.t)) return false;
+        if (!timeStamp.equals(transactionAndTimeStamp.timeStamp)) return false;
 
         return true;
     }

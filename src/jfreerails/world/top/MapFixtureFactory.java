@@ -100,7 +100,7 @@ public class MapFixtureFactory {
 			world.add(SKEY.TRACK_RULES, trackRulesArray[i]);
 		}
 
-		// Add the terrain types if necessary.
+		// Add the terrain types if neccesary.
 		if (world.size(SKEY.TERRAIN_TYPES) == 0) {
 			generateTerrainTypesList(world);
 		}
@@ -108,15 +108,12 @@ public class MapFixtureFactory {
 
 	/** Adds hard coded cargo types. */
 	public static void generateCargoTypesList(World world) {
-        world.add(SKEY.CARGO_TYPES, new CargoType(0, "Mail", Categories.Mail));
-        world.add(SKEY.CARGO_TYPES, new CargoType(0, "Passengers",
-                Categories.Passengers));
-        world.add(SKEY.CARGO_TYPES, new CargoType(0, "Goods",
-                Categories.Fast_Freight));
-        world.add(SKEY.CARGO_TYPES, new CargoType(0, "Steel",
-                Categories.Slow_Freight));
-        world.add(SKEY.CARGO_TYPES, new CargoType(0, "Coal",
-                Categories.Bulk_Freight));
+		world.add(SKEY.CARGO_TYPES, new CargoType(0, "Mail", Categories.Mail));
+		world.add(SKEY.CARGO_TYPES,
+				new CargoType(0, "Passengers", Categories.Passengers));
+		world.add(SKEY.CARGO_TYPES, new CargoType(0, "Goods", Categories.Fast_Freight));
+		world.add(SKEY.CARGO_TYPES, new CargoType(0, "Steel", Categories.Slow_Freight));
+		world.add(SKEY.CARGO_TYPES, new CargoType(0, "Coal", Categories.Bulk_Freight));
 	}
 
 	/** Adds hard coded terrain types. */
