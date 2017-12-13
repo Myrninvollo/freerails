@@ -7,7 +7,8 @@ import junit.framework.TestCase;
 
 
 /**
- *
+ *  Test cases that use FreerailsGameServer <b>and</b> connect
+ * over the Internet should extend this class  .
  *  @author Luke
  *
  */
@@ -18,7 +19,7 @@ public class AbstractFreerailsServerTestCase extends TestCase {
     static final String ipAddress = "127.0.0.1";
 
     protected synchronized void setUp() throws Exception {
-        server = FreerailsGameServer.startServer();
+        server = FreerailsGameServer.startServer(new SavedGamesManager4UnitTests());
         connectionAccepter = new InetConnectionAccepter(port, server);
 
         Thread serverThread = new Thread(connectionAccepter);

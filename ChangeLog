@@ -1,3 +1,18 @@
+Jul 07, 2004 Luke	
+	Bugs fixed:	
+	o 972866 Build track by dragging - only when build track selected
+Jul 06, 2004 Luke
+	RFEs Implemented:
+	o 915943 Sounds!
+	Bugs fixed:	
+	o 984510 jfreerails.world.player.player; local class incompatible
+Jun 25, 2004 Luke
+	Bugs fixed:	
+ 	o 979831 Stacktraces printed out when running unit tests 
+Jun 17, 2004 Luke
+	o Apply Vincenzo Di Massa's station distance patch.
+	o Fixed DisplayModesComboBoxModels.removeDisplayModesBelow(.) so 
+	that it does not remove display modes when displayMode.getBitDepth() returns DisplayMode.BIT_DEPTH_MULTI
 Jun 15, 2004 Luke
 	Bugs fixed:	
 	o 972869 Crash when track under train removed.

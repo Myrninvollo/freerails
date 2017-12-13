@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 import javax.swing.SwingUtilities;
 import javax.swing.event.MouseInputAdapter;
 import jfreerails.client.common.ModelRoot;
+import jfreerails.client.common.SoundManager;
 import jfreerails.client.renderer.BuildTrackRenderer;
 import jfreerails.client.view.DialogueBoxController;
 import jfreerails.client.view.FreerailsCursor;
@@ -23,6 +24,7 @@ import jfreerails.world.common.OneTileMoveVector;
  * @author Luke
  */
 public class UserInputOnMapController extends KeyAdapter {
+    private static final String JFREERAILS_CLIENT_SOUNDS_BUILDTRACK_WAV = "/jfreerails/client/sounds/buildtrack.wav";
     private static final Logger logger = Logger.getLogger(UserInputOnMapController.class.getName());
     private StationTypesPopup stationTypesPopup;
     private MapViewJComponent mapView;
@@ -31,6 +33,7 @@ public class UserInputOnMapController extends KeyAdapter {
     private final ModelRoot modelRoot;
     private final MouseInputAdapter mouseInputAdapter = new CursorMouseAdapter();
     private BuildTrackRenderer buildTrack;
+    private SoundManager soundManager = SoundManager.getSoundManager();
 
     public UserInputOnMapController(ModelRoot mr) {
         modelRoot = mr;
@@ -41,10 +44,8 @@ public class UserInputOnMapController extends KeyAdapter {
         private int y;
         private boolean pressedInside = false;
 
-        //        private List proposedTrack;
         public void mousePressed(MouseEvent evt) {
             if (SwingUtilities.isLeftMouseButton(evt)) {
-                buildTrack.setup(modelRoot);
                 x = evt.getX();
                 y = evt.getY();
 
@@ -56,12 +57,23 @@ public class UserInputOnMapController extends KeyAdapter {
 
                 mapView.requestFocus();
                 pressedInside = true;
-                buildTrack.show();
+
+                /* Fix for bug [ 972866 ] Build track by dragging - only when build track selected */
+                boolean isBuildTrackModeSet = trackBuilder.getTrackBuilderMode() == TrackMoveProducer.BUILD_TRACK;
+
+                if (isBuildTrackModeSet) {
+                    buildTrack.setup(modelRoot);
+                    buildTrack.show();
+                }
             }
         }
 
         public void mouseDragged(MouseEvent evt) {
-            if (SwingUtilities.isLeftMouseButton(evt) && pressedInside) {
+            /* Fix for bug [ 972866 ] Build track by dragging - only when build track selected */
+            boolean isBuildTrackModeSet = trackBuilder.getTrackBuilderMode() == TrackMoveProducer.BUILD_TRACK;
+
+            if (SwingUtilities.isLeftMouseButton(evt) && pressedInside &&
+                    isBuildTrackModeSet) {
                 int x = evt.getX();
                 int y = evt.getY();
                 float scale = mapView.getScale();
@@ -69,13 +81,8 @@ public class UserInputOnMapController extends KeyAdapter {
                 int tileX = x / tileSize.width;
                 int tileY = y / tileSize.height;
 
-                //                proposedTrack = createProposedTrack(new Point(tileX, tileY));
                 buildTrack.setTrack(getCursorPosition(), new Point(tileX, tileY));
                 mapView.requestFocus();
-
-                /** @todo  show created/show track but not send it to other players
-                 * ??? How ???
-                 */
             }
         }
 
@@ -100,6 +107,7 @@ public class UserInputOnMapController extends KeyAdapter {
 
             if (ms.ok) {
                 setCursorMessage("");
+                playAppropriateSound();
             } else {
                 setCursorMessage(ms.message);
             }
@@ -115,6 +123,18 @@ public class UserInputOnMapController extends KeyAdapter {
             //            }
         } else {
             logger.warning("No track builder available!");
+        }
+    }
+
+    private void playAppropriateSound() {
+        final int trackBuilderMode = trackBuilder.getTrackBuilderMode();
+
+        if (trackBuilderMode == TrackMoveProducer.BUILD_TRACK ||
+                trackBuilderMode == TrackMoveProducer.UPGRADE_TRACK) {
+            soundManager.playSound(JFREERAILS_CLIENT_SOUNDS_BUILDTRACK_WAV, 0);
+        } else if (trackBuilderMode == TrackMoveProducer.REMOVE_TRACK) {
+            soundManager.playSound("/jfreerails/client/sounds/removetrack.wav",
+                0);
         }
     }
 
@@ -144,6 +164,7 @@ public class UserInputOnMapController extends KeyAdapter {
 
             if (ms.ok) {
                 setCursorMessage("");
+                playAppropriateSound();
             } else {
                 setCursorMessage(ms.message);
             }

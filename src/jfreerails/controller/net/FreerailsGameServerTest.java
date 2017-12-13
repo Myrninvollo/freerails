@@ -7,7 +7,7 @@ import junit.framework.TestCase;
 
 
 /**
- *
+ *  Junit test for FreerailsGameServer - tests logging on.
  *  @author Luke
  *
  */
@@ -61,6 +61,6 @@ public class FreerailsGameServerTest extends TestCase {
     }
 
     protected void setUp() throws Exception {
-        server = new FreerailsGameServer();
+        server = new FreerailsGameServer(new SavedGamesManager4UnitTests());
     }
 }
