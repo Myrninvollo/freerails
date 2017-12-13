@@ -13,6 +13,7 @@ import jfreerails.world.player.FreerailsPrincipal;
 import jfreerails.world.top.ReadOnlyWorld;
 import jfreerails.world.top.SKEY;
 import jfreerails.world.track.TrackPiece;
+import jfreerails.world.track.TrackPieceImpl;
 import jfreerails.world.track.TrackRule;
 
 
@@ -141,11 +142,11 @@ final public class TrackMoveProducer {
 
     private MoveStatus upgradeTrack(Point point, TrackRule trackRule) {
         ReadOnlyWorld w = executor.getWorld();
-        TrackPiece before = w.getTile(point.x, point.y);
+        TrackPiece before = (TrackPiece)w.getTile(point.x, point.y);
         FreerailsPrincipal principal = executor.getPrincipal();
         int owner = ChangeTrackPieceCompositeMove.getOwner(principal, w);
-        TrackPiece after = trackRule.getTrackPiece(before.getTrackConfiguration(),
-                owner);
+        TrackPiece after = new TrackPieceImpl(before.getTrackConfiguration(),
+                trackRule, owner);
 
         /* We don't want to 'upgrade' a station to track. See bug 874416. */
         if (before.getTrackRule().isStation()) {

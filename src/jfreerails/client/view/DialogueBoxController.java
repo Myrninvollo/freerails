@@ -20,6 +20,7 @@ import javax.swing.JInternalFrame;
 import javax.swing.JLayeredPane;
 import javax.swing.border.LineBorder;
 
+import jfreerails.client.common.ModelRootImpl;
 import jfreerails.client.common.ModelRoot;
 import jfreerails.client.common.MyGlassPanel;
 import jfreerails.client.renderer.ViewLists;
@@ -60,12 +61,9 @@ public class DialogueBoxController implements WorldListListener {
     private StationInfoJPanel stationInfo;
     private TrainDialogueJPanel trainDialogueJPanel;
     private ReadOnlyWorld world;
-    private ModelRoot modelRoot;
+    private ModelRootImpl modelRoot;
     private ViewLists vl;
-    private Component defaultFocusOwner = null;
-    private final LineBorder defaultBorder = new LineBorder(new java.awt.Color(
-                0, 0, 0), 3);
-    private final ActionRoot actionRoot;
+    private Component defaultFocusOwner = null;    
     private final JFrame frame;
 
     /** Use this ActionListener to close a dialogue without performing any other action. */
@@ -113,10 +111,10 @@ public class DialogueBoxController implements WorldListListener {
         
 	private JInternalFrame dialogueJInternalFrame;
 
-    public DialogueBoxController(JFrame frame, ModelRoot mr, ActionRoot ar) {
+    public DialogueBoxController(JFrame frame, ModelRootImpl mr) {
         this.frame = frame;
         modelRoot = mr;
-        actionRoot = ar;
+        
         //Setup glass panel..
         glassPanel = new MyGlassPanel();
         glassPanel.setSize(frame.getSize());
@@ -133,7 +131,7 @@ public class DialogueBoxController implements WorldListListener {
             });
 
         closeButton.addActionListener(closeCurrentDialogue);
-        actionRoot.setDialogueBoxController(this);
+        
 
         showControls = new HtmlJPanel(DialogueBoxController.class.getResource(
                     "/jfreerails/client/view/game_controls.html"));
@@ -157,7 +155,7 @@ public class DialogueBoxController implements WorldListListener {
      * this method to avoid memory leaks - see bug 967677
      * (OutOfMemoryError after starting several new games). </b></p>
      */
-    public void setup(ModelRoot mr, ViewLists vl) {
+    public void setup(ModelRootImpl mr, ViewLists vl) {
         this.modelRoot = mr;
         this.vl = vl;
         modelRoot.addListListener(this); //When a new train gets built, we show the train info etc
@@ -278,7 +276,7 @@ public class DialogueBoxController implements WorldListListener {
     }
 
     public void showTerrainInfo(int x, int y) {
-        FreerailsTile tile = world.getTile(x, y);
+        FreerailsTile tile = (FreerailsTile) world.getTile(x, y);
         int terrainType = tile.getTerrainTypeNumber();
         showTerrainInfo(terrainType);
     }
@@ -318,6 +316,23 @@ public class DialogueBoxController implements WorldListListener {
                 "There are" + " no trains to display!");
         }
     }
+    
+    public void showNetworthGraph() {
+     
+            final NetWorthGraphJPanel worthGraph = new NetWorthGraphJPanel();
+            worthGraph.setup(modelRoot, vl, closeCurrentDialogue);            
+            showContent(worthGraph);
+      
+    }
+    
+    public void showLeaderBoard() {
+
+        LeaderBoardJPanel leaderBoardJPanel = new LeaderBoardJPanel();
+        leaderBoardJPanel.setup(modelRoot, vl, closeCurrentDialogue);
+        showContent(leaderBoardJPanel);
+
+    }
+    
 
     public void showContent(JComponent component) {
     	closeContent();
@@ -393,7 +408,7 @@ public class DialogueBoxController implements WorldListListener {
     }
 
     public void showStationOrTerrainInfo(int x, int y) {
-        FreerailsTile tile = world.getTile(x, y);
+        FreerailsTile tile = (FreerailsTile) world.getTile(x, y);
 
         if (tile.getTrackRule().isStation()) {
             for (int i = 0;

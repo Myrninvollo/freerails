@@ -3,7 +3,6 @@ package jfreerails.move;
 import jfreerails.world.player.FreerailsPrincipal;
 import jfreerails.world.top.KEY;
 import jfreerails.world.top.World;
-import jfreerails.world.train.TrainModel;
 import jfreerails.world.train.TrainPositionOnMap;
 
 
@@ -14,13 +13,13 @@ import jfreerails.world.train.TrainPositionOnMap;
 public class InitialiseTrainPositionMove implements Move {
     private final TrainPositionOnMap newPosition;
     private final int trainNo;
-    private final FreerailsPrincipal principal;
+    private final FreerailsPrincipal m_principal;
 
     public InitialiseTrainPositionMove(int trainNumber,
         TrainPositionOnMap position, FreerailsPrincipal p) {
         newPosition = position;
         trainNo = trainNumber;
-        this.principal = p;
+        m_principal = p;
     }
 
     public MoveStatus tryDoMove(World w, FreerailsPrincipal p) {
@@ -62,13 +61,13 @@ public class InitialiseTrainPositionMove implements Move {
     }
 
     private void setTrainPosition(World w, TrainPositionOnMap p) {
-        TrainModel train = (TrainModel)w.get(KEY.TRAINS, trainNo, principal);
-        train.setPosition(p);
+        w.set(KEY.TRAIN_POSITIONS, trainNo, p, m_principal);
     }
 
     private TrainPositionOnMap getTrainPosition(World w) {
-        TrainModel train = (TrainModel)w.get(KEY.TRAINS, trainNo, principal);
+        TrainPositionOnMap pos = (TrainPositionOnMap)w.get(KEY.TRAIN_POSITIONS,
+                trainNo, m_principal);
 
-        return train.getPosition();
+        return pos;
     }
 }

@@ -5,7 +5,7 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 
 import jfreerails.client.common.JFrameMinimumSizeEnforcer;
-import jfreerails.client.common.ModelRoot;
+import jfreerails.client.common.ModelRootImpl;
 import jfreerails.client.common.MyGlassPanel;
 import jfreerails.client.renderer.ViewLists;
 import jfreerails.client.top.ViewListsImpl;
@@ -15,17 +15,16 @@ import jfreerails.client.view.DialogueBoxController;
 import jfreerails.client.view.HtmlJPanel;
 import jfreerails.client.view.ShowJavaProperties;
 import jfreerails.client.view.TrainDialogueJPanel;
-import jfreerails.controller.MoveChainFork;
-import jfreerails.controller.UntriedMoveReceiver;
 import jfreerails.move.ListMove;
 import jfreerails.move.Move;
 import jfreerails.move.MoveStatus;
+import jfreerails.network.MoveChainFork;
+import jfreerails.network.UntriedMoveReceiver;
 import jfreerails.server.NewTileSetFactoryImpl;
 import jfreerails.server.common.TileSetFactory;
 import jfreerails.util.FreerailsProgressMonitor;
 import jfreerails.world.cargo.CargoBatch;
-import jfreerails.world.cargo.CargoBundle;
-import jfreerails.world.cargo.CargoBundleImpl;
+import jfreerails.world.cargo.MutableCargoBundle;
 import jfreerails.world.player.FreerailsPrincipal;
 import jfreerails.world.player.Player;
 import jfreerails.world.station.DemandAtStation;
@@ -50,13 +49,13 @@ public class DialogueBoxTester extends javax.swing.JFrame {
     private static final FreerailsPrincipal TEST_PRINCIPAL = TEST_PLAYER.getPrincipal();
     
     
-    private final DialogueBoxController dialogueBoxController;        
+    private final DialogueBoxController dialogueBoxController;
     
     private World w;
     
     private ViewLists vl;
     
-    private ModelRoot modelRoot;
+    private ModelRootImpl modelRoot;
     
     private ActionListener closeCurrentDialogue = new ActionListener() {
         public void actionPerformed(ActionEvent arg0) {
@@ -64,25 +63,14 @@ public class DialogueBoxTester extends javax.swing.JFrame {
         }
     };
     
-    private UntriedMoveReceiver dummyReceiver = new UntriedMoveReceiver() {
-        public MoveStatus tryDoMove(Move move) {
-            return MoveStatus.MOVE_OK;
-        }
-        
-        public void undoLastMove() {
-        }
-        
-        public void processMove(Move move) {
-            move.doMove(w, Player.AUTHORITATIVE);
-        }
-    };
+    private UntriedMoveReceiver dummyReceiver = new SimpleMoveReciever(w);
     
     private TrainDialogueJPanel trainDialogueJPanel = new TrainDialogueJPanel();
     
-    /** Creates new form TestGlassPanelMethod */
+    /** Creates new form TestGlassPanelMethod. */
     private DialogueBoxTester() {
         
-        modelRoot = new ModelRoot();    
+        modelRoot = new ModelRootImpl();
         modelRoot.setMoveFork(new MoveChainFork());
         modelRoot.setMoveReceiver(this.dummyReceiver);
         w = new WorldImpl(200, 200);
@@ -99,7 +87,8 @@ public class DialogueBoxTester extends javax.swing.JFrame {
         modelRoot.setup(w, TEST_PLAYER.getPrincipal());
         ActionRoot actionRoot = new ActionRoot();
         actionRoot.setup(modelRoot, vl);
-        dialogueBoxController = new DialogueBoxController(this, modelRoot, actionRoot);
+        dialogueBoxController = new DialogueBoxController(this, modelRoot);
+        actionRoot.setDialogueBoxController(dialogueBoxController);
         dialogueBoxController.setDefaultFocusOwner(this);
         
         int numberOfCargoTypes = w.size(SKEY.CARGO_TYPES);
@@ -130,35 +119,35 @@ public class DialogueBoxTester extends javax.swing.JFrame {
         new StationModel(90, 50, "Swansea", numberOfCargoTypes, 0), TEST_PRINCIPAL);
         //Set up cargo bundle, for the purpose of this test code all the trains can share the
         //same one.
-        CargoBundle cb = new CargoBundleImpl();
+        MutableCargoBundle cb = new MutableCargoBundle();
         cb.setAmount(new CargoBatch(0, 10, 10, 8, 0), 80);
         cb.setAmount(new CargoBatch(0, 10, 10, 9, 0), 60);
         cb.setAmount(new CargoBatch(1, 10, 10, 9, 0), 140);
         cb.setAmount(new CargoBatch(3, 10, 10, 9, 0), 180);
         cb.setAmount(new CargoBatch(5, 10, 10, 9, 0), 10);
-        w.add(KEY.CARGO_BUNDLES, cb, TEST_PRINCIPAL);
+        w.add(KEY.CARGO_BUNDLES, cb.toImmutableCargoBundle(), TEST_PRINCIPAL);
         
         MutableSchedule schedule = new MutableSchedule();
         TrainOrdersModel order =
-        new TrainOrdersModel(0, new int[] { 0, 0, 0 }, false);
+        new TrainOrdersModel(0, new int[] { 0, 0, 0 }, false, false);
         TrainOrdersModel order2 =
-        new TrainOrdersModel(1, new int[] { 1, 2, 0, 0,0 }, true);
+        new TrainOrdersModel(1, new int[] { 1, 2, 0, 0,0 }, true, false);
         TrainOrdersModel order3 =
-        new TrainOrdersModel(2, null, true);
+        new TrainOrdersModel(2, null, true, false);
         schedule.setOrder(0, order);
         schedule.setOrder(1, order2);
         
         int scheduleID = w.add(KEY.TRAIN_SCHEDULES, schedule.toImmutableSchedule(), TEST_PRINCIPAL);
-        w.add(KEY.TRAINS, new TrainModel(0, new int[] { 0, 0 }, null, scheduleID), TEST_PRINCIPAL);
+        w.add(KEY.TRAINS, new TrainModel(0, new int[] { 0, 0 },  scheduleID), TEST_PRINCIPAL);
         schedule.setOrder(2, order2);
         schedule.setOrder(3, order3);
         scheduleID = w.add(KEY.TRAIN_SCHEDULES, schedule.toImmutableSchedule(), TEST_PRINCIPAL);
-        w.add(KEY.TRAINS, new TrainModel(1, new int[] { 1, 1 }, null, scheduleID), TEST_PRINCIPAL);
+        w.add(KEY.TRAINS, new TrainModel(1, new int[] { 1, 1 },  scheduleID), TEST_PRINCIPAL);
         schedule.setOrder(4, order2);
         schedule.setOrderToGoto(3);
         schedule.setPriorityOrders(order);
         scheduleID = w.add(KEY.TRAIN_SCHEDULES, schedule.toImmutableSchedule(), TEST_PRINCIPAL);
-        w.add(KEY.TRAINS, new TrainModel(0, new int[] { 1, 2, 0 }, null, scheduleID), TEST_PRINCIPAL);
+        w.add(KEY.TRAINS, new TrainModel(0, new int[] { 1, 2, 0 },  scheduleID), TEST_PRINCIPAL);
         
         
         final MyGlassPanel glassPanel = new MyGlassPanel();
@@ -190,6 +179,7 @@ public class DialogueBoxTester extends javax.swing.JFrame {
         showTrainList = new javax.swing.JMenuItem();
         showCargoWaitingAndDemand = new javax.swing.JMenuItem();
         showJavaSystemProperties = new javax.swing.JMenuItem();
+        showNetworthGraph = new javax.swing.JMenuItem();
 
         addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
@@ -299,15 +289,28 @@ public class DialogueBoxTester extends javax.swing.JFrame {
 
         show.add(showJavaSystemProperties);
 
+        showNetworthGraph.setText("Show networth graph");
+        showNetworthGraph.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                showNetworthGraphActionPerformed(evt);
+            }
+        });
+
+        show.add(showNetworthGraph);
+
         jMenuBar1.add(show);
 
         setJMenuBar(jMenuBar1);
 
     }//GEN-END:initComponents
     
+    private void showNetworthGraphActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showNetworthGraphActionPerformed
+        dialogueBoxController.showNetworthGraph();
+    }//GEN-LAST:event_showNetworthGraphActionPerformed
+    
     private void showJavaSystemPropertiesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showJavaSystemPropertiesActionPerformed
         // Add your handling code here:
-        String s = ShowJavaProperties.getPropertiesHtmlString();      
+        String s = ShowJavaProperties.getPropertiesHtmlString();
         HtmlJPanel htmlPanel = new HtmlJPanel(s);
         htmlPanel.setup(modelRoot, vl, closeCurrentDialogue);
         dialogueBoxController.showContent(htmlPanel);
@@ -339,52 +342,50 @@ public class DialogueBoxTester extends javax.swing.JFrame {
             // Add your handling code here:
             int stationNumber = 0;
             dialogueBoxController.showStationInfo(stationNumber);
-	} //GEN-LAST:event_showStationInfoActionPerformed
+	}//GEN-LAST:event_showStationInfoActionPerformed
         
 	private void showTerrainInfoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showTerrainInfoActionPerformed
             // Add your handling code here:
             int terrainType = 0;
             dialogueBoxController.showTerrainInfo(terrainType);
-	} //GEN-LAST:event_showTerrainInfoActionPerformed
+	}//GEN-LAST:event_showTerrainInfoActionPerformed
         
 	private void showControlsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showControlsActionPerformed
             // Add your handling code here:
             dialogueBoxController.showGameControls();
-	} //GEN-LAST:event_showControlsActionPerformed
+	}//GEN-LAST:event_showControlsActionPerformed
         
 	private void selectTrainOrdersActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectTrainOrdersActionPerformed
             // Add your handling code here:
             trainDialogueJPanel.setup(modelRoot, vl, closeCurrentDialogue);
             trainDialogueJPanel.display(0);
             dialogueBoxController.showContent(trainDialogueJPanel);
-	} //GEN-LAST:event_selectTrainOrdersActionPerformed
+	}//GEN-LAST:event_selectTrainOrdersActionPerformed
         
 	private void selectWagonsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectWagonsActionPerformed
             // Add your handling code here:
             dialogueBoxController.showSelectWagons();
-	} //GEN-LAST:event_selectWagonsActionPerformed
+	}//GEN-LAST:event_selectWagonsActionPerformed
         
 	private void selectEngineActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectEngineActionPerformed
             // Add your handling code here:
             dialogueBoxController.showSelectEngine();
-	} //GEN-LAST:event_selectEngineActionPerformed
+	}//GEN-LAST:event_selectEngineActionPerformed
         
 	private void newspaperActionPerformed(java.awt.event.ActionEvent evt) {	//GEN-FIRST:event_newspaperActionPerformed
             // Add your handling code here:
             dialogueBoxController.showNewspaper("New headline!");
-	} //GEN-LAST:event_newspaperActionPerformed
+	}//GEN-LAST:event_newspaperActionPerformed
         
-        /** Exit the Application */
-	private void exitForm(java.awt.event.WindowEvent evt) { //GEN-FIRST:event_exitForm
+        /** Exit the Application. */
+	private void exitForm(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_exitForm
             System.exit(0);
-	} //GEN-LAST:event_exitForm
+	}//GEN-LAST:event_exitForm
         
-        /**
-         * @param args the command line arguments
-         */
+        
         public static void main(String args[]) {
             DialogueBoxTester test = new DialogueBoxTester();
-            test.show();
+            test.setVisible(true);
         }
         
         
@@ -411,6 +412,7 @@ public class DialogueBoxTester extends javax.swing.JFrame {
     private javax.swing.JMenuItem showCargoWaitingAndDemand;
     private javax.swing.JMenuItem showControls;
     private javax.swing.JMenuItem showJavaSystemProperties;
+    private javax.swing.JMenuItem showNetworthGraph;
     private javax.swing.JMenuItem showStationInfo;
     private javax.swing.JMenuItem showTerrainInfo;
     private javax.swing.JMenuItem showTrainList;

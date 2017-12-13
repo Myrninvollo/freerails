@@ -2,12 +2,14 @@ package jfreerails.world.common;
 
 
 /**
- * Represents a position on the track as a direction in one of 8 compass points
- * and a coordinate representing the displacement from the centre of a track
- * tile.
+ * A <b>mutable</b> class that stores the coordinates of the tile on entity is standing on
+ * and the direction in which the entity is facing (usually the direction the entity
+ * as just been moving), it provides methods to encode and decode its field
+ * values to and from a single int.
+ *
  * @author Luke
  */
-public final class PositionOnTrack implements FreerailsSerializable {
+public final class PositionOnTrack implements FreerailsMutableSerializable {
     private static final int BITS_FOR_COORINATE = 14;
     private static final int BITS_FOR_DIRECTION = 3;
     public static final int MAX_COORINATE = (1 << BITS_FOR_COORINATE) - 1;

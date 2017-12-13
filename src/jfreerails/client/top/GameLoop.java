@@ -17,22 +17,23 @@ import jfreerails.util.GameModel;
 final public class GameLoop implements Runnable {
     /** Whether to display the FPS counter on the top left of the screen.*/
     private static final Logger logger = Logger.getLogger(GameLoop.class.getName());
-    private static final boolean SHOWFPS = (System.getProperty("SHOWFPS") != null);
+    private boolean SHOWFPS = (System.getProperty("SHOWFPS") != null);
     private final static boolean LIMIT_FRAME_RATE = false;
     private boolean gameNotDone = false;
     private final ScreenHandler screenHandler;
     private final static int TARGET_FPS = 40;
     private FPScounter fPScounter;
     private long frameStartTime;
-    private final GameModel model;
+    private final GameModel[] model;
     private final Integer loopMonitor = new Integer(0);
 
+    //PerformanceStats stats = new PerformanceStats();
     public GameLoop(ScreenHandler s) {
         screenHandler = s;
-        model = GameModel.NULL_MODEL;
+        model = new GameModel[0];
     }
 
-    public GameLoop(ScreenHandler s, GameModel gm) {
+    public GameLoop(ScreenHandler s, GameModel[] gm) {
         screenHandler = s;
         model = gm;
 
@@ -41,60 +42,34 @@ final public class GameLoop implements Runnable {
         }
     }
 
-    /**
-    * Stops the game loop.
-    * Blocks until the loop is stopped.
-    * Do not call this from inside the event loop!
-    */
-    public void stop() {
-        synchronized (loopMonitor) {
-            if (gameNotDone == false) {
-                return;
-            }
-
-            gameNotDone = false;
-
-            if (Thread.holdsLock(SynchronizedEventQueue.MUTEX)) {
-                /*
-                * we might be executing in the event queue so give up the
-                * mutex temporarily to allow the loop to exit
-                */
-                try {
-                    SynchronizedEventQueue.MUTEX.wait();
-                } catch (InterruptedException e) {
-                    assert false;
-                }
-            }
-
-            try {
-                loopMonitor.wait();
-            } catch (InterruptedException e) {
-                assert false;
-            }
-        }
-    }
-
     public void run() {
-        gameNotDone = true;
-        RepaintManagerForActiveRendering.addJFrame(screenHandler.frame);
-        RepaintManagerForActiveRendering.setAsCurrentManager();
-
-        fPScounter = new FPScounter();
-
-        /*
-        * Reduce this threads priority to avoid starvation of the input thread
-        * on Windows.
-        */
         try {
-            Thread.currentThread().setPriority(Thread.NORM_PRIORITY - 1);
-        } catch (SecurityException e) {
-            logger.warning("Couldn't lower priority of redraw thread");
-        }
+            SynchronizedEventQueue.use();
 
-        while (true) {
-            frameStartTime = System.currentTimeMillis();
+            if (!screenHandler.isInUse()) {
+                screenHandler.apply();
+            }
 
-            if (!screenHandler.isMinimised()) {
+            gameNotDone = true;
+            RepaintManagerForActiveRendering.addJFrame(screenHandler.frame);
+            RepaintManagerForActiveRendering.setAsCurrentManager();
+
+            fPScounter = new FPScounter();
+
+            /*
+            * Reduce this threads priority to avoid starvation of the input thread
+            * on Windows.
+            */
+            try {
+                Thread.currentThread().setPriority(Thread.NORM_PRIORITY - 1);
+            } catch (SecurityException e) {
+                logger.warning("Couldn't lower priority of redraw thread");
+            }
+
+            while (true) {
+                //stats.record();
+                frameStartTime = System.currentTimeMillis();
+
                 /*
                 * Flush all redraws in the underlying toolkit.  This reduces
                 * X11 lag when there isn't much happening, but is expensive
@@ -109,36 +84,47 @@ final public class GameLoop implements Runnable {
                         break;
                     }
 
-                    if (model != null) {
-                        model.update();
+                    for (int i = 0; i < model.length; i++) {
+                        model[i].update();
                     }
 
-                    if (screenHandler.isInUse()) {
-                        Graphics g = screenHandler.getDrawGraphics();
+                    if (!screenHandler.isMinimised()) {
+                        if (screenHandler.isInUse()) {
+                            Graphics g = screenHandler.getDrawGraphics();
 
-                        try {
-                            screenHandler.frame.paintComponents(g);
+                            try {
+                                screenHandler.frame.paintComponents(g);
 
-                            if (SHOWFPS) {
-                                fPScounter.updateFPSCounter(frameStartTime, g);
+                                if (SHOWFPS) {
+                                    fPScounter.updateFPSCounter(frameStartTime,
+                                        g);
+                                }
+                            } catch (RuntimeException re) {
+                                /* We are not expecting a RuntimeException here.
+                                * If something goes wrong, lets kill the game straight
+                                * away to avoid hard-to-track-down bugs.
+                                */
+                                logger.severe(
+                                    "Unexpected exception, quitting..");
+                                re.printStackTrace();
+                                System.exit(1);
+                            } finally {
+                                g.dispose();
                             }
-                        } catch (RuntimeException re) {
-                            /* We are not expecting a RuntimeException here.
-                            * If something goes wrong, lets kill the game straight
-                            * away to avoid hard-to-track-down bugs.
-                            */
-                            logger.severe("Unexpected exception, quitting..");
-                            re.printStackTrace();
-                            System.exit(1);
-                        } finally {
-                            g.dispose();
-                        }
 
-                        screenHandler.swapScreens();
+                            screenHandler.swapScreens();
+                        }
                     }
                 }
 
-                if (LIMIT_FRAME_RATE) {
+                if (screenHandler.isMinimised()) {
+                    try {
+                        //The window is minimised so we don't need to keep updating.
+                        Thread.sleep(200);
+                    } catch (Exception e) {
+                        //do nothing.
+                    }
+                } else if (LIMIT_FRAME_RATE) {
                     long deltatime = System.currentTimeMillis() -
                         frameStartTime;
 
@@ -154,18 +140,16 @@ final public class GameLoop implements Runnable {
                             frameStartTime;
                     }
                 }
-            } else {
-                try {
-                    //The window is minimised
-                    Thread.sleep(200);
-                } catch (Exception e) {
-                }
             }
-        }
 
-        /* signal that we are done */
-        synchronized (loopMonitor) {
-            loopMonitor.notify();
+            /* signal that we are done */
+            synchronized (loopMonitor) {
+                loopMonitor.notify();
+            }
+        } catch (Exception e) {
+            logger.severe("Unexpected exception, quitting..");
+            e.printStackTrace();
+            System.exit(1);
         }
     }
 }

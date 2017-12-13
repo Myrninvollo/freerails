@@ -61,7 +61,7 @@ public class WorldDifferences implements World {
     private final int LIST_LENGTH = i++;
 
     /** Instances of this class are used as the keys in the hashmap listDifferences.*/
-    private class DiffKey {
+    public class DiffKey {
         final int keyType;
         final int a;
         final int b;
@@ -370,7 +370,7 @@ public class WorldDifferences implements World {
         return elementRemoved;
     }
 
-    public void setTile(int x, int y, FreerailsTile tile) {
+    public void setTile(int x, int y, FreerailsSerializable tile) {
         Point p = new Point(x, y);
 
         if (underlyingWorld.getTile(x, y).equals(tile)) {
@@ -519,7 +519,7 @@ public class WorldDifferences implements World {
         }
     }
 
-    public FreerailsTile getTile(int x, int y) {
+    public FreerailsSerializable getTile(int x, int y) {
         Point p = new Point(x, y);
 
         if (this.mapDifferences.containsKey(p)) {

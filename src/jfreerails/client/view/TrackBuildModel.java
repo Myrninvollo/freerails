@@ -26,13 +26,13 @@ public class TrackBuildModel {
      * 100 010 001 = 0x111
      */
     private static final int trackTemplate = TrackConfiguration.getFlatInstance(0x111)
-                                                               .getTemplate();
+                                                               .get9bitTemplate();
     private final ActionAdapter buildModeAdapter;
     private final ActionAdapter trackRuleAdapter;
     private final TrackMoveProducer trackMoveProducer;
     private final ViewLists viewLists;
     private final ReadOnlyWorld world;
-    private final ActionRoot actionRoot;
+    private final StationBuildModel stationBuildModel;
 
     public ActionAdapter getBuildModeActionAdapter() {
         return buildModeAdapter;
@@ -99,11 +99,11 @@ public class TrackBuildModel {
     }
 
     public TrackBuildModel(TrackMoveProducer tmp, ReadOnlyWorld world,
-        ViewLists vl, ActionRoot actionRoot) {
+        ViewLists vl, StationBuildModel stationBuildModel) {
         this.world = world;
         viewLists = vl;
         trackMoveProducer = tmp;
-        this.actionRoot = actionRoot;
+        this.stationBuildModel = stationBuildModel;
 
         /* set up build modes */
         BuildModeAction[] actions = new BuildModeAction[] {
@@ -133,7 +133,7 @@ public class TrackBuildModel {
 
 	private void cancelStationPlacement() {
 		//Cancel build station mode..
-		actionRoot.getStationBuildModel().getStationCancelAction().actionPerformed(new ActionEvent(
+		stationBuildModel.getStationCancelAction().actionPerformed(new ActionEvent(
 		        this,
 		        ActionEvent.ACTION_PERFORMED, ""));
 	}

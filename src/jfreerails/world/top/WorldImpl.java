@@ -7,6 +7,7 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 import jfreerails.world.accounts.BankAccount;
+import jfreerails.world.accounts.EconomicClimate;
 import jfreerails.world.accounts.Transaction;
 import jfreerails.world.common.FreerailsSerializable;
 import jfreerails.world.common.GameCalendar;
@@ -45,27 +46,28 @@ public class WorldImpl implements World {
     private final ArrayList[] lists = new ArrayList[KEY.getNumberOfKeys()];
     private final ArrayList[] sharedLists = new ArrayList[SKEY.getNumberOfKeys()];
     private final FreerailsSerializable[] items = new FreerailsSerializable[ITEM.getNumberOfKeys()];
-    private FreerailsTile[][] map;
+    private FreerailsSerializable[][] map;
 
     public WorldImpl() {
-        setupTime();
+        setupItems();
         this.setupMap(0, 0);
         this.setupLists();
     }
 
-    private void setupTime() {
+    private void setupItems() {
         this.set(ITEM.CALENDAR, new GameCalendar(1200, 1840));
         this.set(ITEM.TIME, new GameTime(0));
+        this.set(ITEM.ECONOMIC_CLIMATE, EconomicClimate.MODERATION);
     }
 
     public WorldImpl(int mapWidth, int mapHeight) {
-        setupTime();
+        setupItems();
         this.setupMap(mapWidth, mapHeight);
         this.setupLists();
     }
 
     public void setupMap(int mapWidth, int mapHeight) {
-        map = new FreerailsTile[mapWidth][mapHeight];
+        map = new FreerailsSerializable[mapWidth][mapHeight];
 
         for (int x = 0; x < mapWidth; x++) {
             for (int y = 0; y < mapHeight; y++) {
@@ -145,11 +147,11 @@ public class WorldImpl implements World {
         }
     }
 
-    public void setTile(int x, int y, FreerailsTile element) {
+    public void setTile(int x, int y, FreerailsSerializable element) {
         map[x][y] = element;
     }
 
-    public FreerailsTile getTile(int x, int y) {
+    public FreerailsSerializable getTile(int x, int y) {
         return map[x][y];
     }
 

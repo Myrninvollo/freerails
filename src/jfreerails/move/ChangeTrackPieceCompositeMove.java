@@ -15,10 +15,12 @@ import jfreerails.world.top.ITEM;
 import jfreerails.world.top.ItemsTransactionAggregator;
 import jfreerails.world.top.ReadOnlyWorld;
 import jfreerails.world.top.World;
+import jfreerails.world.track.FreerailsTile;
 import jfreerails.world.track.NullTrackPiece;
 import jfreerails.world.track.NullTrackType;
 import jfreerails.world.track.TrackConfiguration;
 import jfreerails.world.track.TrackPiece;
+import jfreerails.world.track.TrackPieceImpl;
 import jfreerails.world.track.TrackRule;
 
 
@@ -75,13 +77,13 @@ public final class ChangeTrackPieceCompositeMove extends CompositeMove
         int owner = getOwner(principle, w);
 
         if (w.boundsContain(p.x, p.y)) {
-            oldTrackPiece = w.getTile(p.x, p.y).getTrackPiece();
+            oldTrackPiece = ((FreerailsTile)w.getTile(p.x, p.y)).getTrackPiece();
 
             if (oldTrackPiece.getTrackRule() != NullTrackType.getInstance()) {
                 TrackConfiguration trackConfiguration = TrackConfiguration.add(oldTrackPiece.getTrackConfiguration(),
                         direction);
-                newTrackPiece = oldTrackPiece.getTrackRule().getTrackPiece(trackConfiguration,
-                        owner);
+                newTrackPiece = new TrackPieceImpl(trackConfiguration,
+                        oldTrackPiece.getTrackRule(), owner);
             } else {
                 newTrackPiece = getTrackPieceWhenOldTrackPieceIsNull(direction,
                         trackRule, owner);
@@ -103,7 +105,7 @@ public final class ChangeTrackPieceCompositeMove extends CompositeMove
         TrackPiece newTrackPiece;
 
         if (w.boundsContain(p.x, p.y)) {
-            oldTrackPiece = w.getTile(p.x, p.y);
+            oldTrackPiece = (TrackPiece)w.getTile(p.x, p.y);
 
             if (oldTrackPiece.getTrackRule() != NullTrackType.getInstance()) {
                 TrackConfiguration trackConfiguration = TrackConfiguration.subtract(oldTrackPiece.getTrackConfiguration(),
@@ -112,8 +114,8 @@ public final class ChangeTrackPieceCompositeMove extends CompositeMove
                 if (trackConfiguration != TrackConfiguration.getFlatInstance(
                             "000010000")) {
                     int owner = getOwner(principal, w);
-                    newTrackPiece = oldTrackPiece.getTrackRule().getTrackPiece(trackConfiguration,
-                            owner);
+                    newTrackPiece = new TrackPieceImpl(trackConfiguration,
+                            oldTrackPiece.getTrackRule(), owner);
                 } else {
                     newTrackPiece = NullTrackPiece.getInstance();
                 }
@@ -146,10 +148,10 @@ public final class ChangeTrackPieceCompositeMove extends CompositeMove
         TrackConfiguration trackConfiguration = TrackConfiguration.add(simplestConfig,
                 direction);
 
-        return trackRule.getTrackPiece(trackConfiguration, owner);
+        return new TrackPieceImpl(trackConfiguration, trackRule, owner);
     }
 
-    public Rectangle getUpdatedTiles() {
+    public /*=const*/ Rectangle getUpdatedTiles() {
         return updatedTiles;
     }
 
@@ -169,9 +171,8 @@ public final class ChangeTrackPieceCompositeMove extends CompositeMove
         ItemsTransactionAggregator aggregator = new ItemsTransactionAggregator(world,
                 principal);
         aggregator.setCategory(Transaction.TRACK);
-        aggregator.setStartYear(0);
 
-        return aggregator.calulateQuantity() > 0;
+        return aggregator.calculateQuantity() > 0;
     }
 
     private static boolean mustConnectToExistingTrack(ReadOnlyWorld world) {

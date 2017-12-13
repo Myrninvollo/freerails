@@ -6,10 +6,7 @@
 package jfreerails.world.common;
 
 import java.awt.Point;
-import java.awt.event.KeyEvent;
 import java.io.ObjectStreamException;
-import java.util.HashMap;
-import java.util.NoSuchElementException;
 
 
 /**
@@ -18,6 +15,8 @@ import java.util.NoSuchElementException;
  * @author Luke
 */
 final public class OneTileMoveVector implements FlatTrackTemplate {
+    public static final int TILE_DIAMETER = 100;
+
     /** North.   */
     public static final OneTileMoveVector NORTH;
 
@@ -53,22 +52,9 @@ final public class OneTileMoveVector implements FlatTrackTemplate {
      * directions going clockwise from North.
      */
     private static OneTileMoveVector[] list;
-    private static final HashMap keycode2vector = new HashMap();
 
     static {
-        int t = 1;
-
-        vectors = new OneTileMoveVector[3][3];
-
-        for (int y = -1; y <= 1; y++) {
-            for (int x = -1; x <= 1; x++) {
-                if ((0 != x) || (0 != y)) {
-                    vectors[x + 1][y + 1] = new OneTileMoveVector(x, y, t);
-                }
-
-                t = t << 1;
-            }
-        }
+        vectors = setupVectors();
 
         NORTH = getInstance(0, -1);
         WEST = getInstance(-1, 0);
@@ -89,27 +75,23 @@ final public class OneTileMoveVector implements FlatTrackTemplate {
         list[5] = SOUTH_WEST;
         list[6] = WEST;
         list[7] = NORTH_WEST;
+    }
 
-        //Set up key mappings...
-        //Num pad with num lock on
-        keycode2vector.put(new Integer(KeyEvent.VK_NUMPAD1), SOUTH_WEST);
-        keycode2vector.put(new Integer(KeyEvent.VK_NUMPAD2), SOUTH);
-        keycode2vector.put(new Integer(KeyEvent.VK_NUMPAD3), SOUTH_EAST);
-        keycode2vector.put(new Integer(KeyEvent.VK_NUMPAD4), WEST);
-        keycode2vector.put(new Integer(KeyEvent.VK_NUMPAD6), EAST);
-        keycode2vector.put(new Integer(KeyEvent.VK_NUMPAD7), NORTH_WEST);
-        keycode2vector.put(new Integer(KeyEvent.VK_NUMPAD8), NORTH);
-        keycode2vector.put(new Integer(KeyEvent.VK_NUMPAD9), NORTH_EAST);
+    private static OneTileMoveVector[][] setupVectors() {
+        int t = 1;
+        OneTileMoveVector[][] tvectors = new OneTileMoveVector[3][3];
 
-        //Num pad with num lock off       
-        keycode2vector.put(new Integer(KeyEvent.VK_END), SOUTH_WEST);
-        keycode2vector.put(new Integer(KeyEvent.VK_DOWN), SOUTH);
-        keycode2vector.put(new Integer(KeyEvent.VK_PAGE_DOWN), SOUTH_EAST);
-        keycode2vector.put(new Integer(KeyEvent.VK_LEFT), WEST);
-        keycode2vector.put(new Integer(KeyEvent.VK_RIGHT), EAST);
-        keycode2vector.put(new Integer(KeyEvent.VK_HOME), NORTH_WEST);
-        keycode2vector.put(new Integer(KeyEvent.VK_UP), NORTH);
-        keycode2vector.put(new Integer(KeyEvent.VK_PAGE_UP), NORTH_EAST);
+        for (int y = -1; y <= 1; y++) {
+            for (int x = -1; x <= 1; x++) {
+                if ((0 != x) || (0 != y)) {
+                    tvectors[x + 1][y + 1] = new OneTileMoveVector(x, y, t);
+                }
+
+                t = t << 1;
+            }
+        }
+
+        return tvectors;
     }
 
     /** The X and Y components of the vector.    */
@@ -117,7 +99,7 @@ final public class OneTileMoveVector implements FlatTrackTemplate {
 
     /** The X and Y components of the vector.    */
     public final int deltaY;
-    private final int template;
+    private final int flatTrackTemplate;
     private final int length;
 
     /** Returns the X component of the vector.    */
@@ -228,9 +210,10 @@ final public class OneTileMoveVector implements FlatTrackTemplate {
     private OneTileMoveVector(int x, int y, int t) {
         deltaX = x;
         deltaY = y;
-        template = t;
+        flatTrackTemplate = t;
 
-        int sumOfSquares = (x * x * 100 * 100 + y * y * 100 * 100);
+        int sumOfSquares = (x * x * TILE_DIAMETER * TILE_DIAMETER +
+            y * y * TILE_DIAMETER * TILE_DIAMETER);
         length = (int)Math.sqrt((double)sumOfSquares);
     }
 
@@ -238,23 +221,11 @@ final public class OneTileMoveVector implements FlatTrackTemplate {
         return list[number];
     }
 
-    /** Returns the OneTileMoveVector that is mapped to the specified keycode.*/
-    public static OneTileMoveVector getInstanceMappedToKey(int keycode)
-        throws NoSuchElementException {
-        Integer integer = new Integer(keycode);
-
-        if (!keycode2vector.containsKey(integer)) {
-            throw new NoSuchElementException(String.valueOf(keycode));
-        }
-
-        return (OneTileMoveVector)keycode2vector.get(integer);
-    }
-
     public static OneTileMoveVector getInstance(int x, int y) {
         if ((((x < -1) || (x > 1)) || ((y < -1) || (y > 1))) ||
                 ((x == 0) && (y == 0))) {
-            throw new IllegalArgumentException(
-                "The values passed both must be integers in the range -1 to 1, and not both equal 0.");
+            throw new IllegalArgumentException(x + " and " + y +
+                ": The values passed both must be integers in the range -1 to 1, and not both equal 0.");
         } else {
             return vectors[x + 1][y + 1];
         }
@@ -276,15 +247,15 @@ final public class OneTileMoveVector implements FlatTrackTemplate {
     }
 
     public boolean contains(FlatTrackTemplate ftt) {
-        if (ftt.getTemplate() == this.template) {
+        if (ftt.get9bitTemplate() == this.flatTrackTemplate) {
             return true;
         } else {
             return false;
         }
     }
 
-    public int getTemplate() {
-        return template;
+    public int get9bitTemplate() {
+        return flatTrackTemplate;
     }
 
     /**
@@ -389,10 +360,11 @@ final public class OneTileMoveVector implements FlatTrackTemplate {
         }
     }
 
-    /**
-     * @return an integer representing this vector ???
-     */
-    public int getNewTemplateNumber() {
+    public boolean isDiagonal() {
+        return 0 != deltaX * deltaY;
+    }
+
+    public int get8bitTemplate() {
         return 1 << this.getNumber();
     }
 }

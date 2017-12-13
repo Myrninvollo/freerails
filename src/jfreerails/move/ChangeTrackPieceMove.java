@@ -27,7 +27,7 @@ final public class ChangeTrackPieceMove implements TrackMove, MapUpdateMove {
     private final TrackPiece trackPieceAfter;
     private final Point location;
 
-    public Point getLocation() {
+    public /*=const*/ Point getLocation() {
         return location;
     }
 
@@ -87,8 +87,8 @@ final public class ChangeTrackPieceMove implements TrackMove, MapUpdateMove {
 
         //Check that the current track piece at this.location is
         //the same as this.oldTrackPiece.
-        TrackPiece currentTrackPieceAtLocation = w.getTile(location.x,
-                location.y).getTrackPiece();
+        TrackPiece currentTrackPieceAtLocation = ((FreerailsTile)w.getTile(location.x,
+                location.y)).getTrackPiece();
 
         TrackRule expectedTrackRule = oldTrackPiece.getTrackRule();
         TrackRule actualTrackRule = currentTrackPieceAtLocation.getTrackRule();
@@ -127,8 +127,7 @@ final public class ChangeTrackPieceMove implements TrackMove, MapUpdateMove {
                 "Illegal track configuration - diagonal conflict");
         }
 
-        int terrainType = w.getTile(location.x, location.y)
-                           .getTerrainTypeNumber();
+        int terrainType = ((FreerailsTile)w.getTile(location.x, location.y)).getTerrainTypeNumber();
         TerrainType tt = (TerrainType)w.get(SKEY.TERRAIN_TYPES, terrainType);
 
         if (!newTrackPiece.getTrackRule().canBuildOnThisTerrainType(tt.getTerrainCategory())) {
@@ -161,7 +160,7 @@ final public class ChangeTrackPieceMove implements TrackMove, MapUpdateMove {
     private void move(World w, TrackPiece oldTrackPiece,
         TrackPiece newTrackPiece) {
         //FIXME why is oldTrackPiece not used???
-        FreerailsTile oldTile = w.getTile(location.x, location.y);
+        FreerailsTile oldTile = (FreerailsTile)w.getTile(location.x, location.y);
         int terrain = oldTile.getTerrainTypeNumber();
         FreerailsTile newTile = FreerailsTile.getInstance(terrain, newTrackPiece);
         w.setTile(location.x, location.y, newTile);
@@ -179,8 +178,8 @@ final public class ChangeTrackPieceMove implements TrackMove, MapUpdateMove {
         }
     }
 
-    private boolean noDiagonalTrackConflicts(Point point, int trackTemplate,
-        World w) {
+    private boolean noDiagonalTrackConflicts( /*=const*/
+        Point point, int trackTemplate, World w) {
         /*This method is needs replacing.  It only deals with flat track pieces, and
          *is rather hard to make sense of.  LL
          */
@@ -195,14 +194,14 @@ final public class ChangeTrackPieceMove implements TrackMove, MapUpdateMove {
 
         //Avoid array-out-of-bounds exceptions.
         if (point.y > 0) {
-            TrackPiece tp = w.getTile(point.x, point.y - 1);
+            TrackPiece tp = (TrackPiece)w.getTile(point.x, point.y - 1);
             trackTemplateAbove = tp.getTrackGraphicNumber();
         } else {
             trackTemplateAbove = 0;
         }
 
         if ((point.y + 1) < mapSize.height) {
-            TrackPiece tp = w.getTile(point.x, point.y + 1);
+            TrackPiece tp = (TrackPiece)w.getTile(point.x, point.y + 1);
             trackTemplateBelow = tp.getTrackGraphicNumber();
         } else {
             trackTemplateBelow = 0;
@@ -222,7 +221,7 @@ final public class ChangeTrackPieceMove implements TrackMove, MapUpdateMove {
         }
     }
 
-    public Rectangle getUpdatedTiles() {
+    public /*=const*/ Rectangle getUpdatedTiles() {
         //If we are building or removing a station, 
         //we need to repaint/remove the station radius 
         //that appears on the map.

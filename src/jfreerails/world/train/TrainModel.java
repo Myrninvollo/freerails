@@ -9,119 +9,96 @@ import jfreerails.world.common.FreerailsSerializable;
  */
 public class TrainModel implements FreerailsSerializable {
     public static final int MAX_NUMBER_OF_WAGONS = 6;
-    private int scheduleID;
-    private TrainPositionOnMap trainposition;
-    private int engineType = 0;
-    private final int[] wagonTypes;
-    private int cargoBundleNumber;
+    private final int m_scheduleID;
+    private final int m_engineType;
+    private final int[] m_wagonTypes;
+    private final int m_cargoBundleNumber;
 
     public int hashCode() {
         int result;
-        result = scheduleID;
-        result = 29 * result +
-            (trainposition != null ? trainposition.hashCode() : 0);
-        result = 29 * result + engineType;
-        result = 29 * result + cargoBundleNumber;
+        result = m_scheduleID;
+        result = 29 * result + m_engineType;
+        result = 29 * result + m_cargoBundleNumber;
 
         return result;
     }
 
-    public TrainModel getNewInstance(int newEngine, int[] newWagons) {
-        return new TrainModel(newEngine, newWagons, this.getPosition(),
-            this.getScheduleID(), this.getCargoBundleNumber());
+    public TrainModel getNewInstance(int newEngine, /*=const*/
+        int[] newWagons) {
+        return new TrainModel(newEngine, newWagons, this.getScheduleID(),
+            this.getCargoBundleNumber());
     }
 
-    /**
-     * Constructor for a new train.
-     * @param engine type of the engine
-     * @param wagons array of wagon types
-     * @param p initial position of the train on the map.
-     */
-    public TrainModel(int engine, int[] wagons, TrainPositionOnMap p,
-        int scheduleID, int BundleId) { //World world){
-        this.engineType = engine;
-        this.wagonTypes = wagons;
-        trainposition = p;
-        this.scheduleID = scheduleID;
-        this.cargoBundleNumber = BundleId;
+    public TrainModel(int engine, /*=const*/
+        int[] wagons, int scheduleID, int BundleId) {
+        m_engineType = engine;
+        m_wagonTypes = wagons;
+        m_scheduleID = scheduleID;
+        m_cargoBundleNumber = BundleId;
     }
 
-    public TrainModel(int[] wagons, int BundleId) {
-        this.wagonTypes = wagons;
-        this.cargoBundleNumber = BundleId;
+    public TrainModel( /*=const*/
+        int[] wagons, int BundleId) {
+        m_wagonTypes = wagons;
+        m_cargoBundleNumber = BundleId;
+        m_engineType = 0;
+        m_scheduleID = 0;
     }
 
-    public TrainModel(int engine, int[] wagons, TrainPositionOnMap p,
-        int scheduleID) {
-        this.engineType = engine;
-        this.wagonTypes = wagons;
-        trainposition = p;
-        this.scheduleID = scheduleID;
+    public TrainModel(int engine, /*=const*/
+        int[] wagons, int scheduleID) {
+        m_engineType = engine;
+        m_wagonTypes = wagons;
+        m_scheduleID = scheduleID;
+        m_cargoBundleNumber = 0;
     }
 
     public TrainModel(int engine) {
-        this.engineType = engine;
-        wagonTypes = new int[] {0, 1, 2};
+        m_engineType = engine;
+        m_wagonTypes = new int[] {0, 1, 2};
+        m_scheduleID = 0;
+        m_cargoBundleNumber = 0;
     }
 
     public int getLength() {
-        return (1 + wagonTypes.length) * 32; //Engine + wagons.
+        return (1 + m_wagonTypes.length) * 32; //Engine + wagons.
     }
 
     public boolean canAddWagon() {
-        return wagonTypes.length < MAX_NUMBER_OF_WAGONS;
+        return m_wagonTypes.length < MAX_NUMBER_OF_WAGONS;
     }
 
     public int getNumberOfWagons() {
-        return wagonTypes.length;
+        return m_wagonTypes.length;
     }
 
     public int getWagon(int i) {
-        return wagonTypes[i];
-    }
-
-    //	public void addWagon(int wagonType) {
-    //		if (canAddWagon()) {
-    //			int oldlength = wagonTypes.length;
-    //			int[] newWagons = new int[oldlength + 1];
-    //			for (int i = 0; i < oldlength; i++) {
-    //				newWagons[i] = wagonTypes[i];
-    //			}
-    //			newWagons[oldlength] = wagonType;
-    //			wagonTypes = newWagons;
-    //		} else {
-    //			throw new IllegalStateException("Cannot add wagon");
-    //		}
-    //	}
-    public TrainPositionOnMap getPosition() {
-        return trainposition;
-    }
-
-    public void setPosition(TrainPositionOnMap s) {
-        trainposition = s;
+        return m_wagonTypes[i];
     }
 
     public int getEngineType() {
-        return engineType;
+        return m_engineType;
     }
 
     public int getCargoBundleNumber() {
-        return cargoBundleNumber;
+        return m_cargoBundleNumber;
     }
 
     public int getScheduleID() {
-        return scheduleID;
+        return m_scheduleID;
+    }
+
+    public int[] getConsist() {
+        return (int[])m_wagonTypes.clone();
     }
 
     public boolean equals(Object obj) {
         if (obj instanceof TrainModel) {
             TrainModel test = (TrainModel)obj;
-            boolean b = this.cargoBundleNumber == test.cargoBundleNumber &&
-                this.engineType == test.engineType &&
-                null == this.trainposition ? null == test.trainposition
-                                           : this.trainposition.equals(test.trainposition) &&
-                Arrays.equals(this.wagonTypes, test.wagonTypes) &&
-                this.scheduleID == test.scheduleID;
+            boolean b = this.m_cargoBundleNumber == test.m_cargoBundleNumber &&
+                this.m_engineType == test.m_engineType &&
+                Arrays.equals(this.m_wagonTypes, test.m_wagonTypes) &&
+                this.m_scheduleID == test.m_scheduleID;
 
             return b;
         } else {

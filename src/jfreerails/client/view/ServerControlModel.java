@@ -2,33 +2,51 @@ package jfreerails.client.view;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.io.FileInputStream;
+import java.io.ObjectInputStream;
 import java.util.Enumeration;
+import java.util.zip.GZIPInputStream;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
 
 import jfreerails.client.common.ActionAdapter;
-import jfreerails.controller.ServerCommand;
-import jfreerails.controller.ServerControlInterface;
+import jfreerails.client.common.ModelRoot;
+import jfreerails.move.ChangeGameSpeedMove;
+import jfreerails.network.LoadGameServerCommand;
+import jfreerails.network.NewGameServerCommand;
+import jfreerails.network.SaveGameServerCommand;
+import jfreerails.network.ServerCommand;
+import jfreerails.network.ServerControlInterface;
+import jfreerails.world.common.GameSpeed;
+import jfreerails.world.top.ITEM;
+import jfreerails.world.top.ReadOnlyWorld;
 
 
 /**
  * Exposes the ServerControlInterface to client UI implementations.
  * @author rob
+ * @author Luke
+ * @author MystiqueAgent
  */
 public class ServerControlModel {
-    private ServerControlInterface serverInterface;
+   
+    private ModelRoot modelRoot;
 
+	public void setModelRoot(ModelRoot modelRoot) {
+		this.modelRoot = modelRoot;
+	}
     private class NewGameAction extends AbstractAction {
         public void actionPerformed(ActionEvent e) {
-            if (serverInterface != null) {
+           
                 String mapName = e.getActionCommand();
 
                 if (mapName != null) {
-                    serverInterface.newGame(mapName);
+                    ServerCommand command = new NewGameServerCommand(1, mapName);
+                    modelRoot.sendCommand(command);
                 }
-            }
+           
         }
 
         public NewGameAction(String s) {
@@ -46,9 +64,8 @@ public class ServerControlModel {
 
     private class LoadGameAction extends AbstractAction {
         public void actionPerformed(ActionEvent e) {
-            if (serverInterface != null) {
-                serverInterface.loadGame();
-            }
+            ServerCommand command = new LoadGameServerCommand(1, ServerControlInterface.FREERAILS_SAV);
+            modelRoot.sendCommand(command);
         }
 
         public LoadGameAction() {
@@ -61,10 +78,10 @@ public class ServerControlModel {
 
     private class SaveGameAction extends AbstractAction {
         public void actionPerformed(ActionEvent e) {
-            if (serverInterface != null) {
-                serverInterface.saveGame();
-                loadGameAction.setEnabled(true);
-            }
+            ServerCommand command = new SaveGameServerCommand(1, ServerControlInterface.FREERAILS_SAV);
+            modelRoot.sendCommand(command);
+            loadGameAction.setEnabled(true);
+            
         }
 
         public SaveGameAction() {
@@ -79,15 +96,15 @@ public class ServerControlModel {
         final int speed;
 
         public void actionPerformed(ActionEvent e) {
-            if (serverInterface != null) {
+        	 int speed2set = speed;
                 if (speed == 0) { // pausing/unpausing
 
-                    int newSpeed = -1 * serverInterface.getTargetTicksPerSecond();
-                    serverInterface.setTargetTicksPerSecond(newSpeed);
-                } else {
-                    serverInterface.setTargetTicksPerSecond(speed);
-                }
-            }
+                    speed2set = -1 * getTargetTicksPerSecond();
+
+                } 
+                modelRoot.doMove(ChangeGameSpeedMove.getMove(modelRoot.getWorld(),
+                        new GameSpeed(speed2set)));
+            
         }
 
         public SetTargetTicksPerSecondAction(String name, int speed) {
@@ -113,9 +130,9 @@ public class ServerControlModel {
     }
 
     private final SetTargetTicksPerSecondAction[] speedActions = new SetTargetTicksPerSecondAction[] {
-            new SetTargetTicksPerSecondAction("Pause", 0, KeyEvent.VK_P), // by MystiqueAgent: added keyEvent parameter
-            new SetTargetTicksPerSecondAction("Slow", 10, KeyEvent.VK_1), // by MystiqueAgent: added keyEvent parameter
-            new SetTargetTicksPerSecondAction("Moderate", 30, KeyEvent.VK_2), // by MystiqueAgent: added keyEvent parameter
+            new SetTargetTicksPerSecondAction("Pause", 0, KeyEvent.VK_P), 
+            new SetTargetTicksPerSecondAction("Slow", 10, KeyEvent.VK_1), 
+            new SetTargetTicksPerSecondAction("Moderate", 30, KeyEvent.VK_2),
             new SetTargetTicksPerSecondAction("Fast", 50, KeyEvent.VK_3), // by MystiqueAgent: added keyEvent parameter
 
             /* TODO one day we will make turbo faster :) */
@@ -123,14 +140,13 @@ public class ServerControlModel {
         };
     private final ActionAdapter targetTicksPerSecondActions = new ActionAdapter(speedActions,
             0);
+    public void setServerControlInterface() {
+        
 
-    public void setServerControlInterface(ServerControlInterface i) {
-        serverInterface = i;
-
-        boolean enabled = (serverInterface != null);
+        boolean enabled = true;
 
         //Check that there is a file to load..
-        boolean canLoadGame = ServerCommand.isSaveGameAvailable();
+        boolean canLoadGame = ServerControlModel.isSaveGameAvailable();
 
         loadGameAction.setEnabled(enabled && canLoadGame);
         saveGameAction.setEnabled(enabled);
@@ -138,31 +154,31 @@ public class ServerControlModel {
         Enumeration e = targetTicksPerSecondActions.getActions();
         targetTicksPerSecondActions.setPerformActionOnSetSelectedItem(false);
 
-        while (e.hasMoreElements()) {
-            ((Action)e.nextElement()).setEnabled(enabled);
+        while (e.hasMoreElements()) {        	
+            ((Action)e.nextElement()).setEnabled(true);
         }
 
-        if (i == null) {
-            selectMapActions = new ActionAdapter(new Action[0]);
-        } else {
-            String[] mapNames = i.getMapNames();
+//        if (i == null) {
+//            selectMapActions = new ActionAdapter(new Action[0]);
+//        } else {
+            String[] mapNames = NewGameServerCommand.getMapNames();
             Action[] actions = new Action[mapNames.length];
 
             for (int j = 0; j < actions.length; j++) {
                 actions[j] = new NewGameAction(mapNames[j]);
-                actions[j].setEnabled(enabled);
+                actions[j].setEnabled(true);
             }
 
             selectMapActions = new ActionAdapter(actions);
-        }
+//        }
 
-        newGameAction.setEnabled(enabled);
+        newGameAction.setEnabled(true);
 
-        //        serverInterface.setTargetTicksPerSecond(((GameSpeed)world.get(ITEM.GAME_SPEED)).getSpeed());
     }
 
-    public ServerControlModel(ServerControlInterface i) {
-        setServerControlInterface(i);
+    public ServerControlModel(ModelRoot mr) {
+        setServerControlInterface();
+        this.modelRoot = mr;
     }
 
     /**
@@ -225,4 +241,30 @@ public class ServerControlModel {
     public ActionAdapter getMapNames() {
         return selectMapActions;
     }
+
+    public static boolean isSaveGameAvailable() {
+        try {
+            FileInputStream in = new FileInputStream(ServerControlInterface.FREERAILS_SAV);
+            GZIPInputStream zipin = new GZIPInputStream(in);
+            ObjectInputStream objectIn = new ObjectInputStream(zipin);
+            String version_string = (String)objectIn.readObject();
+    
+            if (!ServerControlInterface.VERSION.equals(version_string)) {
+                throw new Exception(version_string);
+            }
+    
+            in.close();
+    
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+    
+   
+        public int getTargetTicksPerSecond() {
+            ReadOnlyWorld world = modelRoot.getWorld();
+            return ((GameSpeed)world.get(ITEM.GAME_SPEED)).getSpeed();
+        }
+    
 }

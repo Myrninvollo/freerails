@@ -22,16 +22,20 @@ import javax.swing.event.*;
  */
 class ClientOptionsJPanel extends javax.swing.JPanel {
     private static final Logger logger = Logger.getLogger(ClientOptionsJPanel.class.getName());
-    private final Launcher owner;
+    private final LauncherInterface owner;
     
     String getPlayerName() {
         return playerName.getText();
     }
     
     DisplayMode getDisplayMode() {
-        MyDisplayMode displayMode = ((MyDisplayMode) jList1.getSelectedValue());
-        logger.fine("The selected display mode is "+displayMode.toString());
-        return displayMode.displayMode;
+    	if(this.fullScreenButton.isSelected()){
+	        MyDisplayMode displayMode = ((MyDisplayMode) jList1.getSelectedValue());
+	        logger.fine("The selected display mode is "+displayMode.toString());
+	        return displayMode.displayMode;
+    	}else{
+    		return null;
+    	}
     }
     InetSocketAddress getRemoteServerAddress() {
         String portStr = remotePort.getText();
@@ -75,27 +79,7 @@ class ClientOptionsJPanel extends javax.swing.JPanel {
             throw new IllegalStateException();
         }
     }
-    
-    boolean validateRemoteAddress(){
-        
-        boolean isValid = true;
-        //Validate the port.
-        try{
-            int port = Integer.parseInt(this.remotePort.getText());
-            if(port >= 0 && port <= 65535){
-                this.portErrorMessage.setText("");
-            }else{
-                throw new Exception();
-            }
-        }catch(Exception e){
-            isValid = false;
-            this.portErrorMessage.setText("A valid port value is between 0 and 65535.");
-        }
-        //Validate the IPAddress.
-        return isValid;
-        
-    }
-    
+
     public void setControlsEnabled(boolean enabled) {
         windowedButton.setEnabled(enabled);
         fullScreenButton.setEnabled(enabled);
@@ -124,7 +108,7 @@ class ClientOptionsJPanel extends javax.swing.JPanel {
         this.jPanel4.setVisible(b);
     }
     
-    public ClientOptionsJPanel(Launcher owner) {
+    public ClientOptionsJPanel(LauncherInterface owner) {
         this.owner = owner;
         initComponents();
         listModel = new DisplayModesComboBoxModels();
@@ -163,17 +147,7 @@ class ClientOptionsJPanel extends javax.swing.JPanel {
         portErrorMessage.setText("A valid port value is between 0 and 65535.");
         return false;
     }
-    
-    private void validateIP(){
-        String host = this.remoteIP.getText();
-        try{
-            InetAddress address = InetAddress.getByName(host);
-            ipErrorMessage.setText("");
-        }catch(Exception e){
-            ipErrorMessage.setText("IP address for "+host+" could be found");
-        }
-    }
-    
+
     /** This method is called from within the constructor to
      * initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is
@@ -240,8 +214,8 @@ class ClientOptionsJPanel extends javax.swing.JPanel {
         jPanel4.setEnabled(false);
         jLabel2.setText("IP Address:");
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         jPanel4.add(jLabel2, gridBagConstraints);
 
         remoteIP.setColumns(15);
@@ -259,8 +233,8 @@ class ClientOptionsJPanel extends javax.swing.JPanel {
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridwidth = 2;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         jPanel4.add(remoteIP, gridBagConstraints);
 
         ipErrorMessage.setForeground(java.awt.Color.red);
@@ -270,17 +244,17 @@ class ClientOptionsJPanel extends javax.swing.JPanel {
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.ipadx = 1;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         jPanel4.add(ipErrorMessage, gridBagConstraints);
 
         jLabel3.setText("port");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         jPanel4.add(jLabel3, gridBagConstraints);
 
         remotePort.setColumns(5);
@@ -288,8 +262,8 @@ class ClientOptionsJPanel extends javax.swing.JPanel {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         jPanel4.add(remotePort, gridBagConstraints);
 
         portErrorMessage.setForeground(java.awt.Color.red);
@@ -299,8 +273,8 @@ class ClientOptionsJPanel extends javax.swing.JPanel {
         gridBagConstraints.gridy = 1;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         jPanel4.add(portErrorMessage, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -377,7 +351,7 @@ class ClientOptionsJPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_fullScreenButtonStateChanged
     
     
-    // Variables declaration - do not modify//GEN-BEGIN:variables
+    // Variables declaration - do not modify
     private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JRadioButton fixedSizeButton;
     private javax.swing.JRadioButton fullScreenButton;
@@ -396,6 +370,7 @@ class ClientOptionsJPanel extends javax.swing.JPanel {
     private javax.swing.JTextField remoteIP;
     private javax.swing.JTextField remotePort;
     private javax.swing.JRadioButton windowedButton;
-    // End of variables declaration//GEN-END:variables
+    // End of variables declaration
+    
     
 }

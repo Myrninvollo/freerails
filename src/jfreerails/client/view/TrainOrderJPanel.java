@@ -111,7 +111,7 @@ public class TrainOrderJPanel extends javax.swing.JPanel implements View, ListCe
         TrainOrdersListModel.TrainOrdersListElement trainOrders = (TrainOrdersListModel.TrainOrdersListElement)value;
         
         //Set station name
-        int stationNumber = trainOrders.order.station;
+        int stationNumber = trainOrders.order.m_station;
         StationModel station = (StationModel)w.get(KEY.STATIONS, stationNumber, principal);
         String stationName = station.getStationName();
         this.stationNameJLabel.setText(stationName);
@@ -156,7 +156,11 @@ public class TrainOrderJPanel extends javax.swing.JPanel implements View, ListCe
         
         //Check for 'No change'
         if(null == trainOrders.order.consist){
-            this.noChangeJLabel.setText("No Change");
+            if(trainOrders.order.autoConsist){
+                 this.noChangeJLabel.setText("Select wagons automatically");
+            }else{
+                this.noChangeJLabel.setText("No Change");
+            }
         }else{
             this.noChangeJLabel.setText(null);
         }

@@ -14,6 +14,7 @@ import jfreerails.world.top.SKEY;
 import jfreerails.world.track.FreerailsTile;
 import jfreerails.world.track.NullTrackType;
 import jfreerails.world.track.TrackPiece;
+import jfreerails.world.track.TrackPieceImpl;
 import jfreerails.world.track.TrackRule;
 
 
@@ -55,7 +56,7 @@ public class StationBuilder {
 
     public boolean canBuiltStationHere(Point p) {
         ReadOnlyWorld world = executor.getWorld();
-        FreerailsTile oldTile = world.getTile(p.x, p.y);
+        FreerailsTile oldTile = (FreerailsTile)world.getTile(p.x, p.y);
         TrackRule oldTrackRule = oldTile.getTrackRule();
 
         return !oldTrackRule.equals(NullTrackType.getInstance());
@@ -63,21 +64,21 @@ public class StationBuilder {
 
     public MoveStatus buildStation(Point p) {
         ReadOnlyWorld world = executor.getWorld();
-        FreerailsTile oldTile = world.getTile(p.x, p.y);
+        FreerailsTile oldTile = (FreerailsTile)world.getTile(p.x, p.y);
 
         //Only build a station if there is track at the specified point.
         if (canBuiltStationHere(p)) {
             String cityName;
             String stationName;
 
-            TrackPiece before = world.getTile(p.x, p.y);
+            TrackPiece before = (TrackPiece)world.getTile(p.x, p.y);
             TrackRule trackRule = (TrackRule)world.get(SKEY.TRACK_RULES,
                     this.ruleNumber);
 
             FreerailsPrincipal principal = executor.getPrincipal();
             int owner = ChangeTrackPieceCompositeMove.getOwner(principal, world);
-            TrackPiece after = trackRule.getTrackPiece(before.getTrackConfiguration(),
-                    owner);
+            TrackPiece after = new TrackPieceImpl(before.getTrackConfiguration(),
+                    trackRule, owner);
             ChangeTrackPieceMove upgradeTrackMove = new ChangeTrackPieceMove(before,
                     after, p);
 

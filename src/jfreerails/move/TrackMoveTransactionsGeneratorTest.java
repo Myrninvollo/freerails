@@ -12,6 +12,7 @@ import jfreerails.world.top.World;
 import jfreerails.world.top.WorldImpl;
 import jfreerails.world.track.TrackConfiguration;
 import jfreerails.world.track.TrackPiece;
+import jfreerails.world.track.TrackPieceImpl;
 import jfreerails.world.track.TrackRule;
 import junit.framework.TestCase;
 
@@ -45,12 +46,12 @@ public class TrackMoveTransactionsGeneratorTest extends TestCase {
 
         //Try building the simplest piece of track.
         newConfig = TrackConfiguration.getFlatInstance("000010000");
-        oldTrackPiece = world.getTile(0, 0);
+        oldTrackPiece = (TrackPiece)world.getTile(0, 0);
 
         TrackRule r = (TrackRule)world.get(SKEY.TRACK_RULES, 0);
         int owner = ChangeTrackPieceCompositeMove.getOwner(MapFixtureFactory.TEST_PRINCIPAL,
                 world);
-        newTrackPiece = r.getTrackPiece(newConfig, owner);
+        newTrackPiece = new TrackPieceImpl(newConfig, r, owner);
         move = new ChangeTrackPieceMove(oldTrackPiece, newTrackPiece,
                 new Point(0, 0));
 
