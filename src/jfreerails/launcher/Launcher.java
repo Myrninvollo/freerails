@@ -8,16 +8,15 @@ package jfreerails.launcher;
 
 import java.awt.CardLayout;
 import java.awt.Component;
-import java.io.IOException;
 import java.io.FileInputStream;
-import java.io.ObjectInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.security.GeneralSecurityException;
 
 import jfreerails.client.common.FileUtils;
-import jfreerails.client.common.ScreenHandler;
 import jfreerails.client.top.GUIClient;
 import jfreerails.controller.ServerControlInterface;
 import jfreerails.server.GameServer;
@@ -86,8 +85,7 @@ FreerailsProgressMonitor {
 		    sci = gs.getSavedGame(this, 0);
 		}
 		sci.setTargetTicksPerSecond(GAME_SPEED_SLOW);  //Set initial game speed to slow.
-		mode = cop.isWindowed() ? ScreenHandler.WINDOWED_MODE :
-		    ScreenHandler.FULL_SCREEN;
+		mode = cop.getScreenMode();
 		try {
 		    p = getPlayer(cop.getPlayerName());
 		    gc = new GUIClient(sci, sci.getLocalConnection(), mode,
@@ -116,8 +114,7 @@ FreerailsProgressMonitor {
 		} else {
 		    sci = gs.getSavedGame(this, lp.getServerPort());
 		}
-		mode = cop.isWindowed() ? ScreenHandler.WINDOWED_MODE :
-		    ScreenHandler.FULL_SCREEN;
+		mode = cop.getScreenMode();
 		try {
 		    p = getPlayer(cop.getPlayerName());
 		    gc = new GUIClient(sci, sci.getLocalConnection(), mode,
@@ -144,8 +141,7 @@ FreerailsProgressMonitor {
 		setNextEnabled(false);
 		break;
 	    case LauncherPanel1.MODE_JOIN_NETWORK_GAME:
-		mode = cop.isWindowed() ? ScreenHandler.WINDOWED_MODE :
-		    ScreenHandler.FULL_SCREEN;
+		mode = cop.getScreenMode();
 		try {
 		    p = getPlayer(cop.getPlayerName());
 		    gc = new

@@ -52,14 +52,7 @@ public final class ModelRoot {
 		if(null == playerPrincipal) throw new NullPointerException();
         return playerPrincipal;
     }
-
-    /**
-     * set the principal corresponding to the player this client is acting for
-     */
-    public void setPlayerPrincipal(FreerailsPrincipal p) {
-        assert p != null;
-        playerPrincipal = p;
-    }
+    
 
     private class BuildTrainDialogAction extends AbstractAction {
         public BuildTrainDialogAction() {
@@ -109,20 +102,22 @@ public final class ModelRoot {
      * world model.
      * Call this when the world model is changed (e.g. new map is loaded)
      */
-    public void setWorld(ReadOnlyWorld world, UntriedMoveReceiver receiver,
-        ViewLists vl) {
+    public void setup(ReadOnlyWorld world, UntriedMoveReceiver receiver,
+        ViewLists vl, FreerailsPrincipal p) {
         viewLists = vl;
         this.world = world;
+		assert p != null;
+		assert world.isPlayer(p);
+		playerPrincipal = p;
 
         if(null == world) throw new NullPointerException();
 
         if (world.size(SKEY.TRACK_RULES) > 0) {
-            assert playerPrincipal != null;
             trackMoveProducer = new TrackMoveProducer(world, receiver,
                     playerPrincipal);
             trackBuildModel = new TrackBuildModel(trackMoveProducer, world, vl);
             stationBuildModel = new StationBuildModel(new StationBuilder(
-                        receiver, world, playerPrincipal), world, vl);
+                        receiver, world, playerPrincipal), this);
         }
 
         synchronized (listeners) {
@@ -188,4 +183,8 @@ public final class ModelRoot {
     public void setMoveReceiver(UntriedMoveReceiver moveReceiver) {
         this.moveReceiver = moveReceiver;
     }
+	public DialogueBoxController getDialogueBoxController() {
+		return dialogueBoxController;
+	}
+
 }

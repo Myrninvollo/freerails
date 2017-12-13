@@ -12,12 +12,14 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import jfreerails.controller.MoveChainFork;
 import jfreerails.controller.SourcedMoveReceiver;
+import jfreerails.move.ChangeGameSpeedMove;
 import jfreerails.move.ChangeProductionAtEngineShopMove;
-import jfreerails.move.ChangeTrainPositionMove;
+import jfreerails.move.Move;
 import jfreerails.move.TimeTickMove;
 import jfreerails.util.FreerailsProgressMonitor;
 import jfreerails.util.GameModel;
 import jfreerails.world.common.GameCalendar;
+import jfreerails.world.common.GameSpeed;
 import jfreerails.world.common.GameTime;
 import jfreerails.world.player.FreerailsPrincipal;
 import jfreerails.world.player.Player;
@@ -45,7 +47,6 @@ public class ServerGameEngine implements GameModel, Runnable {
     private final MoveChainFork moveChainFork;
     private CalcSupplyAtStations calcSupplyAtStations;
     TrainBuilder tb;
-    private int targetTicksPerSecond = 0;
     private IdentityProvider identityProvider;
 
     /**
@@ -54,26 +55,22 @@ public class ServerGameEngine implements GameModel, Runnable {
     private Vector serverAutomata;
 
     /**
-     * Number of ticks which is A Long Time for infrequently updated things.
-     * TODO Ideally we should calculate this from the calendar
-     */
-    private final static int aLongTime = 1000;
-
-    /**
      * Number of ticks since the last time we did an infrequent update
      */
     private int ticksSinceUpdate = 0;
     private long nextModelUpdateDue = System.currentTimeMillis();
     ArrayList trainMovers = new ArrayList();
     private int currentYearLastTick = -1;
+    private int currentMonthLastTick = -1;
     private boolean keepRunning = true;
 
     public int getTargetTicksPerSecond() {
-        return targetTicksPerSecond;
+        return ((GameSpeed)world.get(ITEM.GAME_SPEED)).getSpeed();
     }
 
     public synchronized void setTargetTicksPerSecond(int targetTicksPerSecond) {
-        this.targetTicksPerSecond = targetTicksPerSecond;
+        moveExecuter.processMove(ChangeGameSpeedMove.getMove(world,
+                new GameSpeed(targetTicksPerSecond)));
     }
 
     /**
@@ -89,8 +86,6 @@ public class ServerGameEngine implements GameModel, Runnable {
      * @param trainMovers ArrayList of TrainMover objects.
      * @param serverAutomata Vector of ServerAutomaton representing internal
      * clients of this game.
-     * @param p an IdentityProvider which correlates a ConnectionToServer
-     * object with a Principal.
      */
     private ServerGameEngine(ArrayList trainMovers, World w,
         Vector serverAutomata) {
@@ -140,10 +135,6 @@ public class ServerGameEngine implements GameModel, Runnable {
         keepRunning = false;
     }
 
-    public void infrequentUpdate() {
-        calcSupplyAtStations.doProcessing();
-    }
-
     /**
      * This is the main server update method, which does all the
      * "simulation".
@@ -181,7 +172,9 @@ public class ServerGameEngine implements GameModel, Runnable {
         buildTrains();
         queuedMoveReceiver.executeOutstandingMoves();
 
-        if (targetTicksPerSecond > 0) {
+        int gameSpeed = ((GameSpeed)world.get(ITEM.GAME_SPEED)).getSpeed();
+
+        if (gameSpeed > 0) {
             /* Update the time first, since other updates might need
             to know the current time.*/
             updateGameTime();
@@ -199,13 +192,16 @@ public class ServerGameEngine implements GameModel, Runnable {
                 newYear();
             }
 
-            if (ticksSinceUpdate % aLongTime == 0) {
-                infrequentUpdate();
+            //And then checks for a new month.,,
+            int currentMonth = calendar.getMonth(time.getTime());
+
+            if (this.currentMonthLastTick != currentMonth) {
+                this.currentMonthLastTick = currentMonth;
+                newMonth();
             }
 
             /* calculate "ideal world" time for next tick */
-            nextModelUpdateDue = nextModelUpdateDue +
-                (1000 / targetTicksPerSecond);
+            nextModelUpdateDue = nextModelUpdateDue + (1000 / gameSpeed);
 
             int delay = (int)(nextModelUpdateDue - frameStartTime);
 
@@ -242,8 +238,19 @@ public class ServerGameEngine implements GameModel, Runnable {
         TrackMaintenanceMoveGenerator tmmg = new TrackMaintenanceMoveGenerator(moveExecuter);
         tmmg.update(world);
 
-        CargoAtStationsGenerator cargoAtStationsGenerator = new CargoAtStationsGenerator(moveExecuter);
-        cargoAtStationsGenerator.update(world);
+        TrainMaintenanceMoveGenerator trainMaintenanceMoveGenerator = new TrainMaintenanceMoveGenerator(moveExecuter);
+        trainMaintenanceMoveGenerator.update(world);
+
+        InterestChargeMoveGenerator interestChargeMoveGenerator = new InterestChargeMoveGenerator(moveExecuter);
+        interestChargeMoveGenerator.update(world);
+    }
+
+    /** This is called at the start of each new month. */
+    private void newMonth() {
+        calcSupplyAtStations.doProcessing();
+
+        CargoAtStationsGenerator cargoAtStationsGenerator = new CargoAtStationsGenerator();
+        cargoAtStationsGenerator.update(world, moveExecuter);
     }
 
     /** Iterator over the stations
@@ -281,15 +288,14 @@ public class ServerGameEngine implements GameModel, Runnable {
     private void moveTrains() {
         int deltaDistance = 5;
 
-        ChangeTrainPositionMove m = null;
+        Move m = null;
 
         Iterator i = trainMovers.iterator();
 
         while (i.hasNext()) {
             Object o = i.next();
             TrainMover trainMover = (TrainMover)o;
-            m = trainMover.update(deltaDistance);
-            moveExecuter.processMove(m);
+            trainMover.update(deltaDistance, moveExecuter);
         }
     }
 
@@ -368,10 +374,6 @@ public class ServerGameEngine implements GameModel, Runnable {
      * @return World
      */
     public synchronized World getWorld() {
-        /* Nobody in their right minds would expect this to return a clone ...
-         * Would they???
-        return world.defensiveCopy();
-         */
         return world;
     }
 
@@ -390,12 +392,8 @@ public class ServerGameEngine implements GameModel, Runnable {
         return moveChainFork;
     }
 
-    public void addServerAutomaton(ServerAutomaton sa) {
+    private void addServerAutomaton(ServerAutomaton sa) {
         serverAutomata.add(sa);
-    }
-
-    public void removeServerAutomaton(ServerAutomaton sa) {
-        serverAutomata.remove(sa);
     }
 
     public IdentityProvider getIdentityProvider() {

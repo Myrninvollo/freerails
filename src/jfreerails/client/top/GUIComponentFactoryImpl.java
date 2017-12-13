@@ -1,5 +1,6 @@
 package jfreerails.client.top;
 
+import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -39,8 +40,13 @@ import jfreerails.controller.MoveChainFork;
 import jfreerails.controller.MoveReceiver;
 import jfreerails.controller.UntriedMoveReceiver;
 import jfreerails.world.top.ReadOnlyWorld;
+import jfreerails.move.ChangeGameSpeedMove;
+import jfreerails.move.Move;
+import jfreerails.world.common.GameSpeed;
+import jfreerails.world.top.ITEM;
 
 
+//PAUSE Check Box   import javax.swing.JCheckBoxMenuItem;
 public class GUIComponentFactoryImpl implements GUIComponentFactory,
     ModelRootListener {
     private ModelRoot modelRoot;
@@ -68,6 +74,7 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory,
     Rectangle r = new Rectangle(10, 10, 10, 10);
     ClientJFrame clientJFrame;
     UserMessageGenerator userMessageGenerator;
+    ActionAdapter speedActions;
 
     public GUIComponentFactoryImpl(ModelRoot mr) {
         modelRoot = mr;
@@ -98,8 +105,6 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory,
 
         UntriedMoveReceiver receiver = modelRoot.getReceiver();
 
-        clientJFrame.setup();
-
         if (!vl.validate(world)) {
             throw new IllegalArgumentException("The specified" +
                 " ViewLists are not comaptible with the clients" + "world!");
@@ -107,7 +112,9 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory,
 
         //create the main and overview maps
         mainMap = new DetailMapView(world, viewLists);
-        overviewMap = new ZoomedOutMapRenderer(world);
+
+        Dimension maxSize = new Dimension(200, 200);
+        overviewMap = ZoomedOutMapRenderer.getInstance(world, maxSize);
 
         //init the move handlers
         MoveReceiver overviewmapMoveReceiver = new MapViewMoveReceiver(mainMap);
@@ -154,6 +161,55 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory,
 
         userMessageGenerator = new UserMessageGenerator(this.modelRoot);
         moveFork.add(userMessageGenerator);
+
+        int gameSpeed = ((GameSpeed)world.get(ITEM.GAME_SPEED)).getSpeed();
+
+        // selecting action radio button
+        for (Enumeration enum = speedActions.getActions();
+                enum.hasMoreElements();) {
+            Action action = (Action)enum.nextElement();
+
+            if (action.equals(new Integer(gameSpeed))) {
+                String actionName = (String)action.getValue(Action.NAME);
+                speedActions.setSelectedItem(actionName);
+            }
+        }
+
+        /**
+         *  @todo FIX ME   -- is there better possibility to pritne the same text as in UserMessageGenerator.processMove ?
+         *                    maybe: to add logSpeed(int) into MessageLogger ?
+         */
+        if (gameSpeed <= 0) {
+            modelRoot.getUserMessageLogger().showMessage("Game is paused.");
+        } else {
+            modelRoot.getUserMessageLogger().hideMessage();
+
+            String gameSpeedDesc = modelRoot.getServerControls()
+                                            .getGameSpeedDesc(gameSpeed);
+            modelRoot.getUserMessageLogger().println("Game speed: " +
+                gameSpeedDesc);
+        }
+
+        moveFork.addSplitMoveReceiver(new MoveReceiver() {
+                public void processMove(Move move) {
+                    if (move instanceof ChangeGameSpeedMove) {
+                        ChangeGameSpeedMove speedMove = (ChangeGameSpeedMove)move;
+
+                        for (Enumeration enum = speedActions.getActions();
+                                enum.hasMoreElements();) {
+                            Action action = (Action)enum.nextElement();
+                            String actionName = (String)action.getValue(Action.NAME);
+
+                            if (actionName.equals(modelRoot.getServerControls()
+                                                               .getGameSpeedDesc(speedMove.getNewSpeed()))) {
+                                speedActions.setSelectedItem(actionName);
+                            }
+
+                            break;
+                        }
+                    }
+                }
+            });
     }
 
     public JPanel createOverviewMap() {
@@ -249,10 +305,31 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory,
                 }
             });
 
+        JMenuItem incomeStatementJMenuItem = new JMenuItem("Income Statement");
+        incomeStatementJMenuItem.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    dialogueBoxController.showIncomeStatement();
+                }
+            });
+
+        JMenuItem balanceSheetJMenuItem = new JMenuItem("Balance Sheet");
+        balanceSheetJMenuItem.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    dialogueBoxController.showBalanceSheet();
+                }
+            });
+
         //Set up the gamespeed submenu.
-        ButtonGroup group = new ButtonGroup();
-        ActionAdapter speedActions = sc.getSetTargetTickPerSecondActions();
         JMenu gameSpeedSubMenu = new JMenu("Game Speed");
+
+        /* PAUSE CheckBox
+                final JCheckBoxMenuItem speedMI = new JCheckBoxMenuItem(sc.getPauseAction());
+        //        mi.setModel((ButtonModel)buttonModels.nextElement());
+                gameSpeedSubMenu.add(speedMI);
+        */
+        ButtonGroup group = new ButtonGroup();
+
+        speedActions = sc.getSetTargetTickPerSecondActions();
 
         Enumeration buttonModels = speedActions.getButtonModels();
         Enumeration actions = speedActions.getActions();
@@ -260,6 +337,17 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory,
         while (buttonModels.hasMoreElements()) {
             JRadioButtonMenuItem mi = new JRadioButtonMenuItem((Action)actions.nextElement());
             mi.setModel((ButtonModel)buttonModels.nextElement());
+
+            /* PAUSE CheckBox
+                        mi.addActionListener(new ActionListener() {
+                          public void actionPerformed(ActionEvent e) {
+                            if (speedMI.isSelected()) {
+                              // paused => unchecking the pause checkBox
+                              speedMI.setSelected(false);
+                            }
+                          }
+                        });
+            */
             group.add(mi);
             gameSpeedSubMenu.add(mi);
         }
@@ -269,6 +357,8 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory,
         gameMenu.add(loadGameJMenuItem);
         gameMenu.add(saveGameJMenuItem);
         gameMenu.addSeparator();
+        gameMenu.add(balanceSheetJMenuItem);
+        gameMenu.add(incomeStatementJMenuItem);
         gameMenu.add(gameSpeedSubMenu);
         gameMenu.add(newspaperJMenuItem);
         gameMenu.addSeparator();
@@ -311,8 +401,16 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory,
                 }
             });
 
+        JMenuItem showJavaProperties = new JMenuItem("Show Java Properties");
+        showJavaProperties.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent evt) {
+                    dialogueBoxController.showJavaProperties();
+                }
+            });
+
         helpMenu.add(showControls);
         helpMenu.add(how2play);
+        helpMenu.add(showJavaProperties);
         helpMenu.add(about);
 
         return helpMenu;

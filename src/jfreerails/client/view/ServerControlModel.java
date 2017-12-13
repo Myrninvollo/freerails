@@ -2,13 +2,14 @@ package jfreerails.client.view;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
-import javax.swing.KeyStroke;
-import javax.swing.Action;
-import javax.swing.AbstractAction;
 import java.util.Enumeration;
+
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.KeyStroke;
+
 import jfreerails.client.common.ActionAdapter;
 import jfreerails.controller.ServerControlInterface;
-
 
 /**
  * Exposes the ServerControlInterface to client UI implementations
@@ -75,7 +76,10 @@ public class ServerControlModel {
 
         public void actionPerformed(ActionEvent e) {
             if (serverInterface != null) {
-                serverInterface.setTargetTicksPerSecond(speed);
+                if (speed == 0) // pausing/unpausing
+                  serverInterface.setTargetTicksPerSecond(-1* serverInterface.getTargetTicksPerSecond());
+                else
+                  serverInterface.setTargetTicksPerSecond(speed);
             }
         }
 
@@ -102,10 +106,25 @@ public class ServerControlModel {
             putValue(ACCELERATOR_KEY,
                 KeyStroke.getKeyStroke(keyEvent, 0));
         }
+
+        public boolean equals(Object object) {
+          if (super.equals(object)) return true;
+          if (object instanceof Integer) {
+            Integer sp = (Integer) object;
+            return (speed == sp.intValue());
+          }
+          return false;
+        }
+
     }
 
+/* PAUSEDCheckBox
+        private Action pauseAction = new SetTargetTicksPerSecondAction("Pause", 0, KeyEvent.VK_P);
+*/
+
+    // Should be sorted   
     private ActionAdapter targetTicksPerSecondActions = new ActionAdapter(new Action[] {
-                new SetTargetTicksPerSecondAction("Pause", 0, KeyEvent.VK_P),      // by MystiqueAgent: added keyEvent parameter
+                new SetTargetTicksPerSecondAction( "Pause" , 0, KeyEvent.VK_P),      // by MystiqueAgent: added keyEvent parameter
                 new SetTargetTicksPerSecondAction("Slow", 10, KeyEvent.VK_1),      // by MystiqueAgent: added keyEvent parameter
                 new SetTargetTicksPerSecondAction("Moderate", 30, KeyEvent.VK_2),  // by MystiqueAgent: added keyEvent parameter
                 new SetTargetTicksPerSecondAction("Fast", 50, KeyEvent.VK_3),      // by MystiqueAgent: added keyEvent parameter
@@ -113,7 +132,7 @@ public class ServerControlModel {
 
             /* TODO one day we will make turbo faster :) */
             new SetTargetTicksPerSecondAction("Turbo", 50)
-            }, 1);
+            }, 0);
 
     public void setServerControlInterface(ServerControlInterface i) {
         serverInterface = i;
@@ -122,7 +141,11 @@ public class ServerControlModel {
         loadGameAction.setEnabled(enabled);
         saveGameAction.setEnabled(enabled);
 
+/* PAUSED  CheckBox
+        pauseAction.setEnabled(enabled);
+*/
         Enumeration e = targetTicksPerSecondActions.getActions();
+        targetTicksPerSecondActions.setPerformActionOnSetSelectedItem(false);
 
         while (e.hasMoreElements()) {
             ((Action)e.nextElement()).setEnabled(enabled);
@@ -143,6 +166,8 @@ public class ServerControlModel {
         }
 
         newGameAction.setEnabled(enabled);
+
+//        serverInterface.setTargetTicksPerSecond(((GameSpeed)world.get(ITEM.GAME_SPEED)).getSpeed());
     }
 
     public ServerControlModel(ServerControlInterface i) {
@@ -171,6 +196,41 @@ public class ServerControlModel {
     public ActionAdapter getSetTargetTickPerSecondActions() {
         return targetTicksPerSecondActions;
     }
+
+    public void setTargetTicksPerSecond(int ticksPerSecond) {
+      if (serverInterface != null) {
+        serverInterface.setTargetTicksPerSecond(ticksPerSecond);
+      }
+    }
+
+    /**
+     * Returns human readable string description of <code>tickPerSecond</code> number.
+     * Looks for <code>tickPerSecond</code> in <code>targetTicksPerSecondActions</code>.
+     * If appropriate action is not found returns first greater value or the greatest value.
+     *
+     * @param tickPerSecond int
+     * @return String human readable description
+     */
+    public String getGameSpeedDesc(int tickPerSecond) {
+      SetTargetTicksPerSecondAction action = null;
+      for (Enumeration enum = targetTicksPerSecondActions.getActions(); enum.hasMoreElements(); ) {
+        action = (SetTargetTicksPerSecondAction)enum.nextElement();
+        if (action.speed >= tickPerSecond)
+          return (String) action.getValue(Action.NAME);
+      }
+      return (String) action.getValue(Action.NAME);
+    }
+
+
+    /**
+     *
+     * @return an action to pause/unpase the game
+     */
+/* PAUSED CheckBox
+    public Action getPauseAction() {
+        return pauseAction;
+    }
+*/
 
     /**
      * When calling this action, set the action command string to the desired

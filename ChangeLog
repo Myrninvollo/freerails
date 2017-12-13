@@ -1,3 +1,63 @@
+Apr 8, 2004 10:52:32 PM Luke
+	o Added website to CVS
+	o Added website deployment targets to build.xml
+Apr 7, 2004 8:18:36 PM Luke
+	o Implemented  930716 (Scale overview map) by
+	incorporating code from Railz.
+Apr 6, 2004 6:28:50 PM Luke
+	o Fix selection of track type and build mode that was broken by 
+	the gamespeed patch.
+Apr 6, 2004 1:28:44 AM Luke
+	o Implemented 915945 (Stations should not overlap)
+	o Increased the quality of scaled images returned by ImageManagerImpl
+Apr 5, 2004 10:42:20 PM Luke
+	o Implemented 915952 (Boxes showing cargo waiting at stations) 
+Apr 5, 2004 6:04:01 PM Luke
+	o Fixed 910134 Demand for mail and passengers
+	o Updated javadoc comments in jfreerails.server.parser.
+Apr 4, 2004 4:16:21 PM Luke
+	o Implemented 927152 Show change station popup when add station is clicked 
+Apr 3, 2004 12:18:18 AM Luke
+	o Apply Jan Tozicka's 2nd patch for 910902
+Apr 2, 2004 12:01:57 AM Luke
+	o Fixed bug 910130 (Placement of harbours) 
+Apr 1, 2004 8:16:48 PM Luke
+	o Made trains stop for a couple of seconds at stations.
+	o 915947 Implement ‘wait until full’.
+Apr 1, 2004 12:38:47 AM Luke
+	o Implemented
+		910138 After building a train display train orders 
+		910143 After building station show supply and demand
+	o Started rewriting jfreerails in C#!
+Mar 30, 2004 6:39:20 PM Luke
+	o Implemented 915949 (Balance sheet)
+	o Fixed bug where an exception was thrown if you moved the cursor 
+	when 'View Mode' was selected on the build menu.
+Mar 29, 2004 7:13:13 PM Luke
+	o Implemented 915948 (Income statement) 
+Mar 27, 2004 9:43:29 PM Luke
+	o Updated coding guidelines.
+Mar 15, 2004 1:15:28 AM Luke
+	o Added 'Show java properties' to about menu.
+Mar 14, 2004 11:47:50 PM Luke
+	o Implemented 910123 (Add/remove cargo to cities more frequently). 
+Mar 13, 2004 3:45:44 PM Luke
+	o Fixed various bugs where exceptions were getting thrown.
+	o Stopped the client window getting displayed before the world
+	is loaded from the server.
+Mar 13, 2004 3:50:51 AM Luke
+	o Implemented 910126 (Train list on RHS panel)
+	o Started 915303 (Icons for buttons and tabs) - the
+	tabs on the RHS now have icons instead of titles.
+Mar 12, 2004 8:37:12 PM Luke
+	o Apply Jan Tozicka's patch for 910902 (Game speed not stored on world object).
+Mar 9, 2004 1:11:50 AM Luke
+	o Increase client performance.  93FPS to 111FPS on my machine.
+	Note, I get much higher FPS when the client and server are in different JVMs. 
+Mar 8, 2004 11:39:01 PM Luke
+	o Readded 640x480 fixed size windows mode.  It is useful
+	for taking screen shots and making sure the dialogue boxes
+	work in 640x480 fullscreen mode.
 Mar 6, 2004 12:39:54 PM Luke
 	o Added Scott Bennett's terrain randomisation patch. 
 Mar 6, 2004 12:10:49 AM Luke

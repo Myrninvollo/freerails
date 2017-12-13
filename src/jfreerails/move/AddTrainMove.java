@@ -4,7 +4,8 @@
  */
 package jfreerails.move;
 
-import jfreerails.world.accounts.Bill;
+import jfreerails.world.accounts.AddItemTransaction;
+import jfreerails.world.accounts.Transaction;
 import jfreerails.world.common.Money;
 import jfreerails.world.player.FreerailsPrincipal;
 import jfreerails.world.top.KEY;
@@ -27,8 +28,12 @@ public class AddTrainMove extends CompositeMove {
         Move m = new AddItemToListMove(KEY.TRAINS, i, train, p);
         Move m2 = new AddItemToListMove(KEY.TRAIN_SCHEDULES,
                 train.getScheduleID(), s, p);
+        int quantity = 1;
+        int engineType = train.getEngineType();
+        Transaction transaction = new AddItemTransaction(Transaction.TRAIN,
+                engineType, quantity, new Money(-price.getAmount()));
         AddTransactionMove transactionMove = new AddTransactionMove(p,
-                new Bill(price));
+                transaction);
 
         return new AddTrainMove(new Move[] {m, transactionMove, m2});
     }

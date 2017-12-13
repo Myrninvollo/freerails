@@ -34,7 +34,7 @@ public class TrackMoveTransactionsGeneratorTest extends TestCase {
         MapFixtureFactory.generateTrackRuleList(world);
         player = new Player("test player",
                 (new Player("test player")).getPublicKey(), 0);
-        world.addPlayer(player, Player.AUTHORITATIVE);
+        world.addPlayer(player);
         transactionGenerator = new TrackMoveTransactionsGenerator(world,
                 player.getPrincipal());
     }

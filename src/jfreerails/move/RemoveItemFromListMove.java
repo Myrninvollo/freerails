@@ -127,4 +127,8 @@ public class RemoveItemFromListMove implements ListMove {
     public FreerailsSerializable getAfter() {
         return null;
     }
+
+    public FreerailsPrincipal getPrincipal() {
+        return principal;
+    }
 }

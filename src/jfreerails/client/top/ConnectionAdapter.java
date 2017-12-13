@@ -14,11 +14,11 @@ import jfreerails.controller.SourcedMoveReceiver;
 import jfreerails.controller.UncommittedMoveReceiver;
 import jfreerails.controller.UntriedMoveReceiver;
 import jfreerails.controller.WorldChangedCommand;
-import jfreerails.controller.SpeedChangedCommand;
 import jfreerails.move.Move;
 import jfreerails.move.MoveStatus;
 import jfreerails.move.TimeTickMove;
 import jfreerails.util.FreerailsProgressMonitor;
+import jfreerails.world.player.FreerailsPrincipal;
 import jfreerails.world.player.Player;
 import jfreerails.world.player.PlayerPrincipal;
 import jfreerails.world.top.World;
@@ -203,10 +203,25 @@ public class ConnectionAdapter implements UntriedMoveReceiver,
         connection.sendCommand(new AddPlayerCommand(player, player.sign()));
     }
 
-    private void playerConfirmed() {
+    private void playerConfirmed(PlayerPrincipal principal) {
         try {
             /* create the models */
             assert world != null;
+
+            /*
+             * wait until the player the client represents has been created in
+             * the model (this may not occur until we process the move creating
+             * the player from the server
+            */
+            int playerID = principal.getId();
+
+            while (world.getNumberOfPlayers() <= playerID) {
+                System.out.println("Size of players list is " +
+                    world.getNumberOfPlayers());
+                moveExecuter.update();
+            }
+
+            assert world.isPlayer(principal);
 
             ViewLists viewLists = new ViewListsImpl(world, progressMonitor);
 
@@ -215,20 +230,7 @@ public class ConnectionAdapter implements UntriedMoveReceiver,
                     "viewLists!");
             }
 
-            modelRoot.setWorld(world, this, viewLists);
-
-            /*
-             * wait until the player the client represents has been created in
-             * the model (this may not occur until we process the move creating
-             * the player from the server
-             */
-            int playerID = ((PlayerPrincipal)modelRoot.getPlayerPrincipal()).getId();
-
-            while (world.getNumberOfPlayers() < playerID) {
-                System.out.println("Size of players list is " +
-                    world.getNumberOfPlayers());
-                moveExecuter.update();
-            }
+            modelRoot.setup(world, this, viewLists, principal);
 
             /* start the game loop */
             String threadName = "JFreerails client: " + guiClient.getTitle();
@@ -262,8 +264,9 @@ public class ConnectionAdapter implements UntriedMoveReceiver,
 
                 if (authenticated) {
                     System.out.println("Player was authenticated");
-                    modelRoot.setPlayerPrincipal(((AddPlayerResponseCommand)s).getPrincipal());
-                    playerConfirmed();
+
+                    FreerailsPrincipal principal = ((AddPlayerResponseCommand)s).getPrincipal();
+                    playerConfirmed((PlayerPrincipal)principal);
                 } else {
                     System.out.println("Authentication was rejected");
                 }
@@ -280,14 +283,6 @@ public class ConnectionAdapter implements UntriedMoveReceiver,
             } catch (GeneralSecurityException e) {
                 modelRoot.getUserMessageLogger().println("Unable to " +
                     "authenticate with server: " + e.toString());
-            }
-        } else if (s instanceof SpeedChangedCommand) {
-            int actTickPerSecond = ((SpeedChangedCommand)s).getTicksPerSecond();
-
-            if (actTickPerSecond == 0) {
-                modelRoot.getUserMessageLogger().showMessage("Game is paused.");
-            } else {
-                modelRoot.getUserMessageLogger().hideMessage();
             }
         }
     }

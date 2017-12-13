@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import jfreerails.world.accounts.BankAccount;
 import jfreerails.world.accounts.Transaction;
 import jfreerails.world.common.FreerailsSerializable;
+import jfreerails.world.common.GameCalendar;
+import jfreerails.world.common.GameTime;
 import jfreerails.world.common.Money;
 import jfreerails.world.player.FreerailsPrincipal;
 import jfreerails.world.player.Player;
@@ -39,11 +41,18 @@ public class WorldImpl implements World {
     private FreerailsTile[][] map;
 
     public WorldImpl() {
+        setupTime();
         this.setupMap(0, 0);
         this.setupLists();
     }
 
+    private void setupTime() {
+        this.set(ITEM.CALENDAR, new GameCalendar(1200, 1840));
+        this.set(ITEM.TIME, new GameTime(0));
+    }
+
     public WorldImpl(int mapWidth, int mapHeight) {
+        setupTime();
         this.setupMap(mapWidth, mapHeight);
         this.setupLists();
     }
@@ -258,11 +267,14 @@ public class WorldImpl implements World {
     }
 
     /**
- * @param player Player to add
- * @param p principal who is adding
+ * @param player Player to add    
  * @return index of the player
  */
-    public int addPlayer(Player player, FreerailsPrincipal p) {
+    public int addPlayer(Player player) {
+        if (null == player) {
+            throw new NullPointerException();
+        }
+
         players.add(player);
         bankAccounts.add(new BankAccount());
 
@@ -316,7 +328,8 @@ public class WorldImpl implements World {
     }
 
     public void addTransaction(Transaction t, FreerailsPrincipal p) {
-        getBankAccount(p).addTransaction(t);
+        GameTime time = (GameTime)this.get(ITEM.TIME);
+        getBankAccount(p).addTransaction(t, time);
     }
 
     public Transaction removeLastTransaction(FreerailsPrincipal p) {
@@ -349,5 +362,9 @@ public class WorldImpl implements World {
         } catch (ArrayIndexOutOfBoundsException e) {
             return false;
         }
+    }
+
+    public GameTime getTransactionTimeStamp(int i, FreerailsPrincipal p) {
+        return getBankAccount(p).getTimeStamp(i);
     }
 }

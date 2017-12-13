@@ -14,6 +14,8 @@ import jfreerails.util.GameModel;
  *
  */
 final public class GameLoop implements Runnable {
+    /** Whether to display the FPS counter on the top left of the screen.*/
+    private static final boolean SHOWFPS = true; //(System.getProperty("SHOWFPS") != null);
     final static boolean LIMIT_FRAME_RATE = false;
     boolean gameNotDone = false;
     final ScreenHandler screenHandler;
@@ -38,10 +40,10 @@ final public class GameLoop implements Runnable {
     }
 
     /**
-     * Stops the game loop.
-     * Blocks until the loop is stopped.
-     * Do not call this from inside the event loop!
-     */
+ * Stops the game loop.
+ * Blocks until the loop is stopped.
+ * Do not call this from inside the event loop!
+ */
     public void stop() {
         synchronized (loopMonitor) {
             if (gameNotDone == false) {
@@ -52,9 +54,9 @@ final public class GameLoop implements Runnable {
 
             if (Thread.holdsLock(SynchronizedEventQueue.MUTEX)) {
                 /*
-                 * we might be executing in the event queue so give up the
-                 * mutex temporarily to allow the loop to exit
-                 */
+ * we might be executing in the event queue so give up the
+ * mutex temporarily to allow the loop to exit
+ */
                 try {
                     SynchronizedEventQueue.MUTEX.wait();
                 } catch (InterruptedException e) {
@@ -72,16 +74,15 @@ final public class GameLoop implements Runnable {
 
     public void run() {
         gameNotDone = true;
-        //SynchronizedEventQueue seq = SynchronizedEventQueue.getInstance();
         RepaintManagerForActiveRendering.addJFrame(screenHandler.frame);
         RepaintManagerForActiveRendering.setAsCurrentManager();
 
         fPScounter = new FPScounter();
 
         /*
-         * Reduce this threads priority to avoid starvation of the input thread
-         * on Windows.
-         */
+ * Reduce this threads priority to avoid starvation of the input thread
+ * on Windows.
+ */
         try {
             Thread.currentThread().setPriority(Thread.NORM_PRIORITY - 1);
         } catch (SecurityException e) {
@@ -93,10 +94,10 @@ final public class GameLoop implements Runnable {
 
             if (!screenHandler.isMinimised()) {
                 /*
-                 * Flush all redraws in the underlying toolkit.  This reduces
-                 * X11 lag when there isn't much happening, but is expensive
-                 * under Windows
-                 */
+ * Flush all redraws in the underlying toolkit.  This reduces
+ * X11 lag when there isn't much happening, but is expensive
+ * under Windows
+ */
                 Toolkit.getDefaultToolkit().sync();
 
                 synchronized (SynchronizedEventQueue.MUTEX) {
@@ -110,17 +111,21 @@ final public class GameLoop implements Runnable {
                         model.update();
                     }
 
-                    Graphics g = screenHandler.getDrawGraphics();
+                    if (screenHandler.isInUse()) {
+                        Graphics g = screenHandler.getDrawGraphics();
 
-                    try {
-                        screenHandler.frame.paintComponents(g);
+                        try {
+                            screenHandler.frame.paintComponents(g);
 
-                        fPScounter.updateFPSCounter(frameStartTime, g);
-                    } finally {
-                        g.dispose();
+                            if (SHOWFPS) {
+                                fPScounter.updateFPSCounter(frameStartTime, g);
+                            }
+                        } finally {
+                            g.dispose();
+                        }
+
+                        screenHandler.swapScreens();
                     }
-
-                    screenHandler.swapScreens();
                 }
 
                 if (LIMIT_FRAME_RATE) {
