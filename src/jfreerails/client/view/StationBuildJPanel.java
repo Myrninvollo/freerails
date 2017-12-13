@@ -6,7 +6,6 @@
 
 package jfreerails.client.view;
 
-import java.awt.Dimension;
 import java.awt.Insets;
 
 import javax.swing.Action;
@@ -21,7 +20,6 @@ import jfreerails.client.renderer.ViewLists;
 class StationBuildJPanel extends javax.swing.JPanel {
     
     private int numberOfButtons = 0;
-    private int widthOfButton = 30;
 
     /** Creates new form JPanel */
     public StationBuildJPanel() {
@@ -33,13 +31,8 @@ class StationBuildJPanel extends javax.swing.JPanel {
 	Action[] actions = stationBuildModel.getStationChooseActions();
 	for (int i = 0; i < actions.length; i++) {
 	    StationButton button = new StationButton(actions[i]);
-	    Dimension d = button.getSize();
-	    Dimension s = stationTypesjPanel1.getSize();
-	    int columns = (int) (s.getWidth() / d.getWidth());
 	    stationTypesjPanel1.add(button);
 	    numberOfButtons++;
-	    /* this is OK since all buttons are same width */
-	    widthOfButton = (int) button.getPreferredSize().getWidth();
 	}
     }
 

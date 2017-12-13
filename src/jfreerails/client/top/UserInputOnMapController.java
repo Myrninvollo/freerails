@@ -67,17 +67,19 @@ public class UserInputOnMapController implements CursorEventListener {
     }
 
     public void cursorJumped(CursorEvent ce) {
-        trackBuilder.upgradeTrack(ce.newPosition);
+        if (trackBuilder.getTrackBuilderMode() == TrackMoveProducer.UPGRADE_TRACK) {
+            MoveStatus ms = trackBuilder.upgradeTrack(ce.newPosition);
+
+            if (ms.ok) {
+                cursor.setMessage("");
+            } else {
+                cursor.setMessage(ms.message);
+            }
+        }
     }
 
     public void cursorKeyPressed(CursorEvent ce) {
         switch (ce.keyEvent.getKeyCode()) {
-        case KeyEvent.VK_F7: {
-            buildTrain(ce);
-
-            break;
-        }
-
         case KeyEvent.VK_F8: {
             //defensive copy.
             Point tile = new Point(ce.newPosition);
@@ -88,7 +90,7 @@ public class UserInputOnMapController implements CursorEventListener {
                 Dimension tileSize = new Dimension((int)scale, (int)scale);
                 int x = tile.x * tileSize.width;
                 int y = tile.y * tileSize.height;
-                stationTypesPopup.show(mapView, x, y, tile);
+                stationTypesPopup.showMenu(mapView, x, y, tile);
             } else {
                 modelRoot.getUserMessageLogger().println("Can't" +
                     " build station here!");
@@ -115,10 +117,5 @@ public class UserInputOnMapController implements CursorEventListener {
             break;
         }
         }
-    }
-
-    private void buildTrain(CursorEvent ce) {
-        dialogueBoxController.showSelectEngine();
-        //trainBuilder.buildTrain(ce.newPosition);
     }
 }

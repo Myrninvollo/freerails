@@ -6,13 +6,13 @@ package jfreerails.server;
 
 import jfreerails.controller.MoveReceiver;
 import jfreerails.move.AddTransactionMove;
+import jfreerails.move.ChangeTrackPieceCompositeMove;
 import jfreerails.move.Move;
-import jfreerails.world.accounts.AddItemTransaction;
-import jfreerails.world.accounts.BankAccount;
 import jfreerails.world.accounts.Bill;
 import jfreerails.world.accounts.Transaction;
 import jfreerails.world.common.Money;
-import jfreerails.world.top.KEY;
+import jfreerails.world.player.FreerailsPrincipal;
+import jfreerails.world.top.SKEY;
 import jfreerails.world.top.World;
 import jfreerails.world.track.TrackRule;
 
@@ -31,47 +31,33 @@ public class TrackMaintenanceMoveGenerator {
         this.moveReceiver = mr;
     }
 
-    public static AddTransactionMove generateMove(World w) {
-        int[] track = calulateNumberOfEachTrackType(w);
+    public static AddTransactionMove generateMove(World w,
+        FreerailsPrincipal principal) {
+        int[] track = ChangeTrackPieceCompositeMove.calulateNumberOfEachTrackType(w,
+                principal);
         long amount = 0;
 
         for (int i = 0; i < track.length; i++) {
-            TrackRule trackRule = (TrackRule)w.get(KEY.TRACK_RULES, i);
+            TrackRule trackRule = (TrackRule)w.get(SKEY.TRACK_RULES, i);
             long maintenanceCost = trackRule.getMaintenanceCost().getAmount();
 
             if (track[i] > 0) {
-                System.out.println(track[i] + " " + trackRule.getTypeName() +
-                    " maintenance cost of " + maintenanceCost * track[i]);
+                //                            System.out.println(track[i] + " " + trackRule.getTypeName() +
+                //                                " maintenance cost of " + maintenanceCost * track[i]);
                 amount += maintenanceCost * track[i];
             }
         }
 
         Transaction t = new Bill(new Money(amount));
 
-        return new AddTransactionMove(0, t);
-    }
-
-    public static int[] calulateNumberOfEachTrackType(World w) {
-        int[] unitsOfTrack = new int[w.size(KEY.TRACK_RULES)];
-        BankAccount account = (BankAccount)w.get(KEY.BANK_ACCOUNTS, 0);
-
-        for (int i = 0; i < account.size(); i++) {
-            Transaction t = account.getTransaction(i);
-
-            if (t instanceof AddItemTransaction) {
-                AddItemTransaction addItemTransaction = (AddItemTransaction)t;
-
-                if (AddItemTransaction.TRACK == addItemTransaction.getCategory()) {
-                    unitsOfTrack[addItemTransaction.getType()] += addItemTransaction.getQuantity();
-                }
-            }
-        }
-
-        return unitsOfTrack;
+        return new AddTransactionMove(principal, t);
     }
 
     public void update(World w) {
-        Move m = generateMove(w);
-        moveReceiver.processMove(m);
+        for (int i = 0; i < w.getNumberOfPlayers(); i++) {
+            FreerailsPrincipal principal = w.getPlayer(i).getPrincipal();
+            Move m = generateMove(w, principal);
+            moveReceiver.processMove(m);
+        }
     }
 }

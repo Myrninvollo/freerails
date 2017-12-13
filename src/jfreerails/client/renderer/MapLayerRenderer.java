@@ -16,11 +16,7 @@ import java.awt.Rectangle;
 public interface MapLayerRenderer {
     void paintTile(Graphics g, int tileX, int tileY);
 
-    void paintRectangleOfTiles(Graphics g, int x, int y, int width, int height);
-
     void refreshTile(int x, int y);
-
-    void refreshRectangleOfTiles(int x, int y, int width, int height);
 
     void paintRect(Graphics g, Rectangle visibleRect);
 }

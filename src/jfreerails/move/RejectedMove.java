@@ -1,5 +1,6 @@
 package jfreerails.move;
 
+import jfreerails.world.player.FreerailsPrincipal;
 import jfreerails.world.top.World;
 
 
@@ -28,20 +29,20 @@ public class RejectedMove implements Move {
         return moveStatus;
     }
 
-    public MoveStatus tryDoMove(World w) {
-        return MoveStatus.MOVE_FAILED;
+    public MoveStatus tryDoMove(World w, FreerailsPrincipal p) {
+        return MoveStatus.moveFailed(this.getClass().getName());
     }
 
-    public MoveStatus tryUndoMove(World w) {
-        return MoveStatus.MOVE_FAILED;
+    public MoveStatus tryUndoMove(World w, FreerailsPrincipal p) {
+        return MoveStatus.moveFailed(this.getClass().getName());
     }
 
-    public MoveStatus doMove(World w) {
-        return MoveStatus.MOVE_FAILED;
+    public MoveStatus doMove(World w, FreerailsPrincipal p) {
+        return MoveStatus.moveFailed(this.getClass().getName());
     }
 
-    public MoveStatus undoMove(World w) {
-        return MoveStatus.MOVE_FAILED;
+    public MoveStatus undoMove(World w, FreerailsPrincipal p) {
+        return MoveStatus.moveFailed(this.getClass().getName());
     }
 
     /**

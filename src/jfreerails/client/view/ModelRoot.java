@@ -1,5 +1,13 @@
 package jfreerails.client.view;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import java.util.ArrayList;
+
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.KeyStroke;
+
 import jfreerails.client.common.UserMessageLogger;
 import jfreerails.client.renderer.ViewLists;
 import jfreerails.controller.MoveChainFork;
@@ -7,8 +15,9 @@ import jfreerails.controller.ServerControlInterface;
 import jfreerails.controller.StationBuilder;
 import jfreerails.controller.TrackMoveProducer;
 import jfreerails.controller.UntriedMoveReceiver;
-import jfreerails.world.top.KEY;
+import jfreerails.world.player.FreerailsPrincipal;
 import jfreerails.world.top.ReadOnlyWorld;
+import jfreerails.world.top.SKEY;
 
 
 /**
@@ -18,14 +27,53 @@ public final class ModelRoot {
     private TrackBuildModel trackBuildModel;
     private TrackMoveProducer trackMoveProducer;
     private StationBuildModel stationBuildModel;
-    private  UntriedMoveReceiver moveReceiver;
-    private  MoveChainFork moveFork;
+    private UntriedMoveReceiver moveReceiver;
+    private MoveChainFork moveFork;
     private MapCursor cursor = null;
-	protected ServerControlModel serverControls = new ServerControlModel(null);
-	private ReadOnlyWorld world;
-    
-    public ModelRoot() {        
-    }    	
+    private DialogueBoxController dialogueBoxController = null;
+    private BuildTrainDialogAction buildTrainDialogAction = new BuildTrainDialogAction();
+    private FreerailsPrincipal playerPrincipal;
+    private ViewLists viewLists;
+    private ArrayList listeners = new ArrayList();
+    protected ServerControlModel serverControls = new ServerControlModel(null);
+    private ReadOnlyWorld world;
+
+    public void addModelRootListener(ModelRootListener l) {
+        synchronized (listeners) {
+            listeners.add(l);
+        }
+    }
+
+    /**
+     * @return the principal corresponding to the player this client is acting
+     * for
+     */
+    public FreerailsPrincipal getPlayerPrincipal() {
+		if(null == playerPrincipal) throw new NullPointerException();
+        return playerPrincipal;
+    }
+
+    /**
+     * set the principal corresponding to the player this client is acting for
+     */
+    public void setPlayerPrincipal(FreerailsPrincipal p) {
+        assert p != null;
+        playerPrincipal = p;
+    }
+
+    private class BuildTrainDialogAction extends AbstractAction {
+        public BuildTrainDialogAction() {
+            super("Build Train");
+            putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F7, 0));
+            putValue(SHORT_DESCRIPTION, "Build a new train");
+        }
+
+        public void actionPerformed(ActionEvent e) {
+            if (dialogueBoxController != null) {
+                dialogueBoxController.showSelectEngine();
+            }
+        }
+    }
 
     public MoveChainFork getMoveChainFork() {
         return moveFork;
@@ -50,6 +98,10 @@ public final class ModelRoot {
             public void println(String s) {
                 System.err.println(s);
             }
+            public void showMessage(String msg) {
+              println(msg);
+            }
+            public void hideMessage() {}
         };
 
     /**
@@ -59,11 +111,24 @@ public final class ModelRoot {
      */
     public void setWorld(ReadOnlyWorld world, UntriedMoveReceiver receiver,
         ViewLists vl) {
-        if (world.size(KEY.TRACK_RULES) > 0) {
-            trackMoveProducer = new TrackMoveProducer(world, receiver);
+        viewLists = vl;
+        this.world = world;
+
+        if(null == world) throw new NullPointerException();
+
+        if (world.size(SKEY.TRACK_RULES) > 0) {
+            assert playerPrincipal != null;
+            trackMoveProducer = new TrackMoveProducer(world, receiver,
+                    playerPrincipal);
             trackBuildModel = new TrackBuildModel(trackMoveProducer, world, vl);
             stationBuildModel = new StationBuildModel(new StationBuilder(
-                        receiver, world), world, vl);
+                        receiver, world, playerPrincipal), world, vl);
+        }
+
+        synchronized (listeners) {
+            for (int i = 0; i < listeners.size(); i++) {
+                ((ModelRootListener)listeners.get(i)).modelRootChanged();
+            }
         }
     }
 
@@ -73,6 +138,10 @@ public final class ModelRoot {
 
     public StationBuildModel getStationBuildModel() {
         return stationBuildModel;
+    }
+
+    public Action getBuildTrainDialogAction() {
+        return buildTrainDialogAction;
     }
 
     public TrackMoveProducer getTrackMoveProducer() {
@@ -86,32 +155,37 @@ public final class ModelRoot {
     public void setUserMessageLogger(UserMessageLogger m) {
         messageLogger = m;
     }
-    
-	/**
-		* Not all clients may return a valid object - access to the server controls
-		* is at the discretion of the server.
-		*/
-	   public ServerControlModel getServerControls() {
-		   return serverControls;
-	   }
 
-	   public void setServerControls(ServerControlInterface controls) {
-		   serverControls.setServerControlInterface(controls);
-	   }
-	public ReadOnlyWorld getWorld() {
-		return world;
-	}
+    public void setDialogueBoxController(
+        DialogueBoxController dialogueBoxController) {
+        this.dialogueBoxController = dialogueBoxController;
+    }
 
-	public void setWorld(ReadOnlyWorld world) {
-		this.world = world;
-	}
+    public ViewLists getViewLists() {
+        return viewLists;
+    }
 
-	public void setMoveFork(MoveChainFork moveFork) {
-		this.moveFork = moveFork;
-	}
+    /**
+     * Not all clients may return a valid object - access to the server controls
+     * is at the discretion of the server.
+     */
+    public ServerControlModel getServerControls() {
+        return serverControls;
+    }
 
-	public void setMoveReceiver(UntriedMoveReceiver moveReceiver) {
-		this.moveReceiver = moveReceiver;
-	}
+    public void setServerControls(ServerControlInterface controls) {
+        serverControls.setServerControlInterface(controls);
+    }
 
+    public ReadOnlyWorld getWorld() {
+        return world;
+    }
+
+    public void setMoveFork(MoveChainFork moveFork) {
+        this.moveFork = moveFork;
+    }
+
+    public void setMoveReceiver(UntriedMoveReceiver moveReceiver) {
+        this.moveReceiver = moveReceiver;
+    }
 }

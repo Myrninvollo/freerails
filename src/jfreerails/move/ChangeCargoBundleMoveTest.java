@@ -8,6 +8,7 @@ import jfreerails.world.cargo.CargoBatch;
 import jfreerails.world.cargo.CargoBundle;
 import jfreerails.world.cargo.CargoBundleImpl;
 import jfreerails.world.top.KEY;
+import jfreerails.world.top.MapFixtureFactory;
 
 
 /**
@@ -23,11 +24,13 @@ public class ChangeCargoBundleMoveTest extends AbstractMoveTestCase {
         before.setAmount(new CargoBatch(1, 2, 3, 4, 0), 5);
         after.setAmount(new CargoBatch(1, 2, 3, 4, 0), 8);
 
-        Move m = new ChangeCargoBundleMove(before, after, 0);
+        Move m = new ChangeCargoBundleMove(before, after, 0,
+                MapFixtureFactory.TEST_PRINCIPAL);
         assertEqualsSurvivesSerialisation(m);
 
         assertTryMoveFails(m);
         assertTryUndoMoveFails(m);
-        world.add(KEY.CARGO_BUNDLES, before);
+        getWorld().add(KEY.CARGO_BUNDLES, before,
+            MapFixtureFactory.TEST_PRINCIPAL);
     }
 }

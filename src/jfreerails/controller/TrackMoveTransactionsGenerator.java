@@ -12,8 +12,9 @@ import jfreerails.move.Move;
 import jfreerails.world.accounts.AddItemTransaction;
 import jfreerails.world.accounts.Transaction;
 import jfreerails.world.common.Money;
-import jfreerails.world.top.KEY;
+import jfreerails.world.player.FreerailsPrincipal;
 import jfreerails.world.top.ReadOnlyWorld;
+import jfreerails.world.top.SKEY;
 import jfreerails.world.track.NullTrackType;
 import jfreerails.world.track.TrackRule;
 
@@ -32,6 +33,7 @@ public class TrackMoveTransactionsGenerator {
 
     /** Number of each of the track types removed. */
     private int[] trackRemoved;
+    private final FreerailsPrincipal principal;
 
     /* Note, trackAdded and trackRemoved cannot be combined, since
      * it may cost more to added a unit of track than is refunded when
@@ -40,12 +42,18 @@ public class TrackMoveTransactionsGenerator {
     private ArrayList transactions = new ArrayList();
     private ReadOnlyWorld w;
 
-    public TrackMoveTransactionsGenerator(ReadOnlyWorld world) {
+    /**
+     * @param p the Principal on behalf of which this object generates
+     * transactions for
+     */
+    public TrackMoveTransactionsGenerator(ReadOnlyWorld world,
+        FreerailsPrincipal p) {
         w = world;
+        principal = p;
     }
 
     public Move addTransactions(Move move) {
-        int numberOfTrackTypes = w.size(KEY.TRACK_RULES);
+        int numberOfTrackTypes = w.size(SKEY.TRACK_RULES);
         trackAdded = new int[numberOfTrackTypes];
         trackRemoved = new int[numberOfTrackTypes];
 
@@ -58,7 +66,7 @@ public class TrackMoveTransactionsGenerator {
 
         for (int i = 0; i < transactions.size(); i++) {
             Transaction t = (Transaction)transactions.get(i);
-            moves[i + 1] = new AddTransactionMove(0, t, true);
+            moves[i + 1] = new AddTransactionMove(principal, t, true);
         }
 
         return new CompositeMove(moves);
@@ -105,7 +113,7 @@ public class TrackMoveTransactionsGenerator {
             int numberAdded = trackAdded[i];
 
             if (0 != numberAdded) {
-                TrackRule rule = (TrackRule)w.get(KEY.TRACK_RULES, i);
+                TrackRule rule = (TrackRule)w.get(SKEY.TRACK_RULES, i);
                 Money m = rule.getPrice();
                 Money total = new Money(-m.getAmount() * numberAdded);
                 Transaction t = new AddItemTransaction(AddItemTransaction.TRACK,
@@ -116,7 +124,7 @@ public class TrackMoveTransactionsGenerator {
             int numberRemoved = trackRemoved[i];
 
             if (0 != numberRemoved) {
-                TrackRule rule = (TrackRule)w.get(KEY.TRACK_RULES, i);
+                TrackRule rule = (TrackRule)w.get(SKEY.TRACK_RULES, i);
                 Money m = rule.getPrice();
 
                 Money total = new Money((m.getAmount() * numberRemoved) / 2);

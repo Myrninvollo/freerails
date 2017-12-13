@@ -1,9 +1,10 @@
 package jfreerails.server;
 
-import java.util.ArrayList;
 import jfreerails.move.ChangeTrainPositionMove;
 import jfreerails.world.common.IntLine;
+import jfreerails.world.player.Player;
 import jfreerails.world.top.KEY;
+import jfreerails.world.top.MapFixtureFactory;
 import jfreerails.world.top.World;
 import jfreerails.world.train.PathWalker;
 import jfreerails.world.train.TrainModel;
@@ -16,7 +17,6 @@ import junit.framework.TestCase;
  *
  */
 public class TrainMoverTest extends TestCase {
-    ArrayList points;
     TrainMover trainMover;
     World w;
 
@@ -31,17 +31,17 @@ public class TrainMoverTest extends TestCase {
     protected void setUp() {
         TrainFixture trainFixture = new TrainFixture();
 
-        points = trainFixture.getPoints();
-
         trainMover = trainFixture.getTrainMover();
 
         w = trainFixture.getWorld();
+        w.addPlayer(MapFixtureFactory.TEST_PLAYER, Player.AUTHORITATIVE);
     }
 
     public void testTrainMover() {
         setUp();
 
-        TrainModel t = (TrainModel)w.get(KEY.TRAINS, 0);
+        TrainModel t = (TrainModel)w.get(KEY.TRAINS, 0,
+                MapFixtureFactory.TEST_PRINCIPAL);
 
         TrainPositionOnMap pos = t.getPosition();
 
@@ -63,12 +63,8 @@ public class TrainMoverTest extends TestCase {
     public void testUpdate() {
         setUp();
 
-        TrainModel t = (TrainModel)w.get(KEY.TRAINS, 0);
-
-        TrainPositionOnMap pos = t.getPosition();
-
         ChangeTrainPositionMove m = trainMover.update(30);
 
-        m.doMove(w);
+        m.doMove(w, Player.AUTHORITATIVE);
     }
 }

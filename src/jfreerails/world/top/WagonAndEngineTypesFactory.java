@@ -21,14 +21,14 @@ public class WagonAndEngineTypesFactory {
         //Wagon types
         WagonType[] wagonTypes = new WagonType[] {
                 new WagonType("Mail", WagonType.MAIL),
-                new WagonType("Passenger", WagonType.PASSENGER),
-                new WagonType("Fast Freight", WagonType.FAST_FREIGHT),
-                new WagonType("Slow Freight", WagonType.SLOW_FREIGHT),
-                new WagonType("Bulk Freight", WagonType.BULK_FREIGHT),
+                new WagonType("Passengers", WagonType.PASSENGER),
+                new WagonType("Livestock", WagonType.FAST_FREIGHT),
+                new WagonType("Coffee", WagonType.SLOW_FREIGHT),
+                new WagonType("Wood", WagonType.BULK_FREIGHT),
             };
 
         for (int i = 0; i < wagonTypes.length; i++) {
-            w.add(KEY.WAGON_TYPES, wagonTypes[i]);
+            w.add(SKEY.WAGON_TYPES, wagonTypes[i]);
         }
 
         //Engine types
@@ -40,7 +40,7 @@ public class WagonAndEngineTypesFactory {
             };
 
         for (int i = 0; i < engineTypes.length; i++) {
-            w.add(KEY.ENGINE_TYPES, engineTypes[i]);
+            w.add(SKEY.ENGINE_TYPES, engineTypes[i]);
         }
     }
 }

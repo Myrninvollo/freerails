@@ -11,12 +11,12 @@ package jfreerails.controller;
 
 import java.awt.Point;
 import jfreerails.move.AddStationMove;
+import jfreerails.move.ChangeTrackPieceCompositeMove;
 import jfreerails.move.ChangeTrackPieceMove;
 import jfreerails.move.Move;
-import jfreerails.world.station.naming.CalcNearestCity;
-import jfreerails.world.station.naming.VerifyStationName;
-import jfreerails.world.top.KEY;
+import jfreerails.world.player.FreerailsPrincipal;
 import jfreerails.world.top.ReadOnlyWorld;
+import jfreerails.world.top.SKEY;
 import jfreerails.world.track.FreerailsTile;
 import jfreerails.world.track.NullTrackType;
 import jfreerails.world.track.TrackPiece;
@@ -28,9 +28,12 @@ public class StationBuilder {
     private ReadOnlyWorld w;
     private int ruleNumber;
     private TrackMoveTransactionsGenerator transactionsGenerator;
+    private final FreerailsPrincipal principal;
 
-    public StationBuilder(UntriedMoveReceiver moveReceiver, ReadOnlyWorld world) {
+    public StationBuilder(UntriedMoveReceiver moveReceiver,
+        ReadOnlyWorld world, FreerailsPrincipal p) {
         this.moveReceiver = moveReceiver;
+        this.principal = p;
         w = world;
 
         TrackRule trackRule;
@@ -39,11 +42,11 @@ public class StationBuilder {
 
         do {
             i++;
-            trackRule = (TrackRule)w.get(KEY.TRACK_RULES, i);
+            trackRule = (TrackRule)w.get(SKEY.TRACK_RULES, i);
         } while (!trackRule.isStation());
 
         ruleNumber = i;
-        transactionsGenerator = new TrackMoveTransactionsGenerator(w);
+        transactionsGenerator = new TrackMoveTransactionsGenerator(w, p);
     }
 
     public boolean canBuiltStationHere(Point p) {
@@ -61,9 +64,12 @@ public class StationBuilder {
             String stationName;
 
             TrackPiece before = (TrackPiece)w.getTile(p.x, p.y);
-            TrackRule trackRule = (TrackRule)w.get(KEY.TRACK_RULES,
+            TrackRule trackRule = (TrackRule)w.get(SKEY.TRACK_RULES,
                     this.ruleNumber);
-            TrackPiece after = trackRule.getTrackPiece(before.getTrackConfiguration());
+
+            int owner = ChangeTrackPieceCompositeMove.getOwner(this.principal, w);
+            TrackPiece after = trackRule.getTrackPiece(before.getTrackConfiguration(),
+                    owner);
             ChangeTrackPieceMove upgradeTrackMove = new ChangeTrackPieceMove(before,
                     after, p);
 
@@ -90,7 +96,7 @@ public class StationBuilder {
 
                 //check the terrain to see if we can build a station on it...
                 Move m = AddStationMove.generateMove(w, stationName, p,
-                        upgradeTrackMove);
+                        upgradeTrackMove, principal);
 
                 this.moveReceiver.processMove(transactionsGenerator.addTransactions(
                         m));
@@ -102,10 +108,6 @@ public class StationBuilder {
             System.err.println(
                 "Can't build station since there is no track here!");
         }
-    }
-
-    public ReadOnlyWorld getWorld() {
-        return w;
     }
 
     public void setStationType(int ruleNumber) {

@@ -5,12 +5,14 @@
 package jfreerails.client.renderer;
 
 import java.awt.Image;
+import java.io.File;
 import java.io.IOException;
 import jfreerails.client.common.ImageManager;
 import jfreerails.util.FreerailsProgressMonitor;
 import jfreerails.world.cargo.CargoType;
-import jfreerails.world.top.KEY;
+import jfreerails.world.common.OneTileMoveVector;
 import jfreerails.world.top.ReadOnlyWorld;
+import jfreerails.world.top.SKEY;
 import jfreerails.world.train.EngineType;
 
 
@@ -20,9 +22,6 @@ import jfreerails.world.train.EngineType;
  *
  */
 public class TrainImages {
-    public static final int HEIGHT_100_PIXELS = 0;
-    public static final int HEIGHT_50_PIXELS = 0;
-    public static final int HEIGHT_25_PIXELS = 0;
     private final Image[] sideOnWagonImages;
     private final Image[][] overheadWagonImages;
     private final Image[] sideOnEngineImages;
@@ -35,8 +34,8 @@ public class TrainImages {
         this.w = w;
         this.imageManager = imageManager;
 
-        final int numberOfWagonTypes = w.size(KEY.CARGO_TYPES);
-        final int numberOfEngineTypes = w.size(KEY.ENGINE_TYPES);
+        final int numberOfWagonTypes = w.size(SKEY.CARGO_TYPES);
+        final int numberOfEngineTypes = w.size(SKEY.ENGINE_TYPES);
 
         //Setup progress monitor..
         pm.setMessage("Loading train images.");
@@ -51,12 +50,12 @@ public class TrainImages {
         overheadEngineImages = new Image[numberOfEngineTypes][8];
 
         for (int i = 0; i < numberOfWagonTypes; i++) {
-            CargoType cargoType = (CargoType)w.get(KEY.CARGO_TYPES, i);
-            String sideOnFileName = WagonRenderer.generateSideOnFilename(cargoType.getName());
+            CargoType cargoType = (CargoType)w.get(SKEY.CARGO_TYPES, i);
+            String sideOnFileName = generateSideOnFilename(cargoType.getName());
             sideOnWagonImages[i] = imageManager.getImage(sideOnFileName);
 
             for (int direction = 0; direction < 8; direction++) {
-                String overheadOnFileName = WagonRenderer.generateOverheadFilename(cargoType.getName(),
+                String overheadOnFileName = generateOverheadFilename(cargoType.getName(),
                         direction);
                 overheadWagonImages[i][direction] = imageManager.getImage(overheadOnFileName);
             }
@@ -65,12 +64,12 @@ public class TrainImages {
         }
 
         for (int i = 0; i < numberOfEngineTypes; i++) {
-            EngineType engineType = (EngineType)w.get(KEY.ENGINE_TYPES, i);
-            String sideOnFileName = WagonRenderer.generateSideOnFilename(engineType.getEngineTypeName());
+            EngineType engineType = (EngineType)w.get(SKEY.ENGINE_TYPES, i);
+            String sideOnFileName = generateSideOnFilename(engineType.getEngineTypeName());
             sideOnEngineImages[i] = imageManager.getImage(sideOnFileName);
 
             for (int direction = 0; direction < 8; direction++) {
-                String overheadOnFileName = WagonRenderer.generateOverheadFilename(engineType.getEngineTypeName(),
+                String overheadOnFileName = generateOverheadFilename(engineType.getEngineTypeName(),
                         direction);
                 overheadEngineImages[i][direction] = imageManager.getImage(overheadOnFileName);
             }
@@ -84,8 +83,8 @@ public class TrainImages {
     }
 
     public Image getSideOnWagonImage(int cargoTypeNumber, int height) {
-        CargoType cargoType = (CargoType)w.get(KEY.CARGO_TYPES, cargoTypeNumber);
-        String sideOnFileName = WagonRenderer.generateSideOnFilename(cargoType.getName());
+        CargoType cargoType = (CargoType)w.get(SKEY.CARGO_TYPES, cargoTypeNumber);
+        String sideOnFileName = generateSideOnFilename(cargoType.getName());
 
         try {
             return imageManager.getScaledImage(sideOnFileName, height);
@@ -104,9 +103,9 @@ public class TrainImages {
     }
 
     public Image getSideOnEngineImage(int engineTypeNumber, int height) {
-        EngineType engineType = (EngineType)w.get(KEY.ENGINE_TYPES,
+        EngineType engineType = (EngineType)w.get(SKEY.ENGINE_TYPES,
                 engineTypeNumber);
-        String sideOnFileName = WagonRenderer.generateSideOnFilename(engineType.getEngineTypeName());
+        String sideOnFileName = generateSideOnFilename(engineType.getEngineTypeName());
 
         try {
             return imageManager.getScaledImage(sideOnFileName, height);
@@ -118,5 +117,17 @@ public class TrainImages {
 
     public Image getOverheadEngineImage(int engineTypeNumber, int direction) {
         return overheadEngineImages[engineTypeNumber][direction];
+    }
+
+    public static String generateOverheadFilename(String name, int i) {
+        OneTileMoveVector[] vectors = OneTileMoveVector.getList();
+
+        return "trains" + File.separator + "overhead" + File.separator + name +
+        "_" + vectors[i].toAbrvString() + ".png";
+    }
+
+    public static String generateSideOnFilename(String name) {
+        return "trains" + File.separator + "sideon" + File.separator + name +
+        ".png";
     }
 }

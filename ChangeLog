@@ -1,3 +1,82 @@
+Mar 6, 2004 12:39:54 PM Luke
+	o Added Scott Bennett's terrain randomisation patch. 
+Mar 6, 2004 12:10:49 AM Luke
+	o Remove 'never read' local variables.
+	o Fixed bug 910135 Trains jump when game un paused 
+	o Fixed bug 891360 Trains don't get built while game is paused 
+Mar 5, 2004 8:16:50 PM Luke
+	o Applied Jan Tozicka's patch for bug 900039 (No clear indication game is paused).
+Mar 4, 2004 7:38:53 PM Luke
+	o Minor changes to coding guidelines.
+	o Fixed stale serialVersionUID problem in jfreerails.world.player.Player
+	o Made ant script insert build id into README and about.htm
+Mar 3, 2004 10:02:11 PM Luke
+	o Apply Scott Bennett's removal_of_Loading_text patch.
+Mar 3, 2004 1:25:27 AM Luke
+	o Implemented Request 905446 Track should be continuous 
+	o Implemented Request 905444 Multi player support: different track 
+Mar 2, 2004 5:21:23 PM Luke
+	o Implemented Request 905443 Multi player support: different trains 
+Mar 1, 2004 10:33:52 PM Luke
+	o Implemented Request 905441 Multi player support: different bank accounts
+	Note, presently some of the dialogue boxes are not working.  This will
+	be fixed as adding multi player support continues.
+Feb 27, 2004 1:03:38 PM Luke
+	o Some fixes for DialogueBoxTester.
+Feb 27, 2004 1:44:54 AM Luke
+	o Refactoring in preparation for multiplayer support.
+Feb 26, 2004 9:48:04 PM Luke
+	o Applied Jan Tozicka's 'Shortcuts for gamespeed' (patch 904903).
+Feb 21, 2004 2:14:47 AM Luke
+	o Fix 891359 - Javadoc package dependencies out of date
+	o Tidy up javadoc
+Feb 20, 2004 6:34:03 PM Luke
+	o Fix 839371 - Goods & livestock wagons appear the same on train orders
+Feb 20, 2004 12:31:15 PM Luke
+	o Fix bugs 867473 and 880450 (Intermittent deadlocks).
+Feb 18, 2004 8:49:34 PM Luke
+	o Fix bug 839331 - set initial gamespeed to 'slow' instead of paused
+	o Fix bug 874416 (station icon hides after track-upgrade)
+	o Fix bug 839361 (Several industries of the same type in same city)
+	o Fix bug 891362 (Cancel button on select engine dialogue doesn't work )
+	o Fix bug 891431 No link between train list and train orders screens 
+Feb 18, 2004 1:12:22 AM Luke
+	o Removed unreachable code.
+	o Fix build.xml
+Feb 17, 2004 1:22:31 AM Luke
+	o Apply move infrastructure patch.
+	o Apply OSX work around.
+Feb 16, 2004 9:49:53 PM Luke
+	o Add new select station popup to train orders dialogue (fixes bug 891427).
+	o Add 'About' dialogue (fixes bug 891377)
+	o Add 'How to play' dialogue (fixes bug 891371)
+Feb 6, 2004 12:23:44 AM Luke
+	o Apply Robert Tuck's patch to fix bug 880496 (User stuck after connection refused)
+Feb 5, 2004 12:09:19 AM Luke
+	o Apply Robert Tuck's Mac OS X fixes.
+	o Uncomment out code in TrackMaintenanceMoveGenerator
+Feb 4, 2004 4:07:21 PM Luke
+	o Add testDefensiveCopy() to WorldImplTest
+Jan 19, 2004 7:21:04 PM Luke
+	o Applied Robert Tuck's launcher patch.
+Dec 31, 2003 1:35:01 AM Luke
+	o Remove some unused code.
+	o Fix some things jlint moaned about - perhaps slightly pointless!
+Dec 30, 2003 12:00:03 AM Luke
+	o Refactoring to change the threads in which moves are executed.  
+		(i)  Moves are precommitted on the client's copy of the world 
+		by the thread "AWT_EventQueue."
+		(ii) All moves are now executed on the server's copy of the world 
+		in jfreerails.server.ServerGameEngine.update() by the thread "JFreerails server".		
+		(iii) Moves received from the server are now executed on the clients copy of the 
+		world in jfreerails.client.top.run() by the client thread by the  thread
+		"JFreerails client: ..."
+	Moves are passed between threads using queues. 
+	Currently starting new games and loading games does not work.
+	o Removed most of the passing of mutexes between classes.
+Dec 29, 2003 9:12:42 PM Luke
+	o Apply Robert Tuck's patch to BufferedTiledBackgroundRenderer.
+	o Make the client keep its own copy of the world object even when it is in the same VM as the server.
 Dec 24, 2003 9:36:36 AM Luke
 	o Prepare for release.
 Dec 23, 2003 23:15:58 PM Luke

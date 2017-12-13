@@ -7,12 +7,11 @@ package jfreerails.client.renderer;
 
 import java.awt.Image;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Iterator;
 import jfreerails.client.common.ImageManager;
 import jfreerails.util.FreerailsProgressMonitor;
-import jfreerails.world.top.KEY;
 import jfreerails.world.top.ReadOnlyWorld;
+import jfreerails.world.top.SKEY;
 import jfreerails.world.track.NullTrackType;
 import jfreerails.world.track.TrackConfiguration;
 import jfreerails.world.track.TrackRule;
@@ -20,10 +19,6 @@ import jfreerails.world.track.TrackRule;
 
 final public class TrackPieceRendererList {
     private final TrackPieceRenderer[] trackPieceViewArray;
-
-    public TrackPieceRenderer[] getTrackPieceViewArray() {
-        return trackPieceViewArray;
-    }
 
     public TrackPieceRenderer getTrackPieceView(int i) {
         if (NullTrackType.NULL_TRACK_TYPE_RULE_NUMBER == i) {
@@ -33,40 +28,16 @@ final public class TrackPieceRendererList {
         }
     }
 
-    /** Creates new TrackPieceViewList */
-    public TrackPieceRendererList(TrackPieceRenderer[] trackPieceViews) {
-        trackPieceViewArray = new TrackPieceRenderer[trackPieceViews.length];
-
-        for (int i = 0; i < trackPieceViews.length; i++) {
-            TrackPieceRenderer trackPieceView = trackPieceViews[i];
-
-            if (null == trackPieceView) {
-                throw new java.lang.IllegalArgumentException();
-            }
-
-            trackPieceViewArray[i] = trackPieceView;
-        }
-    }
-
-    public TrackPieceRendererList(ArrayList trackPieceViewArrayList) {
-        trackPieceViewArray = new TrackPieceRenderer[trackPieceViewArrayList.size()];
-
-        for (int i = 0; i < trackPieceViewArrayList.size(); i++) {
-            TrackPieceRenderer trackPieceView = (TrackPieceRenderer)(trackPieceViewArrayList.get(i));
-            trackPieceViewArray[i] = trackPieceView;
-        }
-    }
-
     public TrackPieceRendererList(ReadOnlyWorld w, ImageManager imageManager,
         FreerailsProgressMonitor pm) throws IOException {
         //		Setup progress monitor..
         pm.setMessage("Loading track graphics.");
-        pm.setMax(w.size(KEY.TRACK_RULES));
+        pm.setMax(w.size(SKEY.TRACK_RULES));
 
         int progress = 0;
         pm.setValue(progress);
 
-        int numberOfTrackTypes = w.size(KEY.TRACK_RULES);
+        int numberOfTrackTypes = w.size(SKEY.TRACK_RULES);
         trackPieceViewArray = new TrackPieceRenderer[numberOfTrackTypes];
 
         for (int i = 0; i < numberOfTrackTypes; i++) {
@@ -79,8 +50,8 @@ final public class TrackPieceRendererList {
     public boolean validate(ReadOnlyWorld w) {
         boolean okSoFar = true;
 
-        for (int i = 0; i < w.size(KEY.TRACK_RULES); i++) {
-            TrackRule trackRule = (TrackRule)w.get(KEY.TRACK_RULES, i);
+        for (int i = 0; i < w.size(SKEY.TRACK_RULES); i++) {
+            TrackRule trackRule = (TrackRule)w.get(SKEY.TRACK_RULES, i);
             Iterator legalConfigurationsIterator = trackRule.getLegalConfigurationsIterator();
             TrackPieceRenderer trackPieceView = this.getTrackPieceView(i);
 

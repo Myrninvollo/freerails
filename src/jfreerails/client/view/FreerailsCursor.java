@@ -79,10 +79,6 @@ final public class FreerailsCursor implements KeyListener, MapCursor {
         }
     }
 
-    public void blinkCursor() {
-        blinkValue = -blinkValue;
-    }
-
     /** Use this method rather than KeyTyped to process keyboard input.
     * @param keyEvent The key pressed.
     */
@@ -186,10 +182,6 @@ final public class FreerailsCursor implements KeyListener, MapCursor {
         listeners.addElement(l);
     }
 
-    public void removeCursorEventListener(CursorEventListener l) {
-        listeners.removeElement(l);
-    }
-
     private void moveCursor(OneTileMoveVector v) {
         tryMoveCursor(new Point(cursorMapPosition.x + v.getDx(),
                 cursorMapPosition.y + v.getDy()));
@@ -225,11 +217,7 @@ final public class FreerailsCursor implements KeyListener, MapCursor {
         for (int i = 0; i < listeners.size(); i++) {
             ((CursorEventListener)listeners.elementAt(i)).cursorKeyPressed(ce);
         }
-    }
-
-    public String getMessage() {
-        return message;
-    }
+    }   
 
     public void setMessage(String message) {
         this.message = message;

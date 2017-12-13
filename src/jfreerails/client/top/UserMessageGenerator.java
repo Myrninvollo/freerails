@@ -14,11 +14,13 @@ import jfreerails.world.cargo.CargoBundle;
 import jfreerails.world.cargo.CargoType;
 import jfreerails.world.common.GameCalendar;
 import jfreerails.world.common.GameTime;
+import jfreerails.world.player.FreerailsPrincipal;
 import jfreerails.world.station.StationModel;
 import jfreerails.world.top.ITEM;
 import jfreerails.world.top.KEY;
 import jfreerails.world.top.NonNullElements;
 import jfreerails.world.top.ReadOnlyWorld;
+import jfreerails.world.top.SKEY;
 import jfreerails.world.train.TrainModel;
 
 
@@ -29,13 +31,15 @@ import jfreerails.world.train.TrainModel;
  *
  */
 public class UserMessageGenerator implements MoveReceiver {
-    ModelRoot mr;
-    ReadOnlyWorld world;
+    ModelRoot modelRoot;
     DecimalFormat formatter = new DecimalFormat("#,###,###");
 
-    public UserMessageGenerator(ModelRoot mr, ReadOnlyWorld world) {
-        this.mr = mr;
-        this.world = world;
+    public UserMessageGenerator(ModelRoot mr) {
+        if (null == mr) {
+            throw new NullPointerException();
+        }
+
+        this.modelRoot = mr;
     }
 
     public void processMove(Move move) {
@@ -47,17 +51,21 @@ public class UserMessageGenerator implements MoveReceiver {
             DeliverCargoReceipt deliverCargoReceipt = (DeliverCargoReceipt)addTransactionMove.getTransaction();
             long revenue = deliverCargoReceipt.getValue().getAmount();
 
-            if (0 < revenue) {
+            FreerailsPrincipal playerPrincipal = modelRoot.getPlayerPrincipal();
+            FreerailsPrincipal transactionPrincipal = addTransactionMove.getPrincipal();
+
+            if (0 < revenue && playerPrincipal.equals(transactionPrincipal)) {
+                ReadOnlyWorld world = modelRoot.getWorld();
                 int trainCargoBundle = transferCargoAtStationMove.getChangeOnTrain()
                                                                  .getIndex();
                 int stationCargoBundle = transferCargoAtStationMove.getChangeAtStation()
                                                                    .getIndex();
-                NonNullElements trains = new NonNullElements(KEY.TRAINS, world);
+                NonNullElements trains = new NonNullElements(KEY.TRAINS, world,
+                        playerPrincipal);
                 NonNullElements stations = new NonNullElements(KEY.STATIONS,
-                        world);
+                        world, playerPrincipal);
 
                 int trainNumber = -1;
-                int statonNumber = -1;
                 String stationName = "No station";
 
                 while (trains.next()) {
@@ -74,7 +82,6 @@ public class UserMessageGenerator implements MoveReceiver {
                     StationModel station = (StationModel)stations.getElement();
 
                     if (station.getCargoBundleNumber() == stationCargoBundle) {
-                        statonNumber = stations.getRowNumber();
                         stationName = station.getStationName();
 
                         break;
@@ -88,17 +95,17 @@ public class UserMessageGenerator implements MoveReceiver {
                 String message = gc.getTimeOfDay(gt.getTime()) + "  Train #" +
                     trainNumber + " arrives at " + stationName + "\n";
 
-                for (int i = 0; i < world.size(KEY.CARGO_TYPES); i++) {
+                for (int i = 0; i < world.size(SKEY.CARGO_TYPES); i++) {
                     int amount = cb.getAmount(i);
 
                     if (amount > 0) {
-                        CargoType ct = (CargoType)world.get(KEY.CARGO_TYPES, i);
+                        CargoType ct = (CargoType)world.get(SKEY.CARGO_TYPES, i);
                         message += amount + " " + ct.getDisplayName() + "\n";
                     }
                 }
 
                 message += "$" + formatter.format(revenue);
-                mr.getUserMessageLogger().println(message);
+                modelRoot.getUserMessageLogger().println(message);
             }
         }
     }

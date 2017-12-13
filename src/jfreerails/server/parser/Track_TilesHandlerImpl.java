@@ -9,7 +9,7 @@ package jfreerails.server.parser;
 
 import java.util.ArrayList;
 import jfreerails.server.common.TrackSetFactory;
-import jfreerails.world.top.KEY;
+import jfreerails.world.top.SKEY;
 import jfreerails.world.top.World;
 import jfreerails.world.track.LegalTrackPlacement;
 import jfreerails.world.track.TrackRule;
@@ -25,7 +25,6 @@ public class Track_TilesHandlerImpl implements Track_TilesHandler,
     protected jfreerails.world.track.TrackRuleProperties trackRuleProperties;
     protected jfreerails.world.track.LegalTrackConfigurations legalTrackConfigurations;
     public static final boolean DEBUG = false;
-    protected World w;
     protected ArrayList legalTemplates;
     protected java.util.HashSet terrainTypes;
     protected LegalTrackPlacement legalTrackPlacement;
@@ -184,7 +183,7 @@ public class Track_TilesHandlerImpl implements Track_TilesHandler,
     public void addTrackRules(World w) {
         for (int i = 0; i < this.ruleList.size(); i++) {
             TrackRule r = (TrackRule)ruleList.get(i);
-            w.add(KEY.TRACK_RULES, r);
+            w.add(SKEY.TRACK_RULES, r);
         }
     }
 }

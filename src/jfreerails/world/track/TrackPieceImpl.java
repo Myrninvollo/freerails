@@ -3,23 +3,17 @@ package jfreerails.world.track;
 final public class TrackPieceImpl implements TrackPiece {
     private final TrackConfiguration configuration;
     private final TrackRule trackType;
+    private final int ownerID;
 
     public TrackPieceImpl(jfreerails.world.track.TrackConfiguration c,
-        TrackRule type) {
+        TrackRule type, int owner) {
         configuration = c;
         trackType = type;
-    }
-
-    public int getRGB() {
-        return 0;
+        this.ownerID = owner;
     }
 
     public int getTrackGraphicNumber() {
         return configuration.getTrackGraphicsNumber();
-    }
-
-    public int getTrackTypeNumber() {
-        return trackType.getRuleNumber();
     }
 
     public TrackRule getTrackRule() {
@@ -43,5 +37,9 @@ final public class TrackPieceImpl implements TrackPiece {
         } else {
             return false;
         }
+    }
+
+    public int getOwnerID() {
+        return ownerID;
     }
 }

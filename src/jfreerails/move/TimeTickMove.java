@@ -1,11 +1,17 @@
 package jfreerails.move;
 
-import jfreerails.world.top.World;
-import jfreerails.world.top.ReadOnlyWorld;
 import jfreerails.world.common.GameTime;
+import jfreerails.world.player.FreerailsPrincipal;
 import jfreerails.world.top.ITEM;
+import jfreerails.world.top.ReadOnlyWorld;
+import jfreerails.world.top.World;
 
 
+/**
+ *
+ *  Changes the time item on the world object.
+ *
+ */
 public class TimeTickMove implements Move {
     private GameTime oldTime = null;
     private GameTime newTime = null;
@@ -18,43 +24,47 @@ public class TimeTickMove implements Move {
         return timeTickMove;
     }
 
-    public MoveStatus tryDoMove(World w) {
+    public MoveStatus tryDoMove(World w, FreerailsPrincipal p) {
         if (((GameTime)w.get(ITEM.TIME)).equals(oldTime)) {
             return MoveStatus.MOVE_OK;
         } else {
-            System.err.println("oldTime = " + oldTime.getTime() + " <=> " +
-                "currentTime " + ((GameTime)w.get(ITEM.TIME)).getTime());
+            String string = "oldTime = " + oldTime.getTime() + " <=> " +
+                "currentTime " + ((GameTime)w.get(ITEM.TIME)).getTime();
+            System.err.println(string);
 
-            return MoveStatus.MOVE_FAILED;
+            return MoveStatus.moveFailed(string);
         }
     }
 
-    public MoveStatus tryUndoMove(World w) {
-        if (((GameTime)w.get(ITEM.TIME)).equals(newTime)) {
+    public MoveStatus tryUndoMove(World w, FreerailsPrincipal p) {
+        GameTime time = ((GameTime)w.get(ITEM.TIME));
+
+        if (time.equals(newTime)) {
             return MoveStatus.MOVE_OK;
         } else {
-            return MoveStatus.MOVE_FAILED;
+            return MoveStatus.moveFailed("Expected " + newTime + ", found " +
+                time);
         }
     }
 
-    public MoveStatus doMove(World w) {
-        if (tryDoMove(w).equals(MoveStatus.MOVE_OK)) {
+    public MoveStatus doMove(World w, FreerailsPrincipal p) {
+        MoveStatus status = tryDoMove(w, p);
+
+        if (status.ok) {
             w.set(ITEM.TIME, newTime);
-
-            return MoveStatus.MOVE_OK;
-        } else {
-            return MoveStatus.MOVE_FAILED;
         }
+
+        return status;
     }
 
-    public MoveStatus undoMove(World w) {
-        if (tryUndoMove(w).equals(MoveStatus.MOVE_OK)) {
-            w.set(ITEM.TIME, oldTime);
+    public MoveStatus undoMove(World w, FreerailsPrincipal p) {
+        MoveStatus status = tryUndoMove(w, p);
 
-            return MoveStatus.MOVE_OK;
-        } else {
-            return MoveStatus.MOVE_FAILED;
+        if (status.isOk()) {
+            w.set(ITEM.TIME, oldTime);
         }
+
+        return status;
     }
 
     public String toString() {

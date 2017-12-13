@@ -35,7 +35,7 @@ final public class NullTrackType implements jfreerails.world.track.TrackRule {
         return true; //No track is possible anywhere.
     }
 
-    public jfreerails.world.common.OneTileMoveVector[] getLegalRoutes(
+    public OneTileMoveVector[] getLegalRoutes(
         jfreerails.world.common.OneTileMoveVector directionComingFrom) {
         return new OneTileMoveVector[0];
     }
@@ -50,10 +50,6 @@ final public class NullTrackType implements jfreerails.world.track.TrackRule {
 
     public String getTypeName() {
         return "NullTrackType";
-    }
-
-    public boolean isDoubleTrackEnabled() {
-        return false;
     }
 
     public boolean testTrackPieceLegality(int trackTemplateToTest) {
@@ -72,7 +68,7 @@ final public class NullTrackType implements jfreerails.world.track.TrackRule {
         throw new UnsupportedOperationException("Method not implemented yet!");
     }
 
-    public TrackPiece getTrackPiece(TrackConfiguration config) {
+    public TrackPiece getTrackPiece(TrackConfiguration config, int owner) {
         throw new UnsupportedOperationException("Method not implemented yet!");
     }
 

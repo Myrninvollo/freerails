@@ -4,6 +4,7 @@
  */
 package jfreerails.move;
 
+import jfreerails.world.player.FreerailsPrincipal;
 import jfreerails.world.station.ProductionAtEngineShop;
 import jfreerails.world.station.StationModel;
 import jfreerails.world.top.KEY;
@@ -22,28 +23,32 @@ public class ChangeProductionAtEngineShopMove implements Move {
     final ProductionAtEngineShop before;
     final ProductionAtEngineShop after;
     final int stationNumber;
+    final FreerailsPrincipal principal;
 
     public ChangeProductionAtEngineShopMove(ProductionAtEngineShop b,
-        ProductionAtEngineShop a, int station) {
+        ProductionAtEngineShop a, int station, FreerailsPrincipal p) {
         this.before = b;
         this.after = a;
         this.stationNumber = station;
+        this.principal = p;
     }
 
-    public MoveStatus tryDoMove(World w) {
+    public MoveStatus tryDoMove(World w, FreerailsPrincipal p) {
         return tryMove(w, before);
     }
 
     private MoveStatus tryMove(World w, ProductionAtEngineShop stateA) {
         //Check that the specified station exists.
-        if (!w.boundsContain(KEY.STATIONS, this.stationNumber)) {
-            return MoveStatus.MOVE_FAILED;
+        if (!w.boundsContain(KEY.STATIONS, this.stationNumber, principal)) {
+            return MoveStatus.moveFailed(this.stationNumber + " " + principal);
         }
 
-        StationModel station = (StationModel)w.get(KEY.STATIONS, stationNumber);
+        StationModel station = (StationModel)w.get(KEY.STATIONS, stationNumber,
+                principal);
 
         if (null == station) {
-            return MoveStatus.MOVE_FAILED;
+            return MoveStatus.moveFailed(this.stationNumber + " " + principal +
+                " is does null");
         }
 
         //Check that the station is building what we expect.					
@@ -51,40 +56,44 @@ public class ChangeProductionAtEngineShopMove implements Move {
             if (null == stateA) {
                 return MoveStatus.MOVE_OK;
             } else {
-                return MoveStatus.MOVE_FAILED;
+                return MoveStatus.moveFailed(this.stationNumber + " " +
+                    principal);
             }
         } else {
             if (station.getProduction().equals(stateA)) {
                 return MoveStatus.MOVE_OK;
             } else {
-                return MoveStatus.MOVE_FAILED;
+                return MoveStatus.moveFailed(this.stationNumber + " " +
+                    principal);
             }
         }
     }
 
-    public MoveStatus tryUndoMove(World w) {
+    public MoveStatus tryUndoMove(World w, FreerailsPrincipal p) {
         return tryMove(w, after);
     }
 
-    public MoveStatus doMove(World w) {
-        MoveStatus status = tryDoMove(w);
+    public MoveStatus doMove(World w, FreerailsPrincipal p) {
+        MoveStatus status = tryDoMove(w, p);
 
         if (status.isOk()) {
             StationModel station = (StationModel)w.get(KEY.STATIONS,
-                    stationNumber);
-            station.setProduction(this.after);
+                    stationNumber, principal);
+            station = new StationModel(station, this.after);
+            w.set(KEY.STATIONS, stationNumber, station, principal);
         }
 
         return status;
     }
 
-    public MoveStatus undoMove(World w) {
-        MoveStatus status = tryUndoMove(w);
+    public MoveStatus undoMove(World w, FreerailsPrincipal p) {
+        MoveStatus status = tryUndoMove(w, p);
 
         if (status.isOk()) {
             StationModel station = (StationModel)w.get(KEY.STATIONS,
-                    stationNumber);
-            station.setProduction(this.before);
+                    stationNumber, principal);
+            station = new StationModel(station, this.before);
+            w.set(KEY.STATIONS, stationNumber, station, principal);
         }
 
         return status;

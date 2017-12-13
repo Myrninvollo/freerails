@@ -14,6 +14,7 @@ import java.io.ObjectStreamException;
  */
 final public class NullTrackPiece implements TrackPiece {
     private static final TrackPiece nullTrackPiece = new NullTrackPiece();
+    private static final int NO_OWNER = Integer.MIN_VALUE;
 
     /** Creates new NullTrackPiece */
     private NullTrackPiece() {
@@ -21,10 +22,6 @@ final public class NullTrackPiece implements TrackPiece {
 
     public static TrackPiece getInstance() {
         return nullTrackPiece;
-    }
-
-    public int getRGB() {
-        return 0;
     }
 
     public int getTrackGraphicNumber() {
@@ -45,5 +42,9 @@ final public class NullTrackPiece implements TrackPiece {
 
     public boolean equals(Object o) {
         return o == this;
+    }
+
+    public int getOwnerID() {
+        return NO_OWNER;
     }
 }

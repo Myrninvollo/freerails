@@ -4,20 +4,19 @@
  */
 package jfreerails.move;
 
-import jfreerails.world.accounts.BankAccount;
 import jfreerails.world.accounts.Transaction;
-import jfreerails.world.top.KEY;
+import jfreerails.world.player.FreerailsPrincipal;
 import jfreerails.world.top.World;
 
 
 /** This {@link Move} adds a {@link Transaction} to a players
- * {@link BankAccount}.
+ * bank account on the {@link World} object.
  * @author Luke Lindsay
  *
  */
 public class AddTransactionMove implements Move {
     private final Transaction transaction;
-    private final int account;
+    private final FreerailsPrincipal principal;
 
     /** Whether the move fails if there is not enough cash. */
     private final boolean constrained;
@@ -26,18 +25,19 @@ public class AddTransactionMove implements Move {
         return transaction;
     }
 
-    public AddTransactionMove(int account, Transaction t) {
+    public AddTransactionMove(FreerailsPrincipal account, Transaction t) {
         if (null == t) {
             throw new NullPointerException();
         }
 
-        this.account = account;
+        this.principal = account;
         this.transaction = t;
         constrained = false;
     }
 
-    public AddTransactionMove(int account, Transaction t, boolean constrained) {
-        this.account = account;
+    public AddTransactionMove(FreerailsPrincipal account, Transaction t,
+        boolean constrained) {
+        this.principal = account;
         this.transaction = t;
         this.constrained = constrained;
 
@@ -46,12 +46,10 @@ public class AddTransactionMove implements Move {
         }
     }
 
-    public MoveStatus tryDoMove(World w) {
-        if (w.boundsContain(KEY.BANK_ACCOUNTS, account)) {
+    public MoveStatus tryDoMove(World w, FreerailsPrincipal p) {
+        if (w.isPlayer(principal)) {
             if (this.constrained) {
-                BankAccount bankAccount = (BankAccount)w.get(KEY.BANK_ACCOUNTS,
-                        this.account);
-                long bankBalance = bankAccount.getCurrentBalance().getAmount();
+                long bankBalance = w.getCurrentBalance(principal).getAmount();
                 long transactionAmount = this.transaction.getValue().getAmount();
                 long balanceAfter = bankBalance + transactionAmount;
 
@@ -62,51 +60,43 @@ public class AddTransactionMove implements Move {
 
             return MoveStatus.MOVE_OK;
         } else {
-            return MoveStatus.MOVE_FAILED;
+            return MoveStatus.moveFailed(p.getName() +
+                " does not have a bank account.");
         }
     }
 
-    public MoveStatus tryUndoMove(World w) {
-        if (w.boundsContain(KEY.BANK_ACCOUNTS, account)) {
-            BankAccount bankAccount = (BankAccount)w.get(KEY.BANK_ACCOUNTS,
-                    this.account);
-            int size = bankAccount.size();
+    public MoveStatus tryUndoMove(World w, FreerailsPrincipal p) {
+        int size = w.getNumberOfTransactions(this.principal);
 
-            if (0 == size) {
-                return MoveStatus.MOVE_FAILED;
-            }
+        if (0 == size) {
+            return MoveStatus.moveFailed("No transactions to remove!");
+        }
 
-            Transaction lastTransaction = bankAccount.getTransaction(size - 1);
+        Transaction lastTransaction = w.getTransaction(size - 1, this.principal);
 
-            if (lastTransaction.equals(this.transaction)) {
-                return MoveStatus.MOVE_OK;
-            } else {
-                return MoveStatus.MOVE_FAILED;
-            }
+        if (lastTransaction.equals(this.transaction)) {
+            return MoveStatus.MOVE_OK;
         } else {
-            return MoveStatus.MOVE_FAILED;
+            return MoveStatus.moveFailed("Expected " + this.transaction +
+                "but found " + lastTransaction);
         }
     }
 
-    public MoveStatus doMove(World w) {
-        MoveStatus ms = tryDoMove(w);
+    public MoveStatus doMove(World w, FreerailsPrincipal p) {
+        MoveStatus ms = tryDoMove(w, p);
 
         if (ms.ok) {
-            BankAccount bankAccount = (BankAccount)w.get(KEY.BANK_ACCOUNTS,
-                    this.account);
-            bankAccount.addTransaction(this.transaction);
+            w.addTransaction(this.transaction, this.principal);
         }
 
         return ms;
     }
 
-    public MoveStatus undoMove(World w) {
-        MoveStatus ms = tryUndoMove(w);
+    public MoveStatus undoMove(World w, FreerailsPrincipal p) {
+        MoveStatus ms = tryUndoMove(w, p);
 
         if (ms.ok) {
-            BankAccount bankAccount = (BankAccount)w.get(KEY.BANK_ACCOUNTS,
-                    this.account);
-            bankAccount.removeLastTransaction();
+            w.removeLastTransaction(this.principal);
         }
 
         return ms;
@@ -116,10 +106,14 @@ public class AddTransactionMove implements Move {
         if (obj instanceof AddTransactionMove) {
             AddTransactionMove test = (AddTransactionMove)obj;
 
-            return test.account == this.account &&
+            return test.principal.equals(this.principal) &&
             test.transaction.equals(this.transaction);
         } else {
             return false;
         }
+    }
+
+    public FreerailsPrincipal getPrincipal() {
+        return principal;
     }
 }

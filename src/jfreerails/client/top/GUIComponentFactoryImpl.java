@@ -21,7 +21,6 @@ import jfreerails.client.common.ActionAdapter;
 import jfreerails.client.renderer.MapRenderer;
 import jfreerails.client.renderer.ViewLists;
 import jfreerails.client.renderer.ZoomedOutMapRenderer;
-import jfreerails.client.view.*;
 import jfreerails.client.view.CashJLabel;
 import jfreerails.client.view.DateJLabel;
 import jfreerails.client.view.DetailMapView;
@@ -31,22 +30,20 @@ import jfreerails.client.view.MapCursor;
 import jfreerails.client.view.MapViewJComponentConcrete;
 import jfreerails.client.view.MapViewMoveReceiver;
 import jfreerails.client.view.ModelRoot;
+import jfreerails.client.view.ModelRootListener;
 import jfreerails.client.view.OverviewMapJComponent;
+import jfreerails.client.view.ServerControlModel;
 import jfreerails.client.view.StationPlacementCursor;
 import jfreerails.client.view.TrainsJTabPane;
 import jfreerails.controller.MoveChainFork;
 import jfreerails.controller.MoveReceiver;
-import jfreerails.controller.StationBuilder;
 import jfreerails.controller.UntriedMoveReceiver;
-import jfreerails.move.Move;
-import jfreerails.move.WorldChangedEvent;
 import jfreerails.world.top.ReadOnlyWorld;
 
 
 public class GUIComponentFactoryImpl implements GUIComponentFactory,
-    MoveReceiver {
+    ModelRootListener {
     private ModelRoot modelRoot;
-    private StationPlacementCursor stationPlacementCursor;
     private ServerControlModel sc;
     private DateJLabel datejLabel;
     private CashJLabel cashjLabel;
@@ -56,20 +53,14 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory,
      */
     private TrainsJTabPane trainsJTabPane;
     private javax.swing.JMenu helpMenu;
-    private javax.swing.JLabel messageJLabel;
     private final DialogueBoxController dialogueBoxController;
     private ViewLists viewLists;
-
-    // private GUIClient client;
     private ReadOnlyWorld world;
-    private MainMapAndOverviewMapMediator mediator;
-    MapCursor cursor;
     UserInputOnMapController userInputOnMapController;
     StationTypesPopup stationTypesPopup;
     BuildMenu buildMenu;
     JMenu displayMenu;
     JPanel overviewMapContainer;
-    JScrollPane mainMapContainer;
     MapViewJComponentConcrete mapViewJComponent;
     private JScrollPane mainMapScrollPane1;
     MapRenderer overviewMap;
@@ -86,31 +77,26 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory,
         mainMapScrollPane1 = new JScrollPane();
         overviewMapContainer = new OverviewMapJComponent(r);
         stationTypesPopup = new StationTypesPopup();
-        this.mediator = new MainMapAndOverviewMapMediator(overviewMapContainer,
-                mainMapScrollPane1.getViewport(), mapViewJComponent, r);
 
-        //glassPanel = new MyGlassPanel();
-        //glassPanel.showContent(new NewsPaperJPanel());
-        //clientJFrame.setGlassPane(glassPanel);
+        MainMapAndOverviewMapMediator mediator = new MainMapAndOverviewMapMediator();
+        mediator.setup(overviewMapContainer, mainMapScrollPane1.getViewport(),
+            mapViewJComponent, r);
+
         trainsJTabPane = new TrainsJTabPane();
         datejLabel = new DateJLabel();
 
         cashjLabel = new CashJLabel();
-        messageJLabel = new javax.swing.JLabel("Message");
 
         clientJFrame = new ClientJFrame(this);
         dialogueBoxController = new DialogueBoxController(clientJFrame,
                 modelRoot);
     }
 
-    public void setup(ViewLists vl, ReadOnlyWorld w) {
+    private void setup(ViewLists vl, ReadOnlyWorld w) {
         viewLists = vl;
         world = w;
 
         UntriedMoveReceiver receiver = modelRoot.getReceiver();
-
-        /* create the models */
-        modelRoot.setWorld(world, receiver, viewLists);
 
         clientJFrame.setup();
 
@@ -132,13 +118,14 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory,
         MoveReceiver mainmapMoveReceiver = new MapViewMoveReceiver(overviewMap);
         moveFork.addSplitMoveReceiver(mainmapMoveReceiver);
 
-        StationBuilder sb = new StationBuilder(receiver, w);
-
+        //Never read!
+        //StationBuilder sb = new StationBuilder(receiver, w,
+        //        modelRoot.getPlayerPrincipal());
         stationTypesPopup.setup(modelRoot, mainMap.getStationRadius());
 
         mapViewJComponent.setup(mainMap, w);
         modelRoot.setCursor(mapViewJComponent.getMapCursor());
-        this.cursor = modelRoot.getCursor();
+
         //setup the the main and overview map JComponents
         dialogueBoxController.setDefaultFocusOwner(mapViewJComponent);
 
@@ -151,8 +138,8 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory,
 
         ((OverviewMapJComponent)overviewMapContainer).setup(overviewMap);
 
-        datejLabel.setup(world, null, null);
-        cashjLabel.setup(world, null, null);
+        datejLabel.setup(modelRoot, null);
+        cashjLabel.setup(modelRoot, null);
         trainsJTabPane.setup(world, vl, modelRoot);
 
         MapCursor mapCursor = modelRoot.getCursor();
@@ -160,11 +147,12 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory,
         trainsJTabPane.setMapCursor(mapCursor);
         dialogueBoxController.setup(world, vl, modelRoot.getMoveChainFork(),
             modelRoot.getReceiver(), mapCursor);
-        stationPlacementCursor = new StationPlacementCursor(modelRoot,
+
+        StationPlacementCursor stationPlacementCursor = new StationPlacementCursor(modelRoot,
                 mainMap.getStationRadius(), mapViewJComponent);
         modelRoot.setUserMessageLogger(this.mapViewJComponent);
 
-        userMessageGenerator = new UserMessageGenerator(this.modelRoot, world);
+        userMessageGenerator = new UserMessageGenerator(this.modelRoot);
         moveFork.add(userMessageGenerator);
     }
 
@@ -233,7 +221,6 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory,
                     newGameJMenu.removeAll();
 
                     Enumeration actions = sc.getMapNames().getActions();
-                    ButtonGroup bg = new ButtonGroup();
 
                     while (actions.hasMoreElements()) {
                         JMenuItem mi = new JMenuItem((Action)actions.nextElement());
@@ -265,7 +252,7 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory,
         //Set up the gamespeed submenu.
         ButtonGroup group = new ButtonGroup();
         ActionAdapter speedActions = sc.getSetTargetTickPerSecondActions();
-        JMenu gameSpeedSubMenu = new JMenu("Game Speed...");
+        JMenu gameSpeedSubMenu = new JMenu("Game Speed");
 
         Enumeration buttonModels = speedActions.getButtonModels();
         Enumeration actions = speedActions.getActions();
@@ -290,21 +277,8 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory,
         return gameMenu;
     }
 
-    private void addMainMapAndOverviewMapMediatorIfNecessary() {
-        //if (this.mainMapContainer != null
-        //	&& this.overviewMapContainer != null
-        //	&& null == this.mediator) {
-        //	//Rectangle r = this.overviewMapContainer.getMainMapVisibleRect();
-        //
-        //}
-    }
-
     ViewLists getViewLists() {
-        return this.viewLists;
-    }
-
-    ReadOnlyWorld getAddTrackRules() {
-        return this.world;
+        return modelRoot.getViewLists();
     }
 
     public JFrame createClientJFrame(String title) {
@@ -316,6 +290,20 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory,
     public JMenu createHelpMenu() {
         helpMenu = new javax.swing.JMenu("Help");
 
+        JMenuItem about = new JMenuItem("About");
+        about.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent evt) {
+                    dialogueBoxController.showAbout();
+                }
+            });
+
+        JMenuItem how2play = new JMenuItem("Getting started");
+        how2play.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent evt) {
+                    dialogueBoxController.showHow2Play();
+                }
+            });
+
         JMenuItem showControls = new JMenuItem("Show game controls");
         showControls.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -324,6 +312,8 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory,
             });
 
         helpMenu.add(showControls);
+        helpMenu.add(how2play);
+        helpMenu.add(about);
 
         return helpMenu;
     }
@@ -334,10 +324,6 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory,
 
     public JLabel createCashJLabel() {
         return cashjLabel;
-    }
-
-    public JLabel createMessagePanel() {
-        return messageJLabel;
     }
 
     public JLabel createDateJLabel() {
@@ -359,9 +345,7 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory,
         setup(viewLists, world);
     }
 
-    public void processMove(Move m) {
-        if (m instanceof WorldChangedEvent) {
-            worldModelChanged();
-        }
+    public void modelRootChanged() {
+        worldModelChanged();
     }
 }

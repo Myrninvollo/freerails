@@ -1,5 +1,7 @@
 package jfreerails.world.common;
 
+import java.awt.event.KeyEvent;
+import java.util.NoSuchElementException;
 import junit.framework.TestCase;
 
 
@@ -15,21 +17,6 @@ public class OneTileMoveVectorTest extends TestCase {
 
     public OneTileMoveVectorTest(String arg0) {
         super(arg0);
-    }
-
-    public void testGetRotatedInstance() {
-        assertEquals("Rotating by 0 degrees should have no effect",
-            n.getRotatedInstance(Rotation.BY_0_DEGREES), n);
-        assertEquals(n.getRotatedInstance(Rotation.BY_45_DEGREES), ne);
-        assertEquals(n.getRotatedInstance(Rotation.BY_90_DEGREES), e);
-        assertEquals(n.getRotatedInstance(Rotation.BY_135_DEGREES), se);
-        assertEquals(n.getRotatedInstance(Rotation.BY_180_DEGREES), s);
-
-        assertEquals(nw.getRotatedInstance(Rotation.BY_45_DEGREES), n);
-        assertEquals(nw.getRotatedInstance(Rotation.BY_90_DEGREES), ne);
-        assertEquals(nw.getRotatedInstance(Rotation.BY_135_DEGREES), e);
-        assertEquals(nw.getRotatedInstance(Rotation.BY_180_DEGREES), se);
-        assertTrue(n != ne);
     }
 
     public void testGetDirection() {
@@ -74,5 +61,32 @@ public class OneTileMoveVectorTest extends TestCase {
         assertEquals(OneTileMoveVector.NORTH.getNewTemplateNumber(), 1);
         assertEquals(OneTileMoveVector.NORTH_EAST.getNewTemplateNumber(), 2);
         assertEquals(OneTileMoveVector.EAST.getNewTemplateNumber(), 4);
+    }
+
+    public void testGetInstanceMappedToKey() {
+        OneTileMoveVector v;
+
+        try {
+            v = OneTileMoveVector.getInstanceMappedToKey(KeyEvent.VK_B);
+            fail();
+        } catch (NoSuchElementException e) {
+        }
+
+        v = OneTileMoveVector.getInstanceMappedToKey(KeyEvent.VK_NUMPAD1);
+        assertEquals(sw, v);
+        v = OneTileMoveVector.getInstanceMappedToKey(KeyEvent.VK_NUMPAD2);
+        assertEquals(s, v);
+        v = OneTileMoveVector.getInstanceMappedToKey(KeyEvent.VK_NUMPAD3);
+        assertEquals(se, v);
+        v = OneTileMoveVector.getInstanceMappedToKey(KeyEvent.VK_NUMPAD4);
+        assertEquals(w, v);
+        v = OneTileMoveVector.getInstanceMappedToKey(KeyEvent.VK_NUMPAD6);
+        assertEquals(e, v);
+        v = OneTileMoveVector.getInstanceMappedToKey(KeyEvent.VK_NUMPAD7);
+        assertEquals(nw, v);
+        v = OneTileMoveVector.getInstanceMappedToKey(KeyEvent.VK_NUMPAD8);
+        assertEquals(n, v);
+        v = OneTileMoveVector.getInstanceMappedToKey(KeyEvent.VK_NUMPAD9);
+        assertEquals(ne, v);
     }
 }

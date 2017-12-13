@@ -9,10 +9,8 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JLabel;
 
-import jfreerails.client.renderer.ViewLists;
-import jfreerails.world.accounts.BankAccount;
 import jfreerails.world.common.Money;
-import jfreerails.world.top.KEY;
+import jfreerails.world.player.FreerailsPrincipal;
 import jfreerails.world.top.ReadOnlyWorld;
 
 /**
@@ -23,21 +21,22 @@ import jfreerails.world.top.ReadOnlyWorld;
 public class CashJLabel extends JLabel implements View {
 
 	private ReadOnlyWorld w;
+	private FreerailsPrincipal principal;
 
 	public CashJLabel(){
 		this.setText("         ");
 	}
 
-	public void setup(ReadOnlyWorld w, ViewLists vl, ActionListener submitButtonCallBack) {
-		this.w = w;
+	public void setup(ModelRoot model, ActionListener submitButtonCallBack) {
+		this.w = model.getWorld();
+		principal = model.getPlayerPrincipal();
 	}
 	
 
 	
 	public void paint(Graphics g) {
 		if(null != w){
-			BankAccount account = (BankAccount)w.get(KEY.BANK_ACCOUNTS, 0);
-			Money m = account.getCurrentBalance();
+			Money m = w.getCurrentBalance(principal);
 			String s = m.toString();			
 			this.setText(s);			
 		}

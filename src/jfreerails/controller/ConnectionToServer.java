@@ -19,9 +19,9 @@ import jfreerails.world.top.World;
  * @author lindsal
  */
 public interface ConnectionToServer extends UncommittedMoveReceiver {
-    public void addMoveReceiver(MoveReceiver moveReceiver);
+    public void addMoveReceiver(SourcedMoveReceiver moveReceiver);
 
-    public void removeMoveReceiver(MoveReceiver moveReceiver);
+    public void removeMoveReceiver(SourcedMoveReceiver moveReceiver);
 
     public World loadWorldFromServer() throws IOException;
 
@@ -64,13 +64,6 @@ public interface ConnectionToServer extends UncommittedMoveReceiver {
         public static final ConnectionState READY = new ConnectionState("Ready");
 
         /**
-         * Closing - a CloseConnectionCommand has been sent, but the connection
-         * is not yet closed.
-         */
-        public static final ConnectionState CLOSING = new ConnectionState(
-                "Closing");
-
-        /**
          * Closed - the connection is closed.
          */
         public static final ConnectionState CLOSED = new ConnectionState(
@@ -90,10 +83,5 @@ public interface ConnectionToServer extends UncommittedMoveReceiver {
      */
     public ConnectionState getConnectionState();
 
-    /*
-     * TODO
-     * proposed interface:
-     *
-     * public void send(FreerailsSerializable());
-     */
+    public void sendCommand(ServerCommand s);
 }

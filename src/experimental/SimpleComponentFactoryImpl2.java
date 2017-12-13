@@ -8,8 +8,6 @@ package experimental;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import javax.swing.JComponent;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -33,18 +31,11 @@ public class SimpleComponentFactoryImpl2
     OverviewMapJComponent overviewMap;
     JScrollPane mainMapScrollPane1;
     MapViewJComponentConcrete mainMap;
-    JComponent messagePanel;
-    JMenu gameMenu;
-    JMenu buildMenu;
     MainMapAndOverviewMapMediator mediator;
     Rectangle r = new Rectangle();
 
     /** Creates new SimpleComponentFactoryImpl */
     public SimpleComponentFactoryImpl2() {
-    }
-
-    public JLabel createMessagePanel() {
-        return new JLabel("Message Panel");
     }
 
     public JMenu createBuildMenu() {
@@ -57,8 +48,6 @@ public class SimpleComponentFactoryImpl2
 
     public JMenu createDisplayMenu() {
         JMenu displayMenu = new JMenu("Display");
-
-        final float scale = 5;
 
         addMainmapzoomMenuItem(displayMenu, 5);
         addMainmapzoomMenuItem(displayMenu, 10);
@@ -146,10 +135,6 @@ public class SimpleComponentFactoryImpl2
             this.mediator = new MainMapAndOverviewMapMediator(overviewMap,
                     mainMapScrollPane1.getViewport(), mainMap, r);
         }
-    }
-
-    public JFrame createClientJFrame(String title) {
-        return new JFrame();
     }
 
     public JLabel createCashJLabel() {

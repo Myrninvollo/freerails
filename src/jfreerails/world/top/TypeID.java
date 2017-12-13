@@ -7,20 +7,20 @@ package jfreerails.world.top;
 
 
 /**
- *  This class stores a list KEY and an item index.
+ *  This class stores an SKEY and an item index.
  * @author  Luke Lindsay
  */
 public class TypeID {
     private final int id;
-    private final KEY key;
+    private final SKEY key;
 
     /** Creates a new instance of TypeID */
-    public TypeID(int id, KEY key) {
+    public TypeID(int id, SKEY key) {
         this.id = id;
         this.key = key;
     }
 
-    public KEY getKey() {
+    public SKEY getKey() {
         return key;
     }
 

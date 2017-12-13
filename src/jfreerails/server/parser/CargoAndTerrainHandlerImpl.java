@@ -15,7 +15,7 @@ import jfreerails.world.terrain.Consumption;
 import jfreerails.world.terrain.Conversion;
 import jfreerails.world.terrain.Production;
 import jfreerails.world.terrain.TileTypeImpl;
-import jfreerails.world.top.KEY;
+import jfreerails.world.top.SKEY;
 import jfreerails.world.top.World;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -99,7 +99,7 @@ public class CargoAndTerrainHandlerImpl implements CargoAndTerrainHandler {
         TileTypeImpl tileType = new TileTypeImpl(tileRGB, tileCategory, tileID,
                 tileROW, produces, consumes, converts);
 
-        world.add(KEY.TERRAIN_TYPES, tileType);
+        world.add(SKEY.TERRAIN_TYPES, tileType);
     }
 
     public void handle_Cargo(final Attributes meta) throws SAXException {
@@ -108,9 +108,9 @@ public class CargoAndTerrainHandlerImpl implements CargoAndTerrainHandler {
         int unitWeight = Integer.parseInt(meta.getValue("unitWeight"));
         CargoType cargoType = new CargoType(unitWeight, cargoID, cargoCategory);
 
-        int cargoNumber = world.size(KEY.CARGO_TYPES);
+        int cargoNumber = world.size(SKEY.CARGO_TYPES);
         cargoName2cargoTypeNumber.put(cargoID, new Integer(cargoNumber));
-        world.add(KEY.CARGO_TYPES, cargoType);
+        world.add(SKEY.CARGO_TYPES, cargoType);
     }
 
     public void start_Cargo_Types(final Attributes meta)
@@ -144,7 +144,7 @@ public class CargoAndTerrainHandlerImpl implements CargoAndTerrainHandler {
         int cargoConsumed = string2CargoNumber(meta.getValue("Cargo"));
         String prerequisisteString = meta.getValue("Prerequisiste");
 
-        //"Prerequisiste" is an optional attribute, so may be null. 
+        //"Prerequisiste" is an optional attribute, so may be null.
         int prerequisisteForConsumption = (null == prerequisisteString ? 1
                                                                        : Integer.parseInt(prerequisisteString));
         Consumption consumption = new Consumption(cargoConsumed,

@@ -6,8 +6,9 @@ import jfreerails.move.Move;
 import jfreerails.move.MoveStatus;
 import jfreerails.move.UpgradeTrackMove;
 import jfreerails.world.common.OneTileMoveVector;
-import jfreerails.world.top.KEY;
+import jfreerails.world.player.FreerailsPrincipal;
 import jfreerails.world.top.ReadOnlyWorld;
+import jfreerails.world.top.SKEY;
 import jfreerails.world.track.TrackPiece;
 import jfreerails.world.track.TrackRule;
 
@@ -15,6 +16,12 @@ import jfreerails.world.track.TrackRule;
 final public class TrackMoveProducer {
     private TrackRule trackRule;
     private ReadOnlyWorld w;
+
+    /**
+     * The principal on behalf of which this TrackMoveProducer is producing
+     * moves
+     */
+    private FreerailsPrincipal principal;
     private UntriedMoveReceiver moveTester;
     public final static int BUILD_TRACK = 1;
     public final static int REMOVE_TRACK = 2;
@@ -24,7 +31,10 @@ final public class TrackMoveProducer {
     public final static int IGNORE_TRACK = 4;
     private int trackBuilderMode = BUILD_TRACK;
 
-    /** This generates the transactions - the charge - for the track being built.*/
+    /**
+     * This generates the transactions - the charge - for the track being
+     * built.
+     */
     private TrackMoveTransactionsGenerator transactionsGenerator;
 
     public MoveStatus buildTrack(Point from, OneTileMoveVector trackVector) {
@@ -39,10 +49,10 @@ final public class TrackMoveProducer {
 
         if (trackBuilderMode == BUILD_TRACK) {
             move = ChangeTrackPieceCompositeMove.generateBuildTrackMove(from,
-                    trackVector, trackRule, w);
+                    trackVector, trackRule, w, this.principal);
         } else if (trackBuilderMode == REMOVE_TRACK) {
             move = ChangeTrackPieceCompositeMove.generateRemoveTrackMove(from,
-                    trackVector, w);
+                    trackVector, w, principal);
         } else {
             throw new IllegalArgumentException(String.valueOf(trackBuilderMode));
         }
@@ -54,13 +64,12 @@ final public class TrackMoveProducer {
         return ms;
     }
 
-    public boolean upgradeTrack(Point point) {
+    public MoveStatus upgradeTrack(Point point) {
         if (trackBuilderMode == UPGRADE_TRACK) {
-            upgradeTrack(point, trackRule);
-
-            return true;
+            return upgradeTrack(point, trackRule);
         } else {
-            return false;
+            throw new IllegalStateException(
+                "Track builder not set to upgrade track!");
         }
     }
 
@@ -71,12 +80,7 @@ final public class TrackMoveProducer {
      *@param  trackRuleNumber  The new trackRule value
      */
     public void setTrackRule(int trackRuleNumber) {
-        this.trackRule = (TrackRule)w.get(KEY.TRACK_RULES, trackRuleNumber);
-        TextMessageHandler.sendMessage(trackRule.getTypeName());
-    }
-
-    public int getTrackRule() {
-        return this.trackRule.getRuleNumber();
+        this.trackRule = (TrackRule)w.get(SKEY.TRACK_RULES, trackRuleNumber);
     }
 
     public void setTrackBuilderMode(int i) {
@@ -94,39 +98,41 @@ final public class TrackMoveProducer {
         }
     }
 
-    public int getTrackBuilderMode() {
-        return trackBuilderMode;
-    }
-
-    public TrackMoveProducer(ReadOnlyWorld world) {
-        transactionsGenerator = new TrackMoveTransactionsGenerator(world);
-
-        if (world == null) {
-            throw new java.lang.NullPointerException(
-                "Tried to create new TrackBuilder, but world==null");
-        }
-
-        this.w = world;
-    }
-
+    /**
+     * @param p the principal which this TrackMoveProducer generates moves for
+     */
     public TrackMoveProducer(ReadOnlyWorld world,
-        UntriedMoveReceiver moveReceiver) {
+        UntriedMoveReceiver moveReceiver, FreerailsPrincipal p) {
         if (null == world || null == moveReceiver) {
             throw new NullPointerException();
         }
 
         this.moveTester = moveReceiver;
         this.w = world;
-        this.trackRule = (TrackRule)w.get(KEY.TRACK_RULES, 0);
-        transactionsGenerator = new TrackMoveTransactionsGenerator(world);
+        this.trackRule = (TrackRule)w.get(SKEY.TRACK_RULES, 0);
+        principal = p;
+        transactionsGenerator = new TrackMoveTransactionsGenerator(world,
+                principal);
     }
 
     private MoveStatus upgradeTrack(Point point, TrackRule trackRule) {
         TrackPiece before = (TrackPiece)w.getTile(point.x, point.y);
-        TrackPiece after = trackRule.getTrackPiece(before.getTrackConfiguration());
+        int owner = ChangeTrackPieceCompositeMove.getOwner(this.principal, w);
+        TrackPiece after = trackRule.getTrackPiece(before.getTrackConfiguration(),
+                owner);
+
+        /* We don't want to 'upgrade' a station to track.  See bug 874416.*/
+        if (before.getTrackRule().isStation()) {
+            return MoveStatus.moveFailed("No need to upgrade track at station.");
+        }
+
         Move move = UpgradeTrackMove.generateMove(before, after, point);
         moveTester.processMove(transactionsGenerator.addTransactions(move));
 
         return moveTester.tryDoMove(move);
+    }
+
+    public int getTrackBuilderMode() {
+        return trackBuilderMode;
     }
 }

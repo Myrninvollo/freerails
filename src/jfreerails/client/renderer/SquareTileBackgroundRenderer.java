@@ -19,43 +19,34 @@ import java.awt.Graphics;
  */
 final public class SquareTileBackgroundRenderer
     extends BufferedTiledBackgroundRenderer {
-    private MapLayerRenderer mapView;
-    private final float scale;
-    private final float scaleAsInt;
+    private final MapLayerRenderer mapView;
 
     protected void paintBufferRectangle(int x, int y, int width, int height) {
-        java.awt.Graphics gg = bg.create();
+        Graphics gg = bg.create();
         gg.setClip(x, y, width, height);
         gg.translate(-bufferRect.x, -bufferRect.y);
         mapView.paintRect(gg, bufferRect);
     }
 
     public SquareTileBackgroundRenderer(MapLayerRenderer mv, float _scale) {
-        this.scale = _scale;
-        scaleAsInt = (int)scale;
-        this.mapView = mv;
-    }
+        if (null == mv) {
+            throw new NullPointerException();
+        }
 
-    public void refreshRectangleOfTiles(int x, int y, int width, int height) {
-        java.awt.Graphics gg = bg.create();
-        gg.translate(-bufferRect.x, -bufferRect.y);
-        gg.clipRect((int)(x * scaleAsInt), (int)(y * scaleAsInt),
-            (int)(width * scaleAsInt), (int)(height * scaleAsInt));
-        mapView.paintRectangleOfTiles(gg, x, y, width, height);
+        this.mapView = mv;
     }
 
     public void paintTile(Graphics g, int tileX, int tileY) {
         mapView.paintTile(g, tileX, tileY);
     }
 
-    public void paintRectangleOfTiles(Graphics g, int x, int y, int width,
-        int height) {
-        mapView.paintRectangleOfTiles(g, x, y, width, height);
-    }
-
     public void refreshTile(int x, int y) {
-        Graphics gg = bg.create();
-        gg.translate(-bufferRect.x, -bufferRect.y);
-        mapView.paintTile(gg, x, y);
+        //The backgroundBuffer gets created on the first call to backgroundBuffer.paintRect(..)
+        //so we need a check here to avoid a null pointer exception.
+        if (null != super.backgroundBuffer) {
+            Graphics gg = bg.create();
+            gg.translate(-bufferRect.x, -bufferRect.y);
+            mapView.paintTile(gg, x, y);
+        }
     }
 }

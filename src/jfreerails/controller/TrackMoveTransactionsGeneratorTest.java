@@ -5,12 +5,13 @@
 package jfreerails.controller;
 
 import java.awt.Point;
+import jfreerails.move.ChangeTrackPieceCompositeMove;
 import jfreerails.move.ChangeTrackPieceMove;
 import jfreerails.move.Move;
-import jfreerails.move.MoveStatus;
 import jfreerails.move.TrackMove;
-import jfreerails.world.top.KEY;
+import jfreerails.world.player.Player;
 import jfreerails.world.top.MapFixtureFactory;
+import jfreerails.world.top.SKEY;
 import jfreerails.world.top.World;
 import jfreerails.world.top.WorldImpl;
 import jfreerails.world.track.TrackConfiguration;
@@ -26,27 +27,32 @@ import junit.framework.TestCase;
 public class TrackMoveTransactionsGeneratorTest extends TestCase {
     private World world;
     private TrackMoveTransactionsGenerator transactionGenerator;
+    private Player player;
 
     protected void setUp() throws Exception {
         world = new WorldImpl(20, 20);
         MapFixtureFactory.generateTrackRuleList(world);
-        transactionGenerator = new TrackMoveTransactionsGenerator(world);
+        player = new Player("test player",
+                (new Player("test player")).getPublicKey(), 0);
+        world.addPlayer(player, Player.AUTHORITATIVE);
+        transactionGenerator = new TrackMoveTransactionsGenerator(world,
+                player.getPrincipal());
     }
 
     public void testAddTrackMove() {
         TrackPiece oldTrackPiece;
         TrackPiece newTrackPiece;
-        TrackConfiguration oldConfig;
         TrackConfiguration newConfig;
         TrackMove move;
-        MoveStatus moveStatus;
 
         //Try building the simplest piece of track.
         newConfig = TrackConfiguration.getFlatInstance("000010000");
         oldTrackPiece = (TrackPiece)world.getTile(0, 0);
 
-        TrackRule r = (TrackRule)world.get(KEY.TRACK_RULES, 0);
-        newTrackPiece = r.getTrackPiece(newConfig);
+        TrackRule r = (TrackRule)world.get(SKEY.TRACK_RULES, 0);
+        int owner = ChangeTrackPieceCompositeMove.getOwner(MapFixtureFactory.TEST_PRINCIPAL,
+                world);
+        newTrackPiece = r.getTrackPiece(newConfig, owner);
         move = new ChangeTrackPieceMove(oldTrackPiece, newTrackPiece,
                 new Point(0, 0));
 

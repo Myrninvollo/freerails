@@ -4,7 +4,6 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
-
 import jfreerails.client.renderer.CityNamesRenderer;
 import jfreerails.client.renderer.MapBackgroundRender;
 import jfreerails.client.renderer.MapLayerRenderer;
@@ -13,82 +12,70 @@ import jfreerails.client.renderer.SquareTileBackgroundRenderer;
 import jfreerails.client.renderer.StationNamesRenderer;
 import jfreerails.client.renderer.StationRadiusRenderer;
 import jfreerails.client.renderer.ViewLists;
+import jfreerails.client.common.Painter;
 import jfreerails.world.top.ReadOnlyWorld;
 
+
 public class DetailMapView implements MapRenderer {
+    private static boolean OSXWorkaround = (System.getProperty("OSXWorkaround") != null);
+    private final MapLayerRenderer background;
+    private final Dimension mapSizeInPixels;
+    private final TestOverHeadTrainView trainsview;
+    private final Painter cityNames;
+    private final Painter stationNames;
+    private final StationRadiusRenderer stationRadius;
 
-	private final MapLayerRenderer background;
-	
-	private final Dimension mapSizeInPixels;
-	
-	private final TestOverHeadTrainView trainsview;
-	
-	private final CityNamesRenderer cityNames;
-	
-	private final StationNamesRenderer stationNames;
-	
-	private final StationRadiusRenderer stationRadius;
+    public DetailMapView(ReadOnlyWorld world, ViewLists vl) {
+        trainsview = new TestOverHeadTrainView(world, vl);
 
-	public DetailMapView(
-		ReadOnlyWorld world,
-		ViewLists vl) {									
-		trainsview = new TestOverHeadTrainView(world, vl);
-		background = new SquareTileBackgroundRenderer(new MapBackgroundRender(world, vl.getTileViewList(), vl.getTrackPieceViewList()), 30);
-		Dimension mapSize=new Dimension(world.getMapWidth(), world.getMapHeight());
-		mapSizeInPixels=new Dimension(mapSize.width*30,mapSize.height*30);
-		
-		cityNames = new CityNamesRenderer(world);
-		stationNames = new StationNamesRenderer(world);
-		stationRadius = new StationRadiusRenderer();
-	}
+        if (OSXWorkaround) {
+            //Don't buffer the mapviews background.
+            background = new MapBackgroundRender(world, vl.getTileViewList(),
+                    vl.getTrackPieceViewList());
+        } else {
+            background = new SquareTileBackgroundRenderer(new MapBackgroundRender(
+                        world, vl.getTileViewList(), vl.getTrackPieceViewList()),
+                    30);
+        }
 
-	public StationRadiusRenderer getStationRadius() {
-		return stationRadius;
-	}
+        Dimension mapSize = new Dimension(world.getMapWidth(),
+                world.getMapHeight());
+        mapSizeInPixels = new Dimension(mapSize.width * 30, mapSize.height * 30);
 
-	public float getScale() {
-		return 30;
-	}
+        cityNames = new CityNamesRenderer(world);
+        stationNames = new StationNamesRenderer(world);
+        stationRadius = new StationRadiusRenderer();
+    }
 
-	public Dimension getMapSizeInPixels() {
-		return mapSizeInPixels;
-	}
+    public StationRadiusRenderer getStationRadius() {
+        return stationRadius;
+    }
 
-	public void paintTile(Graphics g, int tileX, int tileY) {
-		background.paintTile(g, tileX, tileY);
-		trainsview.paint((Graphics2D)g);
-		cityNames.paint((Graphics2D)g);
-		stationNames.paint((Graphics2D)g);
-		stationRadius.paint((Graphics2D)g);
-		
-	}
+    public float getScale() {
+        return 30;
+    }
 
-	public void paintRectangleOfTiles(
-		Graphics g,
-		int x,
-		int y,
-		int width,
-		int height) {
-		background.paintRectangleOfTiles(g, x, y, width, height);
-		trainsview.paint((Graphics2D)g);
-		cityNames.paint((Graphics2D)g);
-		stationNames.paint((Graphics2D)g);
-		stationRadius.paint((Graphics2D)g);
-	}
+    public Dimension getMapSizeInPixels() {
+        return mapSizeInPixels;
+    }
 
-	public void refreshTile(int x, int y) {
-		background.refreshTile(x, y);
-	}
+    public void paintTile(Graphics g, int tileX, int tileY) {
+        background.paintTile(g, tileX, tileY);
+        trainsview.paint((Graphics2D)g);
+        cityNames.paint((Graphics2D)g);
+        stationNames.paint((Graphics2D)g);
+        stationRadius.paint((Graphics2D)g);
+    }
 
-	public void refreshRectangleOfTiles(int x, int y, int width, int height) {
-		background.refreshRectangleOfTiles(x, y, width, height);
-	}
+    public void refreshTile(int x, int y) {
+        background.refreshTile(x, y);
+    }
 
-	public void paintRect(Graphics g, Rectangle visibleRect) {
-		background.paintRect(g, visibleRect);
-		trainsview.paint((Graphics2D)g);
-		cityNames.paint((Graphics2D)g);
-		stationNames.paint((Graphics2D)g);
-		stationRadius.paint((Graphics2D)g);
-	}
+    public void paintRect(Graphics g, Rectangle visibleRect) {
+        background.paintRect(g, visibleRect);
+        trainsview.paint((Graphics2D)g);
+        cityNames.paint((Graphics2D)g);
+        stationNames.paint((Graphics2D)g);
+        stationRadius.paint((Graphics2D)g);
+    }
 }

@@ -7,6 +7,7 @@ package jfreerails.move;
 import jfreerails.world.station.ProductionAtEngineShop;
 import jfreerails.world.station.StationModel;
 import jfreerails.world.top.KEY;
+import jfreerails.world.top.MapFixtureFactory;
 import jfreerails.world.top.WagonAndEngineTypesFactory;
 
 
@@ -24,12 +25,15 @@ public class ChangeProductionAtEngineShopMoveTest extends AbstractMoveTestCase {
 
     protected void setUp() {
         super.setUp();
-        world.add(KEY.STATIONS, new StationModel());
-        world.add(KEY.STATIONS, new StationModel());
-        world.add(KEY.STATIONS, new StationModel());
+        getWorld().add(KEY.STATIONS, new StationModel(),
+            MapFixtureFactory.TEST_PRINCIPAL);
+        getWorld().add(KEY.STATIONS, new StationModel(),
+            MapFixtureFactory.TEST_PRINCIPAL);
+        getWorld().add(KEY.STATIONS, new StationModel(),
+            MapFixtureFactory.TEST_PRINCIPAL);
 
         WagonAndEngineTypesFactory wetf = new WagonAndEngineTypesFactory();
-        wetf.addTypesToWorld(world);
+        wetf.addTypesToWorld(getWorld());
         engineType = 0;
         wagonType = 0;
         wagons = new int[] {wagonType, wagonType};
@@ -42,17 +46,20 @@ public class ChangeProductionAtEngineShopMoveTest extends AbstractMoveTestCase {
         ChangeProductionAtEngineShopMove m;
 
         //Should fail because current production at station 0 is null;
-        m = new ChangeProductionAtEngineShopMove(after, before, 0);
+        m = new ChangeProductionAtEngineShopMove(after, before, 0,
+                MapFixtureFactory.TEST_PRINCIPAL);
         assertTryMoveFails(m);
         assertDoMoveFails(m);
 
         //Should fail because station 6 does not exist.
-        m = new ChangeProductionAtEngineShopMove(before, after, 6);
+        m = new ChangeProductionAtEngineShopMove(before, after, 6,
+                MapFixtureFactory.TEST_PRINCIPAL);
         assertTryMoveFails(m);
         assertDoMoveFails(m);
 
         //Should go through
-        m = new ChangeProductionAtEngineShopMove(before, after, 0);
+        m = new ChangeProductionAtEngineShopMove(before, after, 0,
+                MapFixtureFactory.TEST_PRINCIPAL);
         assertTryMoveIsOk(m);
         assertDoMoveIsOk(m);
         assertTryUndoMoveIsOk(m);
@@ -65,11 +72,8 @@ public class ChangeProductionAtEngineShopMoveTest extends AbstractMoveTestCase {
     }
 
     public void testProductionAtEngineShopEquals() {
-        ProductionAtEngineShop a;
         ProductionAtEngineShop b;
         ProductionAtEngineShop c;
-        ProductionAtEngineShop d;
-        a = null;
         b = new ProductionAtEngineShop(engineType, wagons);
         c = new ProductionAtEngineShop(engineType, wagons);
         assertEquals(c, b);

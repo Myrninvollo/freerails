@@ -4,12 +4,13 @@ import java.awt.Point;
 import java.util.HashSet;
 import jfreerails.move.ChangeTrackPieceCompositeMove;
 import jfreerails.move.MoveStatus;
-import jfreerails.world.accounts.BankAccount;
 import jfreerails.world.common.OneTileMoveVector;
 import jfreerails.world.common.PositionOnTrack;
-import jfreerails.world.top.KEY;
+import jfreerails.world.player.Player;
+import jfreerails.world.top.GameRules;
+import jfreerails.world.top.ITEM;
 import jfreerails.world.top.MapFixtureFactory;
-import jfreerails.world.top.World;
+import jfreerails.world.top.SKEY;
 import jfreerails.world.top.WorldImpl;
 import jfreerails.world.track.TrackRule;
 import junit.framework.TestCase;
@@ -21,18 +22,22 @@ import junit.framework.TestCase;
  *
  */
 public class FlatTrackExplorerTest extends TestCase {
-    World world;
+    WorldImpl world;
 
     public FlatTrackExplorerTest(String arg0) {
         super(arg0);
     }
 
+    private Player testPlayer = new Player("test",
+            (new Player("test")).getPublicKey(), 0);
+
     protected void setUp() {
         world = new WorldImpl(20, 20);
-        world.add(KEY.BANK_ACCOUNTS, new BankAccount());
+        world.addPlayer(testPlayer, Player.AUTHORITATIVE);
+        world.set(ITEM.GAME_RULES, GameRules.NO_RESTRICTIONS);
         MapFixtureFactory.generateTrackRuleList(world);
 
-        TrackRule rule = (TrackRule)world.get(KEY.TRACK_RULES, 0);
+        TrackRule rule = (TrackRule)world.get(SKEY.TRACK_RULES, 0);
 
         OneTileMoveVector[] vectors = {
             OneTileMoveVector.WEST, OneTileMoveVector.EAST,
@@ -41,10 +46,10 @@ public class FlatTrackExplorerTest extends TestCase {
         Point p = new Point(10, 10);
         Point[] points = {p, p, p};
 
-        for (int i = 0; (i < points.length && i < vectors.length); i++) {
+        for (int i = 0; i < points.length; i++) {
             ChangeTrackPieceCompositeMove move = ChangeTrackPieceCompositeMove.generateBuildTrackMove(points[i],
-                    vectors[i], rule, world);
-            MoveStatus ms = move.doMove(world);
+                    vectors[i], rule, world, MapFixtureFactory.TEST_PRINCIPAL);
+            MoveStatus ms = move.doMove(world, Player.AUTHORITATIVE);
             assertTrue(ms.ok);
         }
     }

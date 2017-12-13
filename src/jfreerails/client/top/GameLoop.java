@@ -3,51 +3,80 @@ package jfreerails.client.top;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Toolkit;
-import jfreerails.client.common.MultiLockedRegion;
-import jfreerails.client.common.SynchronizedEventQueue;
 import jfreerails.client.common.RepaintManagerForActiveRendering;
 import jfreerails.client.common.ScreenHandler;
+import jfreerails.client.common.SynchronizedEventQueue;
+import jfreerails.util.GameModel;
 
 
 /**
  * This thread updates the GUI Client window.
  *
  */
-final public class GameLoop implements Runnable, MultiLockedRegion {
+final public class GameLoop implements Runnable {
     final static boolean LIMIT_FRAME_RATE = false;
-    boolean gameNotDone = true;
+    boolean gameNotDone = false;
     final ScreenHandler screenHandler;
-    final static int TARGET_FPS = 30;
+    final static int TARGET_FPS = 40;
     FPScounter fPScounter;
     private long frameStartTime;
+    private final GameModel model;
+    private Integer loopMonitor = new Integer(0);
 
     public GameLoop(ScreenHandler s) {
         screenHandler = s;
+        model = GameModel.NULL_MODEL;
     }
 
-    public void multiLockedCallback() {
-        Graphics g = screenHandler.getDrawGraphics();
+    public GameLoop(ScreenHandler s, GameModel gm) {
+        screenHandler = s;
+        model = gm;
 
-        try {
-            screenHandler.frame.paintComponents(g);
-
-            fPScounter.updateFPSCounter(frameStartTime, g);
-        } finally {
-            g.dispose();
+        if (null == model) {
+            throw new NullPointerException();
         }
+    }
 
-        screenHandler.swapScreens();
+    /**
+     * Stops the game loop.
+     * Blocks until the loop is stopped.
+     * Do not call this from inside the event loop!
+     */
+    public void stop() {
+        synchronized (loopMonitor) {
+            if (gameNotDone == false) {
+                return;
+            }
+
+            gameNotDone = false;
+
+            if (Thread.holdsLock(SynchronizedEventQueue.MUTEX)) {
+                /*
+                 * we might be executing in the event queue so give up the
+                 * mutex temporarily to allow the loop to exit
+                 */
+                try {
+                    SynchronizedEventQueue.MUTEX.wait();
+                } catch (InterruptedException e) {
+                    assert false;
+                }
+            }
+
+            try {
+                loopMonitor.wait();
+            } catch (InterruptedException e) {
+                assert false;
+            }
+        }
     }
 
     public void run() {
-        SynchronizedEventQueue seq = SynchronizedEventQueue.getInstance();
-
+        gameNotDone = true;
+        //SynchronizedEventQueue seq = SynchronizedEventQueue.getInstance();
         RepaintManagerForActiveRendering.addJFrame(screenHandler.frame);
         RepaintManagerForActiveRendering.setAsCurrentManager();
 
         fPScounter = new FPScounter();
-
-        long nextModelUpdateDue = System.currentTimeMillis();
 
         /*
          * Reduce this threads priority to avoid starvation of the input thread
@@ -59,18 +88,40 @@ final public class GameLoop implements Runnable, MultiLockedRegion {
             System.err.println("Couldn't lower priority of redraw thread");
         }
 
-        while (gameNotDone) {
+        while (true) {
             frameStartTime = System.currentTimeMillis();
 
             if (!screenHandler.isMinimised()) {
-                seq.grabAllLocks(this);
-
                 /*
                  * Flush all redraws in the underlying toolkit.  This reduces
                  * X11 lag when there isn't much happening, but is expensive
                  * under Windows
                  */
                 Toolkit.getDefaultToolkit().sync();
+
+                synchronized (SynchronizedEventQueue.MUTEX) {
+                    if (!gameNotDone) {
+                        SynchronizedEventQueue.MUTEX.notify();
+
+                        break;
+                    }
+
+                    if (model != null) {
+                        model.update();
+                    }
+
+                    Graphics g = screenHandler.getDrawGraphics();
+
+                    try {
+                        screenHandler.frame.paintComponents(g);
+
+                        fPScounter.updateFPSCounter(frameStartTime, g);
+                    } finally {
+                        g.dispose();
+                    }
+
+                    screenHandler.swapScreens();
+                }
 
                 if (LIMIT_FRAME_RATE) {
                     long deltatime = System.currentTimeMillis() -
@@ -95,6 +146,11 @@ final public class GameLoop implements Runnable, MultiLockedRegion {
                 } catch (Exception e) {
                 }
             }
+        }
+
+        /* signal that we are done */
+        synchronized (loopMonitor) {
+            loopMonitor.notify();
         }
     }
 }
