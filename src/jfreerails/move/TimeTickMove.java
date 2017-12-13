@@ -18,6 +18,7 @@ public class TimeTickMove implements Move {
 
 	private final GameTime newTime;
 
+	@Override
 	public boolean equals(Object o) {
 		if (this == o)
 			return true;
@@ -34,6 +35,7 @@ public class TimeTickMove implements Move {
 		return true;
 	}
 
+	@Override
 	public int hashCode() {
 		int result;
 		result = oldTime.hashCode();
@@ -69,8 +71,7 @@ public class TimeTickMove implements Move {
 		if (time.equals(newTime)) {
 			return MoveStatus.MOVE_OK;
 		}
-		return MoveStatus.moveFailed("Expected " + newTime + ", found "
-				+ time);
+        return MoveStatus.moveFailed("Expected " + newTime + ", found " + time);
 	}
 
 	public MoveStatus doMove(World w, FreerailsPrincipal p) {
@@ -93,6 +94,7 @@ public class TimeTickMove implements Move {
 		return status;
 	}
 
+	@Override
 	public String toString() {
 		return "TimeTickMove: " + oldTime + "=>" + newTime;
 	}

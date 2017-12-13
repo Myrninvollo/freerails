@@ -11,18 +11,18 @@ import java.io.Serializable;
 import javax.swing.JFrame;
 
 import jfreerails.client.common.ModelRootImpl;
-import jfreerails.client.renderer.ViewLists;
+import jfreerails.client.renderer.RenderersRoot;
 import jfreerails.client.top.GUIComponentFactoryImpl;
 import jfreerails.client.top.GameLoop;
-import jfreerails.client.top.ViewListsImpl;
+import jfreerails.client.top.RenderersRootImpl;
 import jfreerails.client.view.ActionRoot;
 import jfreerails.controller.ModelRoot;
 import jfreerails.controller.ReportBugTextGenerator;
 import jfreerails.controller.ScreenHandler;
 import jfreerails.controller.ModelRoot.Property;
-import jfreerails.network.FreerailsClient;
-import jfreerails.network.FreerailsGameServer;
-import jfreerails.network.SavedGamesManager;
+import jfreerails.network.specifics.FreerailsClient;
+import jfreerails.network.specifics.FreerailsGameServer;
+import jfreerails.network.specifics.SavedGamesManager;
 import jfreerails.server.SavedGamesManagerImpl;
 import jfreerails.server.ServerGameModelImpl;
 import jfreerails.util.FreerailsProgressMonitor;
@@ -65,7 +65,7 @@ public class GUIClient extends FreerailsClient implements
 
 	private final ScreenHandler screenHandler;
 
-	private ViewLists vl;
+	private RenderersRoot vl;
 
 	public GUIClient(String name, FreerailsProgressMonitor fm, int screenMode,
 			DisplayMode dm) throws IOException {
@@ -87,6 +87,7 @@ public class GUIClient extends FreerailsClient implements
 
 	}
 
+	@Override
 	protected void clientUpdates() {
 		if (factory.isSetup()) {
 			factory.getBuildTrackController().update();
@@ -117,11 +118,12 @@ public class GUIClient extends FreerailsClient implements
 		return screenHandler;
 	}
 
+	@Override
 	protected void newWorld(World w) {
 		try {
 			if (null == vl || !vl.validate(w)) {
 				try {
-					vl = new ViewListsImpl(w, monitor);
+					vl = new RenderersRootImpl(w, monitor);
 					monitor.finished();
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
@@ -194,8 +196,7 @@ public class GUIClient extends FreerailsClient implements
 		GameModel[] models = new GameModel[] { this, server };
 
 		// Start the game loop
-		GameLoop gameLoop = new GameLoop(screenHandler, models);
-		screenHandler.apply();
+		GameLoop gameLoop = new GameLoop(screenHandler, models);		
 
 		Thread t = new Thread(gameLoop);
 		t.start();

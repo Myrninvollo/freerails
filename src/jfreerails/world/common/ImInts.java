@@ -37,6 +37,7 @@ public class ImInts implements FreerailsSerializable {
 		return ints.length;
 	}
 
+	@Override
 	public boolean equals(Object o) {
 		if (this == o)
 			return true;
@@ -51,6 +52,7 @@ public class ImInts implements FreerailsSerializable {
 		return true;
 	}
 
+	@Override
 	public int hashCode() {
 		return ints.length;
 	}
@@ -61,7 +63,7 @@ public class ImInts implements FreerailsSerializable {
 
 	public ImInts removeLast() {
 		int[] newInts = new int[ints.length - 1];
-		System.arraycopy(ints, 0, ints, 0, newInts.length);
+		System.arraycopy(ints, 0, newInts, 0, newInts.length);
 		return new ImInts(newInts);
 	}
 
@@ -83,6 +85,15 @@ public class ImInts implements FreerailsSerializable {
 		}
 		sb.append("]");
 		return sb.toString();
+	}
+	
+	/** Returns the sum of the ints stored in the list.*/
+	public int sum(){
+		int sum = 0;
+		for (int i = 0; i < ints.length; i++) {
+			sum+=ints[i];
+		}
+		return sum;
 	}
 
 }

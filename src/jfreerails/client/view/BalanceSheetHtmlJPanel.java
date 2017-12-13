@@ -8,7 +8,7 @@ import java.net.URL;
 
 import javax.swing.Action;
 
-import jfreerails.client.renderer.ViewLists;
+import jfreerails.client.renderer.RenderersRoot;
 import jfreerails.controller.BalanceSheetGenerator;
 import jfreerails.controller.ModelRoot;
 import jfreerails.world.player.FreerailsPrincipal;
@@ -38,8 +38,8 @@ public class BalanceSheetHtmlJPanel extends HtmlJPanel implements View {
 		template = loadText(url);
 	}
 
-	public void setup(ModelRoot modelRoot, ViewLists vl,
-			Action closeAction) {
+	@Override
+    public void setup(ModelRoot modelRoot, RenderersRoot vl, Action closeAction) {
 		super.setup(modelRoot, vl, closeAction);
 		this.modelRoot = modelRoot;
 		updateHtml();
@@ -55,6 +55,7 @@ public class BalanceSheetHtmlJPanel extends HtmlJPanel implements View {
 		setHtml(populatedTemplate);
 	}
 
+	@Override
 	protected void paintComponent(Graphics g) {
 		/* Check to see if the text needs updating before painting. */
 		ReadOnlyWorld world = modelRoot.getWorld();

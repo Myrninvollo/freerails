@@ -65,6 +65,7 @@ strictfp public class PathOnTiles implements FreerailsSerializable {
 		this.start = start;
 	}
 
+	@Override
 	public boolean equals(Object o) {
 		if (this == o)
 			return true;
@@ -109,7 +110,7 @@ strictfp public class PathOnTiles implements FreerailsSerializable {
 	 */
 	public ImPoint getPoint(double distance) {
 		if (0 > distance)
-			throw new IllegalArgumentException("distance < 0");
+            throw new IllegalArgumentException("distance:" + distance + " < 0");
 
 		int x = start.x * TILE_DIAMETER + TILE_DIAMETER / 2;
 		int y = start.y * TILE_DIAMETER + TILE_DIAMETER / 2;
@@ -177,6 +178,7 @@ strictfp public class PathOnTiles implements FreerailsSerializable {
 		throw new IllegalArgumentException("distance > getLength()");
 	}
 
+	@Override
 	public int hashCode() {
 		return start.hashCode();
 	}

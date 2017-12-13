@@ -32,12 +32,12 @@ public class Bill implements Transaction {
 		return amount;
 	}
 
+	@Override
 	public boolean equals(Object o) {
 		if (o instanceof Bill) {
 			Bill test = (Bill) o;
 
-			return test.amount.equals(amount)
-					&& category == test.category;
+            return test.amount.equals(amount) && category == test.category;
 		}
 		return false;
 	}
@@ -46,6 +46,7 @@ public class Bill implements Transaction {
 		return category;
 	}
 
+	@Override
 	public int hashCode() {
 		int result;
 		result = amount.hashCode();

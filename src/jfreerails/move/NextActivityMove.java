@@ -27,6 +27,7 @@ public class NextActivityMove implements Move {
 		this.principal = principal;
 	}
 
+	@Override
 	public boolean equals(Object o) {
 		if (this == o)
 			return true;
@@ -45,6 +46,7 @@ public class NextActivityMove implements Move {
 		return true;
 	}
 
+	@Override
 	public int hashCode() {
 		int result;
 		result = activity.hashCode();
@@ -64,8 +66,7 @@ public class NextActivityMove implements Move {
 
 	public MoveStatus tryUndoMove(World w, FreerailsPrincipal p) {
 		ActivityIterator ai = w.getActivities(principal, index);
-		while (ai.hasNext())
-			ai.nextActivity();
+        ai.gotoLastActivity();
 
 		Activity act = ai.getActivity();
 		if (act.equals(activity))

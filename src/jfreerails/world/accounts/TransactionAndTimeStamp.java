@@ -20,19 +20,25 @@ public class TransactionAndTimeStamp implements FreerailsSerializable {
 		timeStamp = stamp;
 	}
 
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof TransactionAndTimeStamp)) return false;
+    @Override
+	public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (!(o instanceof TransactionAndTimeStamp))
+            return false;
 
         final TransactionAndTimeStamp transactionAndTimeStamp = (TransactionAndTimeStamp) o;
 
-        if (!t.equals(transactionAndTimeStamp.t)) return false;
-        if (!timeStamp.equals(transactionAndTimeStamp.timeStamp)) return false;
+        if (!t.equals(transactionAndTimeStamp.t))
+            return false;
+        if (!timeStamp.equals(transactionAndTimeStamp.timeStamp))
+            return false;
 
         return true;
     }
 
-    public int hashCode() {
+    @Override
+	public int hashCode() {
         int result;
         result = t.hashCode();
         result = 29 * result + timeStamp.hashCode();

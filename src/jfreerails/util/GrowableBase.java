@@ -21,6 +21,7 @@
  */
 package jfreerails.util;
 
+import java.io.Serializable;
 import java.lang.reflect.Array;
 
 /**
@@ -32,7 +33,7 @@ import java.lang.reflect.Array;
  * @author Dennis M. Sosnoski
  * @version 1.0
  */
-public abstract class GrowableBase {
+public abstract class GrowableBase implements Serializable {
 	/** Default initial array size. */
 	public static final int DEFAULT_SIZE = 8;
 
@@ -78,8 +79,8 @@ public abstract class GrowableBase {
 	 *            instance being copied
 	 */
 	public GrowableBase(GrowableBase base) {
-		this(base.countLimit, base.maximumGrowth, base.getArray()
-				.getClass().getComponentType());
+		this(base.countLimit, base.maximumGrowth, base.getArray().getClass()
+				.getComponentType());
 	}
 
 	/**
@@ -129,7 +130,6 @@ public abstract class GrowableBase {
 
 		if (!values.getClass().getComponentType().isPrimitive()) {
 			Object[] objects = (Object[]) values;
-
 			for (int i = from; i < to; i++) {
 				objects[i] = null;
 			}

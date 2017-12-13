@@ -1,3 +1,44 @@
+Sep 23 2010  
+	o Put junit tests in a separate directory.
+Apr 9 2009, Luke
+	Fixed bugs
+	1829444 Unexpected Exception: ImList.java line 74
+	1663152 Unexpected exception upon hitting "1" to resume movement
+Apr 9 2009, Luke
+	Fixed bug
+	1687677 Unexpected Exception: TrainScheduleJPanel.java line 658 
+Apr 9 2009, Luke
+	o Incorporate some changes from freerails2 project
+Feb 29 2008, Luke
+	o Separate the general network code and the freerails specific code into different packages.
+Sep 18, 2006, Luke
+	o Apply patch  1557521 (simple cleanups)
+Sep 3, 2006, Luke
+	o Give moving trains priority over stationary trains.
+	Fixed bugs		
+	1551106  Trains with 'auto consist' set don't pickup cargo
+Sep 1, 2006, Luke
+	Features implemented:
+	987520 Track Contention
+Aug 31, 2006 Luke
+	Brought back 'cheat' menu.
+	Fixed bugs
+	1537413 Exception when building station.
+Jul 24, 2006 Luke
+	Fixed bug where list of saved games didn't get updated when files were added, 
+	removed, or renamed.
+Jul 16, 2006 Luke
+	Fixed bugs
+	1384250 Wait until full slows frame rate.
+	1384249 Unexpected Exception when removing last wagon.
+
+Dec 5, 2005 Luke
+	Fixed bugs
+	1313227 Remove last wagon doesn't work with more than 2 wagons
+	1313225 Harbour: Conversion makes no sense
+	1341365 Exception when calculating stock price after buying shares
+	1303162 Unexpected Exception in SquareTileBackgroundRenderer
+	
 Sept 21, 2005 Luke
 	Improve exception reporting
 Sept 19, 2005 Luke

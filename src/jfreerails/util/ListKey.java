@@ -12,7 +12,9 @@ public class ListKey implements Comparable<ListKey>, Serializable{
 	
 	private static final long serialVersionUID = -4939641035786937927L;
 
-	public enum Type{Element, EndPoint}
+    public enum Type {
+        Element, EndPoint
+    }
 
     private final Type type;
 	
@@ -30,20 +32,27 @@ public class ListKey implements Comparable<ListKey>, Serializable{
 		return index.clone();
 	}
 
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ListKey)) return false;
+    @Override
+	public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (!(o instanceof ListKey))
+            return false;
 
         final ListKey listKey = (ListKey) o;
 
-        if (!Arrays.equals(index, listKey.index)) return false;
-        if (!listID.equals(listKey.listID)) return false;
-        if (!type.equals(listKey.type)) return false;
+        if (!Arrays.equals(index, listKey.index))
+            return false;
+        if (!listID.equals(listKey.listID))
+            return false;
+        if (!type.equals(listKey.type))
+            return false;
 
         return true;
     }
 
-    public int hashCode() {
+    @Override
+	public int hashCode() {
         int result;
         result = type.hashCode();
         result = 29 * result + listID.hashCode();

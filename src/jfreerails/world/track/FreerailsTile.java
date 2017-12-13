@@ -15,19 +15,26 @@ import jfreerails.world.terrain.TerrainTile;
  */
 public class FreerailsTile implements TerrainTile,
 		FreerailsSerializable {
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+    @Override
+	public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
         final FreerailsTile that = (FreerailsTile) o;
 
-        if (terrainType != that.terrainType) return false;
-        if (trackPiece != null ? !trackPiece.equals(that.trackPiece) : that.trackPiece != null) return false;
+        if (terrainType != that.terrainType)
+            return false;
+        if (trackPiece != null ? !trackPiece.equals(that.trackPiece)
+                : that.trackPiece != null)
+            return false;
 
         return true;
     }
 
-    public int hashCode() {
+    @Override
+	public int hashCode() {
         int result;
         result = (trackPiece != null ? trackPiece.hashCode() : 0);
         result = 29 * result + terrainType;
@@ -90,6 +97,7 @@ public class FreerailsTile implements TerrainTile,
         return terrainType;
     }
 
+	@Override
 	public String toString() {
 		return "trackPiece=" + trackPiece.toString() + " and terrainType is "
 				+ terrainType;

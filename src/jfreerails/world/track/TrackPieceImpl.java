@@ -16,21 +16,29 @@ final public class TrackPieceImpl implements TrackPiece {
 
 	private final int ruleNumber;
 
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+    @Override
+	public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
         final TrackPieceImpl that = (TrackPieceImpl) o;
 
-        if (ownerID != that.ownerID) return false;
-        if (ruleNumber != that.ruleNumber) return false;
-        if (!configuration.equals(that.configuration)) return false;
-        if (!trackType.equals(that.trackType)) return false;
+        if (ownerID != that.ownerID)
+            return false;
+        if (ruleNumber != that.ruleNumber)
+            return false;
+        if (!configuration.equals(that.configuration))
+            return false;
+        if (!trackType.equals(that.trackType))
+            return false;
 
         return true;
     }
 
-    public int hashCode() {
+    @Override
+	public int hashCode() {
         int result;
         result = configuration.hashCode();
         result = 29 * result + trackType.hashCode();
@@ -39,8 +47,8 @@ final public class TrackPieceImpl implements TrackPiece {
         return result;
     }
 
-    public TrackPieceImpl(TrackConfiguration c,
-			TrackRule type, int owner, int rule) {
+    public TrackPieceImpl(TrackConfiguration c, TrackRule type, int owner,
+            int rule) {
 		configuration = c;
 		trackType = type;
 		ownerID = owner;

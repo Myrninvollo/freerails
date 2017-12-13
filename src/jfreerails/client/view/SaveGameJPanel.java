@@ -9,11 +9,11 @@ import java.awt.event.ActionListener;
 
 import javax.swing.Action;
 
-import jfreerails.client.renderer.ViewLists;
+import jfreerails.client.renderer.RenderersRoot;
 import jfreerails.controller.Message2Server;
 import jfreerails.controller.ModelRoot;
 import jfreerails.controller.ModelRoot.Property;
-import jfreerails.network.SaveGameMessage2Server;
+import jfreerails.network.specifics.SaveGameMessage2Server;
 /**
  *
  * @author  Luke
@@ -117,7 +117,7 @@ public class SaveGameJPanel extends javax.swing.JPanel implements View{
     }//GEN-LAST:event_fileNameTextFieldActionPerformed
     
     
-    public void setup(ModelRoot m, ViewLists vl,
+    public void setup(ModelRoot m, RenderersRoot vl,
             Action closeAction) {
         this.close = closeAction;
         this.modelRoot = m;

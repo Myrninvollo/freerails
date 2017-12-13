@@ -34,6 +34,7 @@ public class Player implements FreerailsSerializable {
 		private final String principalName;
 
 		public WorldPrincipal(String name) {
+            super(-1);
 			this.principalName = name;
 		}
 
@@ -41,14 +42,17 @@ public class Player implements FreerailsSerializable {
 			return principalName;
 		}
 
+		@Override
 		public String toString() {
 			return principalName;
 		}
 
+		@Override
 		public int hashCode() {
 			return principalName.hashCode();
 		}
 
+		@Override
 		public boolean equals(Object o) {
 			if (!(o instanceof WorldPrincipal)) {
 				return false;
@@ -107,6 +111,7 @@ public class Player implements FreerailsSerializable {
 		this.principal = new PlayerPrincipal(id, name);
 	}
 
+	@Override
 	public boolean equals(Object o) {
 		if (o == null) {
 			return false;
@@ -120,10 +125,12 @@ public class Player implements FreerailsSerializable {
 		return (name.equals(((Player) o).name));
 	}
 
+	@Override
 	public int hashCode() {
 		return name.hashCode();
 	}
 
+	@Override
 	public String toString() {
 		return name;
 	}

@@ -10,8 +10,8 @@ import java.util.Vector;
 
 import jfreerails.move.TimeTickMove;
 import jfreerails.move.WorldDiffMove;
-import jfreerails.network.MoveReceiver;
-import jfreerails.network.ServerGameModel;
+import jfreerails.network.specifics.MoveReceiver;
+import jfreerails.network.specifics.ServerGameModel;
 import jfreerails.world.common.GameCalendar;
 import jfreerails.world.common.GameSpeed;
 import jfreerails.world.common.GameTime;
@@ -33,7 +33,7 @@ public class ServerGameModelImpl implements ServerGameModel {
 
 	private transient CalcSupplyAtStations calcSupplyAtStations;
 
-	private TrainBuilder tb;
+	private TrainUpdater tb;
 	
 
 	private String[] passwords;
@@ -190,7 +190,7 @@ public class ServerGameModelImpl implements ServerGameModel {
 
 	public void init(MoveReceiver newMoveExecuter) {
 		this.moveExecuter = newMoveExecuter;
-		tb = new TrainBuilder(newMoveExecuter);
+		tb = new TrainUpdater(newMoveExecuter);
 		calcSupplyAtStations = new CalcSupplyAtStations(world, newMoveExecuter);
 
 		for (int i = 0; i < serverAutomata.size(); i++) {

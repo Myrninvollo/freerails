@@ -14,9 +14,8 @@ import jfreerails.client.common.ModelRootListener;
 import jfreerails.controller.Message2Server;
 import jfreerails.controller.ModelRoot.Property;
 import jfreerails.move.ChangeGameSpeedMove;
-import jfreerails.network.NewGameMessage2Server;
+import jfreerails.network.specifics.NewGameMessage2Server;
 import jfreerails.world.common.GameSpeed;
-import jfreerails.world.common.ImStringList;
 import jfreerails.world.top.ITEM;
 import jfreerails.world.top.ReadOnlyWorld;
 
@@ -262,14 +261,14 @@ public class ServerControlModel implements ModelRootListener{
     }
     
     public void propertyChange(Property p, Object oldValue, Object newValue) {
-        switch (p) {
-            case SAVED_GAMES_LIST:
-                updateLoadGameAction();
-                break;
-                
-            default:
-                break;
-        }
+//        switch (p) {
+//            case SAVED_GAMES_LIST:
+//                updateLoadGameAction();
+//                break;
+//                
+//            default:
+//                break;
+//        }
         
     }
     
@@ -301,16 +300,7 @@ public class ServerControlModel implements ModelRootListener{
         selectMapActions = new ActionAdapter(actions);
         
         newGameAction.setEnabled(true);
+            
+    }
         
-        updateLoadGameAction();
-    }
-    
-    private void updateLoadGameAction(){
-        ImStringList gameNames = (ImStringList) modelRoot.getProperty(Property.SAVED_GAMES_LIST);
-        if(gameNames.size() ==0){
-            this.loadGameAction.setEnabled(false);
-        }else{
-            this.loadGameAction.setEnabled(true);
-        }
-    }
 }

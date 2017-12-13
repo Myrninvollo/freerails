@@ -43,13 +43,13 @@ public class AddItemTransaction implements Transaction {
 		return amount;
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof AddItemTransaction) {
 			AddItemTransaction test = (AddItemTransaction) obj;
 
-			return this.amount.equals(test.amount)
-					&& category == test.category && type == test.type
-					&& quantity == test.quantity;
+            return this.amount.equals(test.amount) && category == test.category
+                    && type == test.type && quantity == test.quantity;
 		}
 		return false;
 	}
@@ -66,6 +66,7 @@ public class AddItemTransaction implements Transaction {
 		return type;
 	}
 
+	@Override
 	public int hashCode() {
 		int result;
 		result = category.hashCode();
@@ -76,6 +77,7 @@ public class AddItemTransaction implements Transaction {
 		return result;
 	}
 	
+	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append("AddItemTransaction ");

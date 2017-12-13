@@ -8,6 +8,8 @@
 		<tstamp />
 
 		<property location="src" name="src" />
+		
+		<property location="test" name="test" />
 
 		<property location="build" name="build" />
 
@@ -18,6 +20,14 @@
 		<property location="temp" name="temp" />
 
 		<property location="datafiles" name="datafiles" />
+		
+		<property name="key-alias" value="Freerails-Developers"/>
+		
+		<property name="keystore.location" value="freerails.keys"/>
+		
+		<property name="keystore.password" value="friend"/>
+		
+        <available file="${keystore.location}" property="keystore.present" />
 
 	</target>
 
@@ -37,7 +47,7 @@
 
 	</target>
 	<!-- Copies html etc and sets last modified date in html files.-->
-	<target name="html2docs" depends="mkdirs">
+	<target name="html2docs" depends="mkdirs" unless="skipdocs">
 		<copy todir="${doc}" preservelastmodified="true" overwrite="true">
 					<fileset dir="${src}">
 						<include name="**/*.html" />
@@ -154,7 +164,7 @@ else:
 	</target>
 
 	<target name="debugcompile" depends="data2build" description="Build everything including JUnit    test-classes. Include debugging symbols">
-		<javac debug="true" destdir="${build}" fork="true" debuglevel="lines,vars,source" source="1.5" srcdir="${src}" classpath="jars/junit.jar" />
+		<javac debug="true" destdir="${build}" fork="true" debuglevel="lines,vars,source" source="1.5" srcdir="${src}:${test}" classpath="jars/junit.jar" />
 	</target>
 
 	<target name="test" depends="debugcompile" description="Run all junit tests">
@@ -163,7 +173,7 @@ else:
 		<junit haltonfailure="yes" printsummary="yes" >
 			<classpath>
 				<pathelement location="${build}" />
-
+				
 				<pathelement path="${java.class.path}" />
 				<pathelement path="jars/junit.jar" />
 			</classpath>
@@ -202,7 +212,7 @@ else:
 	<target name="srcdist" depends="data2temp" description="Generate source distribution">
 		<zip basedir="." destfile="${dist}/lib/jfreerails-${DSTAMP}-${TSTAMP}-src.zip">
 			<include name="src/**/*.java" />
-
+			<include name="test/**/*.java" />
 			<include name="src/**/*.form" />
 
 			<include name="*.xml" />
@@ -251,7 +261,7 @@ else:
 		</delete>
 	</target>
 
-	<target name="run" depends="mkdirs, compile" description="Test run based on compile">
+	<target name="run_old" depends="mkdirs, compile" description="Test run based on compile">
 		<java classname="jfreerails.launcher.Launcher" fork="true">
 			<classpath>
 				<pathelement path="${build}" />
@@ -265,7 +275,7 @@ else:
 		<java fork="true" jar="${dist}/lib/jfreerails-${DSTAMP}-${TSTAMP}.jar" />
 	</target>
 
-	<target name="javadoc" depends="mkdirs, html2docs" description="Generate javadoc">
+	<target name="javadoc" depends="mkdirs, html2docs" description="Generate javadoc" unless="skipdocs">
 		<javadoc Private="true" author="true" destdir="${doc}" overview="${src}/overview.html" source="1.5" use="true" version="true" windowtitle="JFreerails API - build ${DSTAMP}-${TSTAMP}">
 			<fileset defaultexcludes="yes" dir="${src}">
 				<include name="**/*.java" />
@@ -359,13 +369,14 @@ else:
 			</fileset>
 		</scp>
 	</target>
+	
+	<target name="generatekey"  unless="keystore.present" depends="init" description="Generates a key for signing jar files">
+	          <genkey alias="${key-alias}" keystore="${keystore.location}" storepass="${keystore.password}" validity="3650" dname="CN=Luke Lindsay, OU=Luke Lindsay, O=University of Nottingham, C=UK"/>
+     	</target> 
 
 
-	<target name="signjar" depends="bindist" description="Sign the jar file so it can be used with webstart">
-		<!-- To generate key, use the following:
-		keytool -keystore freerailsKeyStore -genkey -alias Freerails-Developers -keypass friend -storepass friend
-		-->
-		<signjar jar="${dist}/lib/jfreerails-${DSTAMP}-${TSTAMP}.jar" signedjar="www/signed_jfreerails.jar" alias="Freerails-Developers" keystore="freerailsKeyStore" storepass="friend" />
+	<target name="signjar" depends="bindist, generatekey" description="Sign the jar file so it can be used with webstart">		
+		<signjar jar="${dist}/lib/jfreerails-${DSTAMP}-${TSTAMP}.jar" signedjar="www/signed_jfreerails.jar" alias="${key-alias}" keystore="${keystore.location}" storepass="friend" />
 	</target>
 
 	<target name="check_username_and_password">
@@ -373,6 +384,14 @@ else:
 		<input message="Please enter password:" addproperty="p" />
 	</target>
 
+	<target name="move_tests">
+		<move todir="test">
+		    <fileset dir="src/">
+		      <include name="**/*Test.java"/>		      
+		    </fileset>
+		  </move>
+		
+	</target>
 
 	<target name="devdist" description="Zips up development environment." depends="clean">
 		<delete file="dev_jfreerails.zip" />
@@ -395,6 +414,25 @@ else:
 
 		</zip>
 	</target>
+        
+        <!-- Profiles the game using the NetBeans profiler.  Note, the location of the profiler is hard coded and
+        will need to be changed for the target to work on other machines.-->
+        
+        <target name="run" depends="compile" description="Profile Project">
+            <fail unless="netbeans.home">This target can only run inside the NetBeans IDE.</fail>
+
+            <nbprofiledirect>
+                <classpath> <pathelement location="C:\Program Files\netbeans-5.0\profiler1\lib"/> </classpath>
+            </nbprofiledirect>
+
+            <java classname="jfreerails.launcher.Launcher" fork="true">
+                <jvmarg value="${profiler.info.jvmargs.agent}"/>
+                <classpath>
+                    <pathelement path="${build}" />
+                </classpath>
+                <sysproperty key="java.util.logging.config.file" value="logging.properties" />
+            </java>
+        </target>
 
 
 </project>

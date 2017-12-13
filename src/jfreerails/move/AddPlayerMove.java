@@ -23,6 +23,7 @@ public class AddPlayerMove implements Move, ServerMove {
 		player2add = p;
 	}
 
+	@Override
 	public boolean equals(Object o) {
 		if (this == o)
 			return true;
@@ -37,6 +38,7 @@ public class AddPlayerMove implements Move, ServerMove {
 		return true;
 	}
 
+	@Override
 	public int hashCode() {
 		return player2add.hashCode();
 	}
@@ -74,8 +76,7 @@ public class AddPlayerMove implements Move, ServerMove {
 			return ms;
 		int playerId = w.addPlayer(this.player2add);		
 		// Sell the player 2 $500,000 bonds at 5% interest.
-		FreerailsPrincipal principal = player2add
-				.getPrincipal();
+        FreerailsPrincipal principal = player2add.getPrincipal();
 		w.addTransaction(principal, BondTransaction.issueBond(5));
 		//Issue stock
 		Money initialStockPrice = new Money(5);

@@ -7,6 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.Enumeration;
+import java.util.Random;
 import java.util.logging.Logger;
 
 import javax.swing.Action;
@@ -28,7 +29,7 @@ import jfreerails.client.common.ModelRootImpl;
 import jfreerails.client.common.ActionAdapter.MappedButtonModel;
 import jfreerails.client.renderer.BuildTrackController;
 import jfreerails.client.renderer.MapRenderer;
-import jfreerails.client.renderer.ViewLists;
+import jfreerails.client.renderer.RenderersRoot;
 import jfreerails.client.renderer.ZoomedOutMapRenderer;
 import jfreerails.client.view.ActionRoot;
 import jfreerails.client.view.CashJLabel;
@@ -43,16 +44,22 @@ import jfreerails.client.view.ServerControlModel;
 import jfreerails.client.view.StationPlacementCursor;
 import jfreerails.controller.ModelRoot;
 import jfreerails.move.ChangeGameSpeedMove;
+import jfreerails.move.ChangeProductionAtEngineShopMove;
 import jfreerails.move.Move;
 import jfreerails.network.LocalConnection;
-import jfreerails.network.MoveReceiver;
+import jfreerails.network.specifics.MoveReceiver;
 import jfreerails.world.common.GameSpeed;
+import jfreerails.world.common.ImList;
 import jfreerails.world.common.ImPoint;
 import jfreerails.world.player.FreerailsPrincipal;
+import jfreerails.world.station.PlannedTrain;
+import jfreerails.world.station.StationModel;
 import jfreerails.world.top.ITEM;
 import jfreerails.world.top.KEY;
 import jfreerails.world.top.NonNullElements;
 import jfreerails.world.top.ReadOnlyWorld;
+import jfreerails.world.top.SKEY;
+import jfreerails.world.top.WorldIterator;
 import jfreerails.world.top.WorldListListener;
 import jfreerails.world.top.WorldMapListener;
 
@@ -63,6 +70,9 @@ import jfreerails.world.top.WorldMapListener;
  */
 public class GUIComponentFactoryImpl implements GUIComponentFactory,
 		WorldMapListener, WorldListListener {
+
+	/** Whether to show certain 'cheat' menus used for testing. */
+	private static final boolean CHEAT = (System.getProperty("cheat") != null);
 
 	private static final Logger logger = Logger
 			.getLogger(GUIComponentFactoryImpl.class.getName());
@@ -130,7 +140,7 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory,
 
 	private UserMessageGenerator userMessageGenerator;
 
-	private ViewLists viewLists;
+	private RenderersRoot renderers;
 
 	private ReadOnlyWorld world;
 
@@ -421,6 +431,48 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory,
 		gameMenu.addSeparator();
 		gameMenu.add(quitJMenuItem);
 
+		if (CHEAT) {
+			/** For testing. */
+			final ActionListener build200trains = new ActionListener() {
+				public void actionPerformed(ActionEvent arg0) {
+					WorldIterator wi = new NonNullElements(KEY.STATIONS,
+							modelRoot.getWorld(), modelRoot.getPrincipal());
+
+					if (wi.next()) {
+						Random randy = new Random();
+						StationModel station = (StationModel) wi.getElement();
+
+						ImList<PlannedTrain> before = station
+								.getProduction();
+						int numberOfEngineTypes = modelRoot.getWorld().size(
+								SKEY.ENGINE_TYPES) - 1;
+						int numberOfcargoTypes = modelRoot.getWorld().size(
+								SKEY.CARGO_TYPES) - 1;
+						PlannedTrain[] temp = new PlannedTrain[200];
+
+						for (int i = 0; i < temp.length; i++) {
+							int engineType = randy.nextInt(numberOfEngineTypes);
+							int[] wagonTypes = new int[] {
+									randy.nextInt(numberOfcargoTypes),
+									randy.nextInt(numberOfcargoTypes),
+									randy.nextInt(numberOfcargoTypes) };
+							PlannedTrain plannedTrain = new PlannedTrain(engineType, wagonTypes);							
+							temp[i] = plannedTrain;
+						}
+						ImList<PlannedTrain> after = new ImList<PlannedTrain>(temp);
+						Move m = new ChangeProductionAtEngineShopMove(before,
+								after, wi.getIndex(), modelRoot.getPrincipal());
+						modelRoot.doMove(m);
+					}
+				}
+			};
+
+			JMenuItem build200TrainsMenuItem = new JMenuItem(
+					"Build 200 trains!");
+			build200TrainsMenuItem.addActionListener(build200trains);
+			gameMenu.add(build200TrainsMenuItem);
+		}
+
 		return gameMenu;
 	}
 
@@ -564,7 +616,7 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory,
 	 * starting several new games). </b>
 	 * </p>
 	 */
-	public void setup(ViewLists vl, ReadOnlyWorld w) throws IOException {
+	public void setup(RenderersRoot vl, ReadOnlyWorld w) throws IOException {
 		/*
 		 * Set the cursor position. The initial cursor position is 0,0. However,
 		 * if a game is loaded or a new game is started and the map size is the
@@ -579,19 +631,19 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory,
 						.getProperty(ModelRoot.Property.CURSOR_POSITION);
 			}
 		}
-		viewLists = vl;
+		renderers = vl;
 		world = w;
 		modelRoot.addMapListener(this);
 		modelRoot.addListListener(this);
 
 		if (!vl.validate(world)) {
 			throw new IllegalArgumentException("The specified"
-					+ " ViewLists are not compatible with the clients"
+					+ " RenderersRoot are not compatible with the clients"
 					+ "world!");
 		}
 
 		// create the main and overview maps
-		mainMap = new DetailMapRenderer(world, viewLists, modelRoot);
+		mainMap = new DetailMapRenderer(world, renderers, modelRoot);
 
 		Dimension maxSize = new Dimension(200, 200);
 		overviewMap = ZoomedOutMapRenderer.getInstance(world, maxSize);
@@ -600,7 +652,7 @@ public class GUIComponentFactoryImpl implements GUIComponentFactory,
 				.getStationRadius());
 
 		mapViewJComponent
-				.setup(mainMap, modelRoot, viewLists.getImageManager());
+				.setup(mainMap, modelRoot, renderers);
 
 		// setup the the main and overview map JComponents
 		dialogueBoxController.setDefaultFocusOwner(mapViewJComponent);
