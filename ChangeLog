@@ -1,0 +1,523 @@
+Mar 9, 2004:
+------------
+Separated view and model client packages.
+Added Debug menu.
+Rendering bugs hopefully mostly fixed.
+Added Release Notes
+Tidied up build.xml
+Removed external references to JFreerails in dialogs etc.
+Added bug reporting link to About dialog.
+Mar 7, 2004
+-----------
+Reworked GUI architecture. Rendering code changed. Still a bit buggy :)
+Added L10N/I18N infrastructure (Thanks Christoph!)
+Feb 28, 2004
+------------
+Railz CVS created from patched JFreerails source
+Added:
+* Overhead wagon graphics
+* Integration of schedule into JTabPane
+* GUI Icons
+* Resizable dialogs
+* Bank account patch
+* Fix to cargo payment calculations
+* GPL License file
+* Load/save fix
+* Removed "experimental" directory
+
+============================================================================
+Feb 20, 2004 6:34:03 PM Luke
+	o Fix 839371 - Goods & livestock wagons appear the same on train orders
+Feb 20, 2004 12:31:15 PM Luke
+	o Fix bugs 867473 and 880450 (Intermittent deadlocks).
+Feb 18, 2004 8:49:34 PM Luke
+	o Fix bug 839331 - set initial gamespeed to 'slow' instead of paused
+	o Fix bug 874416 (station icon hides after track-upgrade)
+	o Fix bug 839361 (Several industries of the same type in same city)
+	o Fix bug 891362 (Cancel button on select engine dialogue doesn't work )
+	o Fix bug 891431 No link between train list and train orders screens 
+Feb 18, 2004 1:12:22 AM Luke
+	o Removed unreachable code.
+	o Fix build.xml
+Feb 17, 2004 1:22:31 AM Luke
+	o Apply move infrastructure patch.
+	o Apply OSX work around.
+Feb 16, 2004 9:49:53 PM Luke
+	o Add new select station popup to train orders dialogue (fixes bug 891427).
+	o Add 'About' dialogue (fixes bug 891377)
+	o Add 'How to play' dialogue (fixes bug 891371)
+Feb 6, 2004 12:23:44 AM Luke
+	o Apply Robert Tuck's patch to fix bug 880496 (User stuck after connection refused)
+Feb 5, 2004 12:09:19 AM Luke
+	o Apply Robert Tuck's Mac OS X fixes.
+	o Uncomment out code in TrackMaintenanceMoveGenerator
+Feb 4, 2004 4:07:21 PM Luke
+	o Add testDefensiveCopy() to WorldImplTest
+Jan 19, 2004 7:21:04 PM Luke
+	o Applied Robert Tuck's launcher patch.
+Dec 31, 2003 1:35:01 AM Luke
+	o Remove some unused code.
+	o Fix some things jlint moaned about - perhaps slightly pointless!
+Dec 30, 2003 12:00:03 AM Luke
+	o Refactoring to change the threads in which moves are executed.  
+		(i)  Moves are precommitted on the client's copy of the world 
+		by the thread "AWT_EventQueue."
+		(ii) All moves are now executed on the server's copy of the world 
+		in jfreerails.server.ServerGameEngine.update() by the thread "JFreerails server".		
+		(iii) Moves received from the server are now executed on the clients copy of the 
+		world in jfreerails.client.top.run() by the client thread by the  thread
+		"JFreerails client: ..."
+	Moves are passed between threads using queues. 
+	Currently starting new games and loading games does not work.
+	o Removed most of the passing of mutexes between classes.
+Dec 29, 2003 9:12:42 PM Luke
+	o Apply Robert Tuck's patch to BufferedTiledBackgroundRenderer.
+	o Make the client keep its own copy of the world object even when it is in the same VM as the server.
+Dec 24, 2003 9:36:36 AM Luke
+	o Prepare for release.
+Dec 23, 2003 23:15:58 PM Luke
+	o Refactoring to remove some cyclic dependencies. 
+Dec 20, 2003 1:53:19 AM Luke
+	O Apply part of Robert Tuck's performance patch.
+	o Update side on wagon graphics.
+	o Fix for bug 839355 (User not told why track cannot be built)
+Dec 18, 2003 11:34:25 PM Luke
+	o Fix for bug 855729 (Game does not start on pre 1.4.2 VMs) 
+Dec 17, 2003 11:33:14 PM Luke
+	o Move UNITS_OF_CARGO_PER_WAGON constant to WagonType.
+Dec 17, 2003 5:50:09 PM Luke
+	o Applied Robert Tuck's patch to fix apparent network lag.
+	o Tweaked 'format' ant target so that it does not format files that are up to date.
+Dec 13, 2003 11:38:12 PM Luke
+	o Fix bug: stations on the trains schedule can now be changed again.
+Dec 13, 2003 10:09:04 PM Luke
+	o Fixed bug: passengers are now demanded by cities and villages.
+	o Fixed bug: track maintenance cost is no longer equal to the build cost.
+	o Fixed bug 839366 (No feedback when trains arrive)
+Dec 12, 2003 9:57:38 PM Luke
+	o Add Robert Tuck's new train graphics.
+Dec 8, 2003 12:29:41 AM Luke
+	o Deprecate methods that take a mutex as a parameter.
+Dec 6, 2003 12:20:24 AM Luke
+	o Apply source code formatting.
+Dec 5, 2003 11:54:58 PM Luke
+	o Apply Robert Tucks move ahead patch.
+Nov 30, 2003 2:27:01 PM Luke
+	o Fixed bug 839376 (Harbours are not painted properly)
+Nov 30, 2003 1:24:28 AM Luke
+	o Fixed bug 839336 (Removing station train heading to causes Exception) 
+Nov 29, 2003 9:46:07 PM Luke
+	o Fixed bug 839392(After F8 to build station, position still follows mouse)
+	o Added jalopy 'format' target to build.xml
+Nov 18, 2003 11:36:38 PM Luke
+	o Applied Robert Tuck's patch to fix the bug that occurred with 1 local client 
+	and 1 networked client in a 2nd VM.
+Nov 10, 2003 3:25:23 PM Luke
+	o Made MoveExecuter non-static.
+	o Fixed bug 835337.
+	o Remove debug console output.
+Nov 9, 2003 5:47:15 PM Luke
+	o Applied Robert Tuck's to fix bug 835241.
+Nov 3, 2003 10:02:54 PM Luke
+	o Added Scott Bennett's enhanced city tile positioner.
+03-Nov-2003 17:58:00 Luke
+	o Applied Robert Tuck's patches to update the launcher gui.
+	o Added Scott Bennett's extra Cities
+18-Oct-2003 00:36:59 Luke
+	o Applied Robert Tuck's patch adding comments to ServerGameEngine.
+	o Other javadoc updates.
+13-Oct-2003 21:59:01 Luke
+	o Applied Robert Tuck's network patch.
+06-Oct-2003 23:45:23 Luke
+	o Fixed, I think, bug where trains went off the track.
+04-Oct-2003 22:58:37 Luke
+	o Update CVS write permissions.
+12-Sep-2003 21:00:00 Luke
+	o Add Robert Tuck's 'build' tab patch.
+07-Sep-2003 22:00:00 Luke
+	o Added progess bar to show what is happening while 
+	the game is loading.
+03-Sep-2003 21:50:00 Luke
+	o Added GUI to select display mode and number of clients.
+28-Aug-2003 23:00:00 Luke
+	o Made train speed decrease with no of wagons.
+	o Made fare increase with distacne travelled.
+	o Made CalcSupplyAtStations implement WorldListListener so
+	that when a new station is added, its supply and demand is
+	calculated by the server.
+25-Aug-2003 23:00:00 Luke
+	o Added new Train orders dialogue.
+	o Made changes to train consist and schedule
+	use Moves instead of changing the DB directly.
+	o Lots of other changes/fixes.
+23-Aug-2003 15:45:00 Luke
+	o Removed cruft from the experiemental package.
+	o Added a simple train list dialogue, accessible via the display menu.
+	o Made the engine images have transparent backgrounds and flipped them 
+	horizontally.
+19-Aug-2003 00:59:00 Luke
+	o Applied Robert Tuck's patches that separated the
+	client and server and allow you to start up two clients
+	in the same JVM.
+	o Fixed painting bug that occured when you started two
+	clients.
+	o Major refactor to get the checkdep ant target working again.
+11-Aug-2003 21:06:23 Luke
+	o You are now charged for track maintenance once per year.
+	o Cargo converions occur when you deliver cargo to a station
+	if an industry that converts the relevant cargo is within the
+	station radius.
+07-Aug-2003 23:26:02 Luke
+	o Applied Robert Tuck's patches to:
+	(i) 	Stop the Terrain Info panel from setting its preferred size to
+	a fixed value.
+	(ii) 	Fix the issue with starting a new map and being unable to lay
+	track.
+	(iii) 	Update remaining classes to use MoveExecuter.
+	(iv) 	Add the station info panel to the tab plane.
+	(v)		Add the train info/orders panel to the tab plane.
+06-Aug-2003 20:54:47 Luke
+	o Applied Robert Tuck's patch to stop the splitpane divider
+	getting focus when you press F8.
+	o Added the field 'constrained' to AddTransactionMove.  When 
+	this is set to true, the move will fail if you don't have enough
+	cash.
+	o Made the building and upgrading track cash constrained. 
+04-Aug-2003 22:35:08 Luke
+	o Added 5 patches contributed by Robert Tuck
+	(i)		Changes to build.xml
+	(ii)	Added 'View mode' to build menu.
+	(iii)	Update to train schedule so that stations
+			can be added and removed.
+	(iv)	Changes to MoveChain and Addition of
+			MoveExecutor.
+	(v)		Adding TabbedPane to the RHS with a tab
+			to show terrain info.
+	o Made build xml copy the game controls html file.
+02-Aug-2003 22:16:33 Luke
+	o Increased the number of resource tiles that are placed
+	around cities.
+	o Fixed bug where cargo was added to trains before wagons
+	were changed.
+01-Aug-2003 20:57:10 Luke
+	o Fixed failure in DropOffAndPickupCargoMoveGeneratorTest.	
+30-Jul-2003 21:51:56 Luke
+	o The player gets paid for delivering cargo, simply
+	$1,000 per unit of cargo for now.
+	See jfreerails.server.ProcessCargoAtStationMoveGenerator
+	o Fixed bug where 40 times too much cargo was being
+	produced by changing figues in cargo_and_terrain.xml	
+27-Jul-2003 17:27:19 Luke
+	o Got DropOffAndPickupCargoMoveGeneratorTest running 
+	without failures.
+21-Jul-2003 23:48:47 Luke
+	o The player now gets charged for:
+		-building stations
+		-building trains
+		-upgrading track
+	o The text for the 'Game controls' dialogue
+	box is now read in from a file rather than
+	hard coded into the java.
+08-Jul-2003 19:55:14 Luke
+	o Added initial balance of 1,000,000.
+	o Added prices to the track types defined in track_tiles.xml
+	o Updated the track XML parser to read in the track prices.
+	o Updated the build track moves that you get charged when you build
+	track and get a small credit when you remove track.	  
+07-Jul-2003 22:41:23 Luke
+	o Wrote 'Move' class to add financial transactions.
+	o Changed the class that adds cargo to stations so that
+	it adds 40 units per year if the station supplies one 
+	carload per year. 
+30-Jun-2003 17:29:00 Scott
+ 	o Cargo is now transferred correctly
+28-Jun-2003 21:46:40 Luke
+	o Moved 'show game controls' menu item to the Help menu.
+	o Removed 'add cargo to stations' menu item from the game
+	menu.  Now cargo is added to stations at the start of each 
+	year.
+	o Set the intial game speed to 'moderate'.
+	o Added junit test for DropOffAndPickupCargoMoveGenerator
+28-Jun-2003 13:18:04 Luke
+	o Moved classes to remove circular dependencies between
+	packages and updated the 'checkdep' ant target. 
+27-Jun-2003 23:46:15 Luke
+	o Added 'station of origin' field to CargoBatch and updated
+	the classes that use CargoBatch as appropriate.  It lets us
+	check whether a train has brought cargo back to the station
+	that it came from.
+27-Jun-2003 23:25:54 Luke
+	o Added 'no change' option to train orders - it indicates 
+	that a train should keep whatever wagons it has when it stops 
+	at a station.
+	o Made 'no change' the default order for new trains. 
+15-Jun_2003 23:17:00 Luke
+	o Improved the train oders dialogue to show
+	the current train consist and what cargo the
+	train is carrying.
+15-Jun_2003 23:17:00 Luke
+	o Fixed a load of problems with station building.
+	-stations can now only be built on the track
+	-building a station on a station now upgrades the
+	station rather than adding a new one.
+	-building stations is now fully undoable in the same
+	way as building track.		
+15-Jun_2003 20:55:00 Luke
+	o The map gets centered on the curors when you press 'C';
+	o Pressing 'I' over a station brings up the station info dialogue
+	box.
+	o Station radii are defined in track xml.
+	o The radius of the station type selected is
+	shown on the map when the station types popup is
+	visible.
+14-Jun_2003 20:40:00 Luke
+	o Fixed bug where train went past station before 
+	turning around.
+12-Jun_2003 20:40:00 Luke
+	o Improved javadoc comments.
+11-Jun-2003 17:39:00 Luke
+	o Add change game speed submenu to game menu.
+11-Jun-2003 17:26:00 Scott
+	o Implemented the Train/Station cargo dropoff and pickup feature, 
+		trains currently only pickup cargo. Its playable!
+05-Jun-2003 21:57:45 Luke
+	o Added loadAndUnloadCargo(..) method to 
+	jfreerails.controller.pathfinder.TrainPathFinder
+04-Jun-2003 23:04:47 Luke
+	o Updated jfreerails.world package overview.
+01-Jun-2003 21:01:14 Luke
+	o The game times passes as real time passes.
+01-Jun-2003 18:45:42 Luke
+	o Rewrote  ClientJFrame using Netbean's GUI editor.
+	o Added JLabels to show the date and available cash to ClientJFrame. 
+31-May-2003 23:58:04 Luke
+	o Pressing backspace now undoes building/removing track.
+31-May-2003 21:28:30 Luke
+	o Make build track moves undoable.
+31-May-2003 16:26:35 Luke
+	o Cargo gets added to stations based on what they supply,
+	currently this is triggered by the 'Add cargo to stations' item
+	on the game menu.
+19-May-2003 04:02:00 Scott
+	o Fixed the problem and deviation from the design ;-) of the station
+	cargo calculations, there's now a temporary menu item on the display menu.
+	Use this to manually update the cargo supply rates.
+18-May-2003 20:16:40 Luke
+	o Uses the new engine and wagon images on the
+	select wagon, select engine, and train info dialogue boxes. 
+18-May-2003 00:52:00 Scott
+	o The cargo supplied to a station can now be viewed from the menu,
+	although some more work is needed.
+16-May-2003 22:51:07 Luke
+	o Now loads tile sized track images instead of grabbing
+	them from the big image.
+12-May-2003 00:16:25 Luke
+	o Now prints out the time it takes to startup.
+11-May-2003 20:24:44 Luke
+	o Track is shown on the overview map again.
+	o Rules about on what terrain track can be built have been added,
+	this is driven by terrain category.	
+10-May-2003 00:02:13 Luke
+	o Rejig track and terrain graphics filenames following discussion
+	on mailing list.
+	o Generated side-on and overhead train graphics.
+05-May-2003 23:02:28 Luke
+	o Added station info dialogue.
+	o Fixed some bugs related to loading games and
+	starting new games.
+05-May-2003 18:00:53 Luke
+	o Changed map view classes to use a VolatileImage for 
+	a backbuffer.
+05-May-2003 00:47:52 Luke
+	o Added terrain info dialogue.
+03-May-2003 13:39:59 Luke
+	o Fixed river drawing bug.
+02-May-2003 00:19:53 Luke
+	o The terrain graphics now get loaded correctly although
+	there is a bug in the code that picks the right image
+	for rivers and other types that are drawn in the same way.
+01-May-2003 00:39:49 Luke
+	o Split up track and terrain images.
+28-Apr-2003 22:18:03 Luke
+	o Integrate new terrain and cargo xml into game.
+	Temporarily lost terrain graphics.
+19-Apr-2003 18:07:22 Luke
+	o More work on schedule GUI, you can set 
+	change the station that a train is going to.
+19-Apr-2003 02:46:15 Luke
+	o Work on train schedule GUI.
+16-Apr-2003 00:48:02 Luke
+	o Added NonNullElements WorldIterator which iterates over non-null elements
+	o Stations now get removed when you remove the track beneath them
+	o Station name renderer and train building and pathfinding classes
+	updated to handle null values for stations gracefully.  
+10-Apr-2003 16:50:00 Scott
+	o Added City Names 
+	o Added Random City Tile positioning.
+	o Cities are now no longer related to the image map. Positions are determined
+	by the data in the south_america_cities.xml file.
+04-Apr-2003 21:20:46 Luke
+	o Simple train schedules, set the 4 points on the 
+	track that trains will travel between by pressing F1 - F4
+	over the track.
+04-Apr-2003 00:22:05 Luke
+	o Added package comments for javadoc.
+22-Mar-2003 19:26:26 Luke
+	o Got the game running again!
+19-Mar-2003 01:09:47 Luke
+	o Refactored to use the new world interface,
+	does not run yet.
+10-Mar-2003 17:52:45 Luke
+	o Fixed bug [ 684596 ] ant build failed
+10-Mar-2003 17:22:16 Luke
+	o Added the MapViewJComponentMouseAdapter in MapViewJComponentConcrete.java 
+	contributed by Karl-Heinz Pennemann - it scrolls the mainmap while 
+	pressing the second mouse button.
+10-Mar-2003 17:20:43 Luke
+	o Added mnemonics contributed by Scott Bennett
+24-Jan-2003 23:51:21 Luke
+	o Release refactorings.
+12-Jan-2003 21:50:04 Luke
+	o Fixed javadoc errors.
+12-Jan-2003 05:11:47 Luke
+	o Major refactoring
+	o added ant target, checkdep, to check that the dependencies
+	betweem packages are in order.  What it does is copy the java files from 
+	a package together with the java files from all the packages that it
+	is allowed to depend on to a temporary directory.  It then compiles the 
+	java files from the package in question in the temporary director.  If the
+	build succeeds, then the package dependencies are ok.		
+11-Jan-2003 02:44:16 Luke
+	o Refactoring and removing dead code.
+10-Jan-2003 23:52:01 Luke
+	o Added package.html to jfreerails.moves
+	o refactoring to simplify the move classes.
+22-Dec-2002 20:47:51 Luke Lindsay
+	o Added 'Newspaper' option to 'game' menu to test drawing on 
+	the glass panel.  The same technique can be used for dialogue boxes.
+04-Dec-2002 21:36:42 Luke Lindsay
+	o The classes from the fastUtils libary that are needed by
+	jfreerails have been added to the jfreerails source tree, so
+	you no longer need fastUtils.jar on the classpath to compile and
+	run jfreerails.
+01-Dec-2002 15:53:02 Luke Lindsay
+	o Prepare for release.
+01-Dec-2002 00:02:25 Luke Lindsay
+	o The trains no longer all move at the same speed.
+30-Nov-2002 23:00:36 Luke Lindsay
+	o Load, save, and new game now work again.
+30-Nov-2002 20:45:18 Luke Lindsay
+	o The path finder now controls train movement.  Press
+	t with the cursor over the track and all the trains will
+	head for that point on the track.
+27-Nov-2002 23:45:40 Luke Lindsay
+	o Wrote SimpleAStarPathFinder and a unit test for it.
+	It seems to work.  The next step is use it together with 
+	NewFlatTrackExplorer to control train movement.
+26-Nov-2002 21:32:20 Luke Lindsay
+	o More or less finished NewFlatTrackExplorer and 
+	incorporated it into the main game code.
+26-Nov-2002 00:17:15 Luke Lindsay
+	o Wrote NewFlatTrackExplorer and NewFlatTrackExplorerTest, 
+	in preparation for writing a pathfinder.
+24-Nov-2002 23:19:10 Luke Lindsay
+	o Rewrote PositionOnTrack and added PositionOnTrackTest.
+	track positions can now be store as a single int.
+24-Nov-2002 00:04:54 Luke Lindsay
+	o Organise imports.	
+09-Nov-2002 01:13:47 Luke Lindsay 
+   o Changes to how the mainmap's buffer gets refreshed.
+   Instead of the refresh being driven by the cursor moving,
+   it is now driven by moves being received.  This means that 
+   it it will refresh even if the moves are generate by another 
+   player.
+08-Nov-2002 23:05:39 Luke Lindsay 
+   o Stations can be built by pressing F8.
+   o The station types no longer appear with the track
+   types on the build menu.
+06-Nov-2002 20:24:10 Luke Lindsay 
+   oFixed 'jar_doc' task in build.xml
+05-Nov-2002 22:53:11 Luke Lindsay 
+   o Moving trains: the class ServerGameEngine
+   has a list of TrainMover objects, which control the 
+   movement of individual trains.  Movement is triggered
+   by calls to ServerGameEngine.update() in the GameLoop's
+   run() method.   
+03-Nov-2002 22:35:52 Luke Lindsay 
+   o Improvements to TrainPosition and ChangeTrainPositionMove classes
+28-Oct-2002 23:52:39 Luke Lindsay 
+   o Fix javadoc warnings
+   o Add 'upload to sourceforge' task to build.xml
+   o Add world_javadoc task to build xml.
+27-Oct-2002 21:54:46 Luke Lindsay 
+   oWrote ChangeTrainPositionMove and ChangeTrainPositionTest
+27-Oct-2002 01:09:22 Luke Lindsay 
+   oWrote TrainPosition and TrainPositionTest to replace Snake class.
+16-Oct-2002 22:58:03 Luke Lindsay 
+   o Removed cyclic dependencies from the rest of
+   the project.
+16-Oct-2002 21:48:24 Luke Lindsay 
+   o Refactored the jfreerails.world.* packages
+   	so that (1) jfreerails.world.* do not depend on any
+   				other jfreerails packages.
+   			(2) there are no cyclic dependencies between
+   				any of the jfreerails.world.* packages.
+   	hopefully this should make it easier to maintain.
+13-Oct-2002 22:30:30 Luke Lindsay 
+   o Added trains!  They don't move yet.  Hit F7 when the cursor 
+   is over the track to build one.
+13-Oct-2002 00:24:18 Luke Lindsay <lindsal49@hotmail.com>:
+	o Add a task to build.xml that runs all junit tests.
+	o Change build.xml to work under Eclipse.
+29-Sep-2002 20:24:18 Luke Lindsay <lindsal49@hotmail.com>:
+    o Reorganised package structure.
+    o Changed files that were incorredtly added to the cvs as binaries to text
+    o Small changes to build.xml so that the ChangeLog, TODO, and build.xml files
+    are included in distributions.
+    o Changed DOMLoader so that it works correctly when reading 
+    files from a jar archive.
+24-Sep-2002 23:49:14 Luke Lindsay <lindsal49@hotmail.com>:
+    o Updated TrainDemo, it now draws wagons rather than lines.
+23-Sep-2002 23:35:30 Luke Lindsay <lindsal49@hotmail.com>:
+    o Wrote a simple demo, TrainDemo, to try out using FreerailsPathIterator
+    and PathWalker to move trains along a track.  To see it in action, run: 
+    experimental.RunTrainDemo
+22-Sep-2002 23:47:07 Luke Lindsay <lindsal49@hotmail.com>:
+    o wrote PathWalkerImpl and PathWalkerImplTest
+19-Sep-2002 00:03:59 Luke Lindsay <lindsal49@hotmail.com>:
+    o wrote SimplePathIteratorImpl and SimplePathIteratorImplTest
+    o removed the method: 
+    boolean canStepForward(int distance) 
+    from the interface PathWalker so that looking ahead is not required.
+16-Sep-2002 21:37:46 Luke Lindsay <lindsal49@hotmail.com>:
+	o build.xml written by JonLS added.  (Sorry, I 
+	forgot to add it to the change log earlier.)
+16-Sep-2002 21:36:50 Luke Lindsay <lindsal49@hotmail.com>:
+	o Updated and commented FreerailsPathIterator and PathWalker interfaces.
+08-Sep-2002 22:11:24 Luke Lindsay <lindsal49@hotmail.com>:
+	o Wrote 'Snake' class that represents a train position.
+26-Aug-2002 19:51:35 Luke Lindsay <lindsal49@hotmail.com>:
+	o Games can now be loaded and saved.	 
+	o New games can be started.
+18-Aug-2002 00:26:35 Luke Lindsay <lindsal49@hotmail.com>:
+	o More work on active rendering fixes for linux.	
+28-Jul-2002 17:18:32 Luke Lindsay <lindsal49@hotmail.com>:
+	o Partially fixed active rendering under linux.	
+04-Jul-2002 22:24:41 Luke Lindsay <lindsal49@hotmail.com>:
+	o Rotate method added to OneTileMoveVector
+21 - Jun - 02 19 : 21 : 08 Luke Lindsay < lindsal49 @ hotmail.com > :
+	o Fullscreen mode
+	o GameLoop, jfreerails now uses active, rather than passive, rendering.
+	o Work on separating the model and view.
+	o Tilesets can be validated against rulesets - ViewLists.validate(Type t)  	
+	o FPS counter added.
+04-Mar-2002 21:57:23 Luke Lindsay <lindsal49@hotmail.com>:
+	o Rearrange dependancies in jfreerails.world...
+02-Mar-2002 19:02:48 Luke Lindsay <lindsal49@hotmail.com>:
+	o Reorganisation of package structure.
+Sat Feb 16 22:48:00 2002 Luke Lindsay <lindsal49@hotmail.com>:
+	o Unrecoverable FreerailsExceptions replaced with standard unchecked exceptions.
+Sat Feb 16 19:42:00 2002 Luke Lindsay <lindsal49@hotmail.com>:
+	o Changed CVS directory structure.
+Sat Feb 16 15:00:00 2002 Luke Lindsay <lindsal49@hotmail.com>:
+	o This ChangeLog started!
