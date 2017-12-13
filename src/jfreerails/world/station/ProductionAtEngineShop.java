@@ -8,7 +8,7 @@ import jfreerails.world.common.FreerailsSerializable;
 
 
 /**
- * This class represents the blue print for what a engine shop
+ * This class represents the blue print for what an engine shop
  * is producing.
  *
  * @author Luke
@@ -21,6 +21,10 @@ public class ProductionAtEngineShop implements FreerailsSerializable {
     public ProductionAtEngineShop(int e, int[] wagons) {
         engineType = e;
         wagonTypes = wagons;
+    }
+
+    public int hashCode() {
+        return engineType;
     }
 
     public int getEngineType() {
@@ -61,9 +65,6 @@ public class ProductionAtEngineShop implements FreerailsSerializable {
         return true;
     }
 
-    /**
-     *
-     */
     public String toString() {
         return "engine type: " + this.engineType + ", with " +
         wagonTypes.length + "wagons";

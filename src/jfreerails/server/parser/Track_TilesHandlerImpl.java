@@ -28,7 +28,6 @@ public class Track_TilesHandlerImpl implements Track_TilesHandler,
     protected ArrayList ruleList;
     protected jfreerails.world.track.TrackRuleProperties trackRuleProperties;
     protected jfreerails.world.track.LegalTrackConfigurations legalTrackConfigurations;
-    public static final boolean DEBUG = false;
     protected ArrayList legalTemplates;
     protected java.util.HashSet terrainTypes;
     protected LegalTrackPlacement legalTrackPlacement;
@@ -57,22 +56,13 @@ public class Track_TilesHandlerImpl implements Track_TilesHandler,
 
     public void start_ListOfLegalRoutesAcrossNode(final Attributes meta)
         throws SAXException {
-        if (DEBUG) {
-            System.err.println("start_ListOfLegalRoutesAcrossNode: " + meta);
-        }
     }
 
     public void end_ListOfLegalRoutesAcrossNode() throws SAXException {
-        if (DEBUG) {
-            System.err.println("end_ListOfLegalRoutesAcrossNode()");
-        }
     }
 
     public void handle_LegalRouteAcrossNode(final Attributes meta)
         throws SAXException {
-        if (DEBUG) {
-            System.err.println("handle_LegalRouteAcrossNode: " + meta);
-        }
     }
 
     public void start_CannotBuildOnTheseTerrainTypes(final Attributes meta)
@@ -90,7 +80,7 @@ public class Track_TilesHandlerImpl implements Track_TilesHandler,
         throws SAXException {
         int rGBvalue;
         String rgbString = meta.getValue("RGBvalue");
-        rGBvalue = (int)Integer.parseInt(rgbString, 16);
+        rGBvalue = Integer.parseInt(rgbString, 16);
 
         /*
          *  We need to change the format of the rgb value to the same one as used
@@ -105,14 +95,13 @@ public class Track_TilesHandlerImpl implements Track_TilesHandler,
                                            .booleanValue();
         String typeName = meta.getValue("type");
         int ruleNumber = ruleList.size();
-        maxConsequ = (int)Integer.parseInt(meta.getValue(
-                    "maxConsecuativePieces"));
+        maxConsequ = Integer.parseInt(meta.getValue("maxConsecuativePieces"));
 
         String stationRadiusString = meta.getValue("stationRadius");
         int stationRadius;
 
         if (null != stationRadiusString) {
-            stationRadius = (int)Integer.parseInt(stationRadiusString);
+            stationRadius = Integer.parseInt(stationRadiusString);
         } else {
             stationRadius = 0;
         }
@@ -129,7 +118,7 @@ public class Track_TilesHandlerImpl implements Track_TilesHandler,
     }
 
     public void end_TrackType() throws SAXException {
-        ruleList.add((Object)(new jfreerails.world.track.TrackRuleImpl(
+        ruleList.add((new jfreerails.world.track.TrackRuleImpl(
                 trackRuleProperties, legalTrackConfigurations,
                 legalTrackPlacement)));
 
@@ -144,15 +133,9 @@ public class Track_TilesHandlerImpl implements Track_TilesHandler,
     }
 
     public void start_Tiles(final Attributes meta) throws SAXException {
-        if (DEBUG) {
-            System.err.println("start_Tiles: " + meta);
-        }
     }
 
     public void end_Tiles() throws SAXException {
-        if (DEBUG) {
-            System.err.println("end_Tiles()");
-        }
     }
 
     public void start_TrackPieceTemplate(final Attributes meta)

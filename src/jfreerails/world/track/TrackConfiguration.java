@@ -9,11 +9,14 @@ import jfreerails.world.common.OneTileMoveVector;
 
 /**
  * An instance of this class represents one of the possible track configurations
- * in a map square - the cobinations of directions in which track can be
+ * in a map square - the combinations of directions in which track can be
  * laid. Instances of this class cannot be created and must be obtained via the
  * static methods herein.
+ *
+ * @author Luke
  */
 final public class TrackConfiguration implements FlatTrackTemplate {
+    public static final int LENGTH_OF_STRAIGHT_TRACK_PIECE = 200;
     private static final ArrayList flatTrackConfigurations = new ArrayList(512);
 
     static {
@@ -23,9 +26,22 @@ final public class TrackConfiguration implements FlatTrackTemplate {
     }
 
     private final int configuration;
+    private final int length;
 
-    private TrackConfiguration(int i) {
-        configuration = i;
+    private TrackConfiguration(int template) {
+        configuration = template;
+
+        //Calculate length.
+        int tempLength = 0;
+        OneTileMoveVector[] vectors = OneTileMoveVector.getList();
+
+        for (int i = 0; i < vectors.length; i++) {
+            if (this.contains(vectors[i].getTemplate())) {
+                tempLength += vectors[i].getLength();
+            }
+        }
+
+        length = tempLength;
     }
 
     private Object readResolve() throws ObjectStreamException {
@@ -130,6 +146,13 @@ final public class TrackConfiguration implements FlatTrackTemplate {
         }
 
         return newTemplate;
+    }
+
+    /** Returns the length of track used in this configuration.  Used to
+     * calculate the cost of building track.
+     */
+    public int getLength() {
+        return length;
     }
 
     public static int stringTemplate2Int(String templateString) {

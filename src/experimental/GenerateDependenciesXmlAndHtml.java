@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.logging.Logger;
 
 /**
  *  This class generates an ant script that checks the dependencies between packages 
@@ -18,12 +19,14 @@ import java.util.Date;
  *
  */
 public class GenerateDependenciesXmlAndHtml {
+	private static final Logger logger = Logger
+			.getLogger(GenerateDependenciesXmlAndHtml.class.getName()); 
 
 	private PrintWriter xmlWriter;
 	private PrintWriter htmlWriter;
 	private ArrayList packages = new ArrayList();
-	boolean started = false;
-	boolean startedBlock = false;
+	private boolean started = false;
+	private boolean startedBlock = false;
 	private String sig;
 
 	public static void main(String[] args) {
@@ -34,7 +37,7 @@ public class GenerateDependenciesXmlAndHtml {
 		}
 	}
 	
-	public GenerateDependenciesXmlAndHtml(String xmlFilename, String htmlFilename) throws FileNotFoundException{
+	private GenerateDependenciesXmlAndHtml(String xmlFilename, String htmlFilename) throws FileNotFoundException{
 		
 		Date d = new Date();
 		sig = this.getClass().getName()+" on "+d;
@@ -97,12 +100,13 @@ public class GenerateDependenciesXmlAndHtml {
 		finish();
 		xmlWriter.flush();
 		htmlWriter.flush();
-		System.out.println(sig);
-		System.out.println("Wrote "+xmlFile);
-		System.out.println("Wrote "+htmlFile);
+		
+		logger.info(sig);
+		logger.info("Wrote "+xmlFile);
+		logger.info("Wrote "+htmlFile);
 	}
 	
-	public void start(){
+	private void start(){
 		assert !started;
 		
 		startXml();
@@ -116,7 +120,7 @@ public class GenerateDependenciesXmlAndHtml {
 		started = true;
 	}
 	
-	public void startBlock(String blockName){
+	private void startBlock(String blockName){
 		assert started;
 		assert !startedBlock;
 		startedBlock = true;
@@ -127,7 +131,7 @@ public class GenerateDependenciesXmlAndHtml {
 		xmlWriter.write("\t\t<mkdir dir=\"dependencies\" />\n");		
 	}
 	
-	public void endBlock(){
+	private void endBlock(){
 		assert started;
 		assert startedBlock;
 		
@@ -169,11 +173,11 @@ public class GenerateDependenciesXmlAndHtml {
 		
 	}
 
-	public void add(String packageName){
+	private void add(String packageName){
 		add(new String[]{packageName});
 	}		
 	
-	public void add(String[] packageNames){
+	private void add(String[] packageNames){
 		assert started;
 		assert startedBlock;
 		
@@ -247,7 +251,7 @@ public class GenerateDependenciesXmlAndHtml {
 		return s.matches("(([a-zA-Z]*)/)*\\*") || s.matches("(([a-zA-Z]*)/)*\\*\\*/\\*");		
 	}
 
-	public void finish(){
+	private void finish(){
 		assert started;
 		assert !startedBlock;
 		//finish the file.

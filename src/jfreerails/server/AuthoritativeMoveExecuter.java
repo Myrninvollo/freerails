@@ -1,8 +1,8 @@
 package jfreerails.server;
 
 import java.util.LinkedList;
+import java.util.logging.Logger;
 import jfreerails.controller.MoveReceiver;
-import jfreerails.controller.UncommittedMoveReceiver;
 import jfreerails.move.Move;
 import jfreerails.move.MoveStatus;
 import jfreerails.move.RejectedMove;
@@ -14,11 +14,13 @@ import jfreerails.world.top.World;
 /**
  * A move executer which has the authority to reject moves
  * outright.
+ * @author rob
  */
-class AuthoritativeMoveExecuter implements UncommittedMoveReceiver {
+class AuthoritativeMoveExecuter implements MoveReceiver {
+    private static final Logger logger = Logger.getLogger(AuthoritativeMoveExecuter.class.getName());
     private static final int MAX_UNDOS = 10;
-    protected final World world;
-    protected final MoveReceiver moveReceiver;
+    private final World world;
+    private final MoveReceiver moveReceiver;
     private final LinkedList moveStack = new LinkedList();
 
     public AuthoritativeMoveExecuter(World w, MoveReceiver mr) {
@@ -65,9 +67,6 @@ class AuthoritativeMoveExecuter implements UncommittedMoveReceiver {
         forwardMove(move, ms);
     }
 
-    /**
-     * @see MoveReceiver#processMove(Move)
-     */
     public void processMove(Move move) {
         /* TODO
         processMove(move, move.getPrincipal());
@@ -90,7 +89,7 @@ class AuthoritativeMoveExecuter implements UncommittedMoveReceiver {
             ms = m.undoMove(world, Player.AUTHORITATIVE);
 
             if (ms != MoveStatus.MOVE_OK) {
-                System.err.println("Couldn't undo move!");
+                logger.warning("Couldn't undo move!");
 
                 /* push it back on the stack to prevent further
                  * out-of-order undos */
@@ -99,7 +98,7 @@ class AuthoritativeMoveExecuter implements UncommittedMoveReceiver {
 
             forwardMove(m, ms);
         } else {
-            System.err.println("No moves on stack.");
+            logger.warning("No moves on stack.");
         }
     }
 }

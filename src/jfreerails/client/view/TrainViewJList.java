@@ -10,6 +10,8 @@ import java.awt.Component;
 import java.awt.event.ActionListener;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
+import jfreerails.client.common.ModelRoot;
+import jfreerails.client.renderer.ViewLists;
 import jfreerails.world.player.FreerailsPrincipal;
 import jfreerails.world.top.ReadOnlyWorld;
 
@@ -21,13 +23,12 @@ import jfreerails.world.top.ReadOnlyWorld;
 public class TrainViewJList extends JList implements View, ListCellRenderer {
     private ReadOnlyWorld w;
     private TrainConsistListModel trainConsistListModel;
-    private WagonView wagonView;
+    private final WagonView wagonView;
     private FreerailsPrincipal principal;
 
-    /** Creates a new instance of TrainView */
-    public TrainViewJList(ModelRoot mr, int trainNumber) {
+    public TrainViewJList(ModelRoot mr, ViewLists vl, int trainNumber) {
         wagonView = new WagonView();
-        setup(mr, null);
+        setup(mr, vl, null);
         this.setLayoutOrientation(javax.swing.JList.HORIZONTAL_WRAP);
         this.setVisibleRowCount(1);
 
@@ -38,16 +39,17 @@ public class TrainViewJList extends JList implements View, ListCellRenderer {
         this.setBackground(Color.GRAY);
     }
 
-    public void display(int trainNumber) {
+    private void display(int trainNumber) {
         trainConsistListModel = new TrainConsistListModel(w, trainNumber,
                 principal);
         this.setModel(trainConsistListModel);
     }
 
-    public void setup(ModelRoot mr, ActionListener submitButtonCallBack) {
+    public void setup(ModelRoot mr, ViewLists vl,
+        ActionListener submitButtonCallBack) {
         this.w = mr.getWorld();
-        wagonView.setup(mr, null);
-        principal = mr.getPlayerPrincipal();
+        wagonView.setup(mr, vl, null);
+        principal = mr.getPrincipal();
     }
 
     public Component getListCellRendererComponent(JList list, Object value,

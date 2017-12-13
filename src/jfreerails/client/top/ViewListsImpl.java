@@ -4,6 +4,7 @@ import java.awt.Image;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.logging.Logger;
 import jfreerails.client.common.ImageManager;
 import jfreerails.client.common.ImageManagerImpl;
 import jfreerails.client.renderer.ChequeredTileRenderer;
@@ -23,7 +24,12 @@ import jfreerails.world.top.ReadOnlyWorld;
 import jfreerails.world.top.SKEY;
 
 
+/** Implementation of ViewLists whose constructor loads graphics and provides feed back
+ * using a FreerailsProgressMonitor.
+ * @author Luke
+ */
 public class ViewListsImpl implements ViewLists {
+    private static final Logger logger = Logger.getLogger(ViewListsImpl.class.getName());
     private final TileRendererList tiles;
     private final TrackPieceRendererList trackPieceViewList;
     private final TrainImages trainImages;
@@ -43,12 +49,12 @@ public class ViewListsImpl implements ViewLists {
         trainImages = new TrainImages(w, imageManager, pm);
     }
 
-    public TrackPieceRendererList loadTrackViews(ReadOnlyWorld w,
+    private TrackPieceRendererList loadTrackViews(ReadOnlyWorld w,
         FreerailsProgressMonitor pm) throws IOException {
         return new TrackPieceRendererList(w, imageManager, pm);
     }
 
-    public TileRendererList loadNewTileViewList(ReadOnlyWorld w,
+    private TileRendererList loadNewTileViewList(ReadOnlyWorld w,
         FreerailsProgressMonitor pm) throws IOException {
         ArrayList tileRenderers = new ArrayList();
 
@@ -141,7 +147,7 @@ public class ViewListsImpl implements ViewLists {
                 continue;
             } catch (IOException io) {
                 // If the image is missing, we generate it.
-                System.err.println("No tile renderer for " +
+                logger.warning("No tile renderer for " +
                     t.getTerrainTypeName());
 
                 String filename = StandardTileRenderer.generateFilename(t.getTerrainTypeName());

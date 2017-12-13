@@ -2,13 +2,9 @@
  * Created on 10-Aug-2003
  *
  */
-package jfreerails.controller;
+package jfreerails.move;
 
 import java.util.ArrayList;
-import jfreerails.move.AddTransactionMove;
-import jfreerails.move.ChangeTrackPieceMove;
-import jfreerails.move.CompositeMove;
-import jfreerails.move.Move;
 import jfreerails.world.accounts.AddItemTransaction;
 import jfreerails.world.accounts.Transaction;
 import jfreerails.world.common.Money;
@@ -16,6 +12,8 @@ import jfreerails.world.player.FreerailsPrincipal;
 import jfreerails.world.top.ReadOnlyWorld;
 import jfreerails.world.top.SKEY;
 import jfreerails.world.track.NullTrackType;
+import jfreerails.world.track.TrackConfiguration;
+import jfreerails.world.track.TrackPiece;
 import jfreerails.world.track.TrackRule;
 
 
@@ -39,8 +37,8 @@ public class TrackMoveTransactionsGenerator {
      * it may cost more to added a unit of track than is refunded when
      * you removed it.
      */
-    private ArrayList transactions = new ArrayList();
-    private ReadOnlyWorld w;
+    private final ArrayList transactions = new ArrayList();
+    private final ReadOnlyWorld w;
 
     /**
      * @param p the Principal on behalf of which this object generates
@@ -89,19 +87,45 @@ public class TrackMoveTransactionsGenerator {
     }
 
     private void processMove(ChangeTrackPieceMove move) {
-        final int after = move.getNewTrackPiece().getTrackRule().getRuleNumber();
-        final int before = move.getOldTrackPiece().getTrackRule().getRuleNumber();
+        TrackPiece newTrackPiece = move.getNewTrackPiece();
+        TrackRule newTrackRule = newTrackPiece.getTrackRule();
+        final int ruleAfter = newTrackRule.getRuleNumber();
+        TrackPiece oldTrackPiece = move.getOldTrackPiece();
+        TrackRule oldTrackRule = oldTrackPiece.getTrackRule();
+        final int ruleBefore = oldTrackRule.getRuleNumber();
 
-        if (after == before) {
+        final int oldLength = oldTrackPiece.getTrackConfiguration().getLength();
+        final int newLength = newTrackPiece.getTrackConfiguration().getLength();
+
+        //Stations get treated separately
+        if (oldTrackRule.isStation() || newTrackRule.isStation()) {
+            if (oldTrackRule.isStation()) {
+                trackRemoved[ruleBefore] += TrackConfiguration.LENGTH_OF_STRAIGHT_TRACK_PIECE;
+            }
+
+            if (newTrackRule.isStation()) {
+                trackAdded[ruleAfter] += TrackConfiguration.LENGTH_OF_STRAIGHT_TRACK_PIECE;
+            }
+
             return;
         }
 
-        if (after != NullTrackType.NULL_TRACK_TYPE_RULE_NUMBER) {
-            trackAdded[after]++;
+        if (ruleAfter == ruleBefore) {
+            if (oldLength < newLength) {
+                trackAdded[ruleAfter] += (newLength - oldLength);
+            } else if (oldLength > newLength) {
+                trackRemoved[ruleAfter] += (oldLength - newLength);
+            }
+
+            return;
         }
 
-        if (before != NullTrackType.NULL_TRACK_TYPE_RULE_NUMBER) {
-            trackRemoved[before]++;
+        if (ruleAfter != NullTrackType.NULL_TRACK_TYPE_RULE_NUMBER) {
+            trackAdded[ruleAfter] += newLength;
+        }
+
+        if (ruleBefore != NullTrackType.NULL_TRACK_TYPE_RULE_NUMBER) {
+            trackRemoved[ruleBefore] += oldLength;
         }
     }
 
@@ -115,7 +139,7 @@ public class TrackMoveTransactionsGenerator {
             if (0 != numberAdded) {
                 TrackRule rule = (TrackRule)w.get(SKEY.TRACK_RULES, i);
                 Money m = rule.getPrice();
-                Money total = new Money(-m.getAmount() * numberAdded);
+                Money total = new Money(-m.getAmount() * numberAdded / TrackConfiguration.LENGTH_OF_STRAIGHT_TRACK_PIECE);
                 Transaction t = new AddItemTransaction(AddItemTransaction.TRACK,
                         i, numberAdded, total);
                 transactions.add(t);
@@ -127,7 +151,7 @@ public class TrackMoveTransactionsGenerator {
                 TrackRule rule = (TrackRule)w.get(SKEY.TRACK_RULES, i);
                 Money m = rule.getPrice();
 
-                Money total = new Money((m.getAmount() * numberRemoved) / 2);
+                Money total = new Money((m.getAmount() * numberRemoved) / TrackConfiguration.LENGTH_OF_STRAIGHT_TRACK_PIECE);
 
                 //You only get half the money back.
                 total = new Money(total.getAmount() / 2);

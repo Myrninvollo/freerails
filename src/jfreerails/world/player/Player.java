@@ -16,6 +16,7 @@ import java.security.Signature;
 import java.security.SignatureException;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.logging.Logger;
 import jfreerails.world.common.FreerailsSerializable;
 
 
@@ -35,6 +36,7 @@ import jfreerails.world.common.FreerailsSerializable;
  * @author rtuck99@users.sourceforge.net
  */
 public class Player implements FreerailsSerializable {
+    private static final Logger logger = Logger.getLogger(Player.class.getName());
     private static final long serialVersionUID = 1;
 
     private static class WorldPrincipal extends FreerailsPrincipal {
@@ -69,30 +71,30 @@ public class Player implements FreerailsSerializable {
     private FreerailsPrincipal principal;
 
     /**
-     * salt used to ensure signatures are always unique
+     * Salt used to ensure signatures are always unique.
      */
     private int salt;
 
     /**
-     * This Principal can be granted all permissions
+     * This Principal can be granted all permissions.
      */
     public static final FreerailsPrincipal AUTHORITATIVE = new WorldPrincipal(
             "Authoritative Server");
 
     /**
-     * This Principal has no permissions
+     * This Principal has no permissions.
      */
     public static final FreerailsPrincipal NOBODY = new WorldPrincipal("Nobody");
 
     /**
-     * name of the player
+     * Name of the player.
      */
-    public String name;
+    private final String name;
 
     /**
      * Private data (eg private keys) that should not be serialized in normal
      * use. Instead, when the client needs to save their session they should
-     * call saveSession()
+     * call saveSession().
      */
     private transient PrivateData privateData;
 
@@ -119,14 +121,14 @@ public class Player implements FreerailsSerializable {
          * record of "salt" used for previous connections. This is held by the
          * server.
          */
-        HashSet salts = new HashSet();
+        final HashSet salts = new HashSet();
 
         PrivateData(PrivateKey key) {
             privateKey = key;
         }
 
         /**
-         * Default constructor called on server
+         * Default constructor called on server.
          */
         PrivateData() {
             privateKey = null;
@@ -134,7 +136,7 @@ public class Player implements FreerailsSerializable {
     }
 
     /**
-     * Used by the client to generate a player with a particular name
+     * Used by the client to generate a player with a particular name.
      */
     public Player(String name) {
         this.name = name;
@@ -150,8 +152,6 @@ public class Player implements FreerailsSerializable {
             privateData = new PrivateData(kp.getPrivate());
             publicKey = kp.getPublic();
         } catch (NoSuchAlgorithmException e) {
-            System.err.println("DSA encryption algorithm no supported by" +
-                " JVM!");
             throw new RuntimeException(e);
         }
     }
@@ -178,8 +178,17 @@ public class Player implements FreerailsSerializable {
             return false;
         }
 
-        return (name.equals(((Player)o).name) &&
-        Arrays.equals(publicKey.getEncoded(), ((Player)o).publicKey.getEncoded()));
+        boolean keysEqual;
+
+        if (null != publicKey) {
+            byte[] encoded = publicKey.getEncoded();
+            byte[] encoded2 = ((Player)o).publicKey.getEncoded();
+            keysEqual = Arrays.equals(encoded, encoded2);
+        } else {
+            keysEqual = null == ((Player)o).publicKey;
+        }
+
+        return (name.equals(((Player)o).name) && keysEqual);
     }
 
     public int hashCode() {
@@ -247,7 +256,7 @@ public class Player implements FreerailsSerializable {
             publicKey.getEncoded());
 
         if (privateData.salts.contains(new Integer(player.salt))) {
-            System.err.println("Player " + player + " attempted to connect " +
+            logger.warning("Player " + player + " attempted to connect " +
                 "with old salt");
 
             return false;
@@ -270,7 +279,7 @@ public class Player implements FreerailsSerializable {
              */
             sig.initVerify(this.publicKey);
         } catch (InvalidKeyException e) {
-            System.err.println("Caught InvalidKeyException in Player.sign()");
+            logger.warning("Caught InvalidKeyException in Player.sign()");
 
             return false;
         }
@@ -290,13 +299,13 @@ public class Player implements FreerailsSerializable {
 
         try {
             if (sig.verify(signature) == false) {
-                System.err.println("Signature verification failed in " +
+                logger.warning("Signature verification failed in " +
                     "Player.verify()");
 
                 return false;
             }
         } catch (SignatureException e) {
-            System.err.println("Caught SignatureException in Player.sign()");
+            logger.warning("Caught SignatureException in Player.sign()");
 
             return false;
         }
@@ -308,7 +317,7 @@ public class Player implements FreerailsSerializable {
             return true;
         }
 
-        System.err.println("Player name was different");
+        logger.warning("Player name was different");
 
         return false;
     }

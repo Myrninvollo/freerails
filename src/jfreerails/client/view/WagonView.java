@@ -7,10 +7,12 @@ package jfreerails.client.view;
 
 import java.awt.Dimension;
 import java.awt.Image;
+import java.awt.event.ActionListener;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
+import jfreerails.client.common.ModelRoot;
 import jfreerails.client.renderer.ViewLists;
 import jfreerails.world.top.SKEY;
 import jfreerails.world.top.TypeID;
@@ -25,16 +27,15 @@ import jfreerails.world.top.TypeID;
 public class WagonView extends JLabel implements View, ListCellRenderer {
     private ViewLists vl;
 
-    /** The height in pixels to display the images at */
-    private int height = 40;
+    /** The height in pixels to display the images at. */
+    private final int height = 40;
 
-    /** Creates a new instance of WagonView */
     public WagonView() {
     }
 
-    public void setup(ModelRoot mr,
-        java.awt.event.ActionListener submitButtonCallBack) {
-        this.vl = mr.getViewLists();
+    public void setup(ModelRoot mr, ViewLists vl,
+        ActionListener submitButtonCallBack) {
+        this.vl = vl;
     }
 
     public java.awt.Component getListCellRendererComponent(JList list,

@@ -13,7 +13,7 @@ import java.awt.image.VolatileImage;
 
 
 /**
- *  This abstract class stores a buffer of the backgound of the current visible
+ *  This abstract class stores a buffer of the background of the current visible
  *  rectangle of the map. Code that is independent of how tiles are represented,
  *  e.g. whether they are square or isometric, should go here.
  *
@@ -29,14 +29,14 @@ public abstract class BufferedTiledBackgroundRenderer
      *  graphics configuration. Such images can be drawn to the screen quickly
      *  since no conversion is needed.
      */
-    protected GraphicsConfiguration defaultConfiguration = GraphicsEnvironment.getLocalGraphicsEnvironment()
-                                                                              .getDefaultScreenDevice()
-                                                                              .getDefaultConfiguration();
+    private final GraphicsConfiguration defaultConfig = GraphicsEnvironment.getLocalGraphicsEnvironment()
+                                                                           .getDefaultScreenDevice()
+                                                                           .getDefaultConfiguration();
 
     /**
-     *  Used to draw on the backbuffer
+     *  Used to draw on the backbuffer.
      */
-    protected Graphics bg;
+    Graphics bg;
 
     /**
      * Used to draw on the backbuffer. It is translated so that to its users,
@@ -45,18 +45,18 @@ public abstract class BufferedTiledBackgroundRenderer
      *
      *  translatedBg equals bg.translate(-bufferRect.x , -bufferRect.y);
      */
-    protected Graphics translatedBg;
+    private Graphics translatedBg;
 
     /**
      *  The bounds and location of the map region that is stored in the
-     *  offscreen Image backgraoundBuffer
+     *  offscreen Image backgraoundBuffer.
      */
-    protected Rectangle bufferRect = new Rectangle();
+    final Rectangle bufferRect = new Rectangle();
 
     /**
-     *  An offscreen image storing the background of a region of the map
+     *  An offscreen image storing the background of a region of the map.
      */
-    protected VolatileImage backgroundBuffer;
+    VolatileImage backgroundBuffer;
 
     /**
      *  Updates the backbuffer as necessay, then draws it on to the Graphics
@@ -69,11 +69,7 @@ public abstract class BufferedTiledBackgroundRenderer
      */
     public void paintRect(Graphics outputGraphics,
         Rectangle newVisibleRectectangle) {
-        int iterations = 0;
-
         do {
-            iterations++;
-
             /*
              *  If this is the first call to the paint method or the component has just been resized,
              *  we need to create a new backgroundBuffer.
@@ -86,13 +82,13 @@ public abstract class BufferedTiledBackgroundRenderer
             }
 
             //	Test if image is lost and restore it.
-            int valCode = backgroundBuffer.validate(defaultConfiguration);
+            int valCode = backgroundBuffer.validate(defaultConfig);
 
-            // No need to check for IMAGE_RESTORED since we are
-            // going to re-render the image anyway.
             if (valCode == VolatileImage.IMAGE_INCOMPATIBLE) {
                 setbackgroundBuffer(newVisibleRectectangle.width,
                     newVisibleRectectangle.height);
+            } else if (valCode == VolatileImage.IMAGE_RESTORED) {
+                this.refreshBackground();
             }
 
             /*
@@ -119,14 +115,22 @@ public abstract class BufferedTiledBackgroundRenderer
         } while (backgroundBuffer.contentsLost());
     }
 
-    protected void refreshBackground() {
+    private void refreshBackground() {
         paintBufferRectangle(0, 0, bufferRect.width, bufferRect.height);
     }
 
-    protected void setbackgroundBuffer(int w, int h) {
-        //backgroundBuffer = defaultConfiguration.createCompatibleImage(w, h);
-        backgroundBuffer = defaultConfiguration.createCompatibleVolatileImage(w,
-                h);
+    public void refreshAll() {
+        refreshBackground();
+    }
+
+    private void setbackgroundBuffer(int w, int h) {
+        //Releases VRAM used by backgroundBuffer. 
+        if (backgroundBuffer != null) {
+            backgroundBuffer.flush();
+        }
+
+        //Create new backgroundBuffer.
+        backgroundBuffer = defaultConfig.createCompatibleVolatileImage(w, h);
         bufferRect.height = backgroundBuffer.getHeight(null);
         bufferRect.width = backgroundBuffer.getWidth(null);
 
@@ -149,13 +153,7 @@ public abstract class BufferedTiledBackgroundRenderer
     protected abstract void paintBufferRectangle(int x, int y, int width,
         int height);
 
-    /**
-     *  Description of the Method
-     *
-     *@param  dx  Description of Parameter
-     *@param  dy  Description of Parameter
-     */
-    protected void scrollbackgroundBuffer(int dx, int dy) {
+    private void scrollbackgroundBuffer(int dx, int dy) {
         int copyWidth = bufferRect.width;
         int copyHeight = bufferRect.height;
         int copySourceX = 0;

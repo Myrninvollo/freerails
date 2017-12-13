@@ -3,7 +3,6 @@ package jfreerails.server;
 import jfreerails.controller.FreerailsServerSerializable;
 import jfreerails.controller.MoveReceiver;
 import jfreerails.move.ChangeTrainPositionMove;
-import jfreerails.move.InitialiseTrainPositionMove;
 import jfreerails.move.Move;
 import jfreerails.world.common.FreerailsPathIterator;
 import jfreerails.world.player.FreerailsPrincipal;
@@ -13,7 +12,6 @@ import jfreerails.world.train.PathWalker;
 import jfreerails.world.train.PathWalkerImpl;
 import jfreerails.world.train.TrainModel;
 import jfreerails.world.train.TrainPathIterator;
-import jfreerails.world.train.TrainPositionOnMap;
 
 
 /**
@@ -21,13 +19,15 @@ import jfreerails.world.train.TrainPositionOnMap;
  *
  * @author Luke Lindsay 27-Oct-2002
  *
+ * TODO make TrainMover stateless.
+ *
  */
 public class TrainMover implements FreerailsServerSerializable {
-    final PathWalker walker;
-    final int trainNumber;
-    final ReadOnlyWorld w;
-    final TrainPathFinder trainPathFinder;
-    final FreerailsPrincipal principal;
+    private final PathWalker walker;
+    private final int trainNumber;
+    private final ReadOnlyWorld w;
+    private final TrainPathFinder trainPathFinder;
+    private final FreerailsPrincipal principal;
 
     public TrainMover(FreerailsPathIterator to, ReadOnlyWorld world,
         int trainNo, FreerailsPrincipal p) {
@@ -49,20 +49,16 @@ public class TrainMover implements FreerailsServerSerializable {
         this.trainPathFinder = pathFinder;
     }
 
-    public Move setInitialTrainPosition(TrainModel train,
-        FreerailsPathIterator from) {
-        int trainLength = train.getLength();
-        PathWalker fromPathWalker = new PathWalkerImpl(from);
-        fromPathWalker.stepForward(trainLength);
-
-        TrainPositionOnMap initialPosition = TrainPositionOnMap.createInSameDirectionAsPath(fromPathWalker);
-
-        return new InitialiseTrainPositionMove(trainNumber, initialPosition,
-            principal);
-    }
-
     public PathWalker getWalker() {
         return walker;
+    }
+
+    public int getTrainNumber() {
+        return trainNumber;
+    }
+
+    public FreerailsPrincipal getPrincipal() {
+        return principal;
     }
 
     public void update(int distanceTravelled, MoveReceiver moveReceiver) {
@@ -77,7 +73,7 @@ public class TrainMover implements FreerailsServerSerializable {
         }
     }
 
-    public double getTrainSpeed() {
+    private double getTrainSpeed() {
         TrainModel train = (TrainModel)w.get(KEY.TRAINS, trainNumber, principal);
         int trainLength = train.getNumberOfWagons();
 

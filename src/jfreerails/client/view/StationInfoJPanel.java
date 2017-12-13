@@ -11,10 +11,10 @@ import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
-import jfreerails.controller.MoveReceiver;
-import jfreerails.move.AddItemToListMove;
-import jfreerails.move.ListMove;
-import jfreerails.move.Move;
+import javax.swing.JPanel;
+
+import jfreerails.client.common.ModelRoot;
+import jfreerails.client.renderer.ViewLists;
 import jfreerails.world.cargo.CargoBundle;
 import jfreerails.world.cargo.CargoType;
 import jfreerails.world.common.FreerailsSerializable;
@@ -25,6 +25,7 @@ import jfreerails.world.top.NonNullElements;
 import jfreerails.world.top.ReadOnlyWorld;
 import jfreerails.world.top.SKEY;
 import jfreerails.world.top.WorldIterator;
+import jfreerails.world.top.WorldListListener;
 import jfreerails.world.track.FreerailsTile;
 import jfreerails.world.train.WagonType;
 
@@ -32,22 +33,18 @@ import jfreerails.world.train.WagonType;
  *
  * @author  Luke
  */
-public class StationInfoJPanel
-extends javax.swing.JPanel
-implements MoveReceiver, View {
-	
-	private ReadOnlyWorld w;
+public class StationInfoJPanel extends JPanel implements View, WorldListListener {
+    
+    private ReadOnlyWorld w;
     private ModelRoot modelRoot;
-    private WorldIterator wi;
-    private boolean ignoreMoves = true;
-    private MapCursor mapCursor = MapCursor.NULL_MAP_CURSOR;
+    private WorldIterator wi;   
     
     /**
-     * The index of the cargoBundle associated with this station
+     * The index of the cargoBundle associated with this station.
      */
     private int cargoBundleIndex;
     
-    /** Creates new form StationInfoJPanel */
+    
     public StationInfoJPanel() {
         initComponents();
     }
@@ -76,10 +73,10 @@ implements MoveReceiver, View {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.insets = new java.awt.Insets(8, 8, 4, 8);
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(8, 8, 4, 8);
         add(jLabel1, gridBagConstraints);
 
         nextStation.setText("next ->");
@@ -94,9 +91,9 @@ implements MoveReceiver, View {
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
         add(nextStation, gridBagConstraints);
 
         previousStation.setText("<- previous");
@@ -111,9 +108,9 @@ implements MoveReceiver, View {
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
         add(previousStation, gridBagConstraints);
 
         close.setText("close");
@@ -124,8 +121,8 @@ implements MoveReceiver, View {
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
         gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
         add(close, gridBagConstraints);
 
     }//GEN-END:initComponents
@@ -139,7 +136,7 @@ implements MoveReceiver, View {
             new Point(
             ((StationModel) wi.getElement()).getStationX(),
             ((StationModel) wi.getElement()).getStationY());
-            getMapCursor().tryMoveCursor(p);
+            this.modelRoot.setProperty(ModelRoot.CURSOR_POSITION, p);
             
             display();
         } else {
@@ -156,7 +153,7 @@ implements MoveReceiver, View {
             new Point(
             ((StationModel) wi.getElement()).getStationX(),
             ((StationModel) wi.getElement()).getStationY());
-            getMapCursor().tryMoveCursor(p);
+            this.modelRoot.setProperty(ModelRoot.CURSOR_POSITION, p);
             display();
         } else {
             throw new IllegalStateException();
@@ -164,8 +161,8 @@ implements MoveReceiver, View {
         
 	} //GEN-LAST:event_nextStationActionPerformed
     
-    public void setup(ModelRoot mr, ActionListener al) {        
-        this.wi = new NonNullElements(KEY.STATIONS, mr.getWorld(), mr.getPlayerPrincipal());
+    public void setup(ModelRoot mr,  ViewLists vl, ActionListener al) {
+        this.wi = new NonNullElements(KEY.STATIONS, mr.getWorld(), mr.getPrincipal());
         addComponentListener(componentListener);
         this.w = mr.getWorld();
         this.modelRoot = mr;
@@ -177,7 +174,7 @@ implements MoveReceiver, View {
         display();
     }
     
-    public void display() {
+    private void display() {
         
         if (wi.getRowNumber() > 0) {
             this.previousStation.setEnabled(true);
@@ -195,14 +192,14 @@ implements MoveReceiver, View {
         String label;
         if (stationNumber != WorldIterator.BEFORE_FIRST) {
             StationModel station =
-            (StationModel) w.get(KEY.STATIONS, stationNumber, modelRoot.getPlayerPrincipal());
+            (StationModel) w.get(KEY.STATIONS, stationNumber, modelRoot.getPrincipal());
             FreerailsTile tile = w.getTile(station.x, station.y);
             String stationTypeName = tile.getTrackRule().getTypeName();
             cargoBundleIndex = station.getCargoBundleNumber();
             CargoBundle cargoWaiting =
             (CargoBundle) w.get(
             KEY.CARGO_BUNDLES,
-            station.getCargoBundleNumber(), modelRoot.getPlayerPrincipal());
+            station.getCargoBundleNumber(), modelRoot.getPrincipal());
             String title =
             "<h2 align=\"center\">"
             + station.getStationName()
@@ -249,13 +246,13 @@ implements MoveReceiver, View {
         this.repaint();
     }
     
-    ComponentAdapter componentListener = new ComponentAdapter() {
+    private final ComponentAdapter componentListener = new ComponentAdapter() {
         public void componentHidden(ComponentEvent e) {
-            ignoreMoves = true;
+           
         }
         
         public void componentShown(ComponentEvent e) {
-            ignoreMoves = false;
+           
             int i = wi.getIndex();
             wi.reset();
             if (i != WorldIterator.BEFORE_FIRST) {
@@ -265,17 +262,30 @@ implements MoveReceiver, View {
         }
     };
     
-    public void processMove(Move move) {
-        if(ignoreMoves){
+    
+    private FreerailsSerializable lastCargoBundle = null;
+    
+    protected void paintComponent(Graphics g) {
+        /* We need to update if the cargo bundle has changed.*/
+        FreerailsPrincipal playerPrincipal = this.modelRoot.getPrincipal();
+        
+        /* Avoid a array out of bounds exception when there are no stations and the stations tab is visible.*/
+        if(w.boundsContain(KEY.CARGO_BUNDLES, cargoBundleIndex, playerPrincipal)){
+            FreerailsSerializable currentCargoBundle = w.get(KEY.CARGO_BUNDLES, this.cargoBundleIndex, playerPrincipal);
+            if(lastCargoBundle != currentCargoBundle){
+                this.display();
+                lastCargoBundle = currentCargoBundle;
+            }
+        }
+        super.paintComponent(g);
+    }
+    
+    private void reactToUpdate(KEY key, int changedIndex, boolean isAddition){
+        if(!isVisible()){
             return;
         }
-        if (!(move instanceof ListMove)) {
-            return;
-        }
-        ListMove lm = (ListMove) move;
+        
         int currentIndex = wi.getIndex();
-        int changedIndex = lm.getIndex();
-        KEY key = lm.getKey();
         if (key == KEY.CARGO_BUNDLES) {
             if (changedIndex == cargoBundleIndex) {
                 /* update our cargo bundle */
@@ -285,24 +295,43 @@ implements MoveReceiver, View {
         } else if (key == KEY.STATIONS) {
             wi.reset();
             if (currentIndex != WorldIterator.BEFORE_FIRST) {
-                wi.gotoIndex(currentIndex);
+            	if(currentIndex < wi.size()){
+            		wi.gotoIndex(currentIndex);  
+            	}else{
+            		currentIndex = WorldIterator.BEFORE_FIRST;
+            	}
             }
-            if (lm instanceof AddItemToListMove
-            && wi.getIndex() == WorldIterator.BEFORE_FIRST) {
+            if (isAddition && wi.getIndex() == WorldIterator.BEFORE_FIRST) {
                 if (wi.next()) {
                     display();
                 }
             }
-            if (changedIndex < currentIndex) {
-                previousStation.setEnabled(lm.getBefore() != null);
-            } else if (changedIndex > currentIndex) {
-                nextStation.setEnabled(lm.getAfter() != null);
-            } else {
-                display();
-            }
+          
+            if(currentIndex == changedIndex || currentIndex == WorldIterator.BEFORE_FIRST){
+            	 display();
+            }                     
         }
         return;
+        
     }
+    
+    public void listUpdated(KEY key, int index, FreerailsPrincipal principal) {
+        reactToUpdate(key, index, false);
+        
+    }
+    
+    public void itemAdded(KEY key, int index, FreerailsPrincipal principal) {
+        reactToUpdate(key, index, true);
+    }
+    
+    public void itemRemoved(KEY key, int index, FreerailsPrincipal principal) {
+        reactToUpdate(key, index, false);
+    }
+    
+    void removeCloseButton(){
+    	this.remove(close);
+    }
+    
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton close;
@@ -312,30 +341,5 @@ implements MoveReceiver, View {
     // End of variables declaration//GEN-END:variables
     
     
-    public MapCursor getMapCursor() {
-        return mapCursor;
-    }
     
-    public void setMapCursor(MapCursor cursor) {
-        if(null == cursor){
-            throw new NullPointerException();
-        }
-        mapCursor = cursor;
-    }
-	    
-    private FreerailsSerializable lastCargoBundle = null;
-	
-	protected void paintComponent(Graphics g) {
-		/* We need to update if the cargo bundle has changed.*/
-		FreerailsPrincipal playerPrincipal = this.modelRoot.getPlayerPrincipal();
-		
-		/* Avoid a array out of bounds exception when there are no stations and the stations tab is visible.*/
-		if(w.boundsContain(KEY.CARGO_BUNDLES, cargoBundleIndex, playerPrincipal)){
-			FreerailsSerializable currentCargoBundle = w.get(KEY.CARGO_BUNDLES, this.cargoBundleIndex, playerPrincipal);
-			if(lastCargoBundle != currentCargoBundle){
-				this.display();
-			}
-		}
-		super.paintComponent(g);
-	}
 }

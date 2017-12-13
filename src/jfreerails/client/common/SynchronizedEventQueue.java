@@ -3,6 +3,7 @@ package jfreerails.client.common;
 import java.awt.AWTEvent;
 import java.awt.EventQueue;
 import java.awt.Toolkit;
+import java.util.logging.Logger;
 
 
 /**
@@ -14,11 +15,12 @@ import java.awt.Toolkit;
  *
  */
 final public class SynchronizedEventQueue extends EventQueue {
+    private static final Logger logger = Logger.getLogger(SynchronizedEventQueue.class.getName());
     public static final Object MUTEX = new Object();
-    private static SynchronizedEventQueue instance = new SynchronizedEventQueue();
+    private static final SynchronizedEventQueue instance = new SynchronizedEventQueue();
     private static boolean alreadyInUse = false;
 
-    /** Enforce singleton property */
+    /** Enforce singleton property. */
     private SynchronizedEventQueue() {
     }
 
@@ -34,7 +36,17 @@ final public class SynchronizedEventQueue extends EventQueue {
 
     protected void dispatchEvent(AWTEvent aEvent) {
         synchronized (MUTEX) {
-            super.dispatchEvent(aEvent);
+            try {
+                super.dispatchEvent(aEvent);
+            } catch (Exception e) {
+                /*
+                * If something goes wrong, lets kill the game straight
+                * away to avoid hard-to-track-down bugs.
+                */
+                logger.severe("Unexpected exception, quitting..");
+                e.printStackTrace();
+                System.exit(1);
+            }
         }
     }
 }

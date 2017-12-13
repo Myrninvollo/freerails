@@ -21,10 +21,7 @@ import jfreerails.world.track.FreerailsTile;
 /**
  * This class has a static method that converts an image file into a map.
  * @author Luke
- *
- */
-/**
- * Updated 23rd Jan 2004 by Scott Bennett <scott@scottbennett.net>
+ * @author Scott Bennett   (Updated 23rd Jan 2004)
  *
  * Implemented Terrain Randomisation to randomly position the terrain types
  * for each tile on the map.
@@ -33,8 +30,8 @@ public class MapFactory {
     /*
      * create a vector to keep track of what terrain types to 'clump'
      */
-    private static Vector countryTypes = new Vector();
-    private static Vector non_countryTypes = new Vector();
+    private static final Vector countryTypes = new Vector();
+    private static final Vector non_countryTypes = new Vector();
     private static WorldImpl world;
 
     public static void setupMap(URL map_url, WorldImpl w,
@@ -103,7 +100,7 @@ public class MapFactory {
                         " at location " + x + ", " + y);
                 }
 
-                tile = new FreerailsTile(terrainRandomiser.getNewType(
+                tile = FreerailsTile.getInstance(terrainRandomiser.getNewType(
                             type.intValue()));
 
                 if (countryTypes.contains(
@@ -118,7 +115,7 @@ public class MapFactory {
 
         for (int i = 0; i < locations.size(); i++) {
             RandomTerrainValue rtv = (RandomTerrainValue)locations.elementAt(i);
-            FreerailsTile tile = new FreerailsTile(rtv.getType());
+            FreerailsTile tile = FreerailsTile.getInstance(rtv.getType());
 
             int x = rtv.getX();
             int y = rtv.getY();

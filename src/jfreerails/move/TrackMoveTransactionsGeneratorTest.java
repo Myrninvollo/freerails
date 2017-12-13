@@ -2,13 +2,9 @@
  * Created on 10-Aug-2003
  *
  */
-package jfreerails.controller;
+package jfreerails.move;
 
 import java.awt.Point;
-import jfreerails.move.ChangeTrackPieceCompositeMove;
-import jfreerails.move.ChangeTrackPieceMove;
-import jfreerails.move.Move;
-import jfreerails.move.TrackMove;
 import jfreerails.world.player.Player;
 import jfreerails.world.top.MapFixtureFactory;
 import jfreerails.world.top.SKEY;
@@ -21,6 +17,8 @@ import junit.framework.TestCase;
 
 
 /**
+ * JUnit test case for TrackMoveTransactionsGenerator.
+ *
  * @author Luke Lindsay
  *
  */
@@ -47,7 +45,7 @@ public class TrackMoveTransactionsGeneratorTest extends TestCase {
 
         //Try building the simplest piece of track.
         newConfig = TrackConfiguration.getFlatInstance("000010000");
-        oldTrackPiece = (TrackPiece)world.getTile(0, 0);
+        oldTrackPiece = world.getTile(0, 0);
 
         TrackRule r = (TrackRule)world.get(SKEY.TRACK_RULES, 0);
         int owner = ChangeTrackPieceCompositeMove.getOwner(MapFixtureFactory.TEST_PRINCIPAL,

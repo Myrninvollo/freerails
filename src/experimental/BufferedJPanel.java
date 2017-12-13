@@ -8,6 +8,7 @@ import java.awt.Graphics;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsEnvironment;
 import java.awt.Image;
+import java.util.logging.Logger;
 import javax.swing.JPanel;
 import jfreerails.client.common.RepaintManagerForActiveRendering;
 
@@ -18,16 +19,17 @@ import jfreerails.client.common.RepaintManagerForActiveRendering;
  *
  */
 public class BufferedJPanel extends JPanel {
-    protected GraphicsConfiguration defaultConfiguration = GraphicsEnvironment.getLocalGraphicsEnvironment()
-                                                                              .getDefaultScreenDevice()
-                                                                              .getDefaultConfiguration();
+    private static final Logger logger = Logger.getLogger(BufferedJPanel.class.getName());
+    private GraphicsConfiguration defaultConfiguration = GraphicsEnvironment.getLocalGraphicsEnvironment()
+                                                                            .getDefaultScreenDevice()
+                                                                            .getDefaultConfiguration();
     private Image buffer;
     private Dimension bufferSize;
-    boolean bufferNeedsPainting = true;
+    private boolean bufferNeedsPainting = true;
     private long lastEventsDispatched = 0;
-    long bufferRepaints;
-    long bufferUsed;
-    long paints;
+    private long bufferRepaints;
+    private long bufferUsed;
+    private long paints;
 
     protected void paintComponent(Graphics g) {
         if (null == buffer) {
@@ -70,7 +72,7 @@ public class BufferedJPanel extends JPanel {
             bufferRepaints = 0;
             bufferRepaints = 0;
             paints = 0;
-            System.out.println(percentageUsage + "% buffer usage");
+            logger.fine(percentageUsage + "% buffer usage");
         }
     }
 

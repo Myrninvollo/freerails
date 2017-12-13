@@ -5,6 +5,7 @@ package jfreerails.server;
 
 import java.io.IOException;
 import java.util.Vector;
+import java.util.logging.Logger;
 import javax.swing.table.TableModel;
 import jfreerails.controller.AddPlayerCommand;
 import jfreerails.controller.AddPlayerResponseCommand;
@@ -20,19 +21,22 @@ import jfreerails.util.FreerailsProgressMonitor;
 
 
 /**
- * associates an instance of ServerGameEngine with a set of game controls.
+ * Associates an instance of ServerGameEngine with a set of game controls.
  * Manages connectivity to the ServerGameEngine.
+ * @author rob
  */
 class ServerGameController implements ServerControlInterface,
     ConnectionListener {
+    private static final Logger logger = Logger.getLogger(ServerGameController.class.getName());
+
     /**
-     * The connections that this server has
-     */
-    private Vector connections = new Vector();
+    * The connections that this server has.
+    */
+    private final Vector connections = new Vector();
     private MoveChainFork moveChainFork;
     private InetConnection serverSocket;
     ServerGameEngine gameEngine;
-    private ClientConnectionTableModel tableModel = new ClientConnectionTableModel(this);
+    private final ClientConnectionTableModel tableModel = new ClientConnectionTableModel(this);
 
     public ServerGameController(ServerGameEngine engine, int port) {
         moveChainFork = engine.getMoveChainFork();
@@ -44,7 +48,7 @@ class ServerGameController implements ServerControlInterface,
                 serverSocket = new InetConnection(engine.getWorld(),
                         InetConnection.SERVER_PORT);
             } catch (IOException e) {
-                System.err.println("Couldn't open the server socket!!!" + e);
+                logger.warning("Couldn't open the server socket!!!" + e);
                 throw new RuntimeException(e);
             }
 
@@ -54,8 +58,8 @@ class ServerGameController implements ServerControlInterface,
     }
 
     /**
-     * return a brand new local connection.
-     */
+    * return a brand new local connection.
+    */
     public synchronized LocalConnection getLocalConnection() {
         LocalConnection connection = new LocalConnection(gameEngine.getWorld());
         addConnection(connection);
@@ -65,11 +69,11 @@ class ServerGameController implements ServerControlInterface,
 
     public synchronized void connectionClosed(ConnectionToServer c) {
         /*
-         * If the player is connected locally, the connection is still
-         * active, so that the server may still be controlled via the
-         * connection, but the player must re-authenticate themselves
-         * in order to play
-         */
+        * If the player is connected locally, the connection is still
+        * active, so that the server may still be controlled via the
+        * connection, but the player must re-authenticate themselves
+        * in order to play
+        */
         if (!(c instanceof LocalConnection)) {
             removeConnection(c);
         } else {
@@ -81,17 +85,17 @@ class ServerGameController implements ServerControlInterface,
     private synchronized void removeConnection(ConnectionToServer c) {
         gameEngine.getIdentityProvider().removeConnection(c);
         tableModel.removeRow(connections.indexOf(c));
-        moveChainFork.remove(c);
+        moveChainFork.removeCompleteMoveReceiver(c);
         connections.remove(c);
         c.removeMoveReceiver(gameEngine.getMoveExecuter());
-        c.removeConnectionListener(this);
+        c.removeConnectionListener();
     }
 
     synchronized void addConnection(ConnectionToServer c) {
         c.addConnectionListener(this);
         c.addMoveReceiver(gameEngine.getMoveExecuter());
         connections.add(c);
-        moveChainFork.add(c);
+        moveChainFork.addCompleteMoveReceiver(c);
 
         if (c instanceof InetConnection) {
             tableModel.addRow(c,
@@ -103,17 +107,17 @@ class ServerGameController implements ServerControlInterface,
     }
 
     /**
-     * Create a new ServerGameEngine instance and transfer all clients of
-     * this game to the new one.
-     */
+    * Create a new ServerGameEngine instance and transfer all clients of
+    * this game to the new one.
+    */
     public void loadGame() {
-        int ticksPerSec = gameEngine.getTargetTicksPerSecond();
-
+        /* Note this method no longer sets the target ticks per second.
+        * Instead, the new game has whatever game speed was set when
+        * the game was saved.
+        */
         /* open a new controller */
         ServerGameEngine newGame = ServerGameEngine.loadGame();
-
         transferClients(newGame);
-        setTargetTicksPerSecond(ticksPerSec);
     }
 
     public void saveGame() {
@@ -133,22 +137,9 @@ class ServerGameController implements ServerControlInterface,
     }
 
     /**
-     * Sends a server commamnd to all connections
-     * @param serverCommand
-     */
-    public void sendToAllConections(ServerCommand serverCommand) {
-        for (int i = 0; i < connections.size(); i++) {
-            ConnectionToServer c = (ConnectionToServer)connections.get(i);
-
-            c.sendCommand(serverCommand);
-            c.flush();
-        }
-    }
-
-    /**
-     * stop the current game and transfer the current local connections to a
-     * new game running the specified map.
-     */
+    * stop the current game and transfer the current local connections to a
+    * new game running the specified map.
+    */
     public void newGame(String mapName) {
         int ticksPerSec = gameEngine.getTargetTicksPerSecond();
         ServerGameEngine newGame = new ServerGameEngine(mapName,
@@ -159,8 +150,8 @@ class ServerGameController implements ServerControlInterface,
     }
 
     /**
-     * transfer all clients of this game to the new game
-     */
+    * Transfer all clients of this game to the new game.
+    */
     private synchronized void transferClients(ServerGameEngine newGame) {
         Vector localConnections = new Vector();
 
@@ -168,7 +159,7 @@ class ServerGameController implements ServerControlInterface,
             ConnectionToServer c = (ConnectionToServer)connections.get(i);
 
             /* Local connections must be transferred manually - remote
-             * connections are sent a WorldChangedCommand later */
+            * connections are sent a WorldChangedCommand later */
             if (c instanceof LocalConnection) {
                 localConnections.add(c);
                 removeConnection(c);
@@ -191,14 +182,14 @@ class ServerGameController implements ServerControlInterface,
         }
 
         /* send all remaining clients notification that this game is
-         * about to end */
+        * about to end */
         for (int i = 0; i < connections.size(); i++) {
             ConnectionToServer c = (ConnectionToServer)connections.get(i);
 
             /*
-             * don't send locally connected clients the
-             * WorldChangedCommand as they have already been sent one
-             */
+            * don't send locally connected clients the
+            * WorldChangedCommand as they have already been sent one
+            */
             if (!(c instanceof LocalConnection)) {
                 c.sendCommand(new WorldChangedCommand());
                 c.flush();
@@ -230,12 +221,12 @@ class ServerGameController implements ServerControlInterface,
             AddPlayerCommand apc = (AddPlayerCommand)s;
 
             synchronized (this) {
-                System.out.println("Received request to authenticate player" +
-                    " " + apc.getPlayer());
+                logger.fine("Received request to authenticate player" + " " +
+                    apc.getPlayer());
 
                 if (!gameEngine.getIdentityProvider().addConnection(c,
                             apc.getPlayer(), apc.getSignature())) {
-                    c.sendCommand(new AddPlayerResponseCommand(apc, ""));
+                    c.sendCommand(new AddPlayerResponseCommand());
                 } else {
                     c.sendCommand(new AddPlayerResponseCommand(
                             gameEngine.getIdentityProvider().getPrincipal(c)));

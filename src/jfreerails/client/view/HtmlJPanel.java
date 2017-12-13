@@ -15,35 +15,40 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
+import java.util.logging.Logger;
+
+import jfreerails.client.common.ModelRoot;
+import jfreerails.client.renderer.ViewLists;
 
 /**
  *  This JPanel displays a HTML document read from a URL.
  * @author  Luke
  */
 public class HtmlJPanel extends javax.swing.JPanel implements View {
-	
-	
-    protected HtmlJPanel(){
-		initComponents();
+    
+    private static final Logger logger = Logger.getLogger(HtmlJPanel.class
+			.getName()); 
+    HtmlJPanel(){
+        initComponents();
     }
     
-    /** Creates new form HtmlJPanel */
-    public HtmlJPanel(URL url) {        
+    
+    public HtmlJPanel(URL url) {
         initComponents();
         htmlJLabel.setText(loadText(url));
     }
     
-    public HtmlJPanel(URL url, HashMap context) {        
+    public HtmlJPanel(URL url, HashMap context) {
         initComponents();
         String template = loadText(url);
         String populatedTemplate = populateTokens(template, context);
         htmlJLabel.setText(populatedTemplate);
     }
     
-	public HtmlJPanel(String html) {        
-		initComponents();
-		this.htmlJLabel.setText(html);
-	}
+    public HtmlJPanel(String html) {
+        initComponents();
+        this.htmlJLabel.setText(html);
+    }
     
     /** This method is called from within the constructor to
      * initialize the form.
@@ -80,13 +85,13 @@ public class HtmlJPanel extends javax.swing.JPanel implements View {
 
     }//GEN-END:initComponents
     
-    public void setup(ModelRoot m, ActionListener submitButtonCallBack) {
+    public void setup(ModelRoot m,  ViewLists vl, ActionListener submitButtonCallBack) {
         this.done.addActionListener(submitButtonCallBack);
     }
     
     /** Load the help text from file.  */
-    protected String loadText(final URL htmlUrl) {
-        try {            
+    String loadText(final URL htmlUrl) {
+        try {
             InputStream in = htmlUrl.openStream();
             BufferedReader br =
             new BufferedReader(
@@ -99,40 +104,40 @@ public class HtmlJPanel extends javax.swing.JPanel implements View {
             return text;
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println(htmlUrl);
+            logger.warning(htmlUrl.toString());
             return "Couldn't read: "+htmlUrl;
         }
     }
     
-    protected void setHtml(String s){
-		htmlJLabel.setText(s);
+    void setHtml(String s){
+        htmlJLabel.setText(s);
     }
-       
-    protected static String populateTokens(String template, Object context){
-    	StringTokenizer tokenizer = new StringTokenizer(template, "$");
-    	String output = "";
-    	
-    	while(tokenizer.hasMoreTokens()){
-    		output += tokenizer.nextToken();
-    		if(tokenizer.hasMoreTokens()){
-    			String token = tokenizer.nextToken();
-    			String value;
-    			if(context instanceof HashMap){
-    				value = (String)((HashMap)context).get(token);
-    			}else{
-    				try {
-						Field field = context.getClass().getField(token);
-						value = field.get(context).toString();						
-					} catch (Exception e) {						
-						e.printStackTrace();
-						throw new NoSuchElementException(token);
-					}     				
-    			}    			
-    			output+=value;
-    		}
-    	}
-    	
-    	return output;
+    
+    static String populateTokens(String template, Object context){
+        StringTokenizer tokenizer = new StringTokenizer(template, "$");
+        String output = "";
+        
+        while(tokenizer.hasMoreTokens()){
+            output += tokenizer.nextToken();
+            if(tokenizer.hasMoreTokens()){
+                String token = tokenizer.nextToken();
+                String value;
+                if(context instanceof HashMap){
+                    value = (String)((HashMap)context).get(token);
+                }else{
+                    try {
+                        Field field = context.getClass().getField(token);
+                        value = field.get(context).toString();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        throw new NoSuchElementException(token);
+                    }
+                }
+                output+=value;
+            }
+        }
+        
+        return output;
     }
     
     // Variables declaration - do not modify//GEN-BEGIN:variables

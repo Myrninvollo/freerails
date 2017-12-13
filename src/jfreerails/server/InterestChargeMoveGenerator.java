@@ -12,7 +12,7 @@ import jfreerails.world.top.World;
 
 
 /** This class iterates over the entries in the BankAccount
- * and counts the number of outstanding bonds, then calulates the
+ * and counts the number of outstanding bonds, then calculates the
  * interest due.
  *
  * @author Luke Lindsay
@@ -25,7 +25,7 @@ public class InterestChargeMoveGenerator {
         this.moveReceiver = mr;
     }
 
-    public static AddTransactionMove generateMove(World w,
+    private static AddTransactionMove generateMove(World w,
         FreerailsPrincipal principal) {
         long interestDue = 0;
 

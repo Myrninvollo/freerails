@@ -10,9 +10,11 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Image;
+import java.awt.event.ActionListener;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.ListCellRenderer;
+import jfreerails.client.common.ModelRoot;
 import jfreerails.client.renderer.ViewLists;
 import jfreerails.world.player.FreerailsPrincipal;
 import jfreerails.world.top.KEY;
@@ -46,26 +48,18 @@ public class TrainViewJPanel extends JPanel implements View, ListCellRenderer,
      */
     private boolean centerTrain = false;
     private int trainWidth = 0;
-    boolean selected = false;
-    private Color backgoundColor = (java.awt.Color)javax.swing.UIManager.getDefaults()
-                                                                        .get("List.background");
-    private Color selectedColor = (java.awt.Color)javax.swing.UIManager.getDefaults()
-                                                                       .get("List.selectionBackground");
+    private boolean selected = false;
+    private final Color backgoundColor = (java.awt.Color)javax.swing.UIManager.getDefaults()
+                                                                              .get("List.background");
+    private final Color selectedColor = (java.awt.Color)javax.swing.UIManager.getDefaults()
+                                                                             .get("List.selectionBackground");
 
     public TrainViewJPanel() {
         this.setOpaque(false);
     }
 
-    /** Creates a new instance of TrainView */
-    public TrainViewJPanel(ModelRoot mr) {
-        setup(mr, null);
-        this.setBackground(backgoundColor);
-    }
-
-    /** Creates a new instance of TrainView */
-    public TrainViewJPanel(ModelRoot mr, int trainNumber) {
-        setup(mr, null);
-        display(trainNumber);
+    public TrainViewJPanel(ModelRoot mr, ViewLists vl) {
+        setup(mr, vl, null);
         this.setBackground(backgoundColor);
     }
 
@@ -132,11 +126,11 @@ public class TrainViewJPanel extends JPanel implements View, ListCellRenderer,
         this.setPreferredSize(new Dimension(width, height));
     }
 
-    public void setup(ModelRoot mr,
-        java.awt.event.ActionListener submitButtonCallBack) {
+    public void setup(ModelRoot mr, ViewLists vl,
+        ActionListener submitButtonCallBack) {
         this.w = mr.getWorld();
-        this.vl = mr.getViewLists();
-        this.principal = mr.getPlayerPrincipal();
+        this.vl = vl;
+        this.principal = mr.getPrincipal();
     }
 
     public Component getListCellRendererComponent(JList list, Object value,

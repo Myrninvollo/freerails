@@ -2,15 +2,14 @@ package jfreerails.client.top;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.NoSuchElementException;
-import jfreerails.client.view.ModelRoot;
+import java.util.logging.Logger;
+import jfreerails.client.common.ModelRoot;
 import jfreerails.controller.MoveReceiver;
 import jfreerails.controller.SychronizedQueue;
-import jfreerails.controller.UncommittedMoveReceiver;
 import jfreerails.move.Move;
 import jfreerails.move.MoveStatus;
 import jfreerails.move.RejectedMove;
-import jfreerails.move.UndoneMove;
+import jfreerails.move.UndoMove;
 import jfreerails.util.GameModel;
 import jfreerails.world.common.FreerailsSerializable;
 import jfreerails.world.player.Player;
@@ -37,14 +36,14 @@ import jfreerails.world.top.World;
  *
  * @author rtuck99@users.sourceforge.net
  */
-public class NonAuthoritativeMoveExecuter implements UncommittedMoveReceiver,
-    GameModel {
-    private PendingQueue pendingQueue = new PendingQueue();
-    private ModelRoot modelRoot;
-    private MoveReceiver moveReceiver;
-    private World world;
+public class NonAuthoritativeMoveExecuter implements MoveReceiver, GameModel {
+    private static final Logger logger = Logger.getLogger(NonAuthoritativeMoveExecuter.class.getName());
+    private final PendingQueue pendingQueue = new PendingQueue();
+    private final ModelRoot modelRoot;
+    private final MoveReceiver moveReceiver;
+    private final World world;
     private final SychronizedQueue sychronizedQueue = new SychronizedQueue();
-    static final boolean debug = (System.getProperty(
+    private static final boolean debug = (System.getProperty(
             "jfreerails.move.NonAuthoritativeMoveExecuter.debug") != null);
 
     public NonAuthoritativeMoveExecuter(World w, MoveReceiver mr,
@@ -54,14 +53,7 @@ public class NonAuthoritativeMoveExecuter implements UncommittedMoveReceiver,
         world = w;
     }
 
-    /**
-     * @see MoveReceiver#processMove(Move)
-     */
     public void processMove(Move move) {
-        if (move instanceof jfreerails.move.AddTrainMove) {
-            System.err.println("adding train move " + move);
-        }
-
         sychronizedQueue.write(move);
     }
 
@@ -82,18 +74,18 @@ public class NonAuthoritativeMoveExecuter implements UncommittedMoveReceiver,
      * pre-committed. New moves are added at the end, and removed from the front
      * when committed.
      */
-    public UncommittedMoveReceiver getUncommittedMoveReceiver() {
+    public MoveReceiver getUncommittedMoveReceiver() {
         return pendingQueue;
     }
 
-    public class PendingQueue implements UncommittedMoveReceiver {
+    public class PendingQueue implements MoveReceiver {
         /**
-         * synchronize access to this list of unverified moves
+         * synchronize access to this list of unverified moves.
          */
-        private LinkedList pendingMoves = new LinkedList();
-        private ArrayList rejectedMoves = new ArrayList();
-        private LinkedList approvedMoves = new LinkedList();
-        private UncommittedMoveReceiver moveReceiver;
+        private final LinkedList pendingMoves = new LinkedList();
+        private final ArrayList rejectedMoves = new ArrayList();
+        private final LinkedList approvedMoves = new LinkedList();
+        private MoveReceiver moveReceiver;
 
         private boolean undoMoves() {
             int n = 0;
@@ -111,24 +103,24 @@ public class NonAuthoritativeMoveExecuter implements UncommittedMoveReceiver,
                 ms = attempted.tryUndoMove(world, Player.AUTHORITATIVE);
 
                 if (ms == MoveStatus.MOVE_OK) {
-                    System.err.println("undoing " + attempted.toString());
+                    logger.warning("undoing " + attempted.toString());
                     attempted.undoMove(world, Player.AUTHORITATIVE);
                     rejectedMoves.remove(i);
-                    forwardMove(new UndoneMove(attempted), ms);
+                    forwardMove(new UndoMove(attempted), ms);
                     n++;
                 }
             }
 
             if (n > 0) {
-                modelRoot.getUserMessageLogger().println("Undid " + n +
-                    " moves rejected by " + "server!");
+                modelRoot.setProperty(ModelRoot.QUICK_MESSAGE,
+                    "Undid " + n + " moves rejected by " + "server!");
             }
 
             return (n > 0);
         }
 
         /**
-         * Called when a move is accepted or rejected by the server
+         * Called when a move is accepted or rejected by the server.
          */
         private synchronized void moveCommitted(Move move) {
             MoveStatus ms;
@@ -185,10 +177,8 @@ public class NonAuthoritativeMoveExecuter implements UncommittedMoveReceiver,
                 ms = move.doMove(world, Player.AUTHORITATIVE);
 
                 if (ms != MoveStatus.MOVE_OK) {
-                    if (debug) {
-                        System.out.println("Move " + move + " rejected " +
-                            "because " + ms.toString());
-                    }
+                    logger.fine("Move " + move + " rejected " + "because " +
+                        ms.toString());
 
                     /* move could not be committed because of
                      * a pre-commited move yet to be rejected by the server */
@@ -201,20 +191,8 @@ public class NonAuthoritativeMoveExecuter implements UncommittedMoveReceiver,
             }
         }
 
-        public synchronized void undoLastMove() {
-            if (moveReceiver != null) {
-                try {
-                    pendingMoves.removeLast();
-                } catch (NoSuchElementException e) {
-                    // ignore
-                }
-
-                moveReceiver.undoLastMove();
-            }
-        }
-
         /**
-         * pre-commits a move sent from the client
+         * Pre-commits a move sent from the client.
          */
         public synchronized void processMove(Move move) {
             if (moveReceiver != null) {
@@ -232,15 +210,11 @@ public class NonAuthoritativeMoveExecuter implements UncommittedMoveReceiver,
             }
         }
 
-        public synchronized void addMoveReceiver(UncommittedMoveReceiver mr) {
+        public synchronized void addMoveReceiver(MoveReceiver mr) {
             if (moveReceiver == null) {
                 moveReceiver = mr;
             }
         }
-    }
-
-    public void undoLastMove() {
-        assert false : "attempted to undo move in client on return from server";
     }
 
     /**
@@ -250,7 +224,7 @@ public class NonAuthoritativeMoveExecuter implements UncommittedMoveReceiver,
      */
     private void forwardMove(Move move, MoveStatus status) {
         if (status != MoveStatus.MOVE_OK) {
-            System.err.println("Couldn't commit move: " + status.message);
+            logger.warning("Couldn't commit move: " + status.message);
 
             return;
         }

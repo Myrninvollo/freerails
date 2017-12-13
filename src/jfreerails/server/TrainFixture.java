@@ -3,6 +3,7 @@ package jfreerails.server;
 import java.awt.Point;
 import java.util.ArrayList;
 import jfreerails.controller.ToAndFroPathIterator;
+import jfreerails.move.InitialiseTrainPositionMove;
 import jfreerails.move.Move;
 import jfreerails.move.MoveStatus;
 import jfreerails.world.common.FreerailsPathIterator;
@@ -12,21 +13,20 @@ import jfreerails.world.top.MapFixtureFactory;
 import jfreerails.world.top.World;
 import jfreerails.world.top.WorldImpl;
 import jfreerails.world.train.TrainModel;
+import jfreerails.world.train.TrainPositionOnMap;
 
 
 /**
+ * Used by TrainMoverTest.
  * @author Luke Lindsay 30-Oct-2002
  *
  */
 public class TrainFixture {
-    TrainMover trainMover;
-    ArrayList points = new ArrayList();
-    World w = new WorldImpl(0, 0);
-    AuthoritativeMoveExecuter moveExecuter;
+    private TrainMover trainMover;
+    private final ArrayList points = new ArrayList();
+    private final World w = new WorldImpl(0, 0);
 
     public TrainFixture() {
-        moveExecuter = new AuthoritativeMoveExecuter(w, null);
-
         points.add(new Point(0, 0));
         points.add(new Point(80, 80));
         points.add(new Point(150, 100));
@@ -43,15 +43,20 @@ public class TrainFixture {
         FreerailsPathIterator from = pathIterator();
         trainMover = new TrainMover(to, w, 0, MapFixtureFactory.TEST_PRINCIPAL);
 
-        Move move = trainMover.setInitialTrainPosition(train, from);
-        MoveStatus ms = move.doMove(w, Player.AUTHORITATIVE);
+        TrainPositionOnMap initialPosition = TrainBuilder.setInitialTrainPosition(train,
+                from);
+
+        Move positionMove = new InitialiseTrainPositionMove(0, initialPosition,
+                MapFixtureFactory.TEST_PRINCIPAL);
+
+        MoveStatus ms = positionMove.doMove(w, Player.AUTHORITATIVE);
 
         if (!ms.isOk()) {
             throw new IllegalStateException(ms.message);
         }
     }
 
-    public FreerailsPathIterator pathIterator() {
+    private FreerailsPathIterator pathIterator() {
         return new ToAndFroPathIterator(points);
     }
 
@@ -60,9 +65,9 @@ public class TrainFixture {
     }
 
     /**
-     * Returns the trainMover.
-     * @return TrainMover
-     */
+ * Returns the trainMover.
+ * @return TrainMover
+ */
     public TrainMover getTrainMover() {
         return trainMover;
     }

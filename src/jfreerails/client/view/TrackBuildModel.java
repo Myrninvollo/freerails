@@ -1,5 +1,6 @@
 package jfreerails.client.view;
 
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.util.Vector;
 import javax.swing.AbstractAction;
@@ -17,7 +18,8 @@ import jfreerails.world.track.TrackRule;
 
 
 /**
- * provides the models for the TrackMoveProducer build mode
+ * Provides the models for the TrackMoveProducer build mode.
+ * @author rob
  */
 public class TrackBuildModel {
     /*
@@ -25,11 +27,12 @@ public class TrackBuildModel {
      */
     private static final int trackTemplate = TrackConfiguration.getFlatInstance(0x111)
                                                                .getTemplate();
-    private ActionAdapter buildModeAdapter;
-    private ActionAdapter trackRuleAdapter;
-    private TrackMoveProducer trackMoveProducer;
-    private ViewLists viewLists;
-    private ReadOnlyWorld world;
+    private final ActionAdapter buildModeAdapter;
+    private final ActionAdapter trackRuleAdapter;
+    private final TrackMoveProducer trackMoveProducer;
+    private final ViewLists viewLists;
+    private final ReadOnlyWorld world;
+    private final ActionRoot actionRoot;
 
     public ActionAdapter getBuildModeActionAdapter() {
         return buildModeAdapter;
@@ -40,7 +43,7 @@ public class TrackBuildModel {
     }
 
     private class BuildModeAction extends AbstractAction {
-        private int actionId;
+        private final int actionId;
 
         private BuildModeAction(int actionId, String name) {
             putValue(NAME, name);
@@ -49,6 +52,7 @@ public class TrackBuildModel {
         }
 
         public void actionPerformed(ActionEvent e) {
+        	 cancelStationPlacement();
             if (!(e.getSource() instanceof ActionAdapter))
                 return;
 
@@ -57,7 +61,7 @@ public class TrackBuildModel {
     }
 
     private class TrackRuleAction extends AbstractAction {
-        private int actionId;
+        private final int actionId;
 
         private TrackRuleAction(int actionId, String name) {
             TrackPieceRendererList trackPieceRendererList = viewLists.getTrackPieceViewList();
@@ -69,24 +73,37 @@ public class TrackBuildModel {
                     actionId);
             int ruleNumber = trackRule.getRuleNumber();
             TrackPieceRenderer renderer = trackPieceRendererList.getTrackPieceView(ruleNumber);
-            putValue(SMALL_ICON,
-                new ImageIcon(renderer.getTrackPieceIcon(trackTemplate)));
-            putValue(SHORT_DESCRIPTION, trackRule.getTypeName());
+
+            /* create a scaled image */
+            Image unscaledImage = renderer.getTrackPieceIcon(trackTemplate);
+            Image scaledImage = unscaledImage.getScaledInstance(unscaledImage.getWidth(
+                        null) * 3 / 4, unscaledImage.getHeight(null) * 3 / 4,
+                    Image.SCALE_SMOOTH);
+
+            putValue(SMALL_ICON, new ImageIcon(scaledImage));
+            putValue(SHORT_DESCRIPTION,
+                trackRule.getTypeName() + " \n $" + trackRule.getPrice());
         }
 
         public void actionPerformed(ActionEvent e) {
+        	 //Cancel build station mode..
+        	 cancelStationPlacement();
+            
+            //Not sure why the following is here, LL
             if (!(e.getSource() instanceof ActionAdapter))
                 return;
 
             trackMoveProducer.setTrackRule(actionId);
+           
         }
     }
 
     public TrackBuildModel(TrackMoveProducer tmp, ReadOnlyWorld world,
-        ViewLists vl) {
+        ViewLists vl, ActionRoot actionRoot) {
         this.world = world;
         viewLists = vl;
         trackMoveProducer = tmp;
+        this.actionRoot = actionRoot;
 
         /* set up build modes */
         BuildModeAction[] actions = new BuildModeAction[] {
@@ -113,4 +130,11 @@ public class TrackBuildModel {
         trackRuleAdapter = new ActionAdapter((Action[])actionsVector.toArray(
                     new Action[0]));
     }
+
+	private void cancelStationPlacement() {
+		//Cancel build station mode..
+		actionRoot.getStationBuildModel().getStationCancelAction().actionPerformed(new ActionEvent(
+		        this,
+		        ActionEvent.ACTION_PERFORMED, ""));
+	}
 }

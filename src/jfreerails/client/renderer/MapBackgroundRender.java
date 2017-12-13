@@ -10,6 +10,8 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.util.logging.Logger;
+import jfreerails.client.common.ModelRoot;
 import jfreerails.client.common.Painter;
 import jfreerails.world.terrain.TerrainTile;
 import jfreerails.world.top.ReadOnlyWorld;
@@ -25,15 +27,17 @@ import jfreerails.world.track.TrackPiece;
  * @version 1
  */
 final public class MapBackgroundRender implements MapLayerRenderer {
+    private static final Logger logger = Logger.getLogger(MapBackgroundRender.class.getName());
+
     /** The terrain layer.
      */
-    protected TerrainLayer terrainLayer;
+    private final TerrainLayer terrainLayer;
 
     /** The track layer.
      */
-    protected TrackLayer trackLayer;
-    private Dimension tileSize = new Dimension(30, 30);
-    private Dimension mapSize;
+    private final TrackLayer trackLayer;
+    private final Dimension tileSize = new Dimension(30, 30);
+    private final Dimension mapSize;
     private final Painter cityNames;
     private final Painter stationNames;
 
@@ -49,8 +53,8 @@ final public class MapBackgroundRender implements MapLayerRenderer {
      *     21 September 2001
      */
     final public class TrackLayer implements MapLayerRenderer {
-        private ReadOnlyWorld w;
-        private TrackPieceRendererList trackPieceViewList;
+        private final ReadOnlyWorld w;
+        private final TrackPieceRendererList trackPieceViewList;
 
         /** Paints a rectangle of tiles onto the supplied
          * graphics context.
@@ -76,7 +80,7 @@ final public class MapBackgroundRender implements MapLayerRenderer {
                         tile.y++) {
                     if ((tile.x >= 0) && (tile.x < mapSize.width) &&
                             (tile.y >= 0) && (tile.y < mapSize.height)) {
-                        TrackPiece tp = (TrackPiece)w.getTile(tile.x, tile.y);
+                        TrackPiece tp = w.getTile(tile.x, tile.y);
 
                         int graphicsNumber = tp.getTrackGraphicNumber();
 
@@ -116,6 +120,9 @@ final public class MapBackgroundRender implements MapLayerRenderer {
             this.trackPieceViewList = trackPieceViewList;
             this.w = world;
         }
+
+        public void refreshAll() {
+        }
     }
 
     /**
@@ -125,8 +132,8 @@ final public class MapBackgroundRender implements MapLayerRenderer {
      *     21 September 2001
      */
     final public class TerrainLayer implements MapLayerRenderer {
-        private TileRendererList tiles;
-        private ReadOnlyWorld w;
+        private final TileRendererList tiles;
+        private final ReadOnlyWorld w;
 
         public void paintTile(Graphics g, Point tile) {
             int screenX = tileSize.width * tile.x;
@@ -134,13 +141,13 @@ final public class MapBackgroundRender implements MapLayerRenderer {
 
             if ((tile.x >= 0) && (tile.x < mapSize.width) && (tile.y >= 0) &&
                     (tile.y < mapSize.height)) {
-                TerrainTile tt = (TerrainTile)w.getTile(tile.x, tile.y);
+                TerrainTile tt = w.getTile(tile.x, tile.y);
 
                 int typeNumber = tt.getTerrainTypeNumber();
                 TileRenderer tr = tiles.getTileViewWithNumber(typeNumber);
 
                 if (null == tr) {
-                    System.err.println("No tile renderer for " + typeNumber);
+                    logger.warning("No tile renderer for " + typeNumber);
                 } else {
                     tr.renderTile(g, screenX, screenY, tile.x, tile.y, w);
                 }
@@ -186,14 +193,18 @@ final public class MapBackgroundRender implements MapLayerRenderer {
             this.w = world;
             this.tiles = tiles;
         }
+
+        public void refreshAll() {
+        }
     }
 
-    public MapBackgroundRender(ReadOnlyWorld w, ViewLists vl) {
+    public MapBackgroundRender(ReadOnlyWorld w, ViewLists vl,
+        ModelRoot modelRoot) {
         trackLayer = new TrackLayer(w, vl.getTrackPieceViewList());
         terrainLayer = new TerrainLayer(w, vl.getTileViewList());
         mapSize = new Dimension(w.getMapWidth(), w.getMapHeight());
         cityNames = new CityNamesRenderer(w);
-        stationNames = new StationNamesRenderer(w);
+        stationNames = new StationNamesRenderer(w, modelRoot);
     }
 
     public void paintTile(Graphics g, int x, int y) {
@@ -228,5 +239,10 @@ final public class MapBackgroundRender implements MapLayerRenderer {
     }
 
     public void refreshTile(int x, int y) {
+        //Do nothing
+    }
+
+    public void refreshAll() {
+        //Do nothing
     }
 }

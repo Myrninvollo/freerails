@@ -12,15 +12,15 @@ import jfreerails.world.track.TrackRuleImpl;
 import jfreerails.world.track.TrackRuleProperties;
 
 
-/** This class is used to generate fixures for Junit tests.
+/** This class is used to generate fixtures for Junit tests.
  *
  * @author Luke
  *
  */
 public class MapFixtureFactory {
-    public int w = 10;
-    public int h = 10;
-    public World world = new WorldImpl(w, h);
+    private int w = 10;
+    private int h = 10;
+    private World world = new WorldImpl(w, h);
 
     /** Only subclasses should use these constants.*/
     public static final Player TEST_PLAYER = new Player("test player",

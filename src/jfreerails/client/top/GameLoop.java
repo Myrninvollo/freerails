@@ -3,6 +3,7 @@ package jfreerails.client.top;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Toolkit;
+import java.util.logging.Logger;
 import jfreerails.client.common.RepaintManagerForActiveRendering;
 import jfreerails.client.common.ScreenHandler;
 import jfreerails.client.common.SynchronizedEventQueue;
@@ -11,19 +12,20 @@ import jfreerails.util.GameModel;
 
 /**
  * This thread updates the GUI Client window.
- *
+ *  @author Luke
  */
 final public class GameLoop implements Runnable {
     /** Whether to display the FPS counter on the top left of the screen.*/
-    private static final boolean SHOWFPS = true; //(System.getProperty("SHOWFPS") != null);
-    final static boolean LIMIT_FRAME_RATE = false;
-    boolean gameNotDone = false;
-    final ScreenHandler screenHandler;
-    final static int TARGET_FPS = 40;
-    FPScounter fPScounter;
+    private static final Logger logger = Logger.getLogger(GameLoop.class.getName());
+    private static final boolean SHOWFPS = (System.getProperty("SHOWFPS") != null);
+    private final static boolean LIMIT_FRAME_RATE = false;
+    private boolean gameNotDone = false;
+    private final ScreenHandler screenHandler;
+    private final static int TARGET_FPS = 40;
+    private FPScounter fPScounter;
     private long frameStartTime;
     private final GameModel model;
-    private Integer loopMonitor = new Integer(0);
+    private final Integer loopMonitor = new Integer(0);
 
     public GameLoop(ScreenHandler s) {
         screenHandler = s;
@@ -40,10 +42,10 @@ final public class GameLoop implements Runnable {
     }
 
     /**
- * Stops the game loop.
- * Blocks until the loop is stopped.
- * Do not call this from inside the event loop!
- */
+    * Stops the game loop.
+    * Blocks until the loop is stopped.
+    * Do not call this from inside the event loop!
+    */
     public void stop() {
         synchronized (loopMonitor) {
             if (gameNotDone == false) {
@@ -54,9 +56,9 @@ final public class GameLoop implements Runnable {
 
             if (Thread.holdsLock(SynchronizedEventQueue.MUTEX)) {
                 /*
- * we might be executing in the event queue so give up the
- * mutex temporarily to allow the loop to exit
- */
+                * we might be executing in the event queue so give up the
+                * mutex temporarily to allow the loop to exit
+                */
                 try {
                     SynchronizedEventQueue.MUTEX.wait();
                 } catch (InterruptedException e) {
@@ -80,13 +82,13 @@ final public class GameLoop implements Runnable {
         fPScounter = new FPScounter();
 
         /*
- * Reduce this threads priority to avoid starvation of the input thread
- * on Windows.
- */
+        * Reduce this threads priority to avoid starvation of the input thread
+        * on Windows.
+        */
         try {
             Thread.currentThread().setPriority(Thread.NORM_PRIORITY - 1);
         } catch (SecurityException e) {
-            System.err.println("Couldn't lower priority of redraw thread");
+            logger.warning("Couldn't lower priority of redraw thread");
         }
 
         while (true) {
@@ -94,10 +96,10 @@ final public class GameLoop implements Runnable {
 
             if (!screenHandler.isMinimised()) {
                 /*
- * Flush all redraws in the underlying toolkit.  This reduces
- * X11 lag when there isn't much happening, but is expensive
- * under Windows
- */
+                * Flush all redraws in the underlying toolkit.  This reduces
+                * X11 lag when there isn't much happening, but is expensive
+                * under Windows
+                */
                 Toolkit.getDefaultToolkit().sync();
 
                 synchronized (SynchronizedEventQueue.MUTEX) {
@@ -120,6 +122,14 @@ final public class GameLoop implements Runnable {
                             if (SHOWFPS) {
                                 fPScounter.updateFPSCounter(frameStartTime, g);
                             }
+                        } catch (RuntimeException re) {
+                            /* We are not expecting a RuntimeException here.
+                            * If something goes wrong, lets kill the game straight
+                            * away to avoid hard-to-track-down bugs.
+                            */
+                            logger.severe("Unexpected exception, quitting..");
+                            re.printStackTrace();
+                            System.exit(1);
                         } finally {
                             g.dispose();
                         }
@@ -161,12 +171,12 @@ final public class GameLoop implements Runnable {
 }
 
 final class FPScounter {
-    final long TIME_INTERVAL = 5000;
-    int frameCount = 0;
-    int averageFPS = 0;
-    long averageFPSStartTime = System.currentTimeMillis();
-    String fPSstr = "starting..";
-    boolean dot = true;
+    private final long TIME_INTERVAL = 5000;
+    private int frameCount = 0;
+    private int averageFPS = 0;
+    private long averageFPSStartTime = System.currentTimeMillis();
+    private String fPSstr = "starting..";
+    private boolean dot = true;
 
     //Display the average number of FPS.
     void updateFPSCounter(long frameStartTime, Graphics g) {

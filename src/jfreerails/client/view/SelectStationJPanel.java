@@ -13,6 +13,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.util.NoSuchElementException;
 
+import jfreerails.client.common.ModelRoot;
+import jfreerails.client.renderer.ViewLists;
 import jfreerails.world.common.OneTileMoveVector;
 import jfreerails.world.player.FreerailsPrincipal;
 import jfreerails.world.station.StationModel;
@@ -24,7 +26,7 @@ import jfreerails.world.track.NullTrackPiece;
 import jfreerails.world.train.MutableSchedule;
 import jfreerails.world.train.TrainOrdersModel;
 /**
- * This JPanel lets the user select a stations from a map and add it to a train
+ * This JPanel lets the user select a station from a map and add it to a train
  *  schedule.
  *
  * @author  Luke
@@ -51,7 +53,7 @@ public class SelectStationJPanel extends javax.swing.JPanel implements View {
     
     private FreerailsPrincipal principal;
     
-    /** Creates new form SelectStationJPanel */
+    
     public SelectStationJPanel() {
         initComponents();
     }
@@ -95,7 +97,7 @@ public class SelectStationJPanel extends javax.swing.JPanel implements View {
         });
 
         cargoWaitingAndDemandedJPanel1.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 0, 0)));
-        cargoWaitingAndDemandedJPanel1.setPreferredSize(new java.awt.Dimension(150, 300));
+        cargoWaitingAndDemandedJPanel1.setPreferredSize(new java.awt.Dimension(165, 300));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
@@ -291,11 +293,11 @@ public class SelectStationJPanel extends javax.swing.JPanel implements View {
         }
     }
     
-    public void setup(ModelRoot mr, ActionListener submitButtonCallBack) {
-        cargoWaitingAndDemandedJPanel1.setup(mr,  null);
+    public void setup(ModelRoot mr,  ViewLists vl, ActionListener submitButtonCallBack) {
+        cargoWaitingAndDemandedJPanel1.setup(mr,vl,  null);
         this.world = mr.getWorld();
         this.submitButtonCallBack = submitButtonCallBack;
-        principal = mr.getPlayerPrincipal();
+        principal = mr.getPrincipal();
     }
     
     public MutableSchedule generateNewSchedule(){

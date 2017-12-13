@@ -1,3 +1,94 @@
+Jun 15, 2004 Luke
+	Bugs fixed:	
+	o 972869 Crash when track under train removed.
+	o 972867 Signal towers do nothing
+		I've removed them!
+	o 972864 Deselect place-station-mode when track selected
+Jun 14, 2004 Luke
+	Bugs fixed:
+	o 948668 Building Station on Curve - Cursor changes function 	
+	o 948671 Map City Overlays incorrect
+	o 967675 No trains/stations but train & station menus selectable
+	o 972738 Crash when station removed
+	o 967662 Bottom of terrain info tab cut off in 640*480 res.
+	o 972869 Crash when track under train removed.
+Jun 13, 2004 Luke
+	Bugs fixed:
+	o 948651 IP Address input should be checked immediately. 
+	o 948649 Dialogue Box Behavior 
+	o 967668 No supply & demand at new station
+	o 948672 Large numbers of active trains slows performance 	
+Jun 12, 2004 Luke
+	Bugs Fixed: 
+	o 967667 Cannot close multilple dialogue boxes.
+	o 967664 Fullscreen res. below 640x480 16bit selectable.
+	o 967666 Selected fullscreen resolution ignored.
+	o 967713 FPS counter obscures build menu
+	o 967660 Debug text sent to console 
+	o 948679 Delete/Rebuild single section of track doesn't cost anything 
+Jun 9, 2004 Luke 
+	Bugs Fixed: 
+	o 967673 Crash when building track close to edge of map 
+Jun 6, 2004 Luke 
+	Bugs Fixed: 
+ 	o 967677 OutOfMemoryError after starting several new games
+Jun 6, 2004 Luke
+	RFE implemented:
+	o 915960 Logging 
+Jun 5, 2004 Luke
+	Bugs Fixed: 
+	o 967129 Main map white on 1.5.0 beta 2 
+	o 941743 Build train dialog closes without building train.
+	o 967214 EchoGameServerTest hangs 
+May 31, 2004 Luke
+	Bugs Fixed: 
+	o 948653 Crash after loading a saved game when one is not available.	
+	o 948665 "Show Details" on Train List doesn't work if no train is selected.
+	o 948659 Dialogue Box Behavior not deterministic
+	o 948663 Extra Close Button on Station List tab
+	o 948661 No Formal Specification
+	 see /src/docs/jfreerails_1_0_functional_specification.html
+	o 948656 Non Movable Dialogue Boxes
+		-made dialogue boxes movable
+		-added option to show/hide station names, spheres of influence, and cargo waiting.
+May 30, 2004 Luke
+	Bugs Fixed: 
+	o 948666 Crash when Building Train with Money < 0 and only one station
+May 28, 2004 Luke
+	Bugs Fixed: 
+	o 948655 Can't see consist when there are more than 6 wagons
+	o 948675 Can't upgrade station types
+	o 948680 No way to tell sphere of influence for a station type
+May 27, 2004 PM Luke
+	Bugs Fixed:
+	o 948676 Waiting list is cut off 
+	o 948673 Cost of Building track/stations not shown 
+	o 948670 Removing non-existant track
+	o 948654 Locomotive graphic backwards
+May 24, 2004 PM Luke
+	o Bug fixes for jfreerails.world.top.WorldDifferences
+May 24, 2004 PM Luke
+	o Added class jfreerails.world.top.WorldDifferences  - may be useful for RFE 915957!
+May 10, 2004 11:09:17 PM Luke
+	o Applied Jan Tozicka's first patch for 915957 (Build track by dragging mouse)
+May 5, 2004 5:57:26 PM Luke
+	o Fix bug in SimpleAStarPathFinder spotted by Jan Tozicka.
+Apr 30, 2004 6:30:56 PM Luke
+	o Applied Jan Tozicka's patch
+		-Implements 927165 (Quick start option)
+Apr 21, 2004 1:46:57 AM Luke
+	o Fix DialogueBoxTester
+	o Tweak build.xml
+Apr 11, 2004 2:56:23 AM Luke
+	o Added some javadoc comments.
+	o Added hashcode methods to classes that override equals.
+	o Code cleanup
+	o Let track be built on terrain of category 'Industry' and 'Resource'
+Apr 9, 2004 11:42:12 PM Luke
+	o Fixed bug 891452 (2 servers same port, no error message) 
+	o Fixed bug 868555 (Undo move by pressing backspace doesn't work)
+	o Fix for bug 910132 (Too easy to make money!)  
+	o More work on bug 910902 (Game speed not stored on world object)
 Apr 8, 2004 10:52:32 PM Luke
 	o Added website to CVS
 	o Added website deployment targets to build.xml

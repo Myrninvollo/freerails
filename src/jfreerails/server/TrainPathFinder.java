@@ -2,6 +2,7 @@ package jfreerails.server;
 
 import java.awt.Point;
 import java.util.Vector;
+import java.util.logging.Logger;
 import jfreerails.controller.MoveReceiver;
 import jfreerails.controller.pathfinder.FlatTrackExplorer;
 import jfreerails.controller.pathfinder.SimpleAStarPathFinder;
@@ -36,13 +37,14 @@ import jfreerails.world.train.WagonType;
  * @author Luke Lindsay 28-Nov-2002
  */
 public class TrainPathFinder implements FreerailsIntIterator, ServerAutomaton {
-    public static final int NOT_AT_STATION = -1;
+    private static final Logger logger = Logger.getLogger(TrainPathFinder.class.getName());
+    private static final int NOT_AT_STATION = -1;
     private final int trainId;
     private final ReadOnlyWorld world;
     private transient MoveReceiver moveReceiver;
-    FlatTrackExplorer trackExplorer;
-    SimpleAStarPathFinder pathFinder = new SimpleAStarPathFinder();
-    final FreerailsPrincipal principal;
+    private final FlatTrackExplorer trackExplorer;
+    private final SimpleAStarPathFinder pathFinder = new SimpleAStarPathFinder();
+    private final FreerailsPrincipal principal;
     private GameTime timeLoadingFinished = new GameTime(0);
     private boolean waiting4FullLoad = false;
     private FreerailsSerializable lastCargoBundleAtStation = null;
@@ -73,7 +75,8 @@ public class TrainPathFinder implements FreerailsIntIterator, ServerAutomaton {
     /**
      * @return a move that initialises the trains schedule.
      */
-    public Move initTarget(TrainModel train, ImmutableSchedule currentSchedule) {
+    public static Move initTarget(TrainModel train, int trainID,
+        ImmutableSchedule currentSchedule, FreerailsPrincipal principal) {
         Vector moves = new Vector();
         int scheduleID = train.getScheduleID();
         MutableSchedule schedule = new MutableSchedule(currentSchedule);
@@ -81,8 +84,8 @@ public class TrainPathFinder implements FreerailsIntIterator, ServerAutomaton {
 
         if (null != wagonsToAdd) {
             int engine = train.getEngineType();
-            ChangeTrainMove move = ChangeTrainMove.generateMove(this.trainId,
-                    train, engine, wagonsToAdd, principal);
+            ChangeTrainMove move = ChangeTrainMove.generateMove(trainID, train,
+                    engine, wagonsToAdd, principal);
             moves.add(move);
         }
 
@@ -130,7 +133,7 @@ public class TrainPathFinder implements FreerailsIntIterator, ServerAutomaton {
                     principal);
 
             if (null == station) {
-                System.err.println("null == station, train " + trainId +
+                logger.warning("null == station, train " + trainId +
                     " doesn't know where to go next!");
             }
         }
@@ -207,7 +210,7 @@ public class TrainPathFinder implements FreerailsIntIterator, ServerAutomaton {
      * @return the number of the station the train is currently at, or -1 if no
      *         current station.
      */
-    public int getStationNumber(int x, int y) {
+    private int getStationNumber(int x, int y) {
         //loop thru the station list to check if train is at the same Point as
         // a station
         for (int i = 0; i < world.size(KEY.STATIONS, principal); i++) {

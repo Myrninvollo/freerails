@@ -7,7 +7,6 @@
 package jfreerails.move;
 
 import java.awt.Point;
-import jfreerails.controller.TrackMoveTransactionsGenerator;
 import jfreerails.world.common.OneTileMoveVector;
 import jfreerails.world.player.Player;
 import jfreerails.world.top.GameRules;
@@ -26,15 +25,16 @@ import junit.framework.TestSuite;
 
 
 /**
+ *  JUnit test.
+ * @author Luke
  *
- * @author lindsal
  */
 public class ChangeTrackPieceCompositeMoveTest extends AbstractMoveTestCase {
-    OneTileMoveVector southeast = OneTileMoveVector.SOUTH_EAST;
-    OneTileMoveVector east = OneTileMoveVector.EAST;
-    OneTileMoveVector northeast = OneTileMoveVector.NORTH_EAST;
-    OneTileMoveVector south = OneTileMoveVector.SOUTH;
-    OneTileMoveVector west = OneTileMoveVector.WEST;
+    final OneTileMoveVector southeast = OneTileMoveVector.SOUTH_EAST;
+    final OneTileMoveVector east = OneTileMoveVector.EAST;
+    final OneTileMoveVector northeast = OneTileMoveVector.NORTH_EAST;
+    final OneTileMoveVector south = OneTileMoveVector.SOUTH;
+    final OneTileMoveVector west = OneTileMoveVector.WEST;
     TrackMoveTransactionsGenerator transactionsGenerator;
 
     public ChangeTrackPieceCompositeMoveTest(java.lang.String testName) {
@@ -122,7 +122,7 @@ public class ChangeTrackPieceCompositeMoveTest extends AbstractMoveTestCase {
         TrackPiece tp = oldTile.getTrackPiece();
         TrackPiece newTrackPiece = new TrackPieceImpl(tp.getTrackConfiguration(),
                 tp.getTrackRule(), anotherPlayer);
-        FreerailsTile newTile = new FreerailsTile(oldTile.getTerrainTypeNumber(),
+        FreerailsTile newTile = FreerailsTile.getInstance(oldTile.getTerrainTypeNumber(),
                 newTrackPiece);
         world.setTile(1, 6, newTile);
         assertBuildTrackFails(new Point(1, 6), east, trackRule);
@@ -189,10 +189,14 @@ public class ChangeTrackPieceCompositeMoveTest extends AbstractMoveTestCase {
     }
 
     private void assertRemoveTrackSuceeds(Point p, OneTileMoveVector v) {
-        ChangeTrackPieceCompositeMove move = ChangeTrackPieceCompositeMove.generateRemoveTrackMove(p,
-                v, getWorld(), MapFixtureFactory.TEST_PRINCIPAL);
-        MoveStatus status = move.doMove(getWorld(), Player.AUTHORITATIVE);
-        assertEquals(true, status.isOk());
+        try {
+            ChangeTrackPieceCompositeMove move = ChangeTrackPieceCompositeMove.generateRemoveTrackMove(p,
+                    v, getWorld(), MapFixtureFactory.TEST_PRINCIPAL);
+            MoveStatus status = move.doMove(getWorld(), Player.AUTHORITATIVE);
+            assertEquals(true, status.isOk());
+        } catch (Exception e) {
+            fail();
+        }
     }
 
     public void testMove() {

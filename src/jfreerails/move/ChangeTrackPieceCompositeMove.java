@@ -15,7 +15,6 @@ import jfreerails.world.top.ITEM;
 import jfreerails.world.top.ItemsTransactionAggregator;
 import jfreerails.world.top.ReadOnlyWorld;
 import jfreerails.world.top.World;
-import jfreerails.world.track.FreerailsTile;
 import jfreerails.world.track.NullTrackPiece;
 import jfreerails.world.track.NullTrackType;
 import jfreerails.world.track.TrackConfiguration;
@@ -33,7 +32,6 @@ public final class ChangeTrackPieceCompositeMove extends CompositeMove
     private final Rectangle updatedTiles;
     private final FreerailsPrincipal builder;
 
-    /** Creates new ChangeTrackPieceCompositeMove */
     private ChangeTrackPieceCompositeMove(TrackMove a, TrackMove b,
         FreerailsPrincipal fp) {
         super(new Move[] {a, b});
@@ -56,7 +54,7 @@ public final class ChangeTrackPieceCompositeMove extends CompositeMove
 
     public static ChangeTrackPieceCompositeMove generateRemoveTrackMove(
         Point from, OneTileMoveVector direction, ReadOnlyWorld w,
-        FreerailsPrincipal principal) {
+        FreerailsPrincipal principal) throws Exception {
         TrackMove a;
         TrackMove b;
 
@@ -77,7 +75,7 @@ public final class ChangeTrackPieceCompositeMove extends CompositeMove
         int owner = getOwner(principle, w);
 
         if (w.boundsContain(p.x, p.y)) {
-            oldTrackPiece = ((FreerailsTile)w.getTile(p.x, p.y)).getTrackPiece();
+            oldTrackPiece = w.getTile(p.x, p.y).getTrackPiece();
 
             if (oldTrackPiece.getTrackRule() != NullTrackType.getInstance()) {
                 TrackConfiguration trackConfiguration = TrackConfiguration.add(oldTrackPiece.getTrackConfiguration(),
@@ -100,12 +98,12 @@ public final class ChangeTrackPieceCompositeMove extends CompositeMove
     //utility method.
     private static TrackMove getRemoveTrackChangeTrackPieceMove(Point p,
         OneTileMoveVector direction, ReadOnlyWorld w,
-        FreerailsPrincipal principal) {
+        FreerailsPrincipal principal) throws Exception {
         TrackPiece oldTrackPiece;
         TrackPiece newTrackPiece;
 
         if (w.boundsContain(p.x, p.y)) {
-            oldTrackPiece = (TrackPiece)w.getTile(p.x, p.y);
+            oldTrackPiece = w.getTile(p.x, p.y);
 
             if (oldTrackPiece.getTrackRule() != NullTrackType.getInstance()) {
                 TrackConfiguration trackConfiguration = TrackConfiguration.subtract(oldTrackPiece.getTrackConfiguration(),
@@ -120,7 +118,9 @@ public final class ChangeTrackPieceCompositeMove extends CompositeMove
                     newTrackPiece = NullTrackPiece.getInstance();
                 }
             } else {
-                newTrackPiece = NullTrackPiece.getInstance();
+                //There is no track to remove.
+                //Fix for bug [ 948670 ] Removing non-existant track
+                throw new Exception();
             }
         } else {
             newTrackPiece = NullTrackPiece.getInstance();
@@ -164,7 +164,7 @@ public final class ChangeTrackPieceCompositeMove extends CompositeMove
     }
 
     /** Returns true if some track has been built.*/
-    protected static boolean hasAnyTrackBeenBuilt(ReadOnlyWorld world,
+    static boolean hasAnyTrackBeenBuilt(ReadOnlyWorld world,
         FreerailsPrincipal principal) {
         ItemsTransactionAggregator aggregator = new ItemsTransactionAggregator(world,
                 principal);
@@ -174,7 +174,7 @@ public final class ChangeTrackPieceCompositeMove extends CompositeMove
         return aggregator.calulateQuantity() > 0;
     }
 
-    protected static boolean mustConnectToExistingTrack(ReadOnlyWorld world) {
+    private static boolean mustConnectToExistingTrack(ReadOnlyWorld world) {
         GameRules rules = (GameRules)world.get(ITEM.GAME_RULES);
 
         return rules.isMustConnect2ExistingTrack();
@@ -183,17 +183,23 @@ public final class ChangeTrackPieceCompositeMove extends CompositeMove
     protected MoveStatus compositeTest(World w, FreerailsPrincipal p) {
         if (mustConnectToExistingTrack(w)) {
             if (hasAnyTrackBeenBuilt(w, this.builder)) {
-                ChangeTrackPieceMove a = (ChangeTrackPieceMove)super.getMove(0);
-                ChangeTrackPieceMove b = (ChangeTrackPieceMove)super.getMove(0);
-                int ruleBeforeA = a.trackPieceBefore.getTrackRule()
-                                                    .getRuleNumber();
-                int ruleBeforeB = b.trackPieceBefore.getTrackRule()
-                                                    .getRuleNumber();
+                try {
+                    ChangeTrackPieceMove a = (ChangeTrackPieceMove)super.getMove(0);
+                    ChangeTrackPieceMove b = (ChangeTrackPieceMove)super.getMove(1);
+                    int ruleBeforeA = a.trackPieceBefore.getTrackRule()
+                                                        .getRuleNumber();
+                    int ruleBeforeB = b.trackPieceBefore.getTrackRule()
+                                                        .getRuleNumber();
 
-                if (ruleBeforeA == NullTrackType.NULL_TRACK_TYPE_RULE_NUMBER &&
-                        ruleBeforeB == NullTrackType.NULL_TRACK_TYPE_RULE_NUMBER) {
-                    return MoveStatus.moveFailed(
-                        "Must connect to existing track");
+                    if (ruleBeforeA == NullTrackType.NULL_TRACK_TYPE_RULE_NUMBER &&
+                            ruleBeforeB == NullTrackType.NULL_TRACK_TYPE_RULE_NUMBER) {
+                        return MoveStatus.moveFailed(
+                            "Must connect to existing track");
+                    }
+                } catch (ClassCastException e) {
+                    //It was not the type of move we expected.
+                    //We end up here when we are removing a station.
+                    return MoveStatus.MOVE_OK;
                 }
             }
         }

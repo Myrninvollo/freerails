@@ -13,8 +13,7 @@ import jfreerails.world.top.SKEY;
 
 
 /**
- * This class implements the GoF Adapter pattern. It converts the interface of
- * a list on the World to a ListModel interface that can be used by JLists.
+ * Converts the interface of a list on the world object to a ListModel interface that can be used by JLists.
  * Currently, change notification is <b>not</b> implemented.
  *
  * @author Luke
@@ -54,11 +53,10 @@ public class World2ListModelAdapter implements ListModel {
 
         if (null == w)
             throw new NullPointerException();
-        
+
         //Check that the principal exists.
-        if(!world.isPlayer(p))
-        	throw new IllegalArgumentException(p.getName());
-        	        
+        if (!world.isPlayer(p))
+            throw new IllegalArgumentException(p.getName());
     }
 
     public int getSize() {

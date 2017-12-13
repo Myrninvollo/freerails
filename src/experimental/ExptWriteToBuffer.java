@@ -4,17 +4,23 @@
  */
 package experimental;
 
-import java.io.*;
 import java.awt.Point;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.logging.Logger;
 
 
 /**
  * Experiment to try out reading and writing to a buffer to
- * test serialisaton code.
+ * test serialization code.
  * @author Luke
  *
  */
 public class ExptWriteToBuffer {
+    private static final Logger logger = Logger.getLogger(ExptWriteToBuffer.class.getName());
+
     public static void main(String[] args) {
         try {
             Point p = new Point(10, 10);
@@ -31,9 +37,9 @@ public class ExptWriteToBuffer {
             Point p2 = (Point)o;
 
             if (p.equals(p2)) {
-                System.out.println("The two objects are equal!");
+                logger.info("The two objects are equal!");
             } else {
-                System.out.println("The two objects are not equal!");
+                logger.info("The two objects are not equal!");
             }
         } catch (Exception e) {
             e.printStackTrace();

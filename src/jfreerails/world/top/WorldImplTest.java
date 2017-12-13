@@ -4,16 +4,20 @@
  */
 package jfreerails.world.top;
 
+import jfreerails.world.accounts.Receipt;
+import jfreerails.world.accounts.Transaction;
 import jfreerails.world.common.FreerailsSerializable;
+import jfreerails.world.common.Money;
+import jfreerails.world.player.Player;
 import junit.framework.TestCase;
 
 
-/**
+/**    Junit test.
  * @author Luke
  *
  */
 public class WorldImplTest extends TestCase {
-    FreerailsSerializable fs = new FreerailsSerializable() {
+    private final FreerailsSerializable fs = new FreerailsSerializable() {
         };
 
     public void testGet() {
@@ -45,5 +49,25 @@ public class WorldImplTest extends TestCase {
         assertFalse(copy.equals(original));
         assertEquals(1, copy.size(SKEY.TERRAIN_TYPES));
         assertEquals(0, original.size(SKEY.TERRAIN_TYPES));
+    }
+
+    public void testEquals() {
+        World original;
+        World copy;
+        original = new WorldImpl();
+        copy = original.defensiveCopy();
+
+        Player player = new Player("Name", null, 0);
+        int index = copy.addPlayer(player);
+        assertEquals(index, 0);
+        assertFalse(copy.equals(original));
+        original.addPlayer(player);
+        assertEquals("The copies should be logically equal.", original, copy);
+
+        Transaction t = new Receipt(new Money(100), Transaction.MISC_INCOME);
+        copy.addTransaction(t, player.getPrincipal());
+        assertEquals(new Money(100),
+            copy.getCurrentBalance(player.getPrincipal()));
+        assertFalse(copy.equals(original));
     }
 }

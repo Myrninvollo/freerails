@@ -27,7 +27,7 @@ import jfreerails.world.track.TrackRule;
  *
  */
 public class AddStationMove extends CompositeMove {
-    protected AddStationMove(Move[] moves) {
+    private AddStationMove(Move[] moves) {
         super(moves);
     }
 
@@ -84,7 +84,14 @@ public class AddStationMove extends CompositeMove {
                 boolean xOverlap = sumOfRadiiSquared >= (xDistance * xDistance);
                 boolean yOverlap = sumOfRadiiSquared >= (yDistance * yDistance);
 
-                if (xOverlap && yOverlap) {
+                /* Fix for bug 948675        Can't upgrade station types
+                 * If locations are the same, then we are upgrading a station so
+                 * it doesn't matter if the radii overlap.
+                 */
+                boolean areLocationsDifferent = (xDistance != 0) ||
+                    (yDistance != 0);
+
+                if (xOverlap && yOverlap && areLocationsDifferent) {
                     String message = "Too close to " +
                         station.getStationName();
 

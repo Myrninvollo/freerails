@@ -14,9 +14,9 @@ import jfreerails.world.common.FreerailsSerializable;
  */
 public class SimpleAStarPathFinder implements FreerailsSerializable {
     public static final int PATH_NOT_FOUND = Integer.MIN_VALUE;
-    Int2IntHashMap openList = new Int2IntHashMap();
-    IntHashSet openKeys = new IntHashSet();
-    Int2IntHashMap closedList = new Int2IntHashMap();
+    private final Int2IntHashMap openList = new Int2IntHashMap();
+    private final IntHashSet openKeys = new IntHashSet();
+    private final Int2IntHashMap closedList = new Int2IntHashMap();
 
     public int findpath(int currentPosition, int[] targets,
         GraphExplorer explorer) {
@@ -68,8 +68,10 @@ public class SimpleAStarPathFinder implements FreerailsSerializable {
                 //successor.f = successor.g + successor.h
                 if (successor == currentPosition) {
                     //if successor is the goal, we have found a path, but not necessarily the shorest.
-                    bestPath = q;
-                    bestPathF = successorF;
+                    if (bestPathF > successorF) {
+                        bestPath = q;
+                        bestPathF = successorF;
+                    }
                 }
 
                 if (openList.containsKey(successor) &&
@@ -109,7 +111,7 @@ public class SimpleAStarPathFinder implements FreerailsSerializable {
         return PATH_NOT_FOUND;
     }
 
-    int findNodeWithSmallestFOnOpenList() {
+    private int findNodeWithSmallestFOnOpenList() {
         IntIterator it = (IntIterator)openKeys.iterator();
         int nodeWithSmallestF = 0;
         int smallestF = Integer.MAX_VALUE;
