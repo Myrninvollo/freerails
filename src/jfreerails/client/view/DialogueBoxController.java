@@ -8,6 +8,7 @@ package jfreerails.client.view;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.NoSuchElementException;
@@ -18,10 +19,8 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
 import javax.swing.JLayeredPane;
-import javax.swing.border.LineBorder;
 
 import jfreerails.client.common.ModelRootImpl;
-import jfreerails.client.common.ModelRoot;
 import jfreerails.client.common.MyGlassPanel;
 import jfreerails.client.renderer.ViewLists;
 import jfreerails.move.ChangeProductionAtEngineShopMove;
@@ -35,7 +34,8 @@ import jfreerails.world.top.ReadOnlyWorld;
 import jfreerails.world.top.WorldIterator;
 import jfreerails.world.top.WorldListListener;
 import jfreerails.world.track.FreerailsTile;
-
+import jfreerails.world.track.TrackRule;
+import static jfreerails.client.common.ModelRoot.Property;
 
 /**This class is responsible for displaying dialogue boxes, adding borders to them as appropriate, and
  * returning focus to the last focus owner after a dialogue box has been closed.  It is also responsible for
@@ -143,6 +143,9 @@ public class DialogueBoxController implements WorldListListener {
         terrainInfo = new TerrainInfoJPanel();
         stationInfo = new StationInfoJPanel();
         javaProperties = new HtmlJPanel(ShowJavaProperties.getPropertiesHtmlString());
+        Dimension d = javaProperties.getPreferredSize();
+        d.width += 50;
+        javaProperties.setPreferredSize(d);
         newspaper = new NewsPaperJPanel();
         selectWagons = new SelectWagonsJPanel();
         selectEngine = new SelectEngineJPanel();
@@ -215,11 +218,11 @@ public class DialogueBoxController implements WorldListListener {
                 modelRoot.getPrincipal());
 
         if (!wi.next()) {
-            modelRoot.setProperty(ModelRoot.QUICK_MESSAGE,
+            modelRoot.setProperty(Property.QUICK_MESSAGE,
                 "Cannot" + " show train orders since there are no" +
                 " trains!");
         } else {
-            trainDialogueJPanel.display(0);
+            trainDialogueJPanel.display(wi.getIndex());
             this.showContent(trainDialogueJPanel);
         }
     }
@@ -229,7 +232,7 @@ public class DialogueBoxController implements WorldListListener {
                 modelRoot.getPrincipal());
 
         if (!wi.next()) {
-            modelRoot.setProperty(ModelRoot.QUICK_MESSAGE,
+            modelRoot.setProperty(Property.QUICK_MESSAGE,
                 "Can't" + " build train since there are no stations");
         } else {
             showContent(selectEngine);
@@ -277,7 +280,7 @@ public class DialogueBoxController implements WorldListListener {
 
     public void showTerrainInfo(int x, int y) {
         FreerailsTile tile = (FreerailsTile) world.getTile(x, y);
-        int terrainType = tile.getTerrainTypeNumber();
+        int terrainType = tile.getTerrainTypeID();
         showTerrainInfo(terrainType);
     }
 
@@ -312,7 +315,7 @@ public class DialogueBoxController implements WorldListListener {
 
             showContent(trainList);
         } else {
-            modelRoot.setProperty(ModelRoot.QUICK_MESSAGE,
+            modelRoot.setProperty(Property.QUICK_MESSAGE,
                 "There are" + " no trains to display!");
         }
     }
@@ -347,11 +350,13 @@ public class DialogueBoxController implements WorldListListener {
             constraints.gridy = 0;
             constraints.weightx = 1.0;
             constraints.weighty = 1.0;
+            constraints.insets = new Insets(7, 7, 7, 7);           
             contentPanel.add(component, constraints);
 
             constraints = new GridBagConstraints();
             constraints.gridx = 0;
             constraints.gridy = 1;
+            constraints.insets = new Insets(7, 7, 7, 7);           
             contentPanel.add(closeButton, constraints);
         } else {
             contentPanel = component;
@@ -410,12 +415,15 @@ public class DialogueBoxController implements WorldListListener {
     public void showStationOrTerrainInfo(int x, int y) {
         FreerailsTile tile = (FreerailsTile) world.getTile(x, y);
 
-        if (tile.getTrackRule().isStation()) {
-            for (int i = 0;
-                    i < world.size(KEY.STATIONS, modelRoot.getPrincipal());
+        TrackRule trackRule = tile.getTrackRule();
+        FreerailsPrincipal principal = modelRoot.getPrincipal();
+		if (trackRule.isStation() && tile.getOwnerID() == world.getID(principal)) {
+           
+			for (int i = 0;
+                    i < world.size(KEY.STATIONS, principal);
                     i++) {
                 StationModel station = (StationModel)world.get(KEY.STATIONS, i,
-                        modelRoot.getPrincipal());
+                        principal);
 
                 if (null != station && station.x == x && station.y == y) {
                     this.showStationInfo(i);
@@ -424,11 +432,10 @@ public class DialogueBoxController implements WorldListListener {
                 }
             }
 
-            throw new IllegalStateException("Could find station at " + x +
+            throw new IllegalStateException("Couldn't find station at " + x +
                 ", " + y);
-        } else {
-            this.showTerrainInfo(x, y);
         }
+		this.showTerrainInfo(x, y);
     }
 
     public void listUpdated(KEY key, int index, FreerailsPrincipal principal) {

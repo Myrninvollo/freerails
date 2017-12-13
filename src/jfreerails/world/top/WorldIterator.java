@@ -39,13 +39,21 @@ public interface WorldIterator {
      */
     int getIndex();
 
-    /** Returns the number of the row where the cursor is.
+    /** Returns the number of the row where the cursor is (the first row is 0).
      */
-    int getRowNumber();
+    int getRowID();
 
     /** Returns the number of rows. */
     int size();
 
     /** Moves the cursor to the specified index. */
     void gotoIndex(int i);
+    
+    /** Moves the cursor to the specified index. */
+    void gotoRow(int row);
+    
+    
+    /** Returns the number of the row where the cursor is (the first row is 1).
+     */
+    int getNaturalNumber();
 }

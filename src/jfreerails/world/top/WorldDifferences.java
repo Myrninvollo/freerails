@@ -54,15 +54,16 @@ import jfreerails.world.track.FreerailsTile;
  */
 public class WorldDifferences implements World {
     private static final Object NUMBER_OF_PLAYERS_KEY = new Integer(0);
-    private static int i = 0;
-    private final int LIST = i++;
-    private final int PLAYER = i++;
-    private final int BANK_ACCOUNT = i++;
-    private final int LIST_LENGTH = i++;
+    private enum KeyType {LIST, PLAYER, BANK_ACCOUNT, LIST_LENGTH};
+//    private static int i = 0;
+//    private final int LIST = i++;
+//    private final int PLAYER = i++;
+//    private final int BANK_ACCOUNT = i++;
+//    private final int LIST_LENGTH = i++;
 
     /** Instances of this class are used as the keys in the hashmap listDifferences.*/
     public class DiffKey {
-        final int keyType;
+        final KeyType keyType;
         final int a;
         final int b;
         final int c;
@@ -74,18 +75,18 @@ public class WorldDifferences implements World {
          * Player,
          * index
          */
-        public DiffKey(int keyType, int a, int b, int c) {
+        public DiffKey(KeyType keyType, int a, int b, int c) {
             this.keyType = keyType;
             this.a = a;
             this.b = b;
             this.c = c;
         }
 
-        public DiffKey(int keyType, int a, int b) {
+        public DiffKey(KeyType keyType, int a, int b) {
             this(keyType, a, b, -1);
         }
 
-        public DiffKey(int keyType, int a) {
+        public DiffKey(KeyType keyType, int a) {
             this(keyType, a, -2, -3);
         }
 
@@ -106,7 +107,7 @@ public class WorldDifferences implements World {
 
         public int hashCode() {
             int result;
-            result = keyType;
+            result = keyType.ordinal();
             result = 29 * result + a;
             result = 29 * result + b;
             result = 29 * result + c;
@@ -118,10 +119,10 @@ public class WorldDifferences implements World {
     private final ReadOnlyWorld underlyingWorld;
 
     /** Stores the differences on the map, Points are used as keys. */
-    private HashMap mapDifferences = new HashMap();
+    private HashMap<Point,Object> mapDifferences = new HashMap<Point,Object>();
 
     /** Stores the differences not on the map, instances of DiffKey are used as keys. */
-    private HashMap listDifferences = new HashMap();
+    private HashMap<Object, Object> listDifferences = new HashMap<Object, Object>();
 
     /**
      * Creates a new WorldDifferences object that stores differences relative to
@@ -147,7 +148,7 @@ public class WorldDifferences implements World {
     /** The iterator returns instances of java.awt.Point that store the
      * coordinates of tiles that are different to the underlying world object.
      */
-    public Iterator getMapDifferences() {
+    public Iterator<Point> getMapDifferences() {
         return mapDifferences.keySet().iterator();
     }
 
@@ -162,7 +163,7 @@ public class WorldDifferences implements World {
     }
 
     public void set(ITEM item, FreerailsSerializable element) {
-        if (element.equals(this.underlyingWorld.get(item))) {
+        if (equal(element, underlyingWorld.get(item))) {
             //Case 1: the item is restored to the same value as the underlying world object.		
             if (this.listDifferences.containsKey(item)) {
                 this.listDifferences.remove(item);
@@ -176,11 +177,11 @@ public class WorldDifferences implements World {
     public void set(KEY key, int index, FreerailsSerializable element,
         FreerailsPrincipal principal) {
         //TODO add bounds checking.
-        DiffKey diffKey = new DiffKey(LIST, key.getKeyNumber(),
-                getPlayerNumber(principal), index);
+        DiffKey diffKey = new DiffKey(KeyType.LIST, key.getKeyID(),
+                getPlayerID(principal), index);
 
         if (underlyingWorld.boundsContain(key, index, principal) &&
-                element.equals(underlyingWorld.get(key, index, principal))) {
+        		equal(element, underlyingWorld.get(key, index, principal))) {
             //Case 1: the element is restored to the same value as the underlying world object.
             if (this.listDifferences.containsKey(diffKey)) {
                 this.listDifferences.remove(diffKey);
@@ -192,10 +193,10 @@ public class WorldDifferences implements World {
     }
 
     public void set(SKEY key, int index, FreerailsSerializable element) {
-        DiffKey diffKey = new DiffKey(LIST, key.getKeyNumber(), index);
+        DiffKey diffKey = new DiffKey(KeyType.LIST, key.getKeyID(), index);
 
         if (underlyingWorld.boundsContain(key, index) &&
-                element.equals(underlyingWorld.get(key, index))) {
+        		equal(element, underlyingWorld.get(key, index))) {
             //Case 1: the element is restored to the same value as the underlying world object.	
             if (this.listDifferences.containsKey(diffKey)) {
                 this.listDifferences.remove(diffKey);
@@ -208,8 +209,8 @@ public class WorldDifferences implements World {
 
     public int add(KEY key, FreerailsSerializable element,
         FreerailsPrincipal principal) {
-        int playerNumber = getPlayerNumber(principal);
-        DiffKey lengthKey = new DiffKey(LIST_LENGTH, key.getKeyNumber(),
+        int playerNumber = getPlayerID(principal);
+        DiffKey lengthKey = new DiffKey(KeyType.LIST_LENGTH, key.getKeyID(),
                 playerNumber);
         int index;
         int newLength;
@@ -236,7 +237,7 @@ public class WorldDifferences implements World {
             listDifferences.put(lengthKey, new Integer(newLength));
         }
 
-        DiffKey elementKey = new DiffKey(LIST, key.getKeyNumber(),
+        DiffKey elementKey = new DiffKey(KeyType.LIST, key.getKeyID(),
                 playerNumber, index);
         assert !this.listDifferences.containsKey(elementKey);
         listDifferences.put(elementKey, element);
@@ -245,7 +246,7 @@ public class WorldDifferences implements World {
     }
 
     public int add(SKEY key, FreerailsSerializable element) {
-        DiffKey lengthKey = new DiffKey(LIST_LENGTH, key.getKeyNumber());
+        DiffKey lengthKey = new DiffKey(KeyType.LIST_LENGTH, key.getKeyID());
         int index;
         int newLength;
         int underLyingSize = underlyingWorld.size(key);
@@ -265,7 +266,7 @@ public class WorldDifferences implements World {
             listDifferences.put(lengthKey, new Integer(newLength));
         }
 
-        DiffKey elementKey = new DiffKey(LIST, key.getKeyNumber(), index);
+        DiffKey elementKey = new DiffKey(KeyType.LIST, key.getKeyID(), index);
         assert !this.listDifferences.containsKey(elementKey);
 
         if (underLyingSize > index) {
@@ -278,7 +279,7 @@ public class WorldDifferences implements World {
                 return index;
             }
 
-            if (underlyingElement.equals(element)) {
+            if (equal(underlyingElement, element)) {
                 return index;
             }
         }
@@ -290,8 +291,8 @@ public class WorldDifferences implements World {
 
     public FreerailsSerializable removeLast(KEY key,
         FreerailsPrincipal principal) {
-        int playerNumber = getPlayerNumber(principal);
-        DiffKey lengthKey = new DiffKey(LIST_LENGTH, key.getKeyNumber(),
+        int playerNumber = getPlayerID(principal);
+        DiffKey lengthKey = new DiffKey(KeyType.LIST_LENGTH, key.getKeyID(),
                 playerNumber);
         int index;
         int newLength;
@@ -326,7 +327,7 @@ public class WorldDifferences implements World {
         /* If the element to be reomoved is stored in the list differences hashmap we
          * need to remove it.
          */
-        DiffKey elementKey = new DiffKey(LIST, key.getKeyNumber(),
+        DiffKey elementKey = new DiffKey(KeyType.LIST, key.getKeyID(),
                 playerNumber, index);
 
         if (this.listDifferences.containsKey(elementKey)) {
@@ -337,7 +338,7 @@ public class WorldDifferences implements World {
     }
 
     public FreerailsSerializable removeLast(SKEY key) {
-        DiffKey lengthKey = new DiffKey(LIST_LENGTH, key.getKeyNumber());
+        DiffKey lengthKey = new DiffKey(KeyType.LIST_LENGTH, key.getKeyID());
 
         int index;
         int newLength;
@@ -361,7 +362,7 @@ public class WorldDifferences implements World {
             listDifferences.put(lengthKey, new Integer(newLength));
         }
 
-        DiffKey elementKey = new DiffKey(LIST, key.getKeyNumber(), index);
+        DiffKey elementKey = new DiffKey(KeyType.LIST, key.getKeyID(), index);
 
         if (this.listDifferences.containsKey(elementKey)) {
             listDifferences.remove(elementKey);
@@ -373,7 +374,7 @@ public class WorldDifferences implements World {
     public void setTile(int x, int y, FreerailsSerializable tile) {
         Point p = new Point(x, y);
 
-        if (underlyingWorld.getTile(x, y).equals(tile)) {
+        if (equal(underlyingWorld.getTile(x, y), tile)) {
             if (this.mapDifferences.containsKey(p)) {
                 this.mapDifferences.remove(p);
 
@@ -389,15 +390,15 @@ public class WorldDifferences implements World {
         Integer newNumberOfPlayers = new Integer(playerID + 1);
         this.listDifferences.put(NUMBER_OF_PLAYERS_KEY, newNumberOfPlayers);
 
-        DiffKey playerKey = new DiffKey(PLAYER, playerID);
+        DiffKey playerKey = new DiffKey(KeyType.PLAYER, playerID);
         listDifferences.put(playerKey, player);
 
-        DiffKey bankAccountKey = new DiffKey(BANK_ACCOUNT, playerID);
+        DiffKey bankAccountKey = new DiffKey(KeyType.BANK_ACCOUNT, playerID);
         listDifferences.put(bankAccountKey, new BankAccount());
 
         //We need to create lists of size 0 for the new player.
         for (int i = 0; i < KEY.getNumberOfKeys(); i++) {
-            DiffKey listLengthKey = new DiffKey(LIST_LENGTH, i, playerID);
+            DiffKey listLengthKey = new DiffKey(KeyType.LIST_LENGTH, i, playerID);
             listDifferences.put(listLengthKey, new Integer(0));
         }
 
@@ -420,56 +421,51 @@ public class WorldDifferences implements World {
     public FreerailsSerializable get(ITEM item) {
         if (this.listDifferences.containsKey(item)) {
             return (FreerailsSerializable)this.listDifferences.get(item);
-        } else {
-            return this.underlyingWorld.get(item);
         }
+		return this.underlyingWorld.get(item);
     }
 
     public FreerailsSerializable get(SKEY key, int index) {
-        DiffKey diffKey = new DiffKey(LIST, key.getKeyNumber(), index);
+        DiffKey diffKey = new DiffKey(KeyType.LIST, key.getKeyID(), index);
 
         if (this.listDifferences.containsKey(diffKey)) {
             return (FreerailsSerializable)listDifferences.get(diffKey);
-        } else {
-            return underlyingWorld.get(key, index);
         }
+		return underlyingWorld.get(key, index);
     }
 
     public FreerailsSerializable get(KEY key, int index, FreerailsPrincipal p) {
         //TODO add bounds check.
-        DiffKey diffKey = new DiffKey(LIST, key.getKeyNumber(),
-                this.getPlayerNumber(p), index);
+        DiffKey diffKey = new DiffKey(KeyType.LIST, key.getKeyID(),
+                this.getPlayerID(p), index);
 
         if (this.listDifferences.containsKey(diffKey)) {
             return (FreerailsSerializable)this.listDifferences.get(diffKey);
-        } else {
-            return this.underlyingWorld.get(key, index, p);
         }
+		return this.underlyingWorld.get(key, index, p);
     }
 
     public int size(SKEY key) {
-        DiffKey lengthKey = new DiffKey(LIST_LENGTH, key.getKeyNumber());
+        DiffKey lengthKey = new DiffKey(KeyType.LIST_LENGTH, key.getKeyID());
 
         if (this.listDifferences.containsKey(lengthKey)) {
             Integer i = (Integer)listDifferences.get(lengthKey);
 
             return i.intValue();
-        } else {
-            return this.underlyingWorld.size(key);
         }
+		return this.underlyingWorld.size(key);
     }
 
     public int size(KEY key, FreerailsPrincipal p) {
-        DiffKey listSize = new DiffKey(LIST_LENGTH, key.getKeyNumber(),
-                this.getPlayerNumber(p));
+        DiffKey listSize = new DiffKey(KeyType.LIST_LENGTH, key.getKeyID(),
+                this.getPlayerID(p));
 
         if (this.listDifferences.containsKey(listSize)) {
             Integer i = (Integer)listDifferences.get(listSize);
 
             return i.intValue();
-        } else {
-            return underlyingWorld.size(key, p);
         }
+		return underlyingWorld.size(key, p);
     }
 
     public int getMapWidth() {
@@ -485,17 +481,16 @@ public class WorldDifferences implements World {
             Integer i = (Integer)listDifferences.get(NUMBER_OF_PLAYERS_KEY);
 
             return i.intValue();
-        } else {
-            return underlyingWorld.getNumberOfPlayers();
         }
+		return underlyingWorld.getNumberOfPlayers();
     }
 
     public boolean isPlayer(FreerailsPrincipal p) {
-        return -1 < getPlayerNumber(p);
+        return -1 < getPlayerID(p);
     }
 
     /** Returns the player number or -1 if the player is not found.*/
-    private int getPlayerNumber(FreerailsPrincipal p) {
+    private int getPlayerID(FreerailsPrincipal p) {
         int numberOfPlayers = this.getNumberOfPlayers();
 
         for (int i = 0; i < numberOfPlayers; i++) {
@@ -510,13 +505,12 @@ public class WorldDifferences implements World {
     }
 
     public Player getPlayer(int i) {
-        DiffKey diffKey = new DiffKey(PLAYER, i);
+        DiffKey diffKey = new DiffKey(KeyType.PLAYER, i);
 
         if (this.listDifferences.containsKey(diffKey)) {
             return (Player)this.listDifferences.get(diffKey);
-        } else {
-            return this.underlyingWorld.getPlayer(i);
         }
+		return this.underlyingWorld.getPlayer(i);
     }
 
     public FreerailsSerializable getTile(int x, int y) {
@@ -524,9 +518,8 @@ public class WorldDifferences implements World {
 
         if (this.mapDifferences.containsKey(p)) {
             return (FreerailsTile)this.mapDifferences.get(p);
-        } else {
-            return underlyingWorld.getTile(x, y);
         }
+		return underlyingWorld.getTile(x, y);
     }
 
     public boolean boundsContain(int x, int y) {
@@ -544,43 +537,39 @@ public class WorldDifferences implements World {
     public Transaction getTransaction(int i, FreerailsPrincipal p) {
         if (isAccountDiff(p)) {
             return this.getAccount(p).getTransaction(i);
-        } else {
-            return this.underlyingWorld.getTransaction(i, p);
         }
+		return this.underlyingWorld.getTransaction(i, p);
     }
 
     public GameTime getTransactionTimeStamp(int i, FreerailsPrincipal p) {
         if (isAccountDiff(p)) {
             return this.getAccount(p).getTimeStamp(i);
-        } else {
-            return this.underlyingWorld.getTransactionTimeStamp(i, p);
         }
+		return this.underlyingWorld.getTransactionTimeStamp(i, p);
     }
 
     public Money getCurrentBalance(FreerailsPrincipal p) {
         if (isAccountDiff(p)) {
             return this.getAccount(p).getCurrentBalance();
-        } else {
-            return this.underlyingWorld.getCurrentBalance(p);
         }
+		return this.underlyingWorld.getCurrentBalance(p);
     }
 
     public int getNumberOfTransactions(FreerailsPrincipal p) {
         if (isAccountDiff(p)) {
             return this.getAccount(p).size();
-        } else {
-            return this.underlyingWorld.getNumberOfTransactions(p);
         }
+		return this.underlyingWorld.getNumberOfTransactions(p);
     }
 
     private boolean isAccountDiff(FreerailsPrincipal p) {
-        DiffKey accountKey = new DiffKey(BANK_ACCOUNT, this.getPlayerNumber(p));
+        DiffKey accountKey = new DiffKey(KeyType.BANK_ACCOUNT, this.getPlayerID(p));
 
         return this.listDifferences.containsKey(accountKey);
     }
 
     private BankAccount getAccount(FreerailsPrincipal p) {
-        DiffKey accountKey = new DiffKey(BANK_ACCOUNT, this.getPlayerNumber(p));
+        DiffKey accountKey = new DiffKey(KeyType.BANK_ACCOUNT, this.getPlayerID(p));
 
         return (BankAccount)this.listDifferences.get(accountKey);
     }
@@ -591,21 +580,36 @@ public class WorldDifferences implements World {
     private BankAccount addAccountIfNecessary(FreerailsPrincipal p) {
         if (isAccountDiff(p)) {
             return getAccount(p);
-        } else {
-            //We need to copy the account..
-            DiffKey accountKey = new DiffKey(BANK_ACCOUNT,
-                    this.getPlayerNumber(p));
-            BankAccount account = new BankAccount();
-
-            for (int i = 0; i < underlyingWorld.getNumberOfTransactions(p);
-                    i++) {
-                account.addTransaction(underlyingWorld.getTransaction(i, p),
-                    getTransactionTimeStamp(i, p));
-            }
-
-            listDifferences.put(accountKey, account);
-
-            return account;
         }
+		//We need to copy the account..
+		DiffKey accountKey = new DiffKey(KeyType.BANK_ACCOUNT,
+		        this.getPlayerID(p));
+		BankAccount account = new BankAccount();
+
+		for (int i = 0; i < underlyingWorld.getNumberOfTransactions(p);
+		        i++) {
+		    account.addTransaction(underlyingWorld.getTransaction(i, p),
+		        getTransactionTimeStamp(i, p));
+		}
+
+		listDifferences.put(accountKey, account);
+
+		return account;
     }
+
+	
+	public int getID(FreerailsPrincipal p) {
+	
+		return getPlayerID(p);
+	}
+
+	/** Returns true if the objects are equal or both null, otherwise returns false.  Does
+	 * not throw null pointer exceptions when either of the objects is null.	
+	 */
+	private static boolean equal(FreerailsSerializable a, FreerailsSerializable b){
+		if(null == a || null == b){
+			return null == a && null == b;
+		}
+		return a.equals(b);		
+	}
 }

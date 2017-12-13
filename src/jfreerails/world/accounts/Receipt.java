@@ -15,9 +15,9 @@ import jfreerails.world.common.Money;
  */
 public class Receipt implements Transaction {
     private final Money m_amount;
-    private final int m_category;
+    private final Category m_category;
 
-    public Receipt(Money m, int category) {
+    public Receipt(Money m, Category category) {
         m_amount = m;
         m_category = category;
     }
@@ -25,7 +25,7 @@ public class Receipt implements Transaction {
     public int hashCode() {
         int result;
         result = m_amount.hashCode();
-        result = 29 * result + m_category;
+        result = 29 * result + m_category.hashCode();
 
         return result;
     }
@@ -40,12 +40,11 @@ public class Receipt implements Transaction {
 
             return test.m_amount.equals(m_amount) &&
             m_category == test.m_category;
-        } else {
-            return false;
         }
+		return false;
     }
 
-    public int getCategory() {
+    public Category getCategory() {
         return m_category;
     }
 }

@@ -60,10 +60,9 @@ public abstract class AbstractTileRenderer implements TileRenderer {
 
         if (getTileIcons()[tile] != null) {
             return getTileIcons()[tile];
-        } else {
-            throw new NullPointerException(
-                "Error in TileView.getIcon: icon no. " + tile + "==null");
         }
+		throw new NullPointerException(
+		    "Error in TileView.getIcon: icon no. " + tile + "==null");
     }
 
     int selectTileIcon(int x, int y, ReadOnlyWorld w) {
@@ -78,7 +77,7 @@ public abstract class AbstractTileRenderer implements TileRenderer {
             for (int i = 0; i < typeNumbers.length; i++) {
                 TerrainTile tt = (TerrainTile)w.getTile(x, y);
 
-                if (tt.getTerrainTypeNumber() == typeNumbers[i]) {
+                if (tt.getTerrainTypeID() == typeNumbers[i]) {
                     match = 1;
 
                     //A match

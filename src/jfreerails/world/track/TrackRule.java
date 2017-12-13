@@ -1,9 +1,11 @@
 package jfreerails.world.track;
 
 import java.util.Iterator;
+
 import jfreerails.world.common.FreerailsSerializable;
 import jfreerails.world.common.Money;
 import jfreerails.world.common.OneTileMoveVector;
+import jfreerails.world.terrain.TerrainType;
 
 
 /**
@@ -12,22 +14,29 @@ import jfreerails.world.common.OneTileMoveVector;
 *@author     Luke Lindsay
 *     09 October 2001
 */
-public interface TrackRule extends FreerailsSerializable {
-    boolean canBuildOnThisTerrainType(String TerrainType);
+public interface TrackRule extends FreerailsSerializable, Comparable {
+	
+	public enum TrackCategories{track,  bridge, tunnel, station, non};
+	
+	TrackCategories getCategory();
+	
+    boolean canBuildOnThisTerrainType(TerrainType.Category TerrainType);
 
     boolean isStation();
+    
+    boolean isDouble();
 
     Money getPrice();
+    
+    Money getFixedCost();
 
     Money getMaintenanceCost();
 
-    int getStationRadius();
-
-    int getRuleNumber();
+    int getStationRadius();   
 
     String getTypeName();
 
-    boolean testTrackPieceLegality(int trackTemplateToTest);
+    boolean testTrackPieceLegality(int a9bitTemplate);
 
     boolean trackPieceIsLegal(TrackConfiguration config);
 
@@ -35,5 +44,5 @@ public interface TrackRule extends FreerailsSerializable {
 
     OneTileMoveVector[] getLegalRoutes(OneTileMoveVector directionComingFrom);
 
-    Iterator getLegalConfigurationsIterator();
+    Iterator<TrackConfiguration> getLegalConfigurationsIterator();
 }

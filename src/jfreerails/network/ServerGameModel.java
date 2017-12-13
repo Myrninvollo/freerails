@@ -9,15 +9,15 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import jfreerails.util.GameModel;
 import jfreerails.world.top.World;
-import jfreerails.world.top.WorldListListener;
 
 
 /**
+ * Defines methods on a GameModel that let the server load and initiate, and save it.
+ * 
  * @author Luke
  *
  */
-public interface ServerGameModel extends GameModel, WorldListListener,
-    Serializable {
+public interface ServerGameModel extends GameModel, Serializable {
     void setWorld(World w);
 
     World getWorld();

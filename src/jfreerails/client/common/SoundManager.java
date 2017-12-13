@@ -8,6 +8,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.logging.Logger;
+
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
@@ -25,12 +26,16 @@ import javax.sound.sampled.UnsupportedAudioFileException;
  *  @author Luke
  *
  */
-public class SoundManager {
+public class SoundManager implements ModelRootListener {
     private static final Logger logger = Logger.getLogger(SoundManager.class.getName());
     Random r = new Random();
-    private static boolean enableSounds = true;
+    private boolean playSounds = true;
     private static final SoundManager instance = new SoundManager();
 
+    /**
+     *  Stores the audio data and properties of a sample.      
+     *
+     */
     private static class Sample {
         DataLine.Info info;
         AudioFormat format;
@@ -38,14 +43,18 @@ public class SoundManager {
         byte[] audio;
     }
 
-    private HashMap samples = new HashMap();
+    private HashMap<String, Sample> samples = new HashMap<String, Sample>();
 
     private SoundManager() {
     }
 
-    private void addClip(String s)
+    public void addClip(String s)
         throws IOException, UnsupportedAudioFileException, 
             LineUnavailableException {
+    	if (samples.containsKey(s)) {
+            return;
+        }
+    	
         URL url = getClass().getResource(s);
         AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(loadStream(
                     url.openStream()));
@@ -78,33 +87,37 @@ public class SoundManager {
     }
 
     public void playSound(String s, int loops) {
-        try {
-            if (!samples.containsKey(s)) {
-                addClip(s);
+        if (playSounds) {
+            try {
+                if (!samples.containsKey(s)) {
+                    addClip(s);
+                }
+
+                Sample sample = samples.get(s);
+                
+// The code below is commented out as a fix for bug 1103632	(Sound on Linux).
+//                //Add a random component to the sample rate so that the samples 
+//                //don't always sound the same.
+//                float frameRate = (1 + (r.nextFloat() - 0.5f) / 3) * sample.format.getFrameRate();
+//
+//                //Make sure the frameRate is a sensible value, i.e.  between 4 kHz and 48 kHz.
+//                frameRate = Math.min(frameRate, 48000f);
+//                frameRate = Math.max(frameRate, 4000f);
+//
+//                AudioFormat format = new AudioFormat(sample.format.getEncoding(),
+//                        sample.format.getSampleRate(),
+//                        sample.format.getSampleSizeInBits(),
+//                        sample.format.getChannels(),
+//                        sample.format.getFrameSize(), frameRate,
+//                        sample.format.isBigEndian());
+                Clip clip = (Clip)AudioSystem.getLine(sample.info);
+                clip.open(sample.format, sample.audio, 0, sample.size);
+                clip.loop(loops);
+            } catch (LineUnavailableException e) {
+                logger.warning(e.getMessage());
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-
-            Sample sample = (Sample)samples.get(s);
-
-            //Add a random component to the sample rate so that the samples 
-            //don't always sound the same.
-            float frameRate = (1 + (r.nextFloat() - 0.5f) / 3) * sample.format.getFrameRate();
-
-            //Make sure the frameRate is a sensible value, i.e.  between 4 kHz and 48 kHz.
-            frameRate = Math.min(frameRate, 48000f);
-            frameRate = Math.max(frameRate, 4000f);
-
-            AudioFormat format = new AudioFormat(sample.format.getEncoding(),
-                    sample.format.getSampleRate(),
-                    sample.format.getSampleSizeInBits(),
-                    sample.format.getChannels(), sample.format.getFrameSize(),
-                    frameRate, sample.format.isBigEndian());
-            Clip clip = (Clip)AudioSystem.getLine(sample.info);
-            clip.open(format, sample.audio, 0, sample.size);
-            clip.loop(loops);
-        } catch (LineUnavailableException e) {
-            logger.warning(e.getMessage());
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
@@ -123,5 +136,12 @@ public class SoundManager {
 
     public static SoundManager getSoundManager() {
         return instance;
-    }
+    }  
+
+	public void propertyChange(ModelRoot.Property p, Object before, Object after) {
+		if(p.equals(ModelRoot.Property.PLAY_SOUNDS)){
+			Boolean b = (Boolean)after;
+            playSounds = b.booleanValue();
+		}
+	}
 }

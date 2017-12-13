@@ -3,6 +3,9 @@
  */
 package jfreerails.network;
 
+import jfreerails.controller.PreMove;
+import jfreerails.controller.PreMoveStatus;
+import jfreerails.controller.TimeTickPreMove;
 import jfreerails.move.AddTransactionMove;
 import jfreerails.move.Move;
 import jfreerails.move.MoveStatus;
@@ -77,8 +80,10 @@ public class FreerailsClientWithLocalServerTest extends TestCase {
         /* Connect 2 clients. */
         FreerailsClient client0 = new FreerailsClient();
         LogOnResponse response0 = client0.connect(server, "client0", "password");
+        assertTrue(response0.isSuccessful());
         FreerailsClient client1 = new FreerailsClient();
         LogOnResponse response1 = client1.connect(server, "client1", "password");
+        assertTrue(response1.isSuccessful());
         assertEquals(2, server.countOpenConnections());
         client0.update();
         client1.update();
@@ -133,18 +138,32 @@ public class FreerailsClientWithLocalServerTest extends TestCase {
         World w = client0.getWorld();
         assertNotNull(w.getPlayer(0));
         assertNotNull(w.getPlayer(1));
+        
+        
+        /*
+         * Now check that attempts to log on by new players are rejected.
+         */
+        
+        assertEquals(2, server.countOpenConnections());
+        FreerailsClient client = new FreerailsClient();
+        LogOnResponse response = client.connect(server, "Late player", "password");
+        assertFalse(response.isSuccessful());
+        assertEquals(2, server.countOpenConnections());
+
     }
 
-    /** Tests sending moves between client and sever. */
+    /** Tests sending moves between client and server. */
     public void testSendingMoves() {
         try {
             /* Set up and start a game with 2 clients. */
             FreerailsClient client0 = new FreerailsClient();
             LogOnResponse response0 = client0.connect(server, "client0",
                     "password");
+            assertTrue(response0.isSuccessful());
             FreerailsClient client1 = new FreerailsClient();
             LogOnResponse response1 = client1.connect(server, "client1",
                     "password");
+            assertTrue(response1.isSuccessful());
             client0.update();
             client1.update();
 
@@ -158,15 +177,13 @@ public class FreerailsClientWithLocalServerTest extends TestCase {
             /* Now try sending some moves. */
             Player player0 = client0.getWorld().getPlayer(0);
             FreerailsPrincipal principal0 = player0.getPrincipal();
-            Transaction t = new Receipt(new Money(100), Transaction.MISC_INCOME);
+            Transaction t = new Receipt(new Money(100), Transaction.Category.MISC_INCOME);
             Move move = new AddTransactionMove(principal0, t);
             World copyOfWorld = client0.getWorld().defensiveCopy();
             assertEquals(copyOfWorld, client0.getWorld());
 
             MoveStatus status = move.doMove(copyOfWorld, principal0);
 
-            // MoveStatus status2 = move.doMove(client0.getWorld(), principal0);
-            // assertEquals(status, status2);
             assertTrue(status.isOk());
 
             //client0.write(move);
@@ -199,10 +216,67 @@ public class FreerailsClientWithLocalServerTest extends TestCase {
             assertFalse(client0.getWorld().equals(client1.getWorld()));
             response0 = client0.connect(server, "client0", "password");
             assertTrue(response0.isSuccessful());
-            assertEquals(0, response0.getPlayerNumber());
+            assertEquals(0, response0.getPlayerID());
         } catch (Exception e) {
             e.printStackTrace();
             fail();
         }
+    }
+
+    /** Tests sending premoves between client and server. */
+    public void testSendingPreMoves() {
+        try {
+            /* Set up and start a game with 2 clients. */
+            FreerailsClient client0 = new FreerailsClient();
+            LogOnResponse response0 = client0.connect(server, "client0",
+                    "password");
+            assertTrue(response0.isSuccessful());
+            FreerailsClient client1 = new FreerailsClient();
+            LogOnResponse response1 = client1.connect(server, "client1",
+                    "password");
+            assertTrue(response1.isSuccessful());
+            client0.update();
+            client1.update();
+
+            String[] mapNames = (String[])client0.getProperty(ClientControlInterface.MAPS_AVAILABLE);
+            ServerCommand command = new NewGameServerCommand(99, mapNames[0]);
+            client0.write(command);
+            server.update();
+            client0.update();
+            client1.update();
+
+            /* Now try sending some premoves. */
+            Player player0 = client0.getWorld().getPlayer(0);
+            FreerailsPrincipal principal0 = player0.getPrincipal();
+
+            PreMove pm = new TimeTickPreMove();
+
+            World copyOfWorld = client0.getWorld().defensiveCopy();
+            assertEquals(copyOfWorld, client0.getWorld());
+
+            Move move = pm.generateMove(copyOfWorld);
+            MoveStatus status = move.doMove(copyOfWorld, principal0);
+            assertTrue(status.isOk());
+            client0.processPreMove(pm);
+            server.update();
+
+            PreMoveStatus reply = (PreMoveStatus)client0.read();
+            assertEquals(PreMoveStatus.PRE_MOVE_OK, reply);
+            client0.processMessage(reply);
+
+            server.update();
+            client0.update();
+            client1.update();
+            assertEquals(copyOfWorld, client0.getWorld());
+            assertEquals(copyOfWorld, client1.getWorld());
+            assertEquals(copyOfWorld, server.getCopyOfWorld());
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+    
+    public void testLoadingGame(){
+    	
     }
 }

@@ -8,92 +8,91 @@ import jfreerails.world.common.Money;
  *@author Luke
  */
 final public class TrackRuleProperties implements FreerailsSerializable {
-    public String getTypeName() {
-        return typeName;
-    }
-
-    public int hashCode() {
-        int result;
-        result = rGBvalue;
-        result = 29 * result + number;
-        result = 29 * result + (enableDoubleTrack ? 1 : 0);
-        result = 29 * result + typeName.hashCode();
-        result = 29 * result + (isStation ? 1 : 0);
-        result = 29 * result + stationRadius;
-        result = 29 * result + price.hashCode();
-        result = 29 * result + maintenanceCost.hashCode();
-
-        return result;
-    }
-
-    public int getRuleNumber() {
-        return number;
-    }
-
-    public boolean isStation() {
-        return isStation;
-    }
-
-    private final int rGBvalue;
-    private final int number; //This rule's position in the track rule list.
     private final boolean enableDoubleTrack;
-    private final String typeName;
-    private final boolean isStation;
-    private final int stationRadius;
+    private final Money maintenanceCost;    
     private final Money price;
-    private final Money maintenanceCost;
-
-    public Money getMaintenanceCost() {
-        return maintenanceCost;
-    }
+    private final Money fixedCost;
+    private final TrackRule.TrackCategories category;
+    private final int rGBvalue;
+    private final int stationRadius;
+    private final String typeName;
 
     public TrackRuleProperties(int rgb, boolean doubleTrack, String name,
-        int n, boolean station, int radius, int price, int maintenance) {
+        TrackRule.TrackCategories c, int radius, int price, int maintenance, int fixedCost) {
         stationRadius = radius;
         rGBvalue = rgb;
         enableDoubleTrack = doubleTrack;
-        typeName = name;
-        number = n;
-        isStation = station;
+        typeName = name;     
+        category = c;
         this.price = new Money(price);
         this.maintenanceCost = new Money(maintenance);
-    }
-
-    public Money getPrice() {
-        return price;
-    }
-
-    public int getStationRadius() {
-        return stationRadius;
+        this.fixedCost = new Money(fixedCost);
     }
 
     public boolean equals(Object o) {
         if (o instanceof TrackRuleProperties) {
             TrackRuleProperties test = (TrackRuleProperties)o;
 
-            if (rGBvalue == test.getRGBvalue() && number == test.getNumber() &&
+            if (rGBvalue == test.getRGBvalue() &&
                     enableDoubleTrack == test.isEnableDoubleTrack() &&
                     typeName.equals(test.getTypeName()) &&
-                    isStation == test.isStation() &&
+                    category == test.category &&
                     stationRadius == test.stationRadius) {
                 return true;
-            } else {
-                return false;
             }
-        } else {
-            return false;
+			return false;
         }
+		return false;
+    }
+
+    public Money getMaintenanceCost() {
+        return maintenanceCost;
+    }
+
+ 
+
+    public Money getPrice() {
+        return price;
+    }
+
+    private int getRGBvalue() {
+        return rGBvalue;
+    }
+
+
+    public int getStationRadius() {
+        return stationRadius;
+    }
+    public String getTypeName() {
+        return typeName;
+    }
+
+    public int hashCode() {
+        int result;
+        result = rGBvalue;        
+        result = 29 * result + (enableDoubleTrack ? 1 : 0);
+        result = 29 * result + typeName.hashCode();
+        result = 29 * result + category.hashCode();
+        result = 29 * result + stationRadius;
+        result = 29 * result + price.hashCode();
+        result = 29 * result + fixedCost.hashCode();
+        result = 29 * result + maintenanceCost.hashCode();
+
+        return result;
     }
 
     public boolean isEnableDoubleTrack() {
         return enableDoubleTrack;
     }
 
-    private int getNumber() {
-        return number;
+    public boolean isStation() {
+        return category.equals(TrackRule.TrackCategories.station);
     }
-
-    private int getRGBvalue() {
-        return rGBvalue;
-    }
+	public TrackRule.TrackCategories getCategory() {
+		return category;
+	}
+	
+	public Money getFixedCost() {
+		return fixedCost;
+	}
 }

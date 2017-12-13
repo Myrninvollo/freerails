@@ -5,6 +5,8 @@ import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.NoSuchElementException;
+import java.util.logging.Logger;
+import java.awt.event.KeyEvent;
 
 import javax.swing.ImageIcon;
 import javax.swing.JMenuItem;
@@ -31,6 +33,8 @@ import jfreerails.world.train.TrainOrdersModel;
  * @author  Luke Lindsay
  */
 public class TrainScheduleJPanel extends javax.swing.JPanel implements View, WorldListListener {
+    
+    private static final Logger logger = Logger.getLogger(TrainScheduleJPanel.class.getName());
     
     private int trainNumber = -1;
     
@@ -238,6 +242,11 @@ public class TrainScheduleJPanel extends javax.swing.JPanel implements View, Wor
         jScrollPane1.setPreferredSize(new java.awt.Dimension(280, 160));
         orders.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         orders.setCellRenderer(trainOrderJPanel1);
+        orders.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                ordersKeyPressed(evt);
+            }
+        });
         orders.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 ordersMouseClicked(evt);
@@ -256,9 +265,78 @@ public class TrainScheduleJPanel extends javax.swing.JPanel implements View, Wor
         add(jScrollPane1, gridBagConstraints);
 
     }//GEN-END:initComponents
-
+    
+    private void ordersKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_ordersKeyPressed
+        switch(evt.getKeyCode()){
+            case KeyEvent.VK_O:{
+                //Add priority orders
+                priorityOrdersJButtonActionPerformed(null);
+                break;
+            }
+            case KeyEvent.VK_N:{
+                //Add station
+                addStationJButtonActionPerformed(null);
+                break;
+            }
+            default:{
+                //do nothing.
+            }
+        }
+        
+        int orderNumber = this.orders.getSelectedIndex();
+        if(orderNumber == -1){
+            //No order is selected.
+            return;
+        }
+        switch(evt.getKeyCode()){
+            case KeyEvent.VK_G:{
+                //Goto station.
+                gotoStationJMenuItemActionPerformed(null);
+                break;
+            }
+            case KeyEvent.VK_S:{
+                //Change station
+                showSelectStation(this.getSchedule(), orderNumber);
+                break;
+            }
+            case KeyEvent.VK_A:{
+                //Auto schedule
+                setAutoConsist();
+                break;
+            }
+            case KeyEvent.VK_C:{
+                //Change add wagon
+                
+                break;
+            }
+            case KeyEvent.VK_DELETE:{
+                //Remove station
+                removeStationJMenuItemActionPerformed(null);
+                break;
+            }
+            case KeyEvent.VK_BACK_SPACE:{
+                //Remove last wagon
+                removeLastWagon();
+                break;
+            }
+            
+            case KeyEvent.VK_W:{
+                //toggle wait until full
+                MutableSchedule s = getSchedule();
+                TrainOrdersModel order = s.getOrder(orderNumber);
+                setWaitUntilFull(!order.waitUntilFull);
+                break;
+            }
+            default:{
+                //do nothing.
+            }
+        }
+        listModel.fireRefresh();
+        
+    }//GEN-LAST:event_ordersKeyPressed
+    
     private void autoConsistJMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_autoConsistJMenuItemActionPerformed
-        setAutoConsist();    
+        setAutoConsist();
     }//GEN-LAST:event_autoConsistJMenuItemActionPerformed
     
     private void changeStationActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_changeStationActionPerformed
@@ -287,19 +365,27 @@ public class TrainScheduleJPanel extends javax.swing.JPanel implements View, Wor
     }//GEN-LAST:event_engineOnlyJMenuItemActionPerformed
     
     private void noChangeJMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_noChangeJMenuItemActionPerformed
-        noChange();      
+        noChange();
     }//GEN-LAST:event_noChangeJMenuItemActionPerformed
     
     private void priorityOrdersJButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_priorityOrdersJButtonActionPerformed
         MutableSchedule s = getSchedule();
-        s.setPriorityOrders(new TrainOrdersModel(0, null, false, false));
-        showSelectStation(s, Schedule.PRIORITY_ORDERS);
+        try{
+            s.setPriorityOrders(new TrainOrdersModel(getFirstStationID(), null, false, false));//TODO fix bug
+            showSelectStation(s, Schedule.PRIORITY_ORDERS);
+        }catch (NoSuchElementException e){
+            logger.warning("No stations exist so can't add station to schedule!");
+        }
     }//GEN-LAST:event_priorityOrdersJButtonActionPerformed
     
     private void addStationJButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addStationJButtonActionPerformed
         MutableSchedule s = getSchedule();
-        int newOrderNumber = s.addOrder(new TrainOrdersModel(0, null, false, false));
-        showSelectStation(s, newOrderNumber);
+        try{
+            int newOrderNumber = s.addOrder(new TrainOrdersModel(getFirstStationID(), null, false, false)); //TODO fix bug
+            showSelectStation(s, newOrderNumber);
+        }catch (NoSuchElementException e){
+            logger.warning("No stations exist so can't add station to schedule!");
+        }
     }//GEN-LAST:event_addStationJButtonActionPerformed
     
     private void removeStationJMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeStationJMenuItemActionPerformed
@@ -364,6 +450,9 @@ public class TrainScheduleJPanel extends javax.swing.JPanel implements View, Wor
             public void actionPerformed(ActionEvent evt) {
                 sendUpdateMove(selectStationJPanel1.generateNewSchedule());
                 selectStationJPopupMenu.setVisible(false);
+                listModel.fireRefresh();
+                orders.requestFocus();
+                
             }
         };
         this.selectStationJPanel1.setup(mr, vl, actionListener);
@@ -386,7 +475,7 @@ public class TrainScheduleJPanel extends javax.swing.JPanel implements View, Wor
         MutableSchedule s  = getSchedule();
         addStationJButton.setEnabled(s.canAddOrder());
         
-        //Only one set of prority orders are allowed.
+        //Only one set of priority orders are allowed.
         priorityOrdersJButton.setEnabled(!s.hasPriorityOrders());
     }
     
@@ -396,6 +485,18 @@ public class TrainScheduleJPanel extends javax.swing.JPanel implements View, Wor
         TrainModel train = (TrainModel)w.get(KEY.TRAINS, trainNumber, principal);
         ImmutableSchedule immutableSchedule = (ImmutableSchedule)w.get(KEY.TRAIN_SCHEDULES, train.getScheduleID(), principal);
         return new MutableSchedule(immutableSchedule);
+    }
+    
+    /** Since stations can be removed, we should not assume that station 0 exists: this method
+     * returns the id of the first station that exists.
+     *
+     */
+    private int getFirstStationID(){
+        NonNullElements stations = new NonNullElements(KEY.STATIONS, modelRoot.getWorld(), modelRoot.getPrincipal());
+        if(stations.next()){
+            return stations.getIndex();
+        }
+        throw new NoSuchElementException();
     }
     
     private void setupWagonsPopup() {
@@ -414,10 +515,10 @@ public class TrainScheduleJPanel extends javax.swing.JPanel implements View, Wor
             int width = image.getWidth(null);
             int scale = height/10;
             ImageIcon icon = new ImageIcon(image.getScaledInstance(width/scale,
-            height/scale, Image.SCALE_FAST));
+                    height/scale, Image.SCALE_FAST));
             wagonMenuItem.setIcon(icon);
             wagonMenuItem
-            .addActionListener(new java.awt.event.ActionListener() {
+                    .addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent evt) {
                     
                     addWagon(wagonTypeNumber);
@@ -432,7 +533,7 @@ public class TrainScheduleJPanel extends javax.swing.JPanel implements View, Wor
         MutableSchedule s = getSchedule();
         int orderNumber = this.orders.getSelectedIndex();
         oldOrders = s.getOrder(orderNumber);
-        newOrders = new TrainOrdersModel(oldOrders.getStationNumber(), null, false, false);
+        newOrders = new TrainOrdersModel(oldOrders.getStationID(), null, false, false);
         s.setOrder(orderNumber, newOrders);
         sendUpdateMove(s);
     }
@@ -442,18 +543,24 @@ public class TrainScheduleJPanel extends javax.swing.JPanel implements View, Wor
         MutableSchedule s = getSchedule();
         int orderNumber = this.orders.getSelectedIndex();
         oldOrders = s.getOrder(orderNumber);
-        boolean autoConsist = b ? false: oldOrders.autoConsist;
-        newOrders = new TrainOrdersModel(oldOrders.getStationNumber(), oldOrders.consist, b, autoConsist);
+        //If auto-consist is set do nothing
+        if(oldOrders.autoConsist)
+            return;
+        //If no-change is set do nothing
+        if(oldOrders.consist == null)
+            return;
+        boolean autoConsist = false;
+        newOrders = new TrainOrdersModel(oldOrders.getStationID(), oldOrders.consist, b, autoConsist);
         s.setOrder(orderNumber, newOrders);
         sendUpdateMove(s);
     }
     
-      private void setAutoConsist(){
+    private void setAutoConsist(){
         TrainOrdersModel oldOrders, newOrders;
         MutableSchedule s = getSchedule();
         int orderNumber = this.orders.getSelectedIndex();
-        oldOrders = s.getOrder(orderNumber);       
-        newOrders = new TrainOrdersModel(oldOrders.getStationNumber(), null, false, true);
+        oldOrders = s.getOrder(orderNumber);
+        newOrders = new TrainOrdersModel(oldOrders.getStationID(), null, false, true);
         s.setOrder(orderNumber, newOrders);
         sendUpdateMove(s);
     }
@@ -477,7 +584,7 @@ public class TrainScheduleJPanel extends javax.swing.JPanel implements View, Wor
         }else{
             newConsist = new int[]{wagonTypeNumber};
         }
-        newOrders = new TrainOrdersModel(oldOrders.getStationNumber(), newConsist, oldOrders.getWaitUntilFull(), false);
+        newOrders = new TrainOrdersModel(oldOrders.getStationID(), newConsist, oldOrders.getWaitUntilFull(), false);
         s.setOrder(orderNumber, newOrders);
         sendUpdateMove(s);
     }
@@ -487,7 +594,7 @@ public class TrainScheduleJPanel extends javax.swing.JPanel implements View, Wor
         MutableSchedule s = getSchedule();
         int orderNumber = this.orders.getSelectedIndex();
         oldOrders = s.getOrder(orderNumber);
-        newOrders = new TrainOrdersModel(oldOrders.getStationNumber(), new int[0], false, false);
+        newOrders = new TrainOrdersModel(oldOrders.getStationID(), new int[0], false, false);
         s.setOrder(orderNumber, newOrders);
         sendUpdateMove(s);
     }
@@ -506,7 +613,7 @@ public class TrainScheduleJPanel extends javax.swing.JPanel implements View, Wor
         
         //Copy existing wagons
         System.arraycopy(oldConsist, 0, newConsist, 0, newConsist.length);
-        newOrders = new TrainOrdersModel(oldOrders.getStationNumber(), newConsist, oldOrders.waitUntilFull, false);
+        newOrders = new TrainOrdersModel(oldOrders.getStationID(), newConsist, oldOrders.waitUntilFull, false);
         s.setOrder(orderNumber, newOrders);
         sendUpdateMove(s);
     }
@@ -515,7 +622,8 @@ public class TrainScheduleJPanel extends javax.swing.JPanel implements View, Wor
         FreerailsPrincipal principal = modelRoot.getPrincipal();
         ReadOnlyWorld w = modelRoot.getWorld();
         TrainModel train = (TrainModel)w.get(KEY.TRAINS, this.trainNumber, principal);
-        int scheduleID = train.getScheduleID();
+        // int scheduleID = train.getScheduleID();
+        assert(scheduleID == train.getScheduleID());
         ImmutableSchedule before = (ImmutableSchedule)w.get(KEY.TRAIN_SCHEDULES, scheduleID, principal);
         ImmutableSchedule after = mutableSchedule.toImmutableSchedule();
         Move m = new ChangeTrainScheduleMove(scheduleID, before, after, principal);
@@ -553,32 +661,32 @@ public class TrainScheduleJPanel extends javax.swing.JPanel implements View, Wor
     }
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton addStationJButton;
-    private javax.swing.JMenu addWagonJMenu;
-    private javax.swing.JMenuItem autoConsistJMenuItem;
-    private javax.swing.JMenu changeConsistJMenu;
-    private javax.swing.JMenuItem changeStation;
-    private javax.swing.JMenuItem dontWaitJMenuItem;
-    private javax.swing.JPopupMenu editOrderJPopupMenu;
-    private javax.swing.JMenuItem engineOnlyJMenuItem;
-    private javax.swing.JMenuItem gotoStationJMenuItem;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JSeparator jSeparator1;
-    private javax.swing.JSeparator jSeparator2;
-    private javax.swing.JMenuItem noChangeJMenuItem;
-    private javax.swing.JList orders;
-    private javax.swing.JButton priorityOrdersJButton;
-    private javax.swing.JMenuItem pullUpJMenuItem;
-    private javax.swing.JMenuItem pushDownJMenuItem;
-    private javax.swing.JMenuItem removeAllJMenuItem;
-    private javax.swing.JMenuItem removeLastJMenuItem;
-    private javax.swing.JMenuItem removeStationJMenuItem;
-    private javax.swing.JMenu removeWagonsJMenu;
-    private jfreerails.client.view.SelectStationJPanel selectStationJPanel1;
-    private javax.swing.JPopupMenu selectStationJPopupMenu;
-    private jfreerails.client.view.TrainOrderJPanel trainOrderJPanel1;
-    private javax.swing.JMenu waitJMenu;
-    private javax.swing.JMenuItem waitUntilFullJMenuItem;
+    javax.swing.JButton addStationJButton;
+    javax.swing.JMenu addWagonJMenu;
+    javax.swing.JMenuItem autoConsistJMenuItem;
+    javax.swing.JMenu changeConsistJMenu;
+    javax.swing.JMenuItem changeStation;
+    javax.swing.JMenuItem dontWaitJMenuItem;
+    javax.swing.JPopupMenu editOrderJPopupMenu;
+    javax.swing.JMenuItem engineOnlyJMenuItem;
+    javax.swing.JMenuItem gotoStationJMenuItem;
+    javax.swing.JScrollPane jScrollPane1;
+    javax.swing.JSeparator jSeparator1;
+    javax.swing.JSeparator jSeparator2;
+    javax.swing.JMenuItem noChangeJMenuItem;
+    javax.swing.JList orders;
+    javax.swing.JButton priorityOrdersJButton;
+    javax.swing.JMenuItem pullUpJMenuItem;
+    javax.swing.JMenuItem pushDownJMenuItem;
+    javax.swing.JMenuItem removeAllJMenuItem;
+    javax.swing.JMenuItem removeLastJMenuItem;
+    javax.swing.JMenuItem removeStationJMenuItem;
+    javax.swing.JMenu removeWagonsJMenu;
+    jfreerails.client.view.SelectStationJPanel selectStationJPanel1;
+    javax.swing.JPopupMenu selectStationJPopupMenu;
+    jfreerails.client.view.TrainOrderJPanel trainOrderJPanel1;
+    javax.swing.JMenu waitJMenu;
+    javax.swing.JMenuItem waitUntilFullJMenuItem;
     // End of variables declaration//GEN-END:variables
     
 }

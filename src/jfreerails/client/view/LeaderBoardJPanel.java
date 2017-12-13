@@ -34,7 +34,7 @@ public class LeaderBoardJPanel extends JPanel implements View {
 	
 	private ActionListener m_submitButtonCallBack = null;
 	
-	private Vector values;
+	private Vector<PlayerDetails> values;
 	/**
 	 * This method initializes 
 	 * 
@@ -42,7 +42,7 @@ public class LeaderBoardJPanel extends JPanel implements View {
 	public LeaderBoardJPanel() {
 		super();
 		
-		values = new Vector();
+		values = new Vector<PlayerDetails>();
 		Random rand = new Random();
 		for(int i = 0 ; i < 5; i ++){
 		    PlayerDetails p = new PlayerDetails();
@@ -53,8 +53,7 @@ public class LeaderBoardJPanel extends JPanel implements View {
 	}
 	/**
 	 * This method initializes this
-	 * 
-	 * @return void
+	 * 	
 	 */
 	private void initialize() {      
         this.add(getPlayersList(), null);      
@@ -107,7 +106,11 @@ public class LeaderBoardJPanel extends JPanel implements View {
 		playersList.setListData(values);
 		setSize(getPreferredSize());
     }
-    
+    /**
+     * Stores the details a player that are shown on the leaderboard.
+     * @author Luke
+     *
+     */
     static class PlayerDetails implements Comparable{               
         
         String name = "player";
@@ -130,9 +133,8 @@ public class LeaderBoardJPanel extends JPanel implements View {
                 PlayerDetails test = (PlayerDetails)o;
                 long l = test.networth.getAmount() - networth.getAmount();
                 return (int)l;
-            }else{
-                return 0;
             }
+			return 0;
         }
         
     }

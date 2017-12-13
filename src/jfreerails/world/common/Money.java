@@ -7,6 +7,8 @@ import java.text.DecimalFormat;
  * @author Luke
  */
 final public class Money implements FreerailsSerializable {
+	
+	public static final Money ZERO = new Money(0);
     private static final DecimalFormat df = new DecimalFormat("#,###");
     private final long amount;
 
@@ -35,8 +37,7 @@ final public class Money implements FreerailsSerializable {
             Money test = (Money)obj;
 
             return test.amount == this.amount;
-        } else {
-            return false;
         }
+		return false;
     }
 }

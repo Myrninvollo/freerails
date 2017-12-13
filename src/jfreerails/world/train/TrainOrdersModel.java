@@ -43,7 +43,7 @@ public class TrainOrdersModel implements FreerailsSerializable {
         return this.consist;
     }
 
-    public int getStationNumber() {
+    public int getStationID() {
         return m_station;
     }
 
@@ -71,9 +71,8 @@ public class TrainOrdersModel implements FreerailsSerializable {
             this.m_station == test.m_station &&
             autoConsist == test.autoConsist &&
             Arrays.equals(this.consist, test.consist);
-        } else {
-            return false;
         }
+		return false;
     }
 
     public boolean isAutoConsist() {

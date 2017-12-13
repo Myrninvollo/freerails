@@ -40,11 +40,11 @@ public class AddItemToListMove implements ListMove {
         return listKey;
     }
 
-    AddItemToListMove(KEY key, int i, FreerailsSerializable item,
+    public AddItemToListMove(KEY key, int i, FreerailsSerializable item,
         FreerailsPrincipal p) {
         this.listKey = key;
         this.index = i;
-        this.item = item;
+        this.item = item;      
         this.principal = p;
     }
 
@@ -110,9 +110,8 @@ public class AddItemToListMove implements ListMove {
             }
 
             return true;
-        } else {
-            return false;
         }
+		return false;
     }
 
     public FreerailsSerializable getBefore() {
@@ -125,12 +124,12 @@ public class AddItemToListMove implements ListMove {
 
     public String toString() {
         StringBuffer sb = new StringBuffer(this.getClass().getName());
-        sb.append("\nlist=");
+        sb.append("\n list=");
         sb.append(listKey.toString());
         sb.append("\n index =");
-        sb.append(this.index);
+        sb.append(index);
         sb.append("\n item =");
-        sb.append(this.item.toString());
+        sb.append(item);
 
         return sb.toString();
     }

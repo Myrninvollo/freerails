@@ -45,12 +45,17 @@ public class DropOffAndPickupCargoMoveGenerator {
     private MutableCargoBundle stationBefore;
     private MutableCargoBundle trainAfter;
     private MutableCargoBundle trainBefore;
-    private ArrayList moves;
+    private ArrayList<Move> moves;
     private final FreerailsPrincipal principal;
     private boolean waitingForFullLoad;
     private boolean m_autoConsist;
     private int[] consist = new int[0];
-
+    
+    /** Stores the type and quanity of cargo in a wagon.
+     * 
+     * @author Luke
+     *
+     */
     private static class WagonLoad implements Comparable {
         final int quantity;
         final int cargoType;
@@ -94,10 +99,12 @@ public class DropOffAndPickupCargoMoveGenerator {
         processTrainBundle(); //ie. unload train / dropoff cargo         
 
         if (autoConsist) {
-            ArrayList wagonsAvailable = new ArrayList();
+            ArrayList<WagonLoad> wagonsAvailable = new ArrayList<WagonLoad> ();
 
-            TrainModel train = (TrainModel)world.get(KEY.TRAINS, this.trainId,
-                    principal);
+//            TrainModel train = (TrainModel)world.get(KEY.TRAINS, this.trainId,
+//                    principal);
+            assert(train.equals(world.get(KEY.TRAINS, this.trainId,
+                    principal)));
             Schedule schedule = (ImmutableSchedule)world.get(KEY.TRAIN_SCHEDULES,
                     train.getScheduleID(), principal);
             TrainOrdersModel order = schedule.getOrder(schedule.getOrderToGoto());
@@ -132,7 +139,7 @@ public class DropOffAndPickupCargoMoveGenerator {
             consist = new int[numWagons2add];
 
             for (int i = 0; i < numWagons2add; i++) {
-                WagonLoad wagonload = (WagonLoad)wagonsAvailable.get(i);
+                WagonLoad wagonload = wagonsAvailable.get(i);
                 consist[i] = wagonload.cargoType;
             }
         }
@@ -172,13 +179,13 @@ public class DropOffAndPickupCargoMoveGenerator {
     private void getBundles() {
         TrainModel trainModel = ((TrainModel)w.get(KEY.TRAINS, trainId,
                 principal));
-        trainBundleId = trainModel.getCargoBundleNumber();
+        trainBundleId = trainModel.getCargoBundleID();
         trainBefore = getCopyOfBundle(trainBundleId);
         trainAfter = getCopyOfBundle(trainBundleId);
 
         StationModel stationModel = ((StationModel)w.get(KEY.STATIONS,
                 stationId, principal));
-        stationBundleId = stationModel.getCargoBundleNumber();
+        stationBundleId = stationModel.getCargoBundleID();
         stationAfter = getCopyOfBundle(stationBundleId);
         stationBefore = getCopyOfBundle(stationBundleId);
     }
@@ -280,31 +287,30 @@ public class DropOffAndPickupCargoMoveGenerator {
         int amountToTransfer, MutableCargoBundle from, MutableCargoBundle to) {
         if (0 == amountToTransfer) {
             return;
-        } else {
-            Iterator batches = from.toImmutableCargoBundle().cargoBatchIterator();
-            int amountTransferedSoFar = 0;
-
-            while (batches.hasNext() &&
-                    amountTransferedSoFar < amountToTransfer) {
-                CargoBatch cb = (CargoBatch)batches.next();
-
-                if (cb.getCargoType() == cargoTypeToTransfer) {
-                    int amount = from.getAmount(cb);
-                    int amountOfThisBatchToTransfer;
-
-                    if (amount < amountToTransfer - amountTransferedSoFar) {
-                        amountOfThisBatchToTransfer = amount;
-                        from.setAmount(cb, 0);
-                    } else {
-                        amountOfThisBatchToTransfer = amountToTransfer -
-                            amountTransferedSoFar;
-                        from.addCargo(cb, -amountOfThisBatchToTransfer);
-                    }
-
-                    to.addCargo(cb, amountOfThisBatchToTransfer);
-                    amountTransferedSoFar += amountOfThisBatchToTransfer;
-                }
-            }
         }
+		Iterator batches = from.toImmutableCargoBundle().cargoBatchIterator();
+		int amountTransferedSoFar = 0;
+
+		while (batches.hasNext() &&
+		        amountTransferedSoFar < amountToTransfer) {
+		    CargoBatch cb = (CargoBatch)batches.next();
+
+		    if (cb.getCargoType() == cargoTypeToTransfer) {
+		        int amount = from.getAmount(cb);
+		        int amountOfThisBatchToTransfer;
+
+		        if (amount < amountToTransfer - amountTransferedSoFar) {
+		            amountOfThisBatchToTransfer = amount;
+		            from.setAmount(cb, 0);
+		        } else {
+		            amountOfThisBatchToTransfer = amountToTransfer -
+		                amountTransferedSoFar;
+		            from.addCargo(cb, -amountOfThisBatchToTransfer);
+		        }
+
+		        to.addCargo(cb, amountOfThisBatchToTransfer);
+		        amountTransferedSoFar += amountOfThisBatchToTransfer;
+		    }
+		}
     }
 }

@@ -13,7 +13,6 @@ import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.Random;
 import java.util.logging.Logger;
 
 import javax.swing.JLabel;
@@ -61,16 +60,20 @@ public class NetWorthGraphJPanel extends JPanel implements View {
 
     private  final Font FONT;
 
-    private ArrayList companies = new ArrayList();
+    private ArrayList<CompanyDetails> companies = new ArrayList<CompanyDetails>();
 
     private long scaleMax;       
 
     private Rectangle graphRect = new Rectangle(44, 50, 380, 245);
     ActionListener submitButtonCallBack = null;
 
+    /**
+     * Stores the company details that are used to draw a line and title on the graph.
+     * @author Luke
+     *
+     */
     static class CompanyDetails {
-        static Random r = new Random();
-
+      
         /** The company's net worth at the end of each year. */
         long[] value = new long[100];
 
@@ -88,16 +91,7 @@ public class NetWorthGraphJPanel extends JPanel implements View {
                 value[i] = Integer.MIN_VALUE;
             }           
             
-        }
-        
-//        /** Only here for testing! */
-//        void fillWithRnadomData() {
-//            for (int i = 1; i < 100; i++) {
-//                long lastValue = Math.max(0, value[i - 1]);
-//                long nextValue = lastValue + r.nextInt(30) - 10;
-//                value[i] = Math.max(0, nextValue);
-//            }
-//        }
+        }     
     }
 
     /**
@@ -124,7 +118,6 @@ public class NetWorthGraphJPanel extends JPanel implements View {
     /**
      * This method initializes this
      * 
-     * @return void
      */
     private void initialize() {
         yAxisLabel4 = new JLabel();
@@ -227,7 +220,7 @@ public class NetWorthGraphJPanel extends JPanel implements View {
         //Draw key
         for (int i = 0; i < companies.size(); i++) {
             int yOffset = i * 20;
-            CompanyDetails company = (CompanyDetails) companies.get(i);
+            CompanyDetails company = companies.get(i);
             g2.setColor(company.color);
             g2.drawLine(50, 70 + yOffset, 60, 70 + yOffset);
             g2.setColor(Color.BLACK);
@@ -238,7 +231,7 @@ public class NetWorthGraphJPanel extends JPanel implements View {
         //Draw graphs lines
         for (int i = 0; i < companies.size(); i++) {
 
-            CompanyDetails company = (CompanyDetails) companies.get(i);
+            CompanyDetails company = companies.get(i);
             g2.setColor(company.color);
             for (int year = 1; year < 100; year++) {
                 if (company.value[year] != Integer.MIN_VALUE
@@ -282,7 +275,7 @@ public class NetWorthGraphJPanel extends JPanel implements View {
         
         long max = 0;
         for (int i = 0; i < companies.size(); i++) {
-            CompanyDetails company = (CompanyDetails) companies.get(i);
+            CompanyDetails company = companies.get(i);
             for (int year = 0; year < 100; year++) {
                 long value = company.value[year];
                 if (value > max){
@@ -332,7 +325,6 @@ public class NetWorthGraphJPanel extends JPanel implements View {
     }
 
     private String getYScaleString(long value) {
-        String returnValue;
         String abv;
         if(value >= 1000000000){
             value = value / 1000000000;
@@ -353,7 +345,7 @@ public class NetWorthGraphJPanel extends JPanel implements View {
     public void setup(ModelRoot modelRoot, ViewLists vl, ActionListener submitButtonCallBack) {
         this.submitButtonCallBack = submitButtonCallBack;
         ReadOnlyWorld world = modelRoot.getWorld();
-        companies = new ArrayList();
+        companies = new ArrayList<CompanyDetails>();
         GameCalendar calender  = (GameCalendar)world.get(ITEM.CALENDAR);
         int startYear = calender.getYear(0);
         int endYear = startYear + 100;        
@@ -390,7 +382,13 @@ public class NetWorthGraphJPanel extends JPanel implements View {
         setAppropriateScale();
         
     }
-    
+    /**
+     * A TransactionAggregator that calculates the networth of a player by totalling 
+     * the value of their assets.
+     * 
+     * @author Luke
+     *
+     */
     static class NetWorthCalculator extends TransactionAggregator{
         
     
@@ -404,9 +402,8 @@ public class NetWorthGraphJPanel extends JPanel implements View {
             if(t instanceof AddItemTransaction){
                 //Since buying something is just converting one asset type to another.
                 return false;
-            }else{
-                return true;
             }
+			return true;
         }
     }
 

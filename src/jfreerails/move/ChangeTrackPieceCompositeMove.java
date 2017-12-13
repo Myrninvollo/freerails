@@ -14,6 +14,7 @@ import jfreerails.world.top.GameRules;
 import jfreerails.world.top.ITEM;
 import jfreerails.world.top.ItemsTransactionAggregator;
 import jfreerails.world.top.ReadOnlyWorld;
+import jfreerails.world.top.SKEY;
 import jfreerails.world.top.World;
 import jfreerails.world.track.FreerailsTile;
 import jfreerails.world.track.NullTrackPiece;
@@ -42,14 +43,14 @@ public final class ChangeTrackPieceCompositeMove extends CompositeMove
     }
 
     public static ChangeTrackPieceCompositeMove generateBuildTrackMove(
-        Point from, OneTileMoveVector direction, TrackRule trackRule,
+        Point from, OneTileMoveVector direction, TrackRule ruleA, TrackRule ruleB,
         ReadOnlyWorld w, FreerailsPrincipal principal) {
         ChangeTrackPieceMove a;
         ChangeTrackPieceMove b;
-        a = getBuildTrackChangeTrackPieceMove(from, direction, trackRule, w,
+        a = getBuildTrackChangeTrackPieceMove(from, direction, ruleA, w,
                 principal);
         b = getBuildTrackChangeTrackPieceMove(direction.createRelocatedPoint(
-                    from), direction.getOpposite(), trackRule, w, principal);
+                    from), direction.getOpposite(), ruleB, w, principal);
 
         return new ChangeTrackPieceCompositeMove(a, b, principal);
     }
@@ -83,14 +84,14 @@ public final class ChangeTrackPieceCompositeMove extends CompositeMove
                 TrackConfiguration trackConfiguration = TrackConfiguration.add(oldTrackPiece.getTrackConfiguration(),
                         direction);
                 newTrackPiece = new TrackPieceImpl(trackConfiguration,
-                        oldTrackPiece.getTrackRule(), owner);
+                        oldTrackPiece.getTrackRule(), owner, oldTrackPiece.getTrackTypeID());
             } else {
                 newTrackPiece = getTrackPieceWhenOldTrackPieceIsNull(direction,
-                        trackRule, owner);
+                        trackRule, owner, findRuleID(trackRule, w));
             }
         } else {
             newTrackPiece = getTrackPieceWhenOldTrackPieceIsNull(direction,
-                    trackRule, owner);
+                    trackRule, owner, findRuleID(trackRule, w));
             oldTrackPiece = NullTrackPiece.getInstance();
         }
 
@@ -115,7 +116,7 @@ public final class ChangeTrackPieceCompositeMove extends CompositeMove
                             "000010000")) {
                     int owner = getOwner(principal, w);
                     newTrackPiece = new TrackPieceImpl(trackConfiguration,
-                            oldTrackPiece.getTrackRule(), owner);
+                            oldTrackPiece.getTrackRule(), owner, oldTrackPiece.getTrackTypeID());
                 } else {
                     newTrackPiece = NullTrackPiece.getInstance();
                 }
@@ -136,19 +137,18 @@ public final class ChangeTrackPieceCompositeMove extends CompositeMove
         if (oldTrackPiece.getTrackRule().isStation() &&
                 !newTrackPiece.getTrackRule().isStation()) {
             return RemoveStationMove.getInstance(w, m, principal);
-        } else {
-            return m;
         }
+		return m;
     }
 
     private static TrackPiece getTrackPieceWhenOldTrackPieceIsNull(
-        OneTileMoveVector direction, TrackRule trackRule, int owner) {
+        OneTileMoveVector direction, TrackRule trackRule, int owner, int ruleNumber) {
         TrackConfiguration simplestConfig = TrackConfiguration.getFlatInstance(
                 "000010000");
         TrackConfiguration trackConfiguration = TrackConfiguration.add(simplestConfig,
                 direction);
 
-        return new TrackPieceImpl(trackConfiguration, trackRule, owner);
+        return new TrackPieceImpl(trackConfiguration, trackRule, owner, ruleNumber);
     }
 
     public /*=const*/ Rectangle getUpdatedTiles() {
@@ -170,7 +170,7 @@ public final class ChangeTrackPieceCompositeMove extends CompositeMove
         FreerailsPrincipal principal) {
         ItemsTransactionAggregator aggregator = new ItemsTransactionAggregator(world,
                 principal);
-        aggregator.setCategory(Transaction.TRACK);
+        aggregator.setCategory(Transaction.Category.TRACK);
 
         return aggregator.calculateQuantity() > 0;
     }
@@ -187,10 +187,8 @@ public final class ChangeTrackPieceCompositeMove extends CompositeMove
                 try {
                     ChangeTrackPieceMove a = (ChangeTrackPieceMove)super.getMove(0);
                     ChangeTrackPieceMove b = (ChangeTrackPieceMove)super.getMove(1);
-                    int ruleBeforeA = a.trackPieceBefore.getTrackRule()
-                                                        .getRuleNumber();
-                    int ruleBeforeB = b.trackPieceBefore.getTrackRule()
-                                                        .getRuleNumber();
+                    int ruleBeforeA = a.trackPieceBefore.getTrackTypeID();
+                    int ruleBeforeB = b.trackPieceBefore.getTrackTypeID();
 
                     if (ruleBeforeA == NullTrackType.NULL_TRACK_TYPE_RULE_NUMBER &&
                             ruleBeforeB == NullTrackType.NULL_TRACK_TYPE_RULE_NUMBER) {
@@ -206,5 +204,15 @@ public final class ChangeTrackPieceCompositeMove extends CompositeMove
         }
 
         return MoveStatus.MOVE_OK;
+    }
+    
+    public static int findRuleID(TrackRule r, ReadOnlyWorld w){
+    	for(int i = 0 ; i < w.size(SKEY.TRACK_RULES); i++){
+    		Object o = w.get(SKEY.TRACK_RULES, i);
+    		if(r.equals(o)) {
+    			return i;
+    		}    		
+    	}
+    	throw new IllegalStateException();
     }
 }

@@ -1,9 +1,11 @@
 package jfreerails.client.common;
 
 import java.awt.Point;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
+import java.util.ArrayList;
 import java.util.HashMap;
+
+import jfreerails.controller.PreMove;
+import jfreerails.controller.TrackMoveProducer;
 import jfreerails.move.Move;
 import jfreerails.move.MoveStatus;
 import jfreerails.network.MoveChainFork;
@@ -16,7 +18,6 @@ import jfreerails.world.top.ReadOnlyWorld;
 import jfreerails.world.top.WorldListListener;
 import jfreerails.world.top.WorldMapListener;
 
-
 /**
  * Provides access to the World object and other data that is shared by GUI components (for instance
  * the cursor's position).
@@ -26,8 +27,12 @@ import jfreerails.world.top.WorldMapListener;
  */
 public final class ModelRootImpl implements ModelRoot {
     public boolean hasBeenSetup = false;
+    private MoveChainFork moveFork = new MoveChainFork();
     private UntriedMoveReceiver moveReceiver = new UntriedMoveReceiver() {
             public void processMove(Move Move) {
+            }
+
+            public void processPreMove(PreMove pm) {
             }
 
             public MoveStatus tryDoMove(Move move) {
@@ -36,21 +41,59 @@ public final class ModelRootImpl implements ModelRoot {
             }
         };
 
-    private MoveChainFork moveFork = new MoveChainFork();
     private FreerailsPrincipal playerPrincipal;
-    private ReadOnlyWorld world;
-    private final HashMap properties = new HashMap();
-    private final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
+    private final HashMap<Property, Object> properties = new HashMap<Property, Object>();   
     private ServerCommandReceiver serverCommandReceiver;
+    private ReadOnlyWorld world;
+    private final ArrayList<ModelRootListener> listeners = new ArrayList<ModelRootListener>(); 
 
     public ModelRootImpl() {
-        properties.put(CURSOR_POSITION, new Point());
-        properties.put(SHOW_STATION_NAMES, new Boolean(true));
-        properties.put(SHOW_CARGO_AT_STATIONS, new Boolean(true));
-        properties.put(SHOW_STATION_BORDERS, new Boolean(true));
-        properties.put(CURSOR_MODE, BUILD_TRACK_CURSOR_MODE);
-        properties.put(PREVIOUS_CURSOR_MODE, BUILD_TRACK_CURSOR_MODE);
-        properties.put(SERVER, "server details not set!");
+        properties.put(Property.CURSOR_POSITION, new Point());
+        properties.put(Property.SHOW_STATION_NAMES, Boolean.TRUE);
+        properties.put(Property.SHOW_CARGO_AT_STATIONS, Boolean.TRUE);
+        properties.put(Property.SHOW_STATION_BORDERS, Boolean.TRUE);
+        properties.put(Property.CURSOR_MODE, Value.BUILD_TRACK_CURSOR_MODE);
+        properties.put(Property.PREVIOUS_CURSOR_MODE, Value.BUILD_TRACK_CURSOR_MODE);
+        properties.put(Property.SERVER, "server details not set!");
+        properties.put(Property.PLAY_SOUNDS, Boolean.TRUE);
+        properties.put(Property.IGNORE_KEY_EVENTS, Boolean.FALSE);
+        properties.put(Property.TRACK_BUILDER_MODE, TrackMoveProducer.BuildMode.BUILD_TRACK);             
+        addPropertyChangeListener(SoundManager.getSoundManager());
+    }
+
+    public void addCompleteMoveReceiver(MoveReceiver l) {
+        this.moveFork.addCompleteMoveReceiver(l);
+    }
+
+    public void addListListener(WorldListListener listener) {
+        this.moveFork.addListListener(listener);
+    }
+
+    public void addMapListener(WorldMapListener l) {
+        this.moveFork.addMapListener(l);
+    }
+
+    public void addPropertyChangeListener(ModelRootListener l) {
+       listeners.add(l);
+    }
+
+    public void addSplitMoveReceiver(MoveReceiver l) {
+        this.moveFork.addSplitMoveReceiver(l);
+    }
+
+    public MoveStatus doMove(Move m) {
+        MoveStatus ms = this.moveReceiver.tryDoMove(m);
+        this.moveReceiver.processMove(m);
+
+        return ms;
+    }
+
+    public MoveStatus doPreMove(PreMove pm) {
+        Move m = pm.generateMove(world);
+        MoveStatus ms = moveReceiver.tryDoMove(m);
+        moveReceiver.processPreMove(pm);
+
+        return ms;
     }
 
     public FreerailsPrincipal getPrincipal() {
@@ -59,6 +102,48 @@ public final class ModelRootImpl implements ModelRoot {
         }
 
         return playerPrincipal;
+    }
+
+    public Object getProperty(Property p) {
+        return properties.get(p);
+    }
+
+    public ReadOnlyWorld getWorld() {
+        return world;
+    }
+
+    public void removePropertyChangeListener(ModelRootListener l) {
+    	listeners.remove(l);
+    }
+
+    public void sendCommand(ServerCommand c) {
+        if (null != serverCommandReceiver) {
+            serverCommandReceiver.sendCommand(c);
+        } else {
+            System.err.println(c.toString());
+        }
+    }
+
+    public void setMoveFork(MoveChainFork moveFork) {
+        this.moveFork = moveFork;
+    }
+
+    public void setMoveReceiver(UntriedMoveReceiver moveReceiver) {
+        this.moveReceiver = moveReceiver;
+    }
+
+    public void setProperty(Property p, Object newValue) {
+        Object oldValue = properties.get(p);
+        properties.put(p, newValue);
+        for(ModelRootListener listener : listeners){
+        	listener.propertyChange(p, oldValue, newValue);
+        }
+        
+    }
+
+    public void setServerCommandReceiver(
+        ServerCommandReceiver serverCommandReceiver) {
+        this.serverCommandReceiver = serverCommandReceiver;
     }
 
     /**
@@ -77,75 +162,14 @@ public final class ModelRootImpl implements ModelRoot {
         }
 
         hasBeenSetup = true;
-    }
-
-    public ReadOnlyWorld getWorld() {
-        return world;
-    }
-
-    public void setMoveFork(MoveChainFork moveFork) {
-        this.moveFork = moveFork;
-    }
-
-    public void setMoveReceiver(UntriedMoveReceiver moveReceiver) {
-        this.moveReceiver = moveReceiver;
-    }
-
-    public void setProperty(String property, Object newValue) {
-        Object oldValue = properties.get(property);
-        properties.put(property, newValue);
-        propertyChangeSupport.firePropertyChange(property, oldValue, newValue);
-    }
-
-    public Object getProperty(String property) {
-        return properties.get(property);
-    }
-
-    public void addPropertyChangeListener(PropertyChangeListener l) {
-        propertyChangeSupport.addPropertyChangeListener(l);
-    }
-
-    public void removePropertyChangeListener(PropertyChangeListener l) {
-        propertyChangeSupport.removePropertyChangeListener(l);
-    }
-
-    public MoveStatus doMove(Move m) {
-        MoveStatus ms = this.moveReceiver.tryDoMove(m);
-        this.moveReceiver.processMove(m);
-
-        return ms;
+        
     }
 
     public MoveStatus tryDoMove(Move m) {
         return this.moveReceiver.tryDoMove(m);
     }
 
-    public void addListListener(WorldListListener listener) {
-        this.moveFork.addListListener(listener);
-    }
-
-    public void addMapListener(WorldMapListener l) {
-        this.moveFork.addMapListener(l);
-    }
-
-    public void addCompleteMoveReceiver(MoveReceiver l) {
-        this.moveFork.addCompleteMoveReceiver(l);
-    }
-
-    public void addSplitMoveReceiver(MoveReceiver l) {
-        this.moveFork.addSplitMoveReceiver(l);
-    }
-
-    public void sendCommand(ServerCommand c) {
-        if (null != serverCommandReceiver) {
-            serverCommandReceiver.sendCommand(c);
-        } else {
-            System.err.println(c.toString());
-        }
-    }
-
-    public void setServerCommandReceiver(
-        ServerCommandReceiver serverCommandReceiver) {
-        this.serverCommandReceiver = serverCommandReceiver;
-    }
+	public boolean is(ModelRoot.Property p, Object value) {
+		return getProperty(p).equals(value);
+	}
 }

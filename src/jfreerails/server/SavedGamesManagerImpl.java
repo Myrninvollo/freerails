@@ -7,12 +7,14 @@ package jfreerails.server;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InvalidClassException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
+
 import jfreerails.network.NewGameServerCommand;
 import jfreerails.network.SavedGamesManager;
 import jfreerails.network.ServerControlInterface;
@@ -20,6 +22,8 @@ import jfreerails.util.FreerailsProgressMonitor;
 
 
 /**
+ *  A SavedGamesManager reads and writes gzipped saved games to the working directory.
+ * 
  * @author Luke
  *
  */
@@ -88,6 +92,9 @@ public class SavedGamesManagerImpl implements SavedGamesManager {
             return game;
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
+            throw new IOException(e.getMessage());
+        } catch (InvalidClassException e){
+        	//e.printStackTrace();
             throw new IOException(e.getMessage());
         }
     }

@@ -26,7 +26,7 @@ public class TrainRenderer {
     }
 
     public void paintTrain(Graphics g, TrainModel train, TrainPositionOnMap s) {
-        //If the train has been removeed, it will be null!
+        //If the train has been removed, it will be null!
         if (train == null) {
             return;
         }
@@ -83,9 +83,9 @@ public class TrainRenderer {
         Image image;
 
         if (engine) {
-            image = trainImages.getOverheadEngineImage(type, v.getNumber());
+            image = trainImages.getOverheadEngineImage(type, v.getID());
         } else {
-            image = trainImages.getOverheadWagonImage(type, v.getNumber());
+            image = trainImages.getOverheadWagonImage(type, v.getID());
         }
 
         g.drawImage(image, p.x - 15, p.y - 15, null);

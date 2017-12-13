@@ -1,5 +1,6 @@
 package jfreerails.network;
 
+import jfreerails.controller.PreMove;
 import jfreerails.move.Move;
 import jfreerails.move.MoveStatus;
 
@@ -9,5 +10,7 @@ import jfreerails.move.MoveStatus;
  *
  */
 public interface UntriedMoveReceiver extends MoveReceiver {
-    public MoveStatus tryDoMove(Move move);
+    MoveStatus tryDoMove(Move move);
+
+    void processPreMove(PreMove pm);
 }

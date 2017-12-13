@@ -5,6 +5,7 @@ package jfreerails.client.view;
 
 import java.awt.Point;
 import java.awt.event.ActionEvent;
+import java.util.HashMap;
 import java.util.Vector;
 
 import javax.swing.AbstractAction;
@@ -38,14 +39,14 @@ public class StationBuildModel {
     /*
      * 100 010 001 = 0x111
      */
-    private static final int trackTemplate = TrackConfiguration.getFlatInstance(0x111)
+    private static final int trackTemplate = TrackConfiguration.from9bitTemplate(0x111)
                                                                .get9bitTemplate();
 
     /**
      * Vector of StationBuildAction.
      * Actions which represent stations which can be built
      */
-    private final Vector stationChooseActions = new Vector();
+    private final Vector<Action> stationChooseActions = new Vector<Action>();
 
     /**
      * Whether the station's position can should change when the mouse moves.
@@ -55,6 +56,7 @@ public class StationBuildModel {
     private final StationCancelAction stationCancelAction = new StationCancelAction();
     private final StationBuilder stationBuilder;
     private final ModelRoot modelRoot;
+    private final HashMap<Integer, Action> id2Action = new HashMap<Integer, Action>(); 
 
     public StationBuildModel(StationBuilder sb, ViewLists vl, ModelRoot mr) {
         stationBuilder = sb;
@@ -77,12 +79,17 @@ public class StationBuildModel {
                 action.putValue(Action.SMALL_ICON,
                     new ImageIcon(renderer.getTrackPieceIcon(trackTemplate)));
                 stationChooseActions.add(action);
+                id2Action.put(new Integer(i), action);
             }
         }
     }
+    
+    public Action getStationChooseAction(Integer ruleID ){
+    	return id2Action.get(ruleID);
+    }
 
     public Action[] getStationChooseActions() {
-        return (Action[])stationChooseActions.toArray(new Action[0]);
+        return stationChooseActions.toArray(new Action[0]);
     }
 
     private class StationChooseAction extends AbstractAction {
@@ -92,7 +99,7 @@ public class StationBuildModel {
             this.actionId = actionId;
         }
 
-        public void actionPerformed(java.awt.event.ActionEvent actionEvent) {
+        public void actionPerformed(ActionEvent e) {
             stationBuilder.setStationType(actionId);
 
             TrackRule trackRule = (TrackRule)modelRoot.getWorld().get(SKEY.TRACK_RULES,
@@ -108,7 +115,8 @@ public class StationBuildModel {
 
     private class StationCancelAction extends AbstractAction {
         public void actionPerformed(ActionEvent e) {
-            stationBuildAction.setEnabled(false);
+        	
+        	stationBuildAction.setEnabled(false);
         }
     }
 
@@ -138,12 +146,12 @@ public class StationBuildModel {
             String message = null;
 
             if (ms.isOk()) {
-            	setEnabled(false);
+            	stationBuildAction.setEnabled(false);         	
             }else{
             	message = ms.message;            	
             }
 
-            modelRoot.setProperty(ModelRoot.CURSOR_MESSAGE, message);
+            modelRoot.setProperty(ModelRoot.Property.CURSOR_MESSAGE, message);
             
         }
     }
@@ -151,7 +159,7 @@ public class StationBuildModel {
     public boolean canBuildStationHere() {
         Point p = (Point)stationBuildAction.getValue(StationBuildAction.STATION_POSITION_KEY);
 
-        return stationBuilder.canBuiltStationHere(p);
+        return stationBuilder.tryBuildingStation(p).ok;
     }
 
     public Action getStationCancelAction() {

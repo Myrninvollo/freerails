@@ -7,6 +7,9 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.logging.Logger;
+
+import jfreerails.controller.PreMove;
+import jfreerails.controller.PreMoveStatus;
 import jfreerails.move.Move;
 import jfreerails.move.MoveStatus;
 import jfreerails.util.GameModel;
@@ -25,7 +28,7 @@ public class FreerailsClient implements ClientControlInterface, GameModel,
     UntriedMoveReceiver, ServerCommandReceiver {
     private static final Logger logger = Logger.getLogger(FreerailsClient.class.getName());
     protected Connection2Server connection2Server;
-    private final HashMap properties = new HashMap();
+    private final HashMap<String, Serializable> properties = new HashMap<String, Serializable>();
     private final MoveChainFork moveFork;
     private World world;
     private MovePrecommitter committer;
@@ -47,7 +50,11 @@ public class FreerailsClient implements ClientControlInterface, GameModel,
 
         try {
             connection2Server = new InetConnection2Server(address, port);
+        } catch (IOException e) {
+            return LogOnResponse.rejected(e.getMessage());
+        }
 
+        try {
             LogOnRequest request = new LogOnRequest(username, password);
             connection2Server.writeToServer(request);
             connection2Server.flush();
@@ -119,7 +126,7 @@ public class FreerailsClient implements ClientControlInterface, GameModel,
     }
 
     public final Serializable getProperty(String propertyName) {
-        return (Serializable)properties.get(propertyName);
+        return properties.get(propertyName);
     }
 
     public final void resetProperties(HashMap newProperties) {
@@ -164,12 +171,21 @@ public class FreerailsClient implements ClientControlInterface, GameModel,
             }
 
             connection2Server.flush();
+            clientUpdates();
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
         }
     }
 
+    /** Empty method called by update(), subclasses should override this
+     * method instead of overriding update().
+     *
+     */ 
+    protected void clientUpdates(){
+    	
+    }
+    
     /** Processes a message received from the server.*/
     final void processMessage(FreerailsSerializable message)
         throws IOException {
@@ -185,6 +201,13 @@ public class FreerailsClient implements ClientControlInterface, GameModel,
         } else if (message instanceof MoveStatus) {
             MoveStatus ms = (MoveStatus)message;
             committer.fromServer(ms);
+        } else if (message instanceof PreMove) {
+            PreMove pm = (PreMove)message;
+            Move m = committer.fromServer(pm);
+            moveFork.processMove(m);
+        } else if (message instanceof PreMoveStatus) {
+            PreMoveStatus pms = (PreMoveStatus)message;
+            committer.fromServer(pms);
         } else {
             logger.fine(message.toString());
         }
@@ -208,5 +231,11 @@ public class FreerailsClient implements ClientControlInterface, GameModel,
 
     public void sendCommand(ServerCommand c) {
         write(c);
+    }
+
+    public void processPreMove(PreMove pm) {
+        Move m = committer.toServer(pm);
+        moveFork.processMove(m);
+        write(pm);
     }
 }

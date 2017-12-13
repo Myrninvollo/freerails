@@ -61,7 +61,7 @@ public class BuildIndustryJPopupMenu extends JPopupMenu implements View {
                         public void actionPerformed(ActionEvent arg0) {
                             Move m1 = new ChangeTileMove(modelRoot.getWorld(),
                                     cursorLocation, terrainType);
-                            Transaction t = new AddItemTransaction(Transaction.INDUSTRIES,
+                            Transaction t = new AddItemTransaction(Transaction.Category.INDUSTRIES,
                                     terrainType, 1, price.changeSign());
                             Move m2 = new AddTransactionMove(modelRoot.getPrincipal(),
                                     t);
@@ -71,7 +71,7 @@ public class BuildIndustryJPopupMenu extends JPopupMenu implements View {
                             MoveStatus ms = modelRoot.doMove(m3);
 
                             if (!ms.ok) {
-                                modelRoot.setProperty(ModelRoot.CURSOR_MESSAGE,
+                                modelRoot.setProperty(ModelRoot.Property.CURSOR_MESSAGE,
                                     ms.message);
                             }
                         }

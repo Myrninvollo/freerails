@@ -52,9 +52,10 @@ public class ChangeTrainPositionMove implements Move {
             };
     }
 
+    
     public static ChangeTrainPositionMove generate(ReadOnlyWorld w,
         FreerailsPathIterator nextPathSection, int trainNumber,
-        FreerailsPrincipal p) {
+        FreerailsPrincipal p) throws PreMoveException {
         try {
             if (!nextPathSection.hasNext()) {
                 return getNullMove(trainNumber, p);
@@ -92,16 +93,15 @@ public class ChangeTrainPositionMove implements Move {
 
             intermediate = currentPosition.addToHead(bitToAdd);
 
-            double currentLength = (double)train.getLength();
+            double currentLength = train.getLength();
 
             bitToRemove = getBitToRemove(intermediate, currentLength);
 
             return new ChangeTrainPositionMove(bitToAdd, bitToRemove,
                 trainNumber, true, false, p);
         } catch (Exception e) {
-            e.printStackTrace();
-
-            return null;
+        	//We end up here if the track under the train is removed.           
+            throw new PreMoveException(e.getMessage());
         }
     }
 

@@ -7,14 +7,19 @@ import java.util.zip.Deflater;
 
 
 /**
-* @author Patrice Espié
+*  A FilterOutputStream for sending compressed data over a network connection.
+ * Note that standard ZipOutputStream and java.util.zip.GZipOutputStream don't 
+ * guarantee that flush sends out all the data written so far, which 
+ * leads to deadlocks in request-response-based protocols.
+ * 
+* @author Patrice Espie
 * Licensing: LGPL
 */
 public class CompressedOutputStream extends FilterOutputStream {
     public CompressedOutputStream(OutputStream out) {
         super(out);
         buffer = new byte[0x7d000];
-        compBuffer = new byte[(int)((double)buffer.length * 1.2D)];
+        compBuffer = new byte[(int)(buffer.length * 1.2D)];
         writeIndex = 0;
         deflater = new Deflater(9);
     }
@@ -36,14 +41,14 @@ public class CompressedOutputStream extends FilterOutputStream {
             written += toWrite;
             writeIndex += toWrite;
 
-            if ((double)writeIndex >= (double)buffer.length * 0.80000000000000004D) {
+            if (writeIndex >= buffer.length * 0.80000000000000004D) {
                 flush();
             }
         } while (true);
     }
 
     public void write(int b) throws IOException {
-        if ((double)writeIndex >= (double)buffer.length * 0.80000000000000004D) {
+        if (writeIndex >= buffer.length * 0.80000000000000004D) {
             flush();
         }
 

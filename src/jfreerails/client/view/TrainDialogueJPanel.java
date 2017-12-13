@@ -19,7 +19,7 @@ import jfreerails.world.top.WorldIterator;
 import jfreerails.world.top.WorldListListener;
 
 /**
- * JPanel that displays info on a train, composed of a {@link TrainScheduleJPanel} and {@link TrainDetailsJPanel}.
+ * JPanel that displays info on a train; it is composed of a {@link TrainScheduleJPanel} and {@link TrainDescriptionJPanel}.
  * @author  Luke Lindsay
  */
 public class TrainDialogueJPanel extends javax.swing.JPanel implements View, WorldListListener {
@@ -45,7 +45,7 @@ public class TrainDialogueJPanel extends javax.swing.JPanel implements View, Wor
         java.awt.GridBagConstraints gridBagConstraints;
 
         newTrainScheduleJPanel1 = new jfreerails.client.view.TrainScheduleJPanel();
-        trainDetailsJPanel1 = new jfreerails.client.view.TrainDetailsJPanel();
+        trainDetailsJPanel1 = new TrainDescriptionJPanel();
         previousJButton = new javax.swing.JButton();
         nextJButton = new javax.swing.JButton();
         trainListJButton = new javax.swing.JButton();
@@ -140,13 +140,13 @@ public class TrainDialogueJPanel extends javax.swing.JPanel implements View, Wor
     public void display(int trainNumber){
         wi = new NonNullElements(KEY.TRAINS, w, principal);
         wi.gotoIndex(trainNumber);
-        if (wi.getRowNumber() > 0) {
+        if (wi.getRowID() > 0) {
             this.previousJButton.setEnabled(true);
         } else {
             this.previousJButton.setEnabled(false);
         }
         
-        if (wi.getRowNumber() < (wi.size() - 1)) {
+        if (wi.getRowID() < (wi.size() - 1)) {
             this.nextJButton.setEnabled(true);
         } else {
             this.nextJButton.setEnabled(false);
@@ -188,12 +188,12 @@ public class TrainDialogueJPanel extends javax.swing.JPanel implements View, Wor
     }
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton closeJButton;
-    private jfreerails.client.view.TrainScheduleJPanel newTrainScheduleJPanel1;
-    private javax.swing.JButton nextJButton;
-    private javax.swing.JButton previousJButton;
-    private jfreerails.client.view.TrainDetailsJPanel trainDetailsJPanel1;
-    private javax.swing.JButton trainListJButton;
+    javax.swing.JButton closeJButton;
+    jfreerails.client.view.TrainScheduleJPanel newTrainScheduleJPanel1;
+    javax.swing.JButton nextJButton;
+    javax.swing.JButton previousJButton;
+    jfreerails.client.view.TrainDescriptionJPanel trainDetailsJPanel1;
+    javax.swing.JButton trainListJButton;
     // End of variables declaration//GEN-END:variables
     
 }

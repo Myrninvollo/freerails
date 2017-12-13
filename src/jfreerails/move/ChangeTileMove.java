@@ -37,18 +37,17 @@ public class ChangeTileMove implements Move, MapUpdateMove {
     public MoveStatus tryDoMove(World w, FreerailsPrincipal p) {
         FreerailsTile before = (FreerailsTile)w.getTile(m_x, m_y);
         TerrainType type = (TerrainType)w.get(SKEY.TERRAIN_TYPES,
-                before.getTerrainTypeNumber());
+                before.getTerrainTypeID());
 
-        if (!type.getTerrainCategory().equals("Country")) {
+        if (!type.getCategory().equals(TerrainType.Category.Country)) {
             return MoveStatus.moveFailed("Can only build on clear terrain.");
         }
 
         if (before.equals(m_before)) {
             return MoveStatus.MOVE_OK;
-        } else {
-            return MoveStatus.moveFailed("Expected " + m_before +
-                " but found " + before);
         }
+		return MoveStatus.moveFailed("Expected " + m_before +
+		    " but found " + before);
     }
 
     public MoveStatus tryUndoMove(World w, FreerailsPrincipal p) {
@@ -56,10 +55,9 @@ public class ChangeTileMove implements Move, MapUpdateMove {
 
         if (after.equals(m_after)) {
             return MoveStatus.MOVE_OK;
-        } else {
-            return MoveStatus.moveFailed("Expected " + m_after + " but found " +
-                after);
         }
+		return MoveStatus.moveFailed("Expected " + m_after + " but found " +
+		    after);
     }
 
     public MoveStatus doMove(World w, FreerailsPrincipal p) {
@@ -82,7 +80,7 @@ public class ChangeTileMove implements Move, MapUpdateMove {
         return ms;
     }
 
-    public Rectangle getUpdatedTiles() {
+    public /*=const*/ Rectangle getUpdatedTiles() {
         Rectangle r = new Rectangle(m_x, m_y, 1, 1);
 
         return r;

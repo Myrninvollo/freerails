@@ -18,13 +18,16 @@ import jfreerails.world.player.FreerailsPrincipal;
 public class ItemsTransactionAggregator extends TransactionAggregator {
     public static final int ANY_VALUE = Integer.MIN_VALUE;
     private int type = ANY_VALUE;
-    private int category = ANY_VALUE;
-
-    //private static GameCalendar calendar;
-    //private int startYear = 0;
+    private Transaction.Category category = null;
+    
     private int[] quantities;
     private int quantityRunningTotal;
 
+    /**
+     * Stores the quantities and monetary values of a series of items.
+     * @author Luke
+     *
+     */
     public static class QuantitiesAndValues {
         public int[] quantities;
         public Money[] values;
@@ -49,7 +52,7 @@ public class ItemsTransactionAggregator extends TransactionAggregator {
         AddItemTransaction addItemTransaction = (AddItemTransaction)t;
         boolean isTypeAcceptable = (type == ANY_VALUE) ||
             (type == addItemTransaction.getType());
-        boolean isCategoryAcceptable = (category == ANY_VALUE) ||
+        boolean isCategoryAcceptable = (category == null) ||
             (category == addItemTransaction.getCategory());
 
         return isCategoryAcceptable && isTypeAcceptable;
@@ -92,11 +95,11 @@ public class ItemsTransactionAggregator extends TransactionAggregator {
         quantities[timeIndex] = quantityRunningTotal;
     }
 
-    public int getCategory() {
+    public Transaction.Category getCategory() {
         return category;
     }
 
-    public void setCategory(int category) {
+    public void setCategory(Transaction.Category category) {
         this.category = category;
     }
 

@@ -6,7 +6,11 @@ import java.io.InputStream;
 import java.text.DecimalFormat;
 import java.util.logging.Logger;
 
-
+/**
+*  A FilterInputStream that measures flow rate.
+* @author Patrice Espie
+* Licensing: LGPL
+*/
 public class FlowRateInputStream extends FilterInputStream implements Runnable {
     private static final Logger logger = Logger.getLogger(FlowRateInputStream.class.getName());
 
@@ -29,7 +33,7 @@ public class FlowRateInputStream extends FilterInputStream implements Runnable {
         measureIntervall = measureInterval;
         this.streamName = streamName;
 
-        if (measureIntervall == (long)0) {
+        if (measureIntervall == 0) {
             showTrace = false;
             measureIntervall = 1000L;
         } else {
@@ -57,11 +61,11 @@ public class FlowRateInputStream extends FilterInputStream implements Runnable {
 
         logger.info(String.valueOf(String.valueOf((new StringBuffer("Stream ")).append(
                         streamName).append(": Open duration = ")
-                                                   .append((double)(System.currentTimeMillis() -
+                                                   .append((System.currentTimeMillis() -
                         openTimeMillis) / 1000D).append(", Byte received = ")
                                                    .append(totalByteReceived)
                                                    .append(" (")
-                                                   .append((int)((double)totalByteReceived / 1024D))
+                                                   .append((int)(totalByteReceived / 1024D))
                                                    .append(" Ko), overall flow rate = ")
                                                    .append(overallRate())
                                                    .append(" Ko/s"))));
@@ -89,17 +93,17 @@ public class FlowRateInputStream extends FilterInputStream implements Runnable {
     }
 
     public int currentRate() {
-        return (int)((double)byteReceivedCumul / 1024D / ((double)nbUsed * ((double)measureIntervall / 1000D)));
+        return (int)(byteReceivedCumul / 1024D / (nbUsed * (measureIntervall / 1000D)));
     }
 
     public String currentRateString() {
-        double d = ((double)byteReceivedCumul / 1024D / ((double)nbUsed * ((double)measureIntervall / 1000D)));
+        double d = (byteReceivedCumul / 1024D / (nbUsed * (measureIntervall / 1000D)));
 
         return decimalFormat.format(d);
     }
 
     public int overallRate() {
-        return (int)((double)totalByteReceived / 1024D / ((double)(System.currentTimeMillis() -
+        return (int)(totalByteReceived / 1024D / ((System.currentTimeMillis() -
         openTimeMillis) / 1000D));
     }
 
@@ -133,11 +137,11 @@ public class FlowRateInputStream extends FilterInputStream implements Runnable {
                         logger.info(String.valueOf(String.valueOf(
                                     (new StringBuffer("Stream ")).append(
                                         streamName).append(": Open duration = ")
-                                     .append((double)(System.currentTimeMillis() -
+                                     .append((System.currentTimeMillis() -
                                         openTimeMillis) / 1000D)
                                      .append(", Byte sent = ")
                                      .append(totalByteReceived).append(" (")
-                                     .append((int)((double)totalByteReceived / 1024D))
+                                     .append((int)(totalByteReceived / 1024D))
                                      .append(" Ko), current flow rate = ")
                                      .append(currentRateString()).append(" Ko/s"))));
                     }

@@ -17,9 +17,9 @@ import jfreerails.world.top.World;
  */
 public class NewCityTilePositioner {
     Random random = new Random();
-    ArrayList urbanTerrainTypes = new ArrayList();
-    ArrayList industryTerrainTypes = new ArrayList();
-    ArrayList resourceTerrainTypes = new ArrayList();
+    ArrayList<TerrainType> urbanTerrainTypes = new ArrayList<TerrainType> ();
+    ArrayList<TerrainType>  industryTerrainTypes = new ArrayList<TerrainType> ();
+    ArrayList<TerrainType>  resourceTerrainTypes = new ArrayList<TerrainType> ();
     World w;
 
     public NewCityTilePositioner(World w) {
@@ -28,13 +28,16 @@ public class NewCityTilePositioner {
         //get the different types of Urban/Industry/Resource terrain
         for (int i = 0; i < w.size(SKEY.TERRAIN_TYPES); i++) {
             TerrainType type = (TerrainType)w.get(SKEY.TERRAIN_TYPES, i);
-
-            if (type.getTerrainCategory().equals("Urban")) {
+            switch (type.getCategory().ordinal()){
+            case 0:
                 urbanTerrainTypes.add(type);
-            } else if (type.getTerrainCategory().equals("Industry")) {
+                break;
+            case 6:
                 industryTerrainTypes.add(type);
-            } else if (type.getTerrainCategory().equals("Resource")) {
+                break;
+           case 7:
                 resourceTerrainTypes.add(type);
+                break;            
             }
         }
     }
@@ -72,7 +75,7 @@ public class NewCityTilePositioner {
 
     private void addResourceTile(CityEconomicModel city) {
         int tileTypeNo = random.nextInt(resourceTerrainTypes.size());
-        TerrainType type = (TerrainType)resourceTerrainTypes.get(tileTypeNo);
+        TerrainType type = resourceTerrainTypes.get(tileTypeNo);
         city.addTile(type);
     }
 
@@ -81,14 +84,14 @@ public class NewCityTilePositioner {
 
         if (size > 0) {
             int tileTypeNo = random.nextInt(size);
-            TerrainType type = (TerrainType)city.industriesNotAtCity.get(tileTypeNo);
+            TerrainType type = city.industriesNotAtCity.get(tileTypeNo);
             city.addTile(type);
         }
     }
 
     private void addUrbanTile(CityEconomicModel city) {
         int tileTypeNo = random.nextInt(urbanTerrainTypes.size());
-        TerrainType type = (TerrainType)urbanTerrainTypes.get(tileTypeNo);
+        TerrainType type = urbanTerrainTypes.get(tileTypeNo);
         city.addTile(type);
     }
 

@@ -17,6 +17,8 @@ import jfreerails.world.top.ReadOnlyWorld;
 public interface MoveExecutor {
     MoveStatus doMove(Move m);
 
+    MoveStatus doPreMove(PreMove pm);
+
     MoveStatus tryDoMove(Move m);
 
     ReadOnlyWorld getWorld();

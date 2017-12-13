@@ -10,6 +10,8 @@ import jfreerails.world.top.ReadOnlyWorld;
 
 
 /**
+ * Not yet implemented
+ * 
  * @author Luke
  *
  */
@@ -17,10 +19,7 @@ public class FinancialMoveProducer {
     public static final Money IPO_SHARE_PRICE = new Money(5);
     public static final int SHARE_BUNDLE_SIZE = 10000;
     public static final int IPO_SIZE = SHARE_BUNDLE_SIZE * 10;
-    private final ReadOnlyWorld world;
-
     FinancialMoveProducer(ReadOnlyWorld row) {
-        world = row;
     }
 
     EconomicClimate worsen() {

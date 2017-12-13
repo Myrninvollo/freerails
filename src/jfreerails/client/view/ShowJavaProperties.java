@@ -14,6 +14,8 @@ import java.util.logging.Logger;
  *
  */
 public class ShowJavaProperties {
+	
+	public static final int TABLE_WIDTH = 500;
 	private static final Logger logger = Logger
 			.getLogger(ShowJavaProperties.class.getName()); 
     public static void main(String[] args) {
@@ -23,13 +25,16 @@ public class ShowJavaProperties {
     public static String getPropertiesHtmlString() {
         Properties p = System.getProperties();
         StringBuffer sb = new StringBuffer();
-        sb.append("<html><h3>Java System Properties</h3><table>\n");
+        /*  We set the width of the table so that its text word-wraps.*/
+        sb.append("<html><h3>Java System Properties</h3><table width =\""+TABLE_WIDTH+"\" align = \"left\" valign = \"top\">\n");
 
         Enumeration keys = p.keys();
 
         while (keys.hasMoreElements()) {
             String key = (String)keys.nextElement();
             String value = p.getProperty(key);
+            /* Insert a line break after each ";".  This makes reading classpath elements easier.*/
+            value= value.replaceAll(";", ";<br>"); 
             sb.append("<tr><td>" + key + " </td><td> " + value +
                 "</td></tr>\n");
         }

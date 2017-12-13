@@ -5,8 +5,13 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.logging.Logger;
+
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
+
 import jfreerails.client.common.ImageManager;
 import jfreerails.client.common.ImageManagerImpl;
+import jfreerails.client.common.SoundManager;
 import jfreerails.client.renderer.ChequeredTileRenderer;
 import jfreerails.client.renderer.ForestStyleTileRenderer;
 import jfreerails.client.renderer.RiverStyleTileRenderer;
@@ -43,11 +48,38 @@ public class ViewListsImpl implements ViewLists {
         tiles = loadNewTileViewList(w, pm);
 
         trackPieceViewList = loadTrackViews(w, pm);
-
-        //engine views
-        //sideOnTrainTrainView = addTrainViews(pm);
+        
         trainImages = new TrainImages(w, imageManager, pm);
+        
+        preloadSounds(pm);
+        
     }
+
+	private void preloadSounds(FreerailsProgressMonitor pm) {
+		//Pre-load sounds..
+        String[] soundsFiles = {"/jfreerails/client/sounds/buildtrack.wav",
+        		"/jfreerails/client/sounds/cash.wav",
+        		"/jfreerails/client/sounds/removetrack.wav",
+        		"/jfreerails/client/sounds/whistle.wav"};
+		pm.setMessage("Loading sounds");
+		pm.setMax(soundsFiles.length);
+		SoundManager sm = SoundManager.getSoundManager();
+		for(int i = 0; i < soundsFiles.length; i++){
+        	try {
+				sm.addClip(soundsFiles[i]);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (UnsupportedAudioFileException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (LineUnavailableException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			pm.setValue(i+1);
+        }
+	}
 
     private TrackPieceRendererList loadTrackViews(ReadOnlyWorld w,
         FreerailsProgressMonitor pm) throws IOException {
@@ -56,7 +88,7 @@ public class ViewListsImpl implements ViewLists {
 
     private TileRendererList loadNewTileViewList(ReadOnlyWorld w,
         FreerailsProgressMonitor pm) throws IOException {
-        ArrayList tileRenderers = new ArrayList();
+        ArrayList<TileRenderer> tileRenderers = new ArrayList<TileRenderer>();
 
         //Setup progress monitor..
         pm.setMessage("Loading terrain graphics.");
@@ -77,20 +109,20 @@ public class ViewListsImpl implements ViewLists {
             try {
                 //XXX hack to make rivers flow into ocean and habours & occean
                 // treate habours as the same type.
-                String thisTerrainCategory = t.getTerrainCategory();
+            	TerrainType.Category thisTerrainCategory = t.getCategory();
 
-                if (thisTerrainCategory.equalsIgnoreCase("River") ||
-                        thisTerrainCategory.equalsIgnoreCase("Ocean")) {
+                if (thisTerrainCategory.equals(TerrainType.Category.River) ||
+                        thisTerrainCategory.equals(TerrainType.Category.Ocean)) {
                     //Count number of types with category "water"
                     int count = 0;
 
                     for (int j = 0; j < numberOfTypes; j++) {
                         TerrainType t2 = (TerrainType)w.get(SKEY.TERRAIN_TYPES,
                                 j);
-                        String terrainCategory = t2.getTerrainCategory();
+                        TerrainType.Category  terrainCategory = t2.getCategory();
 
-                        if (terrainCategory.equalsIgnoreCase("Ocean") ||
-                                terrainCategory.equalsIgnoreCase(
+                        if (terrainCategory.equals(TerrainType.Category.Ocean) ||
+                                terrainCategory.equals(
                                     thisTerrainCategory)) {
                             count++;
                         }
@@ -102,10 +134,10 @@ public class ViewListsImpl implements ViewLists {
                     for (int j = 0; j < numberOfTypes; j++) {
                         TerrainType t2 = (TerrainType)w.get(SKEY.TERRAIN_TYPES,
                                 j);
-                        String terrainCategory = t2.getTerrainCategory();
+                        TerrainType.Category terrainCategory = t2.getCategory();
 
-                        if (terrainCategory.equalsIgnoreCase("Ocean") ||
-                                terrainCategory.equalsIgnoreCase(
+                        if (terrainCategory.equals(TerrainType.Category.Ocean) ||
+                                terrainCategory.equals(
                                     thisTerrainCategory)) {
                             typesTreatedAsTheSame[count] = j;
                             count++;
@@ -176,7 +208,7 @@ public class ViewListsImpl implements ViewLists {
             String terrainName = t2.getTerrainTypeName();
 
             if (terrainName.equalsIgnoreCase("Ocean")) {
-                occeanTileRenderer = (TileRenderer)tileRenderers.get(j);
+                occeanTileRenderer = tileRenderers.get(j);
 
                 break;
             }
@@ -192,7 +224,7 @@ public class ViewListsImpl implements ViewLists {
                         new int[] {j}, t, occeanTileRenderer);
                 tileRenderers.set(j, tr);
 
-                occeanTileRenderer = (TileRenderer)tileRenderers.get(j);
+                occeanTileRenderer = tileRenderers.get(j);
 
                 break;
             }
@@ -226,4 +258,8 @@ public class ViewListsImpl implements ViewLists {
     public TrainImages getTrainImages() {
         return trainImages;
     }
+
+	public ImageManager getImageManager() {		
+		return imageManager;
+	}
 }

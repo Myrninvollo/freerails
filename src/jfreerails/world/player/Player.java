@@ -39,6 +39,7 @@ public class Player implements FreerailsSerializable {
     private static final Logger logger = Logger.getLogger(Player.class.getName());
     private static final long serialVersionUID = 1;
 
+    /** A FreerailsPrincipal that is not a player.*/    
     private static class WorldPrincipal extends FreerailsPrincipal {
         private static final long serialVersionUID = 1;
         private final String m_name;
@@ -121,7 +122,7 @@ public class Player implements FreerailsSerializable {
          * record of "salt" used for previous connections. This is held by the
          * server.
          */
-        final /*=mutable*/ HashSet salts = new HashSet();
+        final /*=mutable*/ HashSet<Integer> salts = new HashSet<Integer>();
 
         PrivateData(PrivateKey key) {
             privateKey = key;

@@ -15,15 +15,15 @@ import jfreerails.network.ServerGameModel;
 import jfreerails.world.common.GameCalendar;
 import jfreerails.world.common.GameSpeed;
 import jfreerails.world.common.GameTime;
-import jfreerails.world.player.FreerailsPrincipal;
 import jfreerails.world.player.Player;
 import jfreerails.world.top.ITEM;
-import jfreerails.world.top.KEY;
 import jfreerails.world.top.World;
 import jfreerails.world.top.WorldDifferences;
 
 
 /**
+ *  A ServerGameModel that contains the automations used in the actual game. 
+ * 
  * @author Luke
  *
  */
@@ -31,7 +31,7 @@ public class ServerGameModelImpl implements ServerGameModel {
     public World world;
     private transient CalcSupplyAtStations calcSupplyAtStations;
     private TrainBuilder tb;
-    private final ArrayList trainMovers;
+    private final ArrayList<TrainMover> trainMovers;
 
     /**
      * List of the ServerAutomaton objects connected to this game.
@@ -46,27 +46,15 @@ public class ServerGameModelImpl implements ServerGameModel {
     private transient MoveReceiver moveExecuter;
 
     public ServerGameModelImpl() {
-        this(new ArrayList(), null, new Vector());
+        this(new ArrayList<TrainMover>(), null, new Vector());
     }
 
-    public ServerGameModelImpl(ArrayList trainMovers, World w,
+    public ServerGameModelImpl(ArrayList<TrainMover> trainMovers, World w,
         Vector serverAutomata) {
         this.world = w;
         this.serverAutomata = serverAutomata;
         this.trainMovers = trainMovers;
         nextModelUpdateDue = System.currentTimeMillis();
-    }
-
-    public void listUpdated(KEY key, int index, FreerailsPrincipal principal) {
-        calcSupplyAtStations.listUpdated(key, index, principal);
-    }
-
-    public void itemAdded(KEY key, int index, FreerailsPrincipal principal) {
-        calcSupplyAtStations.itemAdded(key, index, principal);
-    }
-
-    public void itemRemoved(KEY key, int index, FreerailsPrincipal principal) {
-        calcSupplyAtStations.itemRemoved(key, index, principal);
     }
 
     /** This is called on the last tick of each year. */
@@ -185,16 +173,16 @@ public class ServerGameModelImpl implements ServerGameModel {
         }
     }
 
-    public void init(MoveReceiver moveExecuter) {
-        this.moveExecuter = moveExecuter;
-        tb = new TrainBuilder(moveExecuter, trainMovers);
-        calcSupplyAtStations = new CalcSupplyAtStations(world, moveExecuter);
+    public void init(MoveReceiver newMoveExecuter) {
+        this.moveExecuter = newMoveExecuter;
+        tb = new TrainBuilder(newMoveExecuter, trainMovers);
+        calcSupplyAtStations = new CalcSupplyAtStations(world, newMoveExecuter);
 
         for (int i = 0; i < serverAutomata.size(); i++) {
-            ((ServerAutomaton)serverAutomata.get(i)).initAutomaton(moveExecuter);
+            ((ServerAutomaton)serverAutomata.get(i)).initAutomaton(newMoveExecuter);
         }
 
-        tb.initAutomaton(moveExecuter);
+        tb.initAutomaton(newMoveExecuter);
         nextModelUpdateDue = System.currentTimeMillis();
     }
 

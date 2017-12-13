@@ -18,7 +18,9 @@ import jfreerails.network.NewGameServerCommand;
  * of maps.
  * @author rtuck99@users.sourceforge.net
  */
-class MapSelectionPanel extends javax.swing.JPanel {
+class MapSelectionPanel extends javax.swing.JPanel implements LauncherPanel {
+    private static final String SELECT_A_MAP = "Select a map.";
+    private static final String INVALID_PORT = "A valid port value is between between 0 and 65535.";
     private final LauncherInterface owner;
     
     private static final int LOAD_SAVED_GAME = 0;
@@ -27,9 +29,8 @@ class MapSelectionPanel extends javax.swing.JPanel {
     int getMapAction() {
         if (loadMapButton.isSelected()) {
             return LOAD_SAVED_GAME;
-        } else {
-            return START_NEW_MAP;
         }
+		return START_NEW_MAP;
     }
     
     void setServerPortPanelVisible(boolean b){
@@ -37,7 +38,7 @@ class MapSelectionPanel extends javax.swing.JPanel {
     }
     
     public String getMapName() {
-        return (String) jList1.getSelectedValue();
+        return (String) mapsJList.getSelectedValue();
     }
     
     
@@ -47,8 +48,8 @@ class MapSelectionPanel extends javax.swing.JPanel {
         initComponents();
         
         /* initialise the map list */
-        jList1.setListData(NewGameServerCommand.getMapNames());
-        jList1.setSelectedIndex(0);
+        mapsJList.setListData(NewGameServerCommand.getMapNames());
+        mapsJList.setSelectedIndex(0);
         
         owner.setNextEnabled(true);
         this.loadMapButton.setEnabled(ServerControlModel.isSaveGameAvailable());
@@ -56,29 +57,40 @@ class MapSelectionPanel extends javax.swing.JPanel {
         //Listen for changes in the server port text box.
         serverPort.getDocument().addDocumentListener(new DocumentListener(){
             public void insertUpdate(DocumentEvent e) {
-                validatePort();
+                validateInput();
             }
             public void removeUpdate(DocumentEvent e) {
-                validatePort();
+                validateInput();
             }
             public void changedUpdate(DocumentEvent e) {
-                validatePort();
+                validateInput();
             }
             
         });
     }
     
-    boolean  validatePort(){
+    public boolean validateInput(){
+        /* Validate map selection.*/
+        if(newMapButton.isSelected() && mapsJList.getSelectedIndex() == -1){
+            owner.setInfoText(SELECT_A_MAP, LauncherInterface.ERROR);
+            return false;
+        }
+        
+        /* Validate port.*/
         try{
             int port = getServerPort();
-            if(port >= 0 && port <= 65535){
-                serverPortErrorMessage.setText("");
-                return true;
+            if(port < 0 || port > 65535){
+                owner.setInfoText(INVALID_PORT, LauncherInterface.ERROR);
+                return false;
             }
         }catch(Exception e){
+            owner.setInfoText(INVALID_PORT, LauncherInterface.ERROR);
+            return false;
         }
-        serverPortErrorMessage.setText("A valid port value is between 0 and 65535.");
-        return false;
+        
+        /*Everything is ok.*/
+        owner.hideErrorMessages();
+        return true;
     }
     
     /** This method is called from within the constructor to
@@ -93,11 +105,10 @@ class MapSelectionPanel extends javax.swing.JPanel {
         newMapButton = new javax.swing.JRadioButton();
         jPanel1 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jList1 = new javax.swing.JList();
+        mapsJList = new javax.swing.JList();
         jPanel3 = new javax.swing.JPanel();
         jLabel3 = new javax.swing.JLabel();
         serverPort = new javax.swing.JTextField();
-        serverPortErrorMessage = new javax.swing.JLabel();
 
         setLayout(new java.awt.BorderLayout());
 
@@ -109,13 +120,13 @@ class MapSelectionPanel extends javax.swing.JPanel {
 
         jPanel2.setLayout(new javax.swing.BoxLayout(jPanel2, javax.swing.BoxLayout.Y_AXIS));
 
-        loadMapButton.setText("Load a saved game");
         buttonGroup1.add(loadMapButton);
+        loadMapButton.setText("Load a saved game");
         jPanel2.add(loadMapButton);
 
+        buttonGroup1.add(newMapButton);
         newMapButton.setSelected(true);
         newMapButton.setText("Start a new map");
-        buttonGroup1.add(newMapButton);
         newMapButton.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
                 newMapButtonStateChanged(evt);
@@ -130,8 +141,14 @@ class MapSelectionPanel extends javax.swing.JPanel {
 
         jPanel1.setBorder(new javax.swing.border.TitledBorder(new javax.swing.border.EtchedBorder(), "Select Map"));
         jScrollPane1.setViewportBorder(new javax.swing.border.BevelBorder(javax.swing.border.BevelBorder.LOWERED));
-        jList1.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        jScrollPane1.setViewportView(jList1);
+        mapsJList.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        mapsJList.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
+            public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
+                mapsJListValueChanged(evt);
+            }
+        });
+
+        jScrollPane1.setViewportView(mapsJList);
 
         jPanel1.add(jScrollPane1, java.awt.BorderLayout.CENTER);
 
@@ -158,12 +175,14 @@ class MapSelectionPanel extends javax.swing.JPanel {
 
         jPanel3.add(serverPort);
 
-        serverPortErrorMessage.setForeground(java.awt.Color.red);
-        jPanel3.add(serverPortErrorMessage);
-
         add(jPanel3, java.awt.BorderLayout.SOUTH);
 
     }//GEN-END:initComponents
+    
+    private void mapsJListValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_mapsJListValueChanged
+        // TODO add your handling code here:
+        validateInput();
+    }//GEN-LAST:event_mapsJListValueChanged
     
     private void serverPortActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_serverPortActionPerformed
         
@@ -178,7 +197,8 @@ class MapSelectionPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_formComponentShown
     
     private void newMapButtonStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_newMapButtonStateChanged
-        jList1.setEnabled(newMapButton.isSelected());
+        mapsJList.setEnabled(newMapButton.isSelected());
+        validateInput();
     }//GEN-LAST:event_newMapButtonStateChanged
     
     int getServerPort() {
@@ -187,17 +207,16 @@ class MapSelectionPanel extends javax.swing.JPanel {
     }
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.ButtonGroup buttonGroup1;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JList jList1;
-    private javax.swing.JPanel jPanel1;
-    private javax.swing.JPanel jPanel2;
-    private javax.swing.JPanel jPanel3;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JRadioButton loadMapButton;
-    private javax.swing.JRadioButton newMapButton;
-    private javax.swing.JTextField serverPort;
-    private javax.swing.JLabel serverPortErrorMessage;
+    javax.swing.ButtonGroup buttonGroup1;
+    javax.swing.JLabel jLabel3;
+    javax.swing.JPanel jPanel1;
+    javax.swing.JPanel jPanel2;
+    javax.swing.JPanel jPanel3;
+    javax.swing.JScrollPane jScrollPane1;
+    javax.swing.JRadioButton loadMapButton;
+    javax.swing.JList mapsJList;
+    javax.swing.JRadioButton newMapButton;
+    javax.swing.JTextField serverPort;
     // End of variables declaration//GEN-END:variables
     
 }
