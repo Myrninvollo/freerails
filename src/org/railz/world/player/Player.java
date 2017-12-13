@@ -33,8 +33,8 @@ import java.security.Signature;
 import java.security.SignatureException;
 import java.util.Arrays;
 import java.util.HashSet;
-import org.railz.world.common.FreerailsSerializable;
 
+import org.railz.world.common.FreerailsSerializable;
 
 /**
  * Represents a player within the game. The player model is such that a user can
@@ -43,311 +43,337 @@ import org.railz.world.common.FreerailsSerializable;
  * still active. The server can then save the list of players and be stopped and
  * restarted again, the clients can then authenticate themselves to the server
  * and continue their sessions where they left off.
- *
+ * 
  * XXX the player is only authenticated when the connection is opened, and
  * subsequent exchanges are not authenticated.
- *
+ * 
  * TODO implement a more complete authentication system using certificates
  * rather than public keys.
+ * 
  * @author rtuck99@users.sourceforge.net
  */
 public class Player implements FreerailsSerializable {
-    private static class WorldPrincipal extends FreerailsPrincipal {
-        private final String name;
 
-        public WorldPrincipal(String name) {
-            this.name = name;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public String toString() {
-            return name;
-        }
-
-        public int hashCode() {
-            return name.hashCode();
-        }
-
-        public boolean equals(Object o) {
-            if (!(o instanceof WorldPrincipal)) {
-                return false;
-            }
-
-            return (name.equals(((WorldPrincipal)o).name));
-        }
-    }
-
-    private FreerailsPrincipal principal;
-
-    /**
-     * salt used to ensure signatures are always unique
+	/**
+     * 
      */
-    private int salt;
+	private static final long serialVersionUID = -5090370813983420958L;
 
-    /**
-     * This Principal can be granted all permissions
-     */
-    public static final FreerailsPrincipal AUTHORITATIVE = new WorldPrincipal(
-            "Authoritative Server");
+	private static class WorldPrincipal extends FreerailsPrincipal {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 8169090546478585915L;
+		private final String name;
 
-    /**
-     * This Principal has no permissions
-     */
-    public static final FreerailsPrincipal NOBODY = new WorldPrincipal("Nobody");
+		public WorldPrincipal(String name) {
+			this.name = name;
+		}
 
-    /**
-     * name of the player
-     */
-    public String name;
+		@Override
+		public String getName() {
+			return name;
+		}
 
-    /**
-     * Private data (eg private keys) that should not be serialized in normal
-     * use. Instead, when the client needs to save their session they should
-     * call saveSession()
-     */
-    private transient PrivateData privateData;
+		@Override
+		public String toString() {
+			return name;
+		}
 
-    /**
-     * This is the clients public key.
-     */
-    private PublicKey publicKey;
+		@Override
+		public int hashCode() {
+			return name.hashCode();
+		}
 
-    /**
-     * This class is a container for private player-specific data that is
-     * security-sensitive and should not be stored in unencrypted form or
-     * transmitted to other players/systems. Note that we do not implement
-     * FreerailsSerializable here as this is private data.
-     */
-    private class PrivateData implements Serializable {
-        /**
-         * The players private key. This is held by the client.
-         */
-        final PrivateKey privateKey;
+		@Override
+		public boolean equals(Object o) {
+			if (!(o instanceof WorldPrincipal)) {
+				return false;
+			}
 
-        /**
-         * record of "salt" used for previous connections. This is held by the
-         * server.
-         */
-        HashSet salts = new HashSet();
+			return (name.equals(((WorldPrincipal) o).name));
+		}
+	}
 
-        PrivateData(PrivateKey key) {
-            privateKey = key;
-        }
+	private FreerailsPrincipal principal;
 
-        /**
-         * Default constructor called on server
-         */
-        PrivateData() {
-            privateKey = null;
-        }
-    }
+	/**
+	 * salt used to ensure signatures are always unique
+	 */
+	private int salt;
 
-    /**
-     * Used by the client to generate a player with a particular name.
-     * The player is given a public and private keypair.
-     */
-    public Player(String name) {
-        this.name = name;
+	/**
+	 * This Principal can be granted all permissions
+	 */
+	public static final FreerailsPrincipal AUTHORITATIVE = new WorldPrincipal(
+			"Authoritative Server");
 
-        KeyPairGenerator kpg;
+	/**
+	 * This Principal has no permissions
+	 */
+	public static final FreerailsPrincipal NOBODY = new WorldPrincipal("Nobody");
 
-        /* generate our key pair */
-        try {
-            kpg = KeyPairGenerator.getInstance("DSA");
-            kpg.initialize(1024);
+	/**
+	 * name of the player
+	 */
+	public String name;
 
-            KeyPair kp = kpg.generateKeyPair();
-            privateData = new PrivateData(kp.getPrivate());
-            publicKey = kp.getPublic();
-        } catch (NoSuchAlgorithmException e) {
-            System.err.println("DSA encryption algorithm no supported by" +
-                " JVM!");
-            throw new RuntimeException(e);
-        }
-    }
+	/**
+	 * Private data (eg private keys) that should not be serialized in normal
+	 * use. Instead, when the client needs to save their session they should
+	 * call saveSession()
+	 */
+	private transient PrivateData privateData;
 
-    /**
-     * Used by the server to generate a player with a particular name and public
-     * key. The server does not know the private key of the client.
-     * @param name the name of the player
-     * @param id a unique id for the player
-     * @param publicKey the client's public key.
-     * certificate.
-     */
-    public Player(String name, PublicKey publicKey, int id) {
-        this.name = name;
-        this.publicKey = publicKey;
-        privateData = new PrivateData();
-        this.principal = new PlayerPrincipal(id);
-    }
+	/**
+	 * This is the clients public key.
+	 */
+	private PublicKey publicKey;
 
-    public boolean equals(Object o) {
-        if (o == null) {
-            return false;
-        }
+	/**
+	 * This class is a container for private player-specific data that is
+	 * security-sensitive and should not be stored in unencrypted form or
+	 * transmitted to other players/systems. Note that we do not implement
+	 * FreerailsSerializable here as this is private data.
+	 */
+	private class PrivateData implements Serializable {
+		/**
+	 * 
+	 */
+		private static final long serialVersionUID = 7741291320796165318L;
 
-        if (!(o instanceof Player)) {
-            return false;
-        }
+		/**
+		 * The players private key. This is held by the client.
+		 */
+		final PrivateKey privateKey;
 
-        return (name.equals(((Player)o).name) &&
-        Arrays.equals(publicKey.getEncoded(), ((Player)o).publicKey.getEncoded()));
-    }
+		/**
+		 * record of "salt" used for previous connections. This is held by the
+		 * server.
+		 */
+		HashSet salts = new HashSet();
 
-    public int hashCode() {
-        return name.hashCode();
-    }
+		PrivateData(PrivateKey key) {
+			privateKey = key;
+		}
 
-    public String toString() {
-        return name;
-    }
+		/**
+		 * Default constructor called on server
+		 */
+		PrivateData() {
+			privateKey = null;
+		}
+	}
 
-    public String getName() {
-        return name;
-    }
+	/**
+	 * Used by the client to generate a player with a particular name. The
+	 * player is given a public and private keypair.
+	 */
+	public Player(String name) {
+		this.name = name;
 
-    /**
-     * TODO save this player's private data so that they can be re-connected to
-     * the server at a later point in time.
-     */
-    public void saveSession(ObjectOutputStream out) throws IOException {
-        out.writeObject(privateData);
-    }
+		KeyPairGenerator kpg;
 
-    /**
-     * Called by the client to reconstitute the data from a saved game.
-     */
-    public void loadSession(ObjectInputStream in) throws IOException {
-        try {
-            privateData = (PrivateData)in.readObject();
-        } catch (ClassNotFoundException e) {
-            throw new IOException("Couldn't find class:" + e);
-        }
-    }
+		/* generate our key pair */
+		try {
+			kpg = KeyPairGenerator.getInstance("DSA");
+			kpg.initialize(1024);
 
-    /**
-     * @return a signature for a serialized instance of this class
-     */
-    public byte[] sign() throws GeneralSecurityException {
-        SecureRandom sr = SecureRandom.getInstance("SHA1PRNG");
-        byte[] saltBytes = new byte[4];
-        sr.nextBytes(saltBytes);
-        salt = ((saltBytes[0] << 24) & 0xff000000) |
-            ((saltBytes[1] << 16) & 0x00ff0000) |
-            ((saltBytes[2] << 8) & 0x0000ff00) | (saltBytes[3] & 0x000000ff);
+			KeyPair kp = kpg.generateKeyPair();
+			privateData = new PrivateData(kp.getPrivate());
+			publicKey = kp.getPublic();
+		} catch (NoSuchAlgorithmException e) {
+			System.err.println("DSA encryption algorithm no supported by"
+					+ " JVM!");
+			throw new RuntimeException(e);
+		}
+	}
 
-        Signature sig = Signature.getInstance("DSA");
-        sig.initSign(privateData.privateKey);
-        sig.update(saltBytes);
-        sig.update(publicKey.getEncoded());
+	/**
+	 * Used by the server to generate a player with a particular name and public
+	 * key. The server does not know the private key of the client.
+	 * 
+	 * @param name
+	 *            the name of the player
+	 * @param id
+	 *            a unique id for the player
+	 * @param publicKey
+	 *            the client's public key. certificate.
+	 */
+	public Player(String name, PublicKey publicKey, int id) {
+		this.name = name;
+		this.publicKey = publicKey;
+		privateData = new PrivateData();
+		this.principal = new PlayerPrincipal(id);
+	}
 
-        byte[] b = sig.sign();
+	@Override
+	public boolean equals(Object o) {
+		if (o == null) {
+			return false;
+		}
 
-        return b;
-    }
+		if (!(o instanceof Player)) {
+			return false;
+		}
 
-    private String dump(byte[] b) {
-        String s = "";
+		return (name.equals(((Player) o).name) && Arrays.equals(
+				publicKey.getEncoded(), ((Player) o).publicKey.getEncoded()));
+	}
 
-        for (int i = 0; i < b.length; i++) {
-            s += Integer.toString(b[i], 16);
+	@Override
+	public int hashCode() {
+		return name.hashCode();
+	}
 
-            if (i > 0) {
-                s += ", ";
-            }
-        }
+	@Override
+	public String toString() {
+		return name;
+	}
 
-        return s;
-    }
+	public String getName() {
+		return name;
+	}
 
-    /**
-     * @return true if the specified Player object has a valid signature and
-     * has a matching public Key and is equal to this instance. Once this
-     * player has been verified, the same player cannot be verified using the
-     * same signature.
-     */
-    public boolean verify(Player player, byte[] signature) {
-        byte[] encoded;
-        assert privateData != null;
-        assert player != null;
-        assert java.util.Arrays.equals(player.publicKey.getEncoded(),
-            publicKey.getEncoded());
+	/**
+	 * TODO save this player's private data so that they can be re-connected to
+	 * the server at a later point in time.
+	 */
+	public void saveSession(ObjectOutputStream out) throws IOException {
+		out.writeObject(privateData);
+	}
 
-        if (privateData.salts.contains(new Integer(player.salt))) {
-            System.err.println("Player " + player + " attempted to connect " +
-                "with old salt");
+	/**
+	 * Called by the client to reconstitute the data from a saved game.
+	 */
+	public void loadSession(ObjectInputStream in) throws IOException {
+		try {
+			privateData = (PrivateData) in.readObject();
+		} catch (ClassNotFoundException e) {
+			throw new IOException("Couldn't find class:" + e);
+		}
+	}
 
-            return false;
-        }
+	/**
+	 * @return a signature for a serialized instance of this class
+	 */
+	public byte[] sign() throws GeneralSecurityException {
+		SecureRandom sr = SecureRandom.getInstance("SHA1PRNG");
+		byte[] saltBytes = new byte[4];
+		sr.nextBytes(saltBytes);
+		salt = ((saltBytes[0] << 24) & 0xff000000)
+				| ((saltBytes[1] << 16) & 0x00ff0000)
+				| ((saltBytes[2] << 8) & 0x0000ff00)
+				| (saltBytes[3] & 0x000000ff);
 
-        Signature sig;
+		Signature sig = Signature.getInstance("DSA");
+		sig.initSign(privateData.privateKey);
+		sig.update(saltBytes);
+		sig.update(publicKey.getEncoded());
 
-        try {
-            sig = Signature.getInstance("DSA");
-        } catch (NoSuchAlgorithmException e) {
-            assert false;
+		byte[] b = sig.sign();
 
-            return false;
-        }
+		return b;
+	}
 
-        try {
-            /*
-             * XXX verify with _our_own_ public key as we can't trust the one
-             * provided.
-             */
-            sig.initVerify(this.publicKey);
-        } catch (InvalidKeyException e) {
-            System.err.println("Caught InvalidKeyException in Player.sign()");
+	private String dump(byte[] b) {
+		String s = "";
 
-            return false;
-        }
+		for (int i = 0; i < b.length; i++) {
+			s += Integer.toString(b[i], 16);
 
-        try {
-            byte[] saltBytes = new byte[] {
-                    (byte)(player.salt >> 24), (byte)(player.salt >> 16),
-                    (byte)(player.salt >> 8), (byte)(player.salt)
-                };
-            sig.update(saltBytes);
-            sig.update(player.publicKey.getEncoded());
-        } catch (SignatureException e) {
-            assert false;
+			if (i > 0) {
+				s += ", ";
+			}
+		}
 
-            return false;
-        }
+		return s;
+	}
 
-        try {
-            if (sig.verify(signature) == false) {
-                System.err.println("Signature verification failed in " +
-                    "Player.verify()");
+	/**
+	 * @return true if the specified Player object has a valid signature and has
+	 *         a matching public Key and is equal to this instance. Once this
+	 *         player has been verified, the same player cannot be verified
+	 *         using the same signature.
+	 */
+	public boolean verify(Player player, byte[] signature) {
+		byte[] encoded;
+		assert privateData != null;
+		assert player != null;
+		assert java.util.Arrays.equals(player.publicKey.getEncoded(),
+				publicKey.getEncoded());
 
-                return false;
-            }
-        } catch (SignatureException e) {
-            System.err.println("Caught SignatureException in Player.sign()");
+		if (privateData.salts.contains(new Integer(player.salt))) {
+			System.err.println("Player " + player + " attempted to connect "
+					+ "with old salt");
 
-            return false;
-        }
+			return false;
+		}
 
-        if (player.name.equals(name)) {
-            /* remember this salt to prevent sniffing attacks */
-            privateData.salts.add(new Integer(player.salt));
+		Signature sig;
 
-            return true;
-        }
+		try {
+			sig = Signature.getInstance("DSA");
+		} catch (NoSuchAlgorithmException e) {
+			assert false;
 
-        System.err.println("Player name was different");
+			return false;
+		}
 
-        return false;
-    }
+		try {
+			/*
+			 * XXX verify with _our_own_ public key as we can't trust the one
+			 * provided.
+			 */
+			sig.initVerify(this.publicKey);
+		} catch (InvalidKeyException e) {
+			System.err.println("Caught InvalidKeyException in Player.sign()");
 
-    public FreerailsPrincipal getPrincipal() {
-        return principal;
-    }
+			return false;
+		}
 
-    public PublicKey getPublicKey() {
-        return publicKey;
-    }
+		try {
+			byte[] saltBytes = new byte[] { (byte) (player.salt >> 24),
+					(byte) (player.salt >> 16), (byte) (player.salt >> 8),
+					(byte) (player.salt) };
+			sig.update(saltBytes);
+			sig.update(player.publicKey.getEncoded());
+		} catch (SignatureException e) {
+			assert false;
+
+			return false;
+		}
+
+		try {
+			if (sig.verify(signature) == false) {
+				System.err.println("Signature verification failed in "
+						+ "Player.verify()");
+
+				return false;
+			}
+		} catch (SignatureException e) {
+			System.err.println("Caught SignatureException in Player.sign()");
+
+			return false;
+		}
+
+		if (player.name.equals(name)) {
+			/* remember this salt to prevent sniffing attacks */
+			privateData.salts.add(new Integer(player.salt));
+
+			return true;
+		}
+
+		System.err.println("Player name was different");
+
+		return false;
+	}
+
+	public FreerailsPrincipal getPrincipal() {
+		return principal;
+	}
+
+	public PublicKey getPublicKey() {
+		return publicKey;
+	}
 }

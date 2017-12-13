@@ -1,3 +1,25 @@
+May 13, 20012:
+-----------------
+Fixed bug - Freight revenue was not adding correctly.
+Fixed bug - Deleting track that isn't there throws an exception and crashes the game.
+Bug work - Loading games between code changes failed. Resolved this.
+
+Known issue:
+
+If player data is created from a previous version, can't user player name. Can delete the user folder from:
+
+Windows (C:\documents and settings\users\) or something to that effect.
+
+May 13, 20012:
+-----------------
+Fixed water bug - Trains ran out of water too quickly making routes unprofitable. 
+Serious stability work. Ensure back end code errors are caught and recovered from.
+Errors in running code and starting games.
+
+Known issues:
+
+At game start, game view is not drawn. Starts off as a white window until view is moved. 
+
 January 30, 2005:
 -----------------
 Fix for bug 6 - Top-down engine gfx are just black rectangles.
