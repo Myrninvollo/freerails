@@ -3,42 +3,63 @@ package jfreerails.move;
 import jfreerails.world.player.FreerailsPrincipal;
 import jfreerails.world.top.World;
 
-
 /**
  * Undoes the Move passed to its constructor.
+ * 
  * @author luke
  */
 public class UndoMove implements Move {
-    private Move move2undo;
+	private static final long serialVersionUID = 3977582498051929144L;
 
-    /**
-    * @param move The move that was undone
-    */
-    public UndoMove(Move move) {
-        if (move instanceof UndoMove) {
-            throw new IllegalArgumentException();
-        }
+	private Move move2undo;
 
-        move2undo = move;
-    }
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (!(o instanceof UndoMove))
+			return false;
 
-    public MoveStatus tryDoMove(World w, FreerailsPrincipal p) {
-        return move2undo.tryUndoMove(w, p);
-    }
+		final UndoMove undoMove = (UndoMove) o;
 
-    public MoveStatus tryUndoMove(World w, FreerailsPrincipal p) {
-        return move2undo.tryDoMove(w, p);
-    }
+		if (!move2undo.equals(undoMove.move2undo))
+			return false;
 
-    public MoveStatus doMove(World w, FreerailsPrincipal p) {
-        return move2undo.undoMove(w, p);
-    }
+		return true;
+	}
 
-    public MoveStatus undoMove(World w, FreerailsPrincipal p) {
-        return move2undo.undoMove(w, p);
-    }
+	public int hashCode() {
+		return move2undo.hashCode();
+	}
 
-    public Move getUndoneMove() {
-        return move2undo;
-    }
+	/**
+	 * @param move
+	 *            The move that was undone
+	 */
+	public UndoMove(Move move) {
+		if (move instanceof UndoMove) {
+			throw new IllegalArgumentException();
+		}
+
+		move2undo = move;
+	}
+
+	public MoveStatus tryDoMove(World w, FreerailsPrincipal p) {
+		return move2undo.tryUndoMove(w, p);
+	}
+
+	public MoveStatus tryUndoMove(World w, FreerailsPrincipal p) {
+		return move2undo.tryDoMove(w, p);
+	}
+
+	public MoveStatus doMove(World w, FreerailsPrincipal p) {
+		return move2undo.undoMove(w, p);
+	}
+
+	public MoveStatus undoMove(World w, FreerailsPrincipal p) {
+		return move2undo.undoMove(w, p);
+	}
+
+	public Move getUndoneMove() {
+		return move2undo;
+	}
 }

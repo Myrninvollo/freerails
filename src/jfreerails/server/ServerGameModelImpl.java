@@ -6,10 +6,10 @@ package jfreerails.server;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.util.ArrayList;
 import java.util.Vector;
-import jfreerails.move.MapDiffMove;
+
 import jfreerails.move.TimeTickMove;
+import jfreerails.move.WorldDiffMove;
 import jfreerails.network.MoveReceiver;
 import jfreerails.network.ServerGameModel;
 import jfreerails.world.common.GameCalendar;
@@ -18,181 +18,200 @@ import jfreerails.world.common.GameTime;
 import jfreerails.world.player.Player;
 import jfreerails.world.top.ITEM;
 import jfreerails.world.top.World;
-import jfreerails.world.top.WorldDifferences;
-
+import jfreerails.world.top.WorldDiffs;
 
 /**
- *  A ServerGameModel that contains the automations used in the actual game. 
+ * A ServerGameModel that contains the automations used in the actual game.
  * 
  * @author Luke
- *
+ * 
  */
 public class ServerGameModelImpl implements ServerGameModel {
-    public World world;
-    private transient CalcSupplyAtStations calcSupplyAtStations;
-    private TrainBuilder tb;
-    private final ArrayList<TrainMover> trainMovers;
+	private static final long serialVersionUID = 3978144352788820021L;
 
-    /**
-     * List of the ServerAutomaton objects connected to this game.
-     */
-    private final Vector serverAutomata;
+	public World world;
 
-    /**
-     * Number of ticks since the last time we did an infrequent update.
-     */
-    private int ticksSinceUpdate = 0;
-    private transient long nextModelUpdateDue;
-    private transient MoveReceiver moveExecuter;
+	private transient CalcSupplyAtStations calcSupplyAtStations;
 
-    public ServerGameModelImpl() {
-        this(new ArrayList<TrainMover>(), null, new Vector());
-    }
+	private TrainBuilder tb;
+	
 
-    public ServerGameModelImpl(ArrayList<TrainMover> trainMovers, World w,
-        Vector serverAutomata) {
-        this.world = w;
-        this.serverAutomata = serverAutomata;
-        this.trainMovers = trainMovers;
-        nextModelUpdateDue = System.currentTimeMillis();
-    }
+	private String[] passwords;
 
-    /** This is called on the last tick of each year. */
-    private void yearEnd() {
-        TrackMaintenanceMoveGenerator tmmg = new TrackMaintenanceMoveGenerator(moveExecuter);
-        tmmg.update(world);
+	/**
+	 * List of the ServerAutomaton objects connected to this game.
+	 */
+	private final Vector<ServerAutomaton> serverAutomata;
 
-        TrainMaintenanceMoveGenerator trainMaintenanceMoveGenerator = new TrainMaintenanceMoveGenerator(moveExecuter);
-        trainMaintenanceMoveGenerator.update(world);
+	/**
+	 * Number of ticks since the last time we did an infrequent update.
+	 */
+	private int ticksSinceUpdate = 0;
 
-        InterestChargeMoveGenerator interestChargeMoveGenerator = new InterestChargeMoveGenerator(moveExecuter);
-        interestChargeMoveGenerator.update(world);
+	private transient long nextModelUpdateDue;
 
-        //Grow cities.
-        WorldDifferences wd = new WorldDifferences(world);
-        NewCityTilePositioner ctp = new NewCityTilePositioner(wd);
-        ctp.growCities();
+	private transient MoveReceiver moveExecuter;
 
-        MapDiffMove move = new MapDiffMove(world, wd);
-        moveExecuter.processMove(move);
-    }
+	public ServerGameModelImpl() {
+		this(null, new Vector<ServerAutomaton>());
+	}
 
-    /** This is called at the start of each new month. */
-    private void monthEnd() {
-        calcSupplyAtStations.doProcessing();
+	public ServerGameModelImpl( World w,
+			Vector<ServerAutomaton> serverAutomata) {
+		this.world = w;
+		this.serverAutomata = serverAutomata;
+		
+		nextModelUpdateDue = System.currentTimeMillis();
+	}
 
-        CargoAtStationsGenerator cargoAtStationsGenerator = new CargoAtStationsGenerator();
-        cargoAtStationsGenerator.update(world, moveExecuter);
-    }
+	/** This is called on the last tick of each year. */
+	private void yearEnd() {
+		TrackMaintenanceMoveGenerator tmmg = new TrackMaintenanceMoveGenerator(
+				moveExecuter);
+		tmmg.update(world);
 
-    private void updateGameTime() {
-        moveExecuter.processMove(TimeTickMove.getMove(world));
-    }
+		TrainMaintenanceMoveGenerator trainMaintenanceMoveGenerator = new TrainMaintenanceMoveGenerator(
+				moveExecuter);
+		trainMaintenanceMoveGenerator.update(world);
 
-    /**
+		InterestChargeMoveGenerator interestChargeMoveGenerator = new InterestChargeMoveGenerator(
+				moveExecuter);
+		interestChargeMoveGenerator.update(world);
 
-     */
-    public synchronized void update() {
-        long frameStartTime = System.currentTimeMillis();
+		// Grow cities.
+		WorldDiffs wd = new WorldDiffs(world);
+		CityTilePositioner ctp = new CityTilePositioner(wd);
+		ctp.growCities();
 
-        while (nextModelUpdateDue <= frameStartTime) {
-            /* First do the things that need doing whether or not the game is paused.*/
-            tb.buildTrains(world);
+		WorldDiffMove move = new WorldDiffMove(world, wd, WorldDiffMove.Cause.YearEnd);
+		moveExecuter.processMove(move);
+	}
 
-            int gameSpeed = ((GameSpeed)world.get(ITEM.GAME_SPEED)).getSpeed();
+	/** This is called at the start of each new month. */
+	private void monthEnd() {
+		calcSupplyAtStations.doProcessing();
 
-            if (gameSpeed > 0) {
-                /* Update the time first, since other updates might need
-                to know the current time.*/
-                updateGameTime();
+		CargoAtStationsGenerator cargoAtStationsGenerator = new CargoAtStationsGenerator();
+		cargoAtStationsGenerator.update(world, moveExecuter);
+	}
 
-                //now do the other updates
-                tb.moveTrains(world);
+	private void updateGameTime() {
+		moveExecuter.processMove(TimeTickMove.getMove(world));
+	}
 
-                //Check whether we are about to start a new year..
-                GameTime time = (GameTime)world.get(ITEM.TIME);
-                GameCalendar calendar = (GameCalendar)world.get(ITEM.CALENDAR);
-                int yearNextTick = calendar.getYear(time.getTime() + 1);
-                int yearThisTick = calendar.getYear(time.getTime());
+	/**
+	 * 
+	 */
+	public synchronized void update() {
+		long frameStartTime = System.currentTimeMillis();
 
-                if (yearThisTick != yearNextTick) {
-                    yearEnd();
-                }
+		while (nextModelUpdateDue <= frameStartTime) {
+			/*
+			 * First do the things that need doing whether or not the game is
+			 * paused.
+			 */
+			tb.buildTrains(world);
 
-                //And a new month..
-                int monthThisTick = calendar.getMonth(time.getTime());
-                int monthNextTick = calendar.getMonth(time.getTime() + 1);
+			int gameSpeed = ((GameSpeed) world.get(ITEM.GAME_SPEED)).getSpeed();
 
-                if (monthNextTick != monthThisTick) {
-                    monthEnd();
-                }
+			if (gameSpeed > 0) {
+				/*
+				 * Update the time first, since other updates might need to know
+				 * the current time.
+				 */
+				updateGameTime();
 
-                /* calculate "ideal world" time for next tick */
-                nextModelUpdateDue = nextModelUpdateDue + (1000 / gameSpeed);
+				// now do the other updates
+				tb.moveTrains(world);
 
-                //            int delay = (int)(nextModelUpdateDue - frameStartTime);
-                //
-                //            /* wake up any waiting client threads - we could be
-                //             * more agressive, and only notify them if delay > 0? */
-                //            this.notifyAll();
-                //
-                //            try {
-                //                if (delay > 0) {
-                //                    this.wait(delay);
-                //                } else {
-                //                    this.wait(1);
-                //                }
-                //            } catch (InterruptedException e) {
-                //                // do nothing
-                //            }
-                ticksSinceUpdate++;
-            } else {
-                //            try {
-                //                //When the game is frozen we don't want to be spinning in a
-                //                //loop.
-                //                Thread.sleep(200);
-                //            } catch (InterruptedException e) {
-                //                // do nothing
-                //            }
-                nextModelUpdateDue = System.currentTimeMillis();
-            }
-        }
-    }
+				// Check whether we are about to start a new year..
+				GameTime time = world.currentTime();
+				GameCalendar calendar = (GameCalendar) world.get(ITEM.CALENDAR);
+				int yearNextTick = calendar.getYear(time.getTicks() + 1);
+				int yearThisTick = calendar.getYear(time.getTicks());
 
-    public void write(ObjectOutputStream objectOut) throws IOException {
-        objectOut.writeObject(tb.getTrainMovers());
-        objectOut.writeObject(world);
-        objectOut.writeObject(serverAutomata);
+				if (yearThisTick != yearNextTick) {
+					yearEnd();
+				}
 
-        /**
-         * save player private data
-         */
-        for (int i = 0; i < world.getNumberOfPlayers(); i++) {
-            Player player = world.getPlayer(i);
-            player.saveSession(objectOut);
-        }
-    }
+				// And a new month..
+				int monthThisTick = calendar.getMonth(time.getTicks());
+				int monthNextTick = calendar.getMonth(time.getTicks() + 1);
 
-    public void init(MoveReceiver newMoveExecuter) {
-        this.moveExecuter = newMoveExecuter;
-        tb = new TrainBuilder(newMoveExecuter, trainMovers);
-        calcSupplyAtStations = new CalcSupplyAtStations(world, newMoveExecuter);
+				if (monthNextTick != monthThisTick) {
+					monthEnd();
+				}
 
-        for (int i = 0; i < serverAutomata.size(); i++) {
-            ((ServerAutomaton)serverAutomata.get(i)).initAutomaton(newMoveExecuter);
-        }
+				/* calculate "ideal world" time for next tick */
+				nextModelUpdateDue = nextModelUpdateDue + (1000 / gameSpeed);
 
-        tb.initAutomaton(newMoveExecuter);
-        nextModelUpdateDue = System.currentTimeMillis();
-    }
+				// int delay = (int)(nextModelUpdateDue - frameStartTime);
+				//
+				// /* wake up any waiting client threads - we could be
+				// * more agressive, and only notify them if delay > 0? */
+				// this.notifyAll();
+				//
+				// try {
+				// if (delay > 0) {
+				// this.wait(delay);
+				// } else {
+				// this.wait(1);
+				// }
+				// } catch (InterruptedException e) {
+				// // do nothing
+				// }
+				ticksSinceUpdate++;
+			} else {
+				// try {
+				// //When the game is frozen we don't want to be spinning in a
+				// //loop.
+				// Thread.sleep(200);
+				// } catch (InterruptedException e) {
+				// // do nothing
+				// }
+				nextModelUpdateDue = System.currentTimeMillis();
+			}
+		}
+	}
 
-    public World getWorld() {
-        return world;
-    }
+	public void write(ObjectOutputStream objectOut) throws IOException {
+	
+		objectOut.writeObject(world);
+		objectOut.writeObject(serverAutomata);
 
-    public void setWorld(World world) {
-        this.world = world;
-        this.trainMovers.clear();
-        this.serverAutomata.clear();
-    }
+		/**
+		 * save player private data
+		 */
+		for (int i = 0; i < world.getNumberOfPlayers(); i++) {
+			Player player = world.getPlayer(i);
+			player.saveSession(objectOut);
+		}
+	}
+
+	public void init(MoveReceiver newMoveExecuter) {
+		this.moveExecuter = newMoveExecuter;
+		tb = new TrainBuilder(newMoveExecuter);
+		calcSupplyAtStations = new CalcSupplyAtStations(world, newMoveExecuter);
+
+		for (int i = 0; i < serverAutomata.size(); i++) {
+			serverAutomata.get(i).initAutomaton(newMoveExecuter);
+		}
+
+		tb.initAutomaton(newMoveExecuter);
+		nextModelUpdateDue = System.currentTimeMillis();
+	}
+
+	public World getWorld() {
+		return world;
+	}
+
+	public void setWorld(World w, String[] passwords) {
+		this.world = w;		
+		this.serverAutomata.clear();
+		this.passwords = passwords.clone();
+	}
+
+	public String[] getPasswords() {
+		return passwords.clone();
+	}
 }

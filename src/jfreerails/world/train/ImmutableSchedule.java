@@ -1,92 +1,103 @@
 /*
  * Created on 24-Aug-2003
  *
-  */
+ */
 package jfreerails.world.train;
 
-import java.util.Arrays;
 import jfreerails.world.common.FreerailsSerializable;
-
+import jfreerails.world.common.ImInts;
+import jfreerails.world.common.ImList;
 
 /**
  * A Schedule that is immutable.
+ * 
  * @author Luke Lindsay
- *
+ * 
  */
 public class ImmutableSchedule implements Schedule, FreerailsSerializable {
-    private final TrainOrdersModel[] m_orders;
-    private final int nextScheduledOrder;
+	private static final long serialVersionUID = 3977858458324318264L;
 
-    public int hashCode() {
-        int result;
-        result = nextScheduledOrder;
-        result = 29 * result + (m_hasPriorityOrders ? 1 : 0);
+	private final ImList<TrainOrdersModel> orders;
 
-        return result;
-    }
+	private final int nextScheduledOrder;
 
-    private final boolean m_hasPriorityOrders;
+	public int hashCode() {
+		int result;
+		result = nextScheduledOrder;
+		result = 29 * result + (hasPriorityOrders ? 1 : 0);
 
-    public ImmutableSchedule( /*=const*/
-        TrainOrdersModel[] orders, int gotoStation, boolean hasPriorityOrders) {
-        m_orders = orders;
-        nextScheduledOrder = gotoStation;
-        m_hasPriorityOrders = hasPriorityOrders;
-    }
+		return result;
+	}
 
-    public TrainOrdersModel getOrder(int i) {
-        return m_orders[i];
-    }
+	private final boolean hasPriorityOrders;
 
-    public int getOrderToGoto() {
-        return m_hasPriorityOrders ? 0 : nextScheduledOrder;
-    }
+	public ImmutableSchedule(TrainOrdersModel[] orders, int gotoStation,
+			boolean hasPriorityOrders) {
+		this.orders = new ImList<TrainOrdersModel>(orders);
+		this.nextScheduledOrder = gotoStation;
+		this.hasPriorityOrders = hasPriorityOrders;
+	}
 
-    public int getStationToGoto() {
-        int orderToGoto = getOrderToGoto();
+	public TrainOrdersModel getOrder(int i) {
+		return orders.get(i);
+	}
 
-        if (-1 == orderToGoto) {
-            return -1;
-        }
-		return m_orders[orderToGoto].getStationID();
-    }
+	public int getOrderToGoto() {
+		return hasPriorityOrders ? 0 : nextScheduledOrder;
+	}
 
-    public /*=const*/ int[] getWagonsToAdd() {
-        return m_orders[getOrderToGoto()].consist;
-    }
+	public int getStationToGoto() {
+		int orderToGoto = getOrderToGoto();
 
-    public boolean hasPriorityOrders() {
-        return m_hasPriorityOrders;
-    }
+		if (-1 == orderToGoto) {
+			return -1;
+		}
+		TrainOrdersModel order = orders.get(orderToGoto);
+		return order.getStationID();
+	}
 
-    public int getNumOrders() {
-        return m_orders.length;
-    }
+	public ImInts getWagonsToAdd() {
+		TrainOrdersModel order = orders.get(getOrderToGoto());
+		return order.consist;
+	}
 
-    public int getNextScheduledOrder() {
-        return this.nextScheduledOrder;
-    }
+	public boolean hasPriorityOrders() {
+		return hasPriorityOrders;
+	}
 
-    public boolean stopsAtStation(int stationNumber) {
-        for (int i = 0; i < this.getNumOrders(); i++) {
-            TrainOrdersModel order = this.getOrder(i);
+	public int getNumOrders() {
+		return orders.size();
+	}
 
-            if (order.getStationID() == stationNumber) {
-                return true;
-            }
-        }
+	public int getNextScheduledOrder() {
+		return this.nextScheduledOrder;
+	}
 
-        return false;
-    }
+	public boolean stopsAtStation(int stationNumber) {
+		for (int i = 0; i < this.getNumOrders(); i++) {
+			TrainOrdersModel order = this.getOrder(i);
 
-    public boolean equals(Object o) {
-        if (o instanceof ImmutableSchedule) {
-            ImmutableSchedule test = (ImmutableSchedule)o;
+			if (order.getStationID() == stationNumber) {
+				return true;
+			}
+		}
 
-            return this.m_hasPriorityOrders == test.m_hasPriorityOrders &&
-            this.nextScheduledOrder == test.nextScheduledOrder &&
-            Arrays.equals(this.m_orders, test.m_orders);
-        }
 		return false;
-    }
+	}
+
+	public boolean equals(Object o) {
+		if (o instanceof ImmutableSchedule) {
+			ImmutableSchedule test = (ImmutableSchedule) o;
+
+			return this.hasPriorityOrders == test.hasPriorityOrders
+					&& this.nextScheduledOrder == test.nextScheduledOrder
+					&& this.orders.equals(test.orders);
+		}
+		return false;
+	}
+
+	public boolean autoConsist() {
+		TrainOrdersModel order = orders.get(getOrderToGoto());
+		return order.autoConsist;
+	}
 }

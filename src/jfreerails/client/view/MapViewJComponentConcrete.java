@@ -21,308 +21,332 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.MouseInputAdapter;
 
 import jfreerails.client.common.ImageManager;
-import jfreerails.client.common.ModelRoot;
 import jfreerails.client.common.ModelRootImpl;
 import jfreerails.client.common.ModelRootListener;
 import jfreerails.client.renderer.MapRenderer;
-
+import jfreerails.controller.ModelRoot;
+import jfreerails.world.common.ImPoint;
 
 /**
- * Displays the map, the cursor, and user messages (which are stored on the ModelRoot under the keys
- * QUICK_MESSAGE and PERMANENT_MESSAGE).
- * @author  Luke Lindsay
- *
+ * Displays the map, the cursor, and user messages (which are stored on the
+ * ModelRoot under the keys QUICK_MESSAGE and PERMANENT_MESSAGE).
+ * 
+ * @author Luke Lindsay
+ * 
  */
 final public class MapViewJComponentConcrete extends MapViewJComponent
-    implements ModelRootListener {
-    private static final Font USER_MESSAGE_FONT = new Font("Arial", 0, 12);
-    private static final Font LARGE_MESSAGE_FONT = new Font("Arial", 0, 24);   
+		implements ModelRootListener {
+	private static final long serialVersionUID = 3834868087706236208L;
 
-    /** The length of the array is the number of lines.
-     * This is necessary since Graphics.drawString(..)  doesn't know about newline characters*/
-    private String[] userMessage = new String[0];
+	private static final Font USER_MESSAGE_FONT = new Font("Arial", 0, 12);
 
-    /**
-     * Message that will appear in the middle of the screen in <code>LARGE_MESSAGE_FONT</code>.
-     */
-    private String message = null;
+	private static final Font LARGE_MESSAGE_FONT = new Font("Arial", 0, 24);
 
-    /** Time at which to stop displaying the current user message. */
-    private long displayMessageUntil = 0;
-    private FreerailsCursor mapCursor;
+	/**
+	 * The length of the array is the number of lines. This is necessary since
+	 * Graphics.drawString(..) doesn't know about newline characters
+	 */
+	private String[] userMessage = new String[0];
 
-    /**
-    * Affects scroll direction and scroll speed relative to the cursor.
-    * Examples:<p>
-    *            1 := grab map, move 1:1<p>
-    *           -2 := invert mouse, scroll twice as fast
-    */
-    private final int LINEAR_ACCEL = -1;
+	/**
+	 * Message that will appear in the middle of the screen in
+	 * <code>LARGE_MESSAGE_FONT</code>.
+	 */
+	private String message = null;
 
-    /**
-    * Affects the granularity of the map scrolling (the map is scrolled in
-    * tileSize/GRANULARITY intervals). Multiply this value with LINEAR_ACCEL to
-    * be independent of acceleration.
-    */
-    private final int GRANULARITY = 2 * LINEAR_ACCEL;
+	/** Time at which to stop displaying the current user message. */
+	private long displayMessageUntil = 0;
 
-    /**
-    * A {@link Robot} to compensate mouse cursor movement.
-    */
-    private static Robot robot;
+	private FreerailsCursor mapCursor;
 
-    static {
-        try {
-            robot = new Robot();
-        } catch (java.awt.AWTException e) {
-        }
-    }
+	/**
+	 * Affects scroll direction and scroll speed relative to the cursor.
+	 * Examples:
+	 * <p>
+	 * 1 := grab map, move 1:1
+	 * <p>
+	 * -2 := invert mouse, scroll twice as fast
+	 */
+	private final int LINEAR_ACCEL = -1;
 
-    /**
-    * Implements a MouseListener for FreerailsCursor-movement (left
-    * mouse button) and a MouseMotionListener for map-scrolling (right
-    * mouse button).<p>
-    * Possible enhancements:
-    *     setCursor(blankCursor),
-    *     g.draw(cursorimage,lastMouseLocation.x,lastMouseLocation.y,null)
-    */
-    final private class MapViewJComponentMouseAdapter extends MouseInputAdapter {
-        /**
-        * Screen location of the mouse cursor, when the second mouse button was
-        * pressed.
-        */
-        private Point screenLocation = new Point();
-        private Point lastMouseLocation = new Point();
+	/**
+	 * Affects the granularity of the map scrolling (the map is scrolled in
+	 * tileSize/GRANULARITY intervals). Multiply this value with LINEAR_ACCEL to
+	 * be independent of acceleration.
+	 */
+	private final int GRANULARITY = 2 * LINEAR_ACCEL;
 
-        /**
-        * A variable to sum up relative mouse movement.
-        */
-        private Point sigmadelta = new Point();
+	/**
+	 * A {@link Robot} to compensate mouse cursor movement.
+	 */
+	private static Robot robot;
 
-        /**
-        * Where to scroll - Reflects granularity, scroll direction and
-        * acceleration, respects bounds.
-        */
-        private Point tiledelta = new Point();
+	static {
+		try {
+			robot = new Robot();
+		} catch (java.awt.AWTException e) {
+		}
+	}
 
-        public void mousePressed(MouseEvent evt) {
-            /* Note, moving the cursor using the mouse is now handled in UserInputOnMapController */
-            if (SwingUtilities.isRightMouseButton(evt)) {
-                MapViewJComponentConcrete.this.setCursor(Cursor.getPredefinedCursor((LINEAR_ACCEL > 0)
-                        ? Cursor.HAND_CURSOR : Cursor.MOVE_CURSOR));
-                lastMouseLocation.x = evt.getX();
-                lastMouseLocation.y = evt.getY();
-                screenLocation.x = evt.getX();
-                screenLocation.y = evt.getY();
-                sigmadelta.x = 0;
-                sigmadelta.y = 0;
-                javax.swing.SwingUtilities.convertPointToScreen(screenLocation,
-                    MapViewJComponentConcrete.this);
-            }
-        }
+	/**
+	 * Implements a MouseListener for FreerailsCursor-movement (left mouse
+	 * button) and a MouseMotionListener for map-scrolling (right mouse button).
+	 * <p>
+	 * Possible enhancements: setCursor(blankCursor),
+	 * g.draw(cursorimage,lastMouseLocation.x,lastMouseLocation.y,null)
+	 */
+	final private class MapViewJComponentMouseAdapter extends MouseInputAdapter {
+		/**
+		 * Screen location of the mouse cursor, when the second mouse button was
+		 * pressed.
+		 */
+		private Point screenLocation = new Point();
 
-        public void mouseReleased(MouseEvent evt) {
-            MapViewJComponentConcrete.this.setCursor(Cursor.getPredefinedCursor(
-                    Cursor.DEFAULT_CURSOR));
-        }
+		private Point lastMouseLocation = new Point();
 
-        public void mouseDragged(MouseEvent evt) {
-            if (SwingUtilities.isRightMouseButton(evt)) {
-                sigmadelta.x += evt.getX() - lastMouseLocation.x;
-                sigmadelta.y += evt.getY() - lastMouseLocation.y;
+		/**
+		 * A variable to sum up relative mouse movement.
+		 */
+		private Point sigmadelta = new Point();
 
-                int tileSize = (int)getScale();
-                tiledelta.x = (sigmadelta.x * GRANULARITY) / tileSize;
-                tiledelta.y = (sigmadelta.y * GRANULARITY) / tileSize;
-                tiledelta.x = ((tiledelta.x * tileSize) / GRANULARITY) * LINEAR_ACCEL;
-                tiledelta.y = ((tiledelta.y * tileSize) / GRANULARITY) * LINEAR_ACCEL;
+		/**
+		 * Where to scroll - Reflects granularity, scroll direction and
+		 * acceleration, respects bounds.
+		 */
+		private Point tiledelta = new Point();
 
-                Rectangle vr = MapViewJComponentConcrete.this.getVisibleRect();
-                Rectangle bounds = MapViewJComponentConcrete.this.getBounds();
+		public void mousePressed(MouseEvent evt) {
+			/*
+			 * Note, moving the cursor using the mouse is now handled in
+			 * UserInputOnMapController
+			 */
+			if (SwingUtilities.isRightMouseButton(evt)) {
+				MapViewJComponentConcrete.this
+						.setCursor(Cursor
+								.getPredefinedCursor((LINEAR_ACCEL > 0) ? Cursor.HAND_CURSOR
+										: Cursor.MOVE_CURSOR));
+				lastMouseLocation.x = evt.getX();
+				lastMouseLocation.y = evt.getY();
+				screenLocation.x = evt.getX();
+				screenLocation.y = evt.getY();
+				sigmadelta.x = 0;
+				sigmadelta.y = 0;
+				javax.swing.SwingUtilities.convertPointToScreen(screenLocation,
+						MapViewJComponentConcrete.this);
+			}
+		}
 
-                int temp; //respect bounds
+		public void mouseReleased(MouseEvent evt) {
+			MapViewJComponentConcrete.this.setCursor(Cursor
+					.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+		}
 
-                if ((temp = vr.x - tiledelta.x) < 0) {
-                    sigmadelta.x += temp / LINEAR_ACCEL;
-                    tiledelta.x += temp;
-                } else if ((temp = (bounds.width) - (vr.x + vr.width) +
-                            tiledelta.x) < 0) {
-                    sigmadelta.x -= temp / LINEAR_ACCEL;
-                    tiledelta.x -= temp;
-                }
+		public void mouseDragged(MouseEvent evt) {
+			if (SwingUtilities.isRightMouseButton(evt)) {
+				sigmadelta.x += evt.getX() - lastMouseLocation.x;
+				sigmadelta.y += evt.getY() - lastMouseLocation.y;
 
-                if ((temp = vr.y - tiledelta.y) < 0) {
-                    sigmadelta.y += temp / LINEAR_ACCEL;
-                    tiledelta.y += temp;
-                } else if ((temp = (bounds.height) - (vr.y + vr.height) +
-                            tiledelta.y) < 0) {
-                    sigmadelta.y -= temp / LINEAR_ACCEL;
-                    tiledelta.y -= temp;
-                }
+				int tileSize = (int) getScale();
+				tiledelta.x = (sigmadelta.x * GRANULARITY) / tileSize;
+				tiledelta.y = (sigmadelta.y * GRANULARITY) / tileSize;
+				tiledelta.x = ((tiledelta.x * tileSize) / GRANULARITY)
+						* LINEAR_ACCEL;
+				tiledelta.y = ((tiledelta.y * tileSize) / GRANULARITY)
+						* LINEAR_ACCEL;
 
-                if (tiledelta.x != 0 || tiledelta.y != 0) {
-                    vr.x -= tiledelta.x;
-                    vr.y -= tiledelta.y;
-                    MapViewJComponentConcrete.this.scrollRectToVisible(vr);
+				Rectangle vr = MapViewJComponentConcrete.this.getVisibleRect();
+				Rectangle bounds = MapViewJComponentConcrete.this.getBounds();
 
-                    sigmadelta.x -= tiledelta.x / LINEAR_ACCEL;
-                    sigmadelta.y -= tiledelta.y / LINEAR_ACCEL;
-                    lastMouseLocation.x -= tiledelta.x;
-                    lastMouseLocation.y -= tiledelta.y;
-                }
+				int temp; // respect bounds
 
-                MapViewJComponentConcrete.robot.mouseMove(screenLocation.x,
-                    screenLocation.y);
-            }
-        }
-    }
+				if ((temp = vr.x - tiledelta.x) < 0) {
+					sigmadelta.x += temp / LINEAR_ACCEL;
+					tiledelta.x += temp;
+				} else if ((temp = (bounds.width) - (vr.x + vr.width)
+						+ tiledelta.x) < 0) {
+					sigmadelta.x -= temp / LINEAR_ACCEL;
+					tiledelta.x -= temp;
+				}
 
-    protected void paintComponent(java.awt.Graphics g) {       
-        super.paintComponent(g);
+				if ((temp = vr.y - tiledelta.y) < 0) {
+					sigmadelta.y += temp / LINEAR_ACCEL;
+					tiledelta.y += temp;
+				} else if ((temp = (bounds.height) - (vr.y + vr.height)
+						+ tiledelta.y) < 0) {
+					sigmadelta.y -= temp / LINEAR_ACCEL;
+					tiledelta.y -= temp;
+				}
 
-       
-        if (null != mapCursor  && this.isFocusOwner()) {
-            mapCursor.paintCursor(g, new java.awt.Dimension(30, 30));
-        }
+				if (tiledelta.x != 0 || tiledelta.y != 0) {
+					vr.x -= tiledelta.x;
+					vr.y -= tiledelta.y;
+					MapViewJComponentConcrete.this.scrollRectToVisible(vr);
 
-        if (System.currentTimeMillis() < this.displayMessageUntil) {
-            Rectangle visRect = this.getVisibleRect();
-            g.setColor(Color.WHITE);
-            g.setFont(USER_MESSAGE_FONT);
+					sigmadelta.x -= tiledelta.x / LINEAR_ACCEL;
+					sigmadelta.y -= tiledelta.y / LINEAR_ACCEL;
+					lastMouseLocation.x -= tiledelta.x;
+					lastMouseLocation.y -= tiledelta.y;
+				}
 
-            for (int i = 0; i < userMessage.length; i++) {
-                g.drawString(this.userMessage[i], 50 + visRect.x,
-                    50 + visRect.y + i * 20);
-            }
-        }
+				MapViewJComponentConcrete.robot.mouseMove(screenLocation.x,
+						screenLocation.y);
+			}
+		}
+	}
 
-        if (message != null) {
-            Rectangle visRect = this.getVisibleRect();
-            g.setColor(Color.lightGray);
-            g.setFont(LARGE_MESSAGE_FONT);
+	protected void paintComponent(java.awt.Graphics g) {
+		super.paintComponent(g);
 
-            int msgWidth = g.getFontMetrics(LARGE_MESSAGE_FONT).stringWidth(message);
-            int msgHeight = g.getFontMetrics(LARGE_MESSAGE_FONT).getHeight();
-            g.drawString(message,
-                (int)(visRect.x + (visRect.getWidth() - msgWidth) / 2),
-                (int)(visRect.y + (visRect.getHeight() - msgHeight) / 2));
-        }      
-    }
+		if (null != mapCursor && this.isFocusOwner()) {
+			mapCursor.paintCursor(g, new java.awt.Dimension(30, 30));
+		}
 
-    public MapViewJComponentConcrete() {
-        super();
+		if (System.currentTimeMillis() < this.displayMessageUntil) {
+			Rectangle visRect = this.getVisibleRect();
+			g.setColor(Color.WHITE);
+			g.setFont(USER_MESSAGE_FONT);
 
-        MapViewJComponentMouseAdapter mva = new MapViewJComponentMouseAdapter();
-        this.addMouseListener(mva);
-        this.addMouseMotionListener(mva);
-    }
+			for (int i = 0; i < userMessage.length; i++) {
+				g.drawString(this.userMessage[i], 50 + visRect.x, 50
+						+ visRect.y + i * 20);
+			}
+		}
 
-    public void setup(MapRenderer mv, ModelRootImpl mr, ImageManager im) throws IOException {
-        super.setMapView(mv);
+		if (message != null) {
+			Rectangle visRect = this.getVisibleRect();
+			g.setColor(Color.lightGray);
+			g.setFont(LARGE_MESSAGE_FONT);
 
-        this.setBorder(null);
+			int msgWidth = g.getFontMetrics(LARGE_MESSAGE_FONT).stringWidth(
+					message);
+			int msgHeight = g.getFontMetrics(LARGE_MESSAGE_FONT).getHeight();
+			g.drawString(message,
+					(int) (visRect.x + (visRect.getWidth() - msgWidth) / 2),
+					(int) (visRect.y + (visRect.getHeight() - msgHeight) / 2));
+		}
+	}
 
-     
+	public MapViewJComponentConcrete() {
+		super();
 
-        this.mapCursor = new FreerailsCursor(mr, im);
+		MapViewJComponentMouseAdapter mva = new MapViewJComponentMouseAdapter();
+		this.addMouseListener(mva);
+		this.addMouseMotionListener(mva);
+	}
 
-        mr.addPropertyChangeListener(this);
-     
-    }
+	public void setup(MapRenderer mv, ModelRootImpl mr, ImageManager im)
+			throws IOException {
+		super.setMapView(mv);
 
-    public void setup(MapRenderer mv) {
-        super.setMapView(mv);
-    }
+		this.setBorder(null);
 
-    private void react2curorMove(Point newPoint, Point oldPoint) {
-        float scale = getMapView().getScale();
-        Dimension tileSize = new Dimension((int)scale, (int)scale);
-        Rectangle vr = this.getVisibleRect();
-        Rectangle rectangleSurroundingCursor = new Rectangle(0, 0, 1, 1);
+		this.mapCursor = new FreerailsCursor(mr, im);
 
-        rectangleSurroundingCursor.setLocation((newPoint.x - 1) * tileSize.width,
-            (newPoint.y - 1) * tileSize.height);
-        rectangleSurroundingCursor.setSize(tileSize.width * 3,
-            tileSize.height * 3);
+		mr.addPropertyChangeListener(this);
 
-        if (!(vr.contains(rectangleSurroundingCursor))) {
-            int x = newPoint.x * tileSize.width - vr.width / 2;
-            int y = newPoint.y * tileSize.height - vr.height / 2;
-            this.scrollRectToVisible(new Rectangle(x, y, vr.width, vr.height));
-        }
+	}
 
-        this.repaint((newPoint.x - 1) * tileSize.width,
-            (newPoint.y - 1) * tileSize.height, tileSize.width * 3,
-            tileSize.height * 3);
+	public void setup(MapRenderer mv) {
+		super.setMapView(mv);
+	}
 
-        this.repaint((oldPoint.x - 1) * tileSize.width,
-            (oldPoint.y - 1) * tileSize.height, tileSize.width * 3,
-            tileSize.height * 3);
-    }
+	private void react2curorMove(ImPoint newPoint, ImPoint oldPoint) {
+		float scale = getMapView().getScale();
+		Dimension tileSize = new Dimension((int) scale, (int) scale);
+		Rectangle vr = this.getVisibleRect();
+		Rectangle rectangleSurroundingCursor = new Rectangle(0, 0, 1, 1);
 
-    public void paintTile(Graphics g, int tileX, int tileY) {
-        throw new UnsupportedOperationException();
-    }
+		rectangleSurroundingCursor.setLocation((newPoint.x - 1)
+				* tileSize.width, (newPoint.y - 1) * tileSize.height);
+		rectangleSurroundingCursor.setSize(tileSize.width * 3,
+				tileSize.height * 3);
 
-    public void refreshTile(int x, int y) {
-        throw new UnsupportedOperationException();
-    }
+		if (!(vr.contains(rectangleSurroundingCursor))) {
+			int x = newPoint.x * tileSize.width - vr.width / 2;
+			int y = newPoint.y * tileSize.height - vr.height / 2;
+			this.scrollRectToVisible(new Rectangle(x, y, vr.width, vr.height));
+		}
 
-    public void refreshAll() {
-        this.getMapView().refreshAll();
-    }
+		this.repaint((newPoint.x - 1) * tileSize.width, (newPoint.y - 1)
+				* tileSize.height, tileSize.width * 3, tileSize.height * 3);
 
-    public void paintRect(Graphics g, Rectangle visibleRect) {
-        throw new UnsupportedOperationException();
-    }
+		this.repaint((oldPoint.x - 1) * tileSize.width, (oldPoint.y - 1)
+				* tileSize.height, tileSize.width * 3, tileSize.height * 3);
+	}
 
-    public FreerailsCursor getMapCursor() {
-        return mapCursor;
-    }
+	public void paintTile(Graphics g, int tileX, int tileY) {
+		throw new UnsupportedOperationException();
+	}
 
-    private void println(String s) {
-        StringTokenizer st = new StringTokenizer(s, "\n");
-        this.userMessage = new String[st.countTokens()];
+	public void refreshTile(int x, int y) {
+		throw new UnsupportedOperationException();
+	}
 
-        int i = 0;
+	public void refreshAll() {
+		this.getMapView().refreshAll();
+	}
 
-        while (st.hasMoreTokens()) {
-            userMessage[i] = st.nextToken();
-            i++;
-        }
+	public void paintRect(Graphics g, Rectangle visibleRect) {
+		throw new UnsupportedOperationException();
+	}
 
-        //Display the message for 5 seconds.
-        displayMessageUntil = System.currentTimeMillis() + 1000 * 5;
-    }
+	public FreerailsCursor getMapCursor() {
+		return mapCursor;
+	}
 
-    /** Checks what triggered the specfied PropertyChangeEvent and reacts as follows.
-     * <p>(1) If it was ModelRoot.CURSOR_POSITION, scrolls the map if necessary.</p>
-     * <p>(2) If it was ModelRoot.QUICK_MESSAGE, display or hide the message as appropriate.</p>
-     * <p>(3) If it was ModelRoot.PERMANENT_MESSAGE, display or hide the message as appropriate.</p>
-    */
-    public void propertyChange(ModelRoot.Property p, Object before, Object after) {     
+	private void println(String s) {
+		StringTokenizer st = new StringTokenizer(s, "\n");
+		this.userMessage = new String[st.countTokens()];
 
-        if (p.equals(ModelRoot.Property.CURSOR_POSITION)) {
-            Point newPoint = (Point)after;
-            Point oldPoint = (Point)before;
+		int i = 0;
 
-            if (null == oldPoint) {
-                oldPoint = new Point();
-            }
+		while (st.hasMoreTokens()) {
+			userMessage[i] = st.nextToken();
+			i++;
+		}
 
-            react2curorMove(newPoint, oldPoint);
-        } else if (p.equals(ModelRoot.Property.QUICK_MESSAGE)) {
-            String newMessage = (String)after;
+		// Display the message for 5 seconds.
+		displayMessageUntil = System.currentTimeMillis() + 1000 * 5;
+	}
 
-            if (null != newMessage) {
-                println(newMessage);
-            } else {
-                //Its null, so stop displaying whatever we where displaying.
-                displayMessageUntil = Long.MIN_VALUE;
-            }
-        } else if (p.equals(ModelRoot.Property.PERMANENT_MESSAGE)) {
-            message = (String)after;
-        }
-    }
+	/**
+	 * Checks what triggered the specfied PropertyChangeEvent and reacts as
+	 * follows.
+	 * <p>
+	 * (1) If it was ModelRoot.CURSOR_POSITION, scrolls the map if necessary.
+	 * </p>
+	 * <p>
+	 * (2) If it was ModelRoot.QUICK_MESSAGE, display or hide the message as
+	 * appropriate.
+	 * </p>
+	 * <p>
+	 * (3) If it was ModelRoot.PERMANENT_MESSAGE, display or hide the message as
+	 * appropriate.
+	 * </p>
+	 */
+	public void propertyChange(ModelRoot.Property p, Object before, Object after) {
+
+		if (p.equals(ModelRoot.Property.CURSOR_POSITION)) {
+			ImPoint newPoint = (ImPoint) after;
+			ImPoint oldPoint = (ImPoint) before;
+
+			if (null == oldPoint) {
+				oldPoint = new ImPoint();
+			}
+
+			react2curorMove(newPoint, oldPoint);
+		} else if (p.equals(ModelRoot.Property.QUICK_MESSAGE)) {
+			String newMessage = (String) after;
+
+			if (null != newMessage) {
+				println(newMessage);
+			} else {
+				// Its null, so stop displaying whatever we where displaying.
+				displayMessageUntil = Long.MIN_VALUE;
+			}
+		} else if (p.equals(ModelRoot.Property.PERMANENT_MESSAGE)) {
+			message = (String) after;
+		}
+	}
 
 }

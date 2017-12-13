@@ -1,56 +1,70 @@
 package jfreerails.world.top;
 
 import java.io.ObjectStreamException;
+
+import jfreerails.util.Utils;
 import jfreerails.world.common.FreerailsSerializable;
 
-
-/** <p>This class provides a set of keys to access the lists of elements
- * in the game world that are indexed by player.</P>
- *
- * <p>It implements the typesafe enum pattern (see Bloch, <I>Effective Java</I>
- * item 21)</p>
+/**
+ * <p>
+ * This class provides a set of keys to access the lists of elements in the game
+ * world that are indexed by player.
+ * </P>
+ * 
+ * <p>
+ * It implements the typesafe enum pattern (see Bloch, <I>Effective Java</I>
+ * item 21)
+ * </p>
+ * 
  * @author Luke
  */
+@jfreerails.util.InstanceControlled
 public class KEY implements FreerailsSerializable {
-    /** Maps key numbers to KEYs. */
-    private static final KEY[] keys = new KEY[15];
+	private static final long serialVersionUID = 3257572793275987001L;
 
-    //START OF KEYS
-    public static final KEY TRAINS = new KEY();
-    public static final KEY TRAIN_POSITIONS = new KEY();
-    public static final KEY STATIONS = new KEY();
+	/** Maps key numbers to KEYs. */
+	private static final KEY[] keys = new KEY[15];
 
-    /** The cargo waiting at stations or carried by trains. */
-    public static final KEY CARGO_BUNDLES = new KEY();
-    public static final KEY TRAIN_SCHEDULES = new KEY();
+	// START OF KEYS
+	public static final KEY TRAINS = new KEY();
 
-    //END OF KEYS		
-    private static int numberOfKeys;
-    private final int keyNumber;
+	//public static final KEY TRAIN_POSITIONS = new KEY();
 
-    private KEY() {
-        this.keyNumber = numberOfKeys;
-        keys[keyNumber] = this;
-        numberOfKeys++;
-    }
+	public static final KEY STATIONS = new KEY();
 
-    static int getNumberOfKeys() {
-        return numberOfKeys;
-    }
+	/** The cargo waiting at stations or carried by trains. */
+	public static final KEY CARGO_BUNDLES = new KEY();
 
-    int getKeyID() {
-        return keyNumber;
-    }
+	public static final KEY TRAIN_SCHEDULES = new KEY();
 
-    private Object readResolve() throws ObjectStreamException {
-        return keys[this.keyNumber];
-    }
+	// END OF KEYS
+	private static int numberOfKeys;
 
-    public String toString() {
-        return String.valueOf(getKeyID());
-    }
+	private final int keyNumber;
 
-    static KEY getKey(int keyNum) {
-        return keys[keyNum];
-    }
+	private KEY() {
+		this.keyNumber = numberOfKeys;
+		keys[keyNumber] = this;
+		numberOfKeys++;
+	}
+
+	static int getNumberOfKeys() {
+		return numberOfKeys;
+	}
+
+	int getKeyID() {
+		return keyNumber;
+	}
+
+	private Object readResolve() throws ObjectStreamException {
+		return keys[this.keyNumber];
+	}
+
+	public String toString() {
+		return Utils.findConstantFieldName(this);
+	}
+
+	public static KEY getKey(int keyNum) {
+		return keys[keyNum];
+	}
 }

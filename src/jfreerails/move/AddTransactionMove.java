@@ -8,118 +8,124 @@ import jfreerails.world.accounts.Transaction;
 import jfreerails.world.player.FreerailsPrincipal;
 import jfreerails.world.top.World;
 
-
-/** This {@link Move} adds a {@link Transaction} to a players
- * bank account on the {@link World} object.
+/**
+ * This {@link Move} adds a {@link Transaction} to a players bank account on the
+ * {@link World} object.
+ * 
  * @author Luke Lindsay
- *
+ * 
  */
 public class AddTransactionMove implements Move {
-    private final Transaction transaction;
-    private final FreerailsPrincipal principal;
+	private static final long serialVersionUID = 3976738055925019701L;
 
-    /** Whether the move fails if there is not enough cash. */
-    private final boolean constrained;
+	private final Transaction transaction;
 
-    public Transaction getTransaction() {
-        return transaction;
-    }
+	private final FreerailsPrincipal principal;
 
-    public int hashCode() {
-        int result;
-        result = transaction.hashCode();
-        result = 29 * result + principal.hashCode();
-        result = 29 * result + (constrained ? 1 : 0);
+	/** Whether the move fails if there is not enough cash. */
+	private final boolean constrained;
 
-        return result;
-    }
+	public Transaction getTransaction() {
+		return transaction;
+	}
 
-    public AddTransactionMove(FreerailsPrincipal account, Transaction t) {
-        if (null == t) {
-            throw new NullPointerException();
-        }
+	public int hashCode() {
+		int result;
+		result = transaction.hashCode();
+		result = 29 * result + principal.hashCode();
+		result = 29 * result + (constrained ? 1 : 0);
 
-        principal = account;
-        transaction = t;
-        constrained = false;
-    }
+		return result;
+	}
 
-    public AddTransactionMove(FreerailsPrincipal account, Transaction t,
-        boolean constrain) {
-        principal = account;
-        transaction = t;
-        constrained = constrain;
+	public AddTransactionMove(FreerailsPrincipal account, Transaction t) {
+		if (null == t) {
+			throw new NullPointerException();
+		}
 
-        if (null == t) {
-            throw new NullPointerException();
-        }
-    }
+		principal = account;
+		transaction = t;
+		constrained = false;
+	}
 
-    public MoveStatus tryDoMove(World w, FreerailsPrincipal p) {
-        if (w.isPlayer(principal)) {
-            if (this.constrained) {
-                long bankBalance = w.getCurrentBalance(principal).getAmount();
-                long transactionAmount = this.transaction.getValue().getAmount();
-                long balanceAfter = bankBalance + transactionAmount;
+	public AddTransactionMove(FreerailsPrincipal account, Transaction t,
+			boolean constrain) {
+		principal = account;
+		transaction = t;
+		constrained = constrain;
 
-                if (transactionAmount < 0 && balanceAfter < 0) {
-                    return MoveStatus.moveFailed("You can't afford that!");
-                }
-            }
+		if (null == t) {
+			throw new NullPointerException();
+		}
+	}
 
-            return MoveStatus.MOVE_OK;
-        }
-		return MoveStatus.moveFailed(p.getName() +
-		    " does not have a bank account.");
-    }
+	public MoveStatus tryDoMove(World w, FreerailsPrincipal p) {
+		if (w.isPlayer(principal)) {
+			if (this.constrained) {
+				long bankBalance = w.getCurrentBalance(principal).getAmount();
+				long transactionAmount = this.transaction.deltaCash()
+						.getAmount();
+				long balanceAfter = bankBalance + transactionAmount;
 
-    public MoveStatus tryUndoMove(World w, FreerailsPrincipal p) {
-        int size = w.getNumberOfTransactions(this.principal);
+				if (transactionAmount < 0 && balanceAfter < 0) {
+					return MoveStatus.moveFailed("You can't afford that!");
+				}
+			}
 
-        if (0 == size) {
-            return MoveStatus.moveFailed("No transactions to remove!");
-        }
+			return MoveStatus.MOVE_OK;
+		}
+		return MoveStatus.moveFailed(p.getName()
+				+ " does not have a bank account.");
+	}
 
-        Transaction lastTransaction = w.getTransaction(size - 1, this.principal);
+	public MoveStatus tryUndoMove(World w, FreerailsPrincipal p) {
+		int size = w.getNumberOfTransactions(this.principal);
 
-        if (lastTransaction.equals(this.transaction)) {
-            return MoveStatus.MOVE_OK;
-        }
-		return MoveStatus.moveFailed("Expected " + this.transaction +
-		    "but found " + lastTransaction);
-    }
+		if (0 == size) {
+			return MoveStatus.moveFailed("No transactions to remove!");
+		}
 
-    public MoveStatus doMove(World w, FreerailsPrincipal p) {
-        MoveStatus ms = tryDoMove(w, p);
+		Transaction lastTransaction = w
+				.getTransaction(this.principal, size - 1);
 
-        if (ms.ok) {
-            w.addTransaction(this.transaction, this.principal);
-        }
+		if (lastTransaction.equals(this.transaction)) {
+			return MoveStatus.MOVE_OK;
+		}
+		return MoveStatus.moveFailed("Expected " + this.transaction
+				+ "but found " + lastTransaction);
+	}
 
-        return ms;
-    }
+	public MoveStatus doMove(World w, FreerailsPrincipal p) {
+		MoveStatus ms = tryDoMove(w, p);
 
-    public MoveStatus undoMove(World w, FreerailsPrincipal p) {
-        MoveStatus ms = tryUndoMove(w, p);
+		if (ms.ok) {
+			w.addTransaction(this.principal, this.transaction);
+		}
 
-        if (ms.ok) {
-            w.removeLastTransaction(this.principal);
-        }
+		return ms;
+	}
 
-        return ms;
-    }
+	public MoveStatus undoMove(World w, FreerailsPrincipal p) {
+		MoveStatus ms = tryUndoMove(w, p);
 
-    public boolean equals(Object obj) {
-        if (obj instanceof AddTransactionMove) {
-            AddTransactionMove test = (AddTransactionMove)obj;
+		if (ms.ok) {
+			w.removeLastTransaction(this.principal);
+		}
 
-            return test.principal.equals(this.principal) &&
-            test.transaction.equals(this.transaction);
-        }
+		return ms;
+	}
+
+	public boolean equals(Object obj) {
+		if (obj instanceof AddTransactionMove) {
+			AddTransactionMove test = (AddTransactionMove) obj;
+
+			return test.principal.equals(this.principal)
+					&& test.transaction.equals(this.transaction);
+		}
 		return false;
-    }
+	}
 
-    public FreerailsPrincipal getPrincipal() {
-        return principal;
-    }
+	public FreerailsPrincipal getPrincipal() {
+		return principal;
+	}
 }

@@ -1,3 +1,84 @@
+Sept 21, 2005 Luke
+	Improve exception reporting
+Sept 19, 2005 Luke
+	Fixed bugs
+	1289010 Networth on broker screen is wrong
+	1289014 Can buy 100% of treasury stock
+	1289012 No limits on issuing/repaying bonds
+	1295855 Can buy stock when can't afford to
+	1289008 Stock price never changes
+Sept 11, 2005 Luke
+	Fixed bugs
+	1266577 Broker screen layout
+Sept 10, 2005 Luke
+	Fixed bugs
+	1269664 Can't tell other player has my stock
+	1266575 Stock holder equity not shown properly on the balance sheet.
+Sept 9, 2005 Luke
+	Fixed bugs
+	1269676 Stacktraces often lost
+Sept 8, 2005 Luke
+	Fixed bugs
+	1266581 Underscores in map names
+	1223231 "waiting" message on launcher unclear
+	1266582  Progress bar
+	1269679  Train Info doesn't update
+Aug	31, 2005 Luke
+	Fixed bugs
+	1266584 Can't select which saved game on launcher 
+	1269683 Load game when no saved games.
+	1269688 Load game in full screen
+	1269689 Load game across network
+Aug	24, 2005 Luke
+	RFEs implemented
+	1223234	Add show FPS to 'Display' menu.
+	1223235	Save launcher input
+	
+	Fixed bugs
+	1266695	Unexpected exception during network game
+	1266637 OutOfMemoryError
+	1110270 Reproducible Crash Bug
+	1223230 Incorrect station price on popup
+	1223228	NotSerializableException when saving game with trains
+Jul 03, 2005 Luke
+	More code cleanup.
+Jul 03, 2005 Luke
+	Reorganisation of existing code.
+May 22, 2005 Luke
+	Code cleanup
+	Improve pathfinder - finding paths for track is now
+	upto 20 times faster.
+	More of the same
+Apr 10, 2005 Luke
+	More work on new train movement classes
+Apr 04, 2005 Luke
+	More work on new train movement classes
+Apr 01, 2005 Luke
+	More work on new train movement classes
+Feb 20, 2005 Luke
+	More work on new train movement classes
+Feb 18, 2005 Luke
+	Refactoring existing train movement classes in 
+	preparation to use new classes.
+Feb 05, 2005 Luke
+	Update website to use SSI
+	Work on new train movement classes
+	Added AI page to functional spec.
+Feb 04, 2005 Luke
+	Add new train movement classes.
+Jan 27, 2005 Luke
+	Added toString() to KEY classes.
+Jan 27, 2005 Luke
+	Added serialVersionUID field to serializable classes.
+Jan 26, 2005 Luke
+    Bugs Fixed:
+    1105499	Word wrapping in Html components
+	1105494	Load game with wrong player
+	1105488	Attempting to join game in progress
+Jan 25, 2005 Luke
+	Work on bug 1105494	(Load game with wrong player).
+Jan 24, 2005 Luke		
+ 	Second attempt at fixing bug 1103632 (Sound on Linux)
 Jan 17, 2005 Luke	
 	Note, some of theses changes occured at earlier dates but were not
 	entered into this change log.

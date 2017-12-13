@@ -4,45 +4,45 @@ import java.util.Iterator;
 
 import jfreerails.world.common.FreerailsSerializable;
 import jfreerails.world.common.Money;
-import jfreerails.world.common.OneTileMoveVector;
+import jfreerails.world.common.Step;
 import jfreerails.world.terrain.TerrainType;
 
-
 /**
-* Defines methods to access the properties of a track type.
-*
-*@author     Luke Lindsay
-*     09 October 2001
-*/
-public interface TrackRule extends FreerailsSerializable, Comparable {
-	
-	public enum TrackCategories{track,  bridge, tunnel, station, non};
-	
-	TrackCategories getCategory();
-	
-    boolean canBuildOnThisTerrainType(TerrainType.Category TerrainType);
+ * Defines methods to access the properties of a track type.
+ * 
+ * @author Luke Lindsay 09 October 2001
+ */
+public interface TrackRule extends FreerailsSerializable, Comparable<TrackRule> {
 
-    boolean isStation();
-    
-    boolean isDouble();
+	public enum TrackCategories {
+		track, bridge, tunnel, station, non
+	}
 
-    Money getPrice();
-    
-    Money getFixedCost();
+    TrackCategories getCategory();
 
-    Money getMaintenanceCost();
+	boolean canBuildOnThisTerrainType(TerrainType.Category TerrainType);
 
-    int getStationRadius();   
+	boolean isStation();
 
-    String getTypeName();
+	boolean isDouble();
 
-    boolean testTrackPieceLegality(int a9bitTemplate);
+	Money getPrice();
 
-    boolean trackPieceIsLegal(TrackConfiguration config);
+	Money getFixedCost();
 
-    int getMaximumConsecutivePieces();
+	Money getMaintenanceCost();
 
-    OneTileMoveVector[] getLegalRoutes(OneTileMoveVector directionComingFrom);
+	int getStationRadius();
 
-    Iterator<TrackConfiguration> getLegalConfigurationsIterator();
+	String getTypeName();
+
+	boolean testTrackPieceLegality(int a9bitTemplate);
+
+	boolean trackPieceIsLegal(TrackConfiguration config);
+
+	int getMaximumConsecutivePieces();
+
+	Step[] getLegalRoutes(Step directionComingFrom);
+
+	Iterator<TrackConfiguration> getLegalConfigurationsIterator();
 }

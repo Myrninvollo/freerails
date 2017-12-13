@@ -4,46 +4,63 @@
  */
 package jfreerails.world.common;
 
-
-/**This class represents a specific instant in time during a game.
- *
+/**
+ * This class represents a specific instant in time during a game.
+ * 
  * @author Luke
- *
+ * 
  */
-public class GameTime implements FreerailsSerializable {
-    /** The first possible time.*/
-    public static final GameTime BIG_BANG = new GameTime(Integer.MIN_VALUE);
+public class GameTime implements FreerailsSerializable, Comparable<GameTime> {
+	private static final long serialVersionUID = 3691035461301055541L;
 
-    /** The last possible time.*/
-    public static final GameTime END_OF_THE_WORLD = new GameTime(Integer.MAX_VALUE);
-    private final int time;
+	/** The first possible time. */
+	public static final GameTime BIG_BANG = new GameTime(Integer.MIN_VALUE);
 
-    public String toString() {
-        return "GameTime:" + String.valueOf(time);
-    }
+	/** The last possible time. */
+	public static final GameTime END_OF_THE_WORLD = new GameTime(
+			Integer.MAX_VALUE);
 
-    public int hashCode() {
-        return time;
-    }
+	private final int ticks;
 
-    public GameTime(int l) {
-        this.time = l;
-    }
+	public String toString() {
+		return "GameTime:" + String.valueOf(ticks);
+	}
 
-    public GameTime nextTick() {
-        return new GameTime(time + 1);
-    }
+	public int hashCode() {
+		return ticks;
+	}
 
-    public int getTime() {
-        return time;
-    }
+	public GameTime(int l) {
+		this.ticks = l;
+	}
 
-    public boolean equals(Object o) {
-        if (o instanceof GameTime) {
-            GameTime test = (GameTime)o;
+	public GameTime nextTick() {
+		return new GameTime(ticks + 1);
+	}
 
-            return this.time == test.time;
-        }
+	public int getTicks() {
+		return ticks;
+	}
+
+	public boolean equals(Object o) {
+		if (o instanceof GameTime) {
+			GameTime test = (GameTime) o;
+
+			return this.ticks == test.ticks;
+		}
 		return false;
-    }
+	}
+
+	/**
+	 * Compares two GameTimes for ordering.
+	 * 
+	 * @param t
+	 * @return 0 if t is equal to this GameTime; a value less than 0 if this
+	 *         GameTime is before t; and a value greater than 0 if this GameTime
+	 *         is after t.
+	 */
+	public int compareTo(GameTime t) {
+		return ticks - t.ticks;
+	}
+
 }

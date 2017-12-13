@@ -1,151 +1,161 @@
 package jfreerails.world.train;
 
 import java.util.NoSuchElementException;
+
 import jfreerails.world.common.FreerailsPathIterator;
 import jfreerails.world.common.IntLine;
 
-
 /**
  * PathWalker that walks the path exposed by a FreerailsPathIterator.
- *
+ * 
  * @author Luke
  */
 public class PathWalkerImpl implements PathWalker {
-    private final FreerailsPathIterator it;
+	private static final long serialVersionUID = 4050204158701155639L;
 
-    /**
-     * current segment of the path we are on.
-     */
-    private final IntLine currentSegment = new IntLine();
-    private double distanceAlongCurrentSegment = 0;
-    private double distanceOfThisStepRemaining = 0;
-    private boolean beforeFirst = true;
-    private int lastX;
-    private int lastY;
+	private final FreerailsPathIterator it;
 
-    public PathWalkerImpl(FreerailsPathIterator i) {
-        it = i;
-    }
+	/**
+	 * current segment of the path we are on.
+	 */
+	private final IntLine currentSegment = new IntLine();
 
-    /**
-     * @return true if we still have more of the current segment, or more
-     * segments left.
-     */
-    public boolean canStepForward() {
-        if (currentSegment.getLength() > distanceAlongCurrentSegment) {
-            return true;
-        } else if (it.hasNext()) {
-            return true;
-        } else {
-            return false;
-        }
-    }
+	private double distanceAlongCurrentSegment = 0;
 
-    /**
-     * Specify the distance this PathWalker is to progress along the current
-     * step.
-     */
-    public void stepForward(double distance) {
-        distanceOfThisStepRemaining += distance;
-    }
+	private double distanceOfThisStepRemaining = 0;
 
-    /**
-     * @return true if there is still some distance to go along this path
-     */
-    public boolean hasNext() {
-        if (0 == distanceOfThisStepRemaining) {
-            return false;
-        } else if (distanceAlongCurrentSegment < currentSegment.getLength()) {
-            return true;
-        } else if (it.hasNext()) {
-            return true;
-        } else {
-            return false;
-        }
-    }
+	private boolean beforeFirst = true;
 
-    public void nextSegment(IntLine line) {
-        if (!hasNext()) {
-            throw new NoSuchElementException();
-        }
+	private int lastX;
 
-        //If we are at the end of the current segemtn, start a new one.
-        if (currentSegment.getLength() <= distanceAlongCurrentSegment) {
-            startNewSegment(line);
-        } else {
-            startInMiddleOfSegment(line);
-        }
+	private int lastY;
 
-        double remainingDistanceAlongCurrentSegment = currentSegment.getLength() -
-            distanceAlongCurrentSegment;
+	public PathWalkerImpl(FreerailsPathIterator i) {
+		it = i;
+	}
 
-        if (distanceOfThisStepRemaining > remainingDistanceAlongCurrentSegment) {
-            endAtSegmentEnd(line, remainingDistanceAlongCurrentSegment);
-        } else {
-            endInMiddleOfSegment(line);
-        }
+	/**
+	 * @return true if we still have more of the current segment, or more
+	 *         segments left.
+	 */
+	public boolean canStepForward() {
+		if (currentSegment.getLength() > distanceAlongCurrentSegment) {
+			return true;
+		} else if (it.hasNext()) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 
-        /*Sanity check: the first point of the last line should equal the
-         * second point of the current line.
-         *
-         */
-        if (!beforeFirst) {
-            if (line.x1 != this.lastX) {
-                throw new IllegalStateException();
-            }
+	/**
+	 * Specify the distance this PathWalker is to progress along the current
+	 * step.
+	 */
+	public void stepForward(double distance) {
+		distanceOfThisStepRemaining += distance;
+	}
 
-            if (line.y1 != this.lastY) {
-                throw new IllegalStateException();
-            }
-        }
+	/**
+	 * @return true if there is still some distance to go along this path
+	 */
+	public boolean hasNext() {
+		if (0 == distanceOfThisStepRemaining) {
+			return false;
+		} else if (distanceAlongCurrentSegment < currentSegment.getLength()) {
+			return true;
+		} else if (it.hasNext()) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 
-        this.lastX = line.x2;
-        this.lastY = line.y2;
-        beforeFirst = false;
+	public void nextSegment(IntLine line) {
+		if (!hasNext()) {
+			throw new NoSuchElementException();
+		}
 
-        return;
-    }
+		// If we are at the end of the current segemtn, start a new one.
+		if (currentSegment.getLength() <= distanceAlongCurrentSegment) {
+			startNewSegment(line);
+		} else {
+			startInMiddleOfSegment(line);
+		}
 
-    private void endInMiddleOfSegment(IntLine line) {
-        distanceAlongCurrentSegment += distanceOfThisStepRemaining;
-        distanceOfThisStepRemaining = 0;
-        line.x2 = getCoorinateOnSegment(distanceAlongCurrentSegment,
-                currentSegment.x1, currentSegment.x2);
-        line.y2 = getCoorinateOnSegment(distanceAlongCurrentSegment,
-                currentSegment.y1, currentSegment.y2);
-    }
+		double remainingDistanceAlongCurrentSegment = currentSegment
+				.getLength()
+				- distanceAlongCurrentSegment;
 
-    private void endAtSegmentEnd(IntLine line,
-        double remainingDistanceAlongCurrentSegment) {
-        line.x2 = this.currentSegment.x2;
-        line.y2 = this.currentSegment.y2;
-        this.distanceOfThisStepRemaining -= remainingDistanceAlongCurrentSegment;
-        distanceAlongCurrentSegment = this.currentSegment.getLength();
-    }
+		if (distanceOfThisStepRemaining > remainingDistanceAlongCurrentSegment) {
+			endAtSegmentEnd(line, remainingDistanceAlongCurrentSegment);
+		} else {
+			endInMiddleOfSegment(line);
+		}
 
-    private void startInMiddleOfSegment(IntLine line) {
-        line.x1 = getCoorinateOnSegment(distanceAlongCurrentSegment,
-                currentSegment.x1, currentSegment.x2);
-        line.y1 = getCoorinateOnSegment(distanceAlongCurrentSegment,
-                currentSegment.y1, currentSegment.y2);
-    }
+		/*
+		 * Sanity check: the first point of the last line should equal the
+		 * second point of the current line.
+		 * 
+		 */
+		if (!beforeFirst) {
+			if (line.x1 != this.lastX) {
+				throw new IllegalStateException();
+			}
 
-    private void startNewSegment(IntLine line) {
-        it.nextSegment(currentSegment);
-        distanceAlongCurrentSegment = 0;
-        line.x1 = this.currentSegment.x1;
-        line.y1 = this.currentSegment.y1;
-    }
+			if (line.y1 != this.lastY) {
+				throw new IllegalStateException();
+			}
+		}
 
-    private int getCoorinateOnSegment(double distanceAlongSegment,
-        int coordinate1, int coordinate2) {
-        double segmentLength = this.currentSegment.getLength();
-        double delta = 0;
+		this.lastX = line.x2;
+		this.lastY = line.y2;
+		beforeFirst = false;
 
-        if (0 != segmentLength) {
-            delta = (coordinate2 - coordinate1) * distanceAlongSegment / segmentLength;
-        }
+		return;
+	}
 
-        return coordinate1 + (int)delta;
-    }
+	private void endInMiddleOfSegment(IntLine line) {
+		distanceAlongCurrentSegment += distanceOfThisStepRemaining;
+		distanceOfThisStepRemaining = 0;
+		line.x2 = getCoorinateOnSegment(distanceAlongCurrentSegment,
+				currentSegment.x1, currentSegment.x2);
+		line.y2 = getCoorinateOnSegment(distanceAlongCurrentSegment,
+				currentSegment.y1, currentSegment.y2);
+	}
+
+	private void endAtSegmentEnd(IntLine line,
+			double remainingDistanceAlongCurrentSegment) {
+		line.x2 = this.currentSegment.x2;
+		line.y2 = this.currentSegment.y2;
+		this.distanceOfThisStepRemaining -= remainingDistanceAlongCurrentSegment;
+		distanceAlongCurrentSegment = this.currentSegment.getLength();
+	}
+
+	private void startInMiddleOfSegment(IntLine line) {
+		line.x1 = getCoorinateOnSegment(distanceAlongCurrentSegment,
+				currentSegment.x1, currentSegment.x2);
+		line.y1 = getCoorinateOnSegment(distanceAlongCurrentSegment,
+				currentSegment.y1, currentSegment.y2);
+	}
+
+	private void startNewSegment(IntLine line) {
+		it.nextSegment(currentSegment);
+		distanceAlongCurrentSegment = 0;
+		line.x1 = this.currentSegment.x1;
+		line.y1 = this.currentSegment.y1;
+	}
+
+	private int getCoorinateOnSegment(double distanceAlongSegment,
+			int coordinate1, int coordinate2) {
+		double segmentLength = this.currentSegment.getLength();
+		double delta = 0;
+
+		if (0 != segmentLength) {
+			delta = (coordinate2 - coordinate1) * distanceAlongSegment
+					/ segmentLength;
+		}
+
+		return coordinate1 + (int) delta;
+	}
 }

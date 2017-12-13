@@ -1,73 +1,77 @@
 package jfreerails.world.station;
 
 import jfreerails.world.common.FreerailsSerializable;
-
+import jfreerails.world.common.ImInts;
 
 /**
  * Records which cargos are converted to other cargos at a station.
+ * 
  * @author Luke
  */
 public class ConvertedAtStation implements FreerailsSerializable {
-    private static final int NOT_CONVERTED = Integer.MIN_VALUE;
-    private final int[] convertedTo;
+	private static final long serialVersionUID = 3690754012076978231L;
 
-    public ConvertedAtStation(int[] convertedTo) {
-        this.convertedTo = convertedTo.clone(); //defensive copy.
-    }
+	private static final int NOT_CONVERTED = Integer.MIN_VALUE;
 
-    public static ConvertedAtStation emptyInstance(int numberOfCargoTypes) {
-        int[] convertedTo = emptyConversionArray(numberOfCargoTypes);
+	private final ImInts convertedTo;
 
-        return new ConvertedAtStation(convertedTo);
-    }
+	public ConvertedAtStation(int[] convertedTo) {
+		this.convertedTo = new ImInts(convertedTo);
+	}
 
-    public static int[] emptyConversionArray(int numberOfCargoTypes) {
-        int[] convertedTo = new int[numberOfCargoTypes];
+	public static ConvertedAtStation emptyInstance(int numberOfCargoTypes) {
+		int[] convertedTo = emptyConversionArray(numberOfCargoTypes);
 
-        for (int i = 0; i < numberOfCargoTypes; i++) {
-            convertedTo[i] = NOT_CONVERTED;
-        }
+		return new ConvertedAtStation(convertedTo);
+	}
 
-        return convertedTo;
-    }
+	public static int[] emptyConversionArray(int numberOfCargoTypes) {
+		int[] convertedTo = new int[numberOfCargoTypes];
 
-    public boolean isCargoConverted(int cargoNumber) {
-        if (NOT_CONVERTED == convertedTo[cargoNumber]) {
-            return false;
-        }
+		for (int i = 0; i < numberOfCargoTypes; i++) {
+			convertedTo[i] = NOT_CONVERTED;
+		}
+
+		return convertedTo;
+	}
+
+	public boolean isCargoConverted(int cargoNumber) {
+		if (NOT_CONVERTED == convertedTo.get(cargoNumber)) {
+			return false;
+		}
 		return true;
-    }
+	}
 
-    public int getConversion(int cargoNumber) {
-        return convertedTo[cargoNumber];
-    }
+	public int getConversion(int cargoNumber) {
+		return convertedTo.get(cargoNumber);
+	}
 
-    public int hashCode() {
-        int result = 0;
+	public int hashCode() {
+		int result = 0;
 
-        for (int i = 0; i < convertedTo.length; i++) {
-            result = 29 * result + convertedTo[i];
-        }
+		for (int i = 0; i < convertedTo.size(); i++) {
+			result = 29 * result + convertedTo.get(i);
+		}
 
-        return result;
-    }
+		return result;
+	}
 
-    public boolean equals(Object o) {
-        if (o instanceof ConvertedAtStation) {
-            ConvertedAtStation test = (ConvertedAtStation)o;
+	public boolean equals(Object o) {
+		if (o instanceof ConvertedAtStation) {
+			ConvertedAtStation test = (ConvertedAtStation) o;
 
-            if (this.convertedTo.length != test.convertedTo.length) {
-                return false;
-            }
+			if (this.convertedTo.size() != test.convertedTo.size()) {
+				return false;
+			}
 
-            for (int i = 0; i < convertedTo.length; i++) {
-                if (convertedTo[i] != test.convertedTo[i]) {
-                    return false;
-                }
-            }
+			for (int i = 0; i < convertedTo.size(); i++) {
+				if (convertedTo.get(i) != test.convertedTo.get(i)) {
+					return false;
+				}
+			}
 
-            return true;
-        }
+			return true;
+		}
 		return false;
-    }
+	}
 }

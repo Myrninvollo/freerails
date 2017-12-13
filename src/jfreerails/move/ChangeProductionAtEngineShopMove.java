@@ -4,124 +4,133 @@
  */
 package jfreerails.move;
 
-import java.util.Arrays;
+import jfreerails.world.common.ImList;
 import jfreerails.world.player.FreerailsPrincipal;
-import jfreerails.world.station.ProductionAtEngineShop;
+import jfreerails.world.station.PlannedTrain;
 import jfreerails.world.station.StationModel;
 import jfreerails.world.top.KEY;
 import jfreerails.world.top.World;
 
-
 /**
- * This Move changes what is being built
- * at an engine shop - when a client wants to build a train, it
- * should send an instance of this class to the server.
- *
+ * This Move changes what is being built at an engine shop - when a client wants
+ * to build a train, it should send an instance of this class to the server.
+ * 
  * @author Luke
- *
+ * 
  */
 public class ChangeProductionAtEngineShopMove implements Move {
-    private final ProductionAtEngineShop[] m_before;
-    private final ProductionAtEngineShop[] m_after;
-    private final int m_stationNumber;
-    private final FreerailsPrincipal m_principal;
+	private static final long serialVersionUID = 3905519384997737520L;
 
-    public int hashCode() {
-        int result;
-        result = m_before.length;
-        result = 29 * result + m_after.length;
-        result = 29 * result + m_stationNumber;
-        result = 29 * result + m_principal.hashCode();
+	private final ImList<PlannedTrain> before;
 
-        return result;
-    }
+	private final ImList<PlannedTrain> after;
 
-    public ChangeProductionAtEngineShopMove(ProductionAtEngineShop[] b,
-        ProductionAtEngineShop[] a, int station, FreerailsPrincipal p) {
-        m_before = b.clone();
-        m_after = a.clone();
-        m_stationNumber = station;
-        m_principal = p;
-    }
+	private final int stationNumber;
 
-    public MoveStatus tryDoMove(World w, FreerailsPrincipal p) {
-        return tryMove(w, m_before);
-    }
+	private final FreerailsPrincipal principal;
 
-    private MoveStatus tryMove(World w, /*=const*/
-        ProductionAtEngineShop[] stateA) {
-        //Check that the specified station exists.
-        if (!w.boundsContain(KEY.STATIONS, this.m_stationNumber, m_principal)) {
-            return MoveStatus.moveFailed(this.m_stationNumber + " " +
-                m_principal);
-        }
-
-        StationModel station = (StationModel)w.get(KEY.STATIONS,
-                m_stationNumber, m_principal);
-
-        if (null == station) {
-            return MoveStatus.moveFailed(this.m_stationNumber + " " +
-                m_principal + " is does null");
-        }
-
-        //Check that the station is building what we expect.					
-        if (null == station.getProduction()) {
-            if (null == stateA) {
-                return MoveStatus.MOVE_OK;
-            }
-			return MoveStatus.moveFailed(this.m_stationNumber + " " +
-			    m_principal);
-        }
-		if (Arrays.equals(station.getProduction(), (stateA))) {
-		    return MoveStatus.MOVE_OK;
-		}
-		return MoveStatus.moveFailed(this.m_stationNumber + " " +
-		    m_principal);
-    }
-
-    public MoveStatus tryUndoMove(World w, FreerailsPrincipal p) {
-        return tryMove(w, m_after);
-    }
-
-    public MoveStatus doMove(World w, FreerailsPrincipal p) {
-        MoveStatus status = tryDoMove(w, p);
-
-        if (status.isOk()) {
-            StationModel station = (StationModel)w.get(KEY.STATIONS,
-                    m_stationNumber, m_principal);
-            station = new StationModel(station, this.m_after);
-            w.set(KEY.STATIONS, m_stationNumber, station, m_principal);
-        }
-
-        return status;
-    }
-
-    public MoveStatus undoMove(World w, FreerailsPrincipal p) {
-        MoveStatus status = tryUndoMove(w, p);
-
-        if (status.isOk()) {
-            StationModel station = (StationModel)w.get(KEY.STATIONS,
-                    m_stationNumber, m_principal);
-            station = new StationModel(station, this.m_before);
-            w.set(KEY.STATIONS, m_stationNumber, station, m_principal);
-        }
-
-        return status;
-    }
-
-    public boolean equals(Object o) {
-        if (o instanceof ChangeProductionAtEngineShopMove) {
-            ChangeProductionAtEngineShopMove arg = (ChangeProductionAtEngineShopMove)o;
-            boolean stationNumbersEqual = (this.m_stationNumber == arg.m_stationNumber);
-            boolean beforeFieldsEqual = Arrays.equals(this.m_before,
-                    arg.m_before);
-            boolean afterFieldsEqual = Arrays.equals(this.m_after, arg.m_after);
-
-            if (stationNumbersEqual && beforeFieldsEqual && afterFieldsEqual) {
-                return true;
-            }
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (!(o instanceof ChangeProductionAtEngineShopMove))
 			return false;
-        }
-		return false;
-    }
+
+		final ChangeProductionAtEngineShopMove changeProductionAtEngineShopMove = (ChangeProductionAtEngineShopMove) o;
+
+		if (stationNumber != changeProductionAtEngineShopMove.stationNumber)
+			return false;
+		if (after != null ? !after
+				.equals(changeProductionAtEngineShopMove.after)
+				: changeProductionAtEngineShopMove.after != null)
+			return false;
+		if (before != null ? !before
+				.equals(changeProductionAtEngineShopMove.before)
+				: changeProductionAtEngineShopMove.before != null)
+			return false;
+		if (!principal.equals(changeProductionAtEngineShopMove.principal))
+			return false;
+
+		return true;
+	}
+
+	public int hashCode() {
+		int result;
+		result = (before != null ? before.hashCode() : 0);
+		result = 29 * result + (after != null ? after.hashCode() : 0);
+		result = 29 * result + stationNumber;
+		result = 29 * result + principal.hashCode();
+		return result;
+	}
+
+	public ChangeProductionAtEngineShopMove(ImList<PlannedTrain> b,
+			ImList<PlannedTrain> a, int station, FreerailsPrincipal p) {
+		this.before = b;
+		this.after = a;
+		this.stationNumber = station;
+		this.principal = p;
+	}
+
+	public MoveStatus tryDoMove(World w, FreerailsPrincipal p) {
+		return tryMove(w, before);
+	}
+
+	private MoveStatus tryMove(World w, ImList<PlannedTrain> stateA) {
+		// Check that the specified station exists.
+		if (!w.boundsContain(principal, KEY.STATIONS, this.stationNumber)) {
+			return MoveStatus.moveFailed(this.stationNumber + " "
+					+ principal);
+		}
+
+		StationModel station = (StationModel) w.get(principal,
+				KEY.STATIONS, stationNumber);
+
+		if (null == station) {
+			return MoveStatus.moveFailed(this.stationNumber + " "
+					+ principal + " is does null");
+		}
+
+		// Check that the station is building what we expect.
+		if (null == station.getProduction()) {
+			if (null == stateA) {
+				return MoveStatus.MOVE_OK;
+			}
+			return MoveStatus.moveFailed(this.stationNumber + " "
+					+ principal);
+		}
+		if (station.getProduction().equals(stateA)) {
+			return MoveStatus.MOVE_OK;
+		}
+		return MoveStatus.moveFailed(this.stationNumber + " " + principal);
+	}
+
+	public MoveStatus tryUndoMove(World w, FreerailsPrincipal p) {
+		return tryMove(w, after);
+	}
+
+	public MoveStatus doMove(World w, FreerailsPrincipal p) {
+		MoveStatus status = tryDoMove(w, p);
+
+		if (status.isOk()) {
+			StationModel station = (StationModel) w.get(principal,
+					KEY.STATIONS, stationNumber);
+			station = new StationModel(station, this.after);
+			w.set(principal, KEY.STATIONS, stationNumber, station);
+		}
+
+		return status;
+	}
+
+	public MoveStatus undoMove(World w, FreerailsPrincipal p) {
+		MoveStatus status = tryUndoMove(w, p);
+
+		if (status.isOk()) {
+			StationModel station = (StationModel) w.get(principal,
+					KEY.STATIONS, stationNumber);
+			station = new StationModel(station, this.before);
+			w.set(principal, KEY.STATIONS, stationNumber, station);
+		}
+
+		return status;
+	}
+
 }

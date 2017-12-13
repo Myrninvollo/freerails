@@ -3,436 +3,521 @@ package jfreerails.world.train;
 import jfreerails.util.IntArray;
 import jfreerails.world.common.FreerailsPathIterator;
 import jfreerails.world.common.FreerailsSerializable;
+import jfreerails.world.common.ImInts;
 import jfreerails.world.common.IntLine;
 
-
 /**
- * This <b>immutable</b> class represents the position of a train as a String of points.  There
- * must be at least two points.  The first point is the position of the front of the train; the last
- *  point is the position of the end of the train.  Any intermediate points are positions of 'kinks' in
- * the track.
- *
+ * This <b>immutable</b> class represents the position of a train as a String
+ * of points. There must be at least two points. The first point is the position
+ * of the front of the train; the last point is the position of the end of the
+ * train. Any intermediate points are positions of 'kinks' in the track.
+ * 
  * Coordinates are expressed in display coordinates relative to the map origin
  * (as opposed to map squares).
- *
- *
-<p>Train positions can be combined and divided as illustrated below (notice what
-  happens to the head and tail that are combined)</p>
-<table width="100%" border="0">
-  <tr>
-    <td>if</td>
-    <td><code> a</code></td>
-    <td><code>=</code></td>
-    <td><code>{<strong>(10, 10)</strong>, (20,20), (30,30), (40,40) }</code></td>
-  </tr>
-  <tr>
-    <td>and</td>
-    <td><code> b</code></td>
-    <td><code>=</code></td>
-    <td><code>{(1,1), (4,4), (5,5), <strong>(10, 10)</strong>}</code></td>
-  </tr>
-  <tr>
-    <td>then</td>
-    <td><code>a.addToHead(b)</code></td>
-    <td><code>=</code></td>
-    <td><code>{(1,1), (4,4), (5,5), (20,20), (30,30), (40,40) }</code></td>
-  </tr>
-  <tr>
-    <td>and</td>
-    <td><code>b.addToTail(a)</code></td>
-    <td><code>=</code></td>
-    <td><code>{(1,1), (4,4), (5,5), (20,20), (30,30), (40,40) }</code></td>
-  </tr>
-  <tr>
-    <td>and if</td>
-    <td><code> c</code></td>
-    <td><code>=</code></td>
-    <td><code>{(1,1), (4,4), (5,5), (20,20), (30,30), (40,40) }</code></td>
-  </tr>
-  <tr>
-    <td>then</td>
-    <td><code>c.removeFromTail(a)</code></td>
-    <td><code>=</code></td>
-    <td><code>{(1,1), (4,4), (5,5), (10, 10)}</code></td>
-  </tr>
-  <tr>
-    <td>and</td>
-    <td><code>c.removeFromHead(b)</code></td>
-    <td><code>=</code></td>
-    <td><code>{(10, 10), (20,20), (30,30), (40,40) }</code></td>
-  </tr>
-</table>
-
- *
+ * 
+ * 
+ * <p>
+ * Train positions can be combined and divided as illustrated below (notice what
+ * happens to the head and tail that are combined)
+ * </p>
+ * <table width="100%" border="0">
+ * <tr>
+ * <td>if</td>
+ * <td><code> a</code></td>
+ * <td><code>=</code></td>
+ * <td><code>{<strong>(10, 10)</strong>, (20,20), (30,30), (40,40) }</code></td>
+ * </tr>
+ * <tr>
+ * <td>and</td>
+ * <td><code> b</code></td>
+ * <td><code>=</code></td>
+ * <td><code>{(1,1), (4,4), (5,5), <strong>(10, 10)</strong>}</code></td>
+ * </tr>
+ * <tr>
+ * <td>then</td>
+ * <td><code>a.addToHead(b)</code></td>
+ * <td><code>=</code></td>
+ * <td><code>{(1,1), (4,4), (5,5), (20,20), (30,30), (40,40) }</code></td>
+ * </tr>
+ * <tr>
+ * <td>and</td>
+ * <td><code>b.addToTail(a)</code></td>
+ * <td><code>=</code></td>
+ * <td><code>{(1,1), (4,4), (5,5), (20,20), (30,30), (40,40) }</code></td>
+ * </tr>
+ * <tr>
+ * <td>and if</td>
+ * <td><code> c</code></td>
+ * <td><code>=</code></td>
+ * <td><code>{(1,1), (4,4), (5,5), (20,20), (30,30), (40,40) }</code></td>
+ * </tr>
+ * <tr>
+ * <td>then</td>
+ * <td><code>c.removeFromTail(a)</code></td>
+ * <td><code>=</code></td>
+ * <td><code>{(1,1), (4,4), (5,5), (10, 10)}</code></td>
+ * </tr>
+ * <tr>
+ * <td>and</td>
+ * <td><code>c.removeFromHead(b)</code></td>
+ * <td><code>=</code></td>
+ * <td><code>{(10, 10), (20,20), (30,30), (40,40) }</code></td>
+ * </tr>
+ * </table>
+ * 
+ * 
  * @author Luke Lindsay 26-Oct-2002
- *
+ * 
  */
 public class TrainPositionOnMap implements FreerailsSerializable {
-    private final int[] m_xpoints;
-    private final int[] m_ypoints;
+	public static final int CRASH_FRAMES_COUNT = 15;
 
-    public int hashCode() {
-        int result = 0;
+	private static final long serialVersionUID = 3979269144611010865L;
 
-        //TODO is there are danger of overflow here?
-        for (int i = 0; i < m_xpoints.length; i++) {
-            result = 29 * result + m_xpoints[i];
-        }
+	private final ImInts xpoints;
 
-        for (int i = 0; i < m_ypoints.length; i++) {
-            result = 29 * result + m_ypoints[i];
-        }
+	private final ImInts ypoints;
 
-        return result;
-    }
+	private final double speed, acceleration;
 
-    public boolean equals(Object o) {
-        if (null == o) {
-            return false;
-        }
+	private final SpeedTimeAndStatus.Activity activity;
 
-        if (o == this) {
-            return true;
-        }
+	private boolean crashSite = false;
 
-        if (o instanceof TrainPositionOnMap) {
-            TrainPositionOnMap other = (TrainPositionOnMap)o;
-            int thisLength = this.getLength();
-            int otherLength = other.getLength();
+	public boolean isCrashSite() {
+		return crashSite;
+	}
 
-            if (thisLength == otherLength) {
-                FreerailsPathIterator path1;
-                FreerailsPathIterator path2;
-                IntLine line1 = new IntLine();
-                IntLine line2 = new IntLine();
+	public void setCrashSite(boolean isCrash) {
+		crashSite = isCrash;
+	}
 
-                path1 = other.path();
-                path2 = this.path();
+	private int frameCt = 1;
 
-                while (path1.hasNext() && path2.hasNext()) {
-                    path1.nextSegment(line1);
-                    path2.nextSegment(line2);
+	private int frame = 0;
 
-                    if (line1.x1 != line2.x1 || line1.y1 != line2.y1 ||
-                            line1.x2 != line2.x2 || line1.y2 != line2.y2) {
-                        return false;
-                    }
-                }
+	public int getFrameCt() {
+		return frameCt;
+	}
 
-                if (path1.hasNext() || path2.hasNext()) {
-                    return false;
-                }
-				return true;
-            }
+	public void incrementFramCt() {
+		if (frame > 0) {
+			incrementFrame();
+			frame = 0;
+		} else {
+			frame++;
+		}
+	}
+
+	public void incrementFrame() {
+		frameCt++;
+	}
+
+	public int hashCode() {
+		int result = 0;
+
+		// TODO is there are danger of overflow here?
+		for (int i = 0; i < xpoints.size(); i++) {
+			result = 29 * result + xpoints.get(i);
+		}
+
+		for (int i = 0; i < ypoints.size(); i++) {
+			result = 29 * result + ypoints.get(i);
+		}
+
+		return result;
+	}
+
+	public boolean equals(Object o) {
+		if (null == o) {
 			return false;
-        }
+		}
+
+		if (o == this) {
+			return true;
+		}
+
+		if (o instanceof TrainPositionOnMap) {
+			TrainPositionOnMap other = (TrainPositionOnMap) o;
+			int thisLength = this.getLength();
+			int otherLength = other.getLength();
+
+			if (thisLength == otherLength) {
+				FreerailsPathIterator path1;
+				FreerailsPathIterator path2;
+				IntLine line1 = new IntLine();
+				IntLine line2 = new IntLine();
+
+				path1 = other.path();
+				path2 = this.path();
+
+				while (path1.hasNext() && path2.hasNext()) {
+					path1.nextSegment(line1);
+					path2.nextSegment(line2);
+
+					if (line1.x1 != line2.x1 || line1.y1 != line2.y1
+							|| line1.x2 != line2.x2 || line1.y2 != line2.y2) {
+						return false;
+					}
+				}
+
+				if (path1.hasNext() || path2.hasNext()) {
+					return false;
+				}
+				return true;
+			}
+			return false;
+		}
 		return false;
-    }
+	}
 
-    public double calulateDistance() {
-        double distance = 0;
-        IntLine line = new IntLine();
-        FreerailsPathIterator path = this.path();
+	public double calulateDistance() {
+		double distance = 0;
+		IntLine line = new IntLine();
+		FreerailsPathIterator path = this.path();
 
-        while (path.hasNext()) {
-            path.nextSegment(line);
+		while (path.hasNext()) {
+			path.nextSegment(line);
 
-            int sumOfSquares = (line.x1 - line.x2) * (line.x1 - line.x2) +
-                (line.y1 - line.y2) * (line.y1 - line.y2);
-            distance += Math.sqrt(sumOfSquares);
-        }
+			int sumOfSquares = (line.x1 - line.x2) * (line.x1 - line.x2)
+					+ (line.y1 - line.y2) * (line.y1 - line.y2);
+			distance += Math.sqrt(sumOfSquares);
+		}
 
-        return distance;
-    }
+		return distance;
+	}
 
-    public int getLength() {
-        return m_xpoints.length;
-    }
+	public int getLength() {
+		return xpoints.size();
+	}
 
-    public int getX(int position) {
-        return m_xpoints[position];
-    }
+	public ImInts getXPoints() {
+		return xpoints;
+	}
 
-    public int getY(int position) {
-        return m_ypoints[position];
-    }
+	public ImInts getYPoints() {
+		return ypoints;
+	}
 
-    public FreerailsPathIterator path() {
-        return new SimplePathIteratorImpl(this.m_xpoints, this.m_ypoints);
-    }
+	public int getX(int position) {
+		return xpoints.get(position);
+	}
 
-    public FreerailsPathIterator reversePath() {
-        int length = m_xpoints.length;
-        int[] reversed_xpoints = new int[length];
-        int[] reversed_ypoints = new int[length];
+	public int getY(int position) {
+		return ypoints.get(position);
+	}
 
-        for (int i = 0; i < length; i++) {
-            reversed_xpoints[i] = m_xpoints[length - i - 1];
-            reversed_ypoints[i] = m_ypoints[length - i - 1];
-        }
+	public FreerailsPathIterator path() {
+		return new SimplePathIteratorImpl(this.xpoints, this.ypoints);
+	}
 
-        return new SimplePathIteratorImpl(reversed_xpoints, reversed_ypoints);
-    }
+	public FreerailsPathIterator reversePath() {
+		int length = xpoints.size();
+		int[] reversed_xpoints = new int[length];
+		int[] reversed_ypoints = new int[length];
 
-    public TrainPositionOnMap reverse() {
-        int length = m_xpoints.length;
-        int[] reversed_xpoints = new int[length];
-        int[] reversed_ypoints = new int[length];
+		for (int i = 0; i < length; i++) {
+			reversed_xpoints[i] = xpoints.get(length - i - 1);
+			reversed_ypoints[i] = ypoints.get(length - i - 1);
+		}
 
-        for (int i = 0; i < length; i++) {
-            reversed_xpoints[i] = m_xpoints[length - i - 1];
-            reversed_ypoints[i] = m_ypoints[length - i - 1];
-        }
+		return new SimplePathIteratorImpl(reversed_xpoints, reversed_ypoints);
+	}
 
-        return new TrainPositionOnMap(reversed_xpoints, reversed_ypoints);
-    }
+	public TrainPositionOnMap reverse() {
+		int length = xpoints.size();
+		int[] reversed_xpoints = new int[length];
+		int[] reversed_ypoints = new int[length];
 
-    private TrainPositionOnMap( /*=const*/
-        int[] xpoints, /*=const*/
-        int[] ypoints) {
-        if (xpoints.length != ypoints.length) {
-            throw new IllegalArgumentException();
-        }
+		for (int i = 0; i < length; i++) {
+			reversed_xpoints[i] = xpoints.get(length - i - 1);
+			reversed_ypoints[i] = ypoints.get(length - i - 1);
+		}
 
-        m_xpoints = xpoints;
-        m_ypoints = ypoints;
-    }
+		return new TrainPositionOnMap(reversed_xpoints, reversed_ypoints,
+				speed, acceleration, activity);
+	}
 
-    public static TrainPositionOnMap createInstance(int[] xpoints, int[] ypoints) {
-        return new TrainPositionOnMap(xpoints.clone(),
-            ypoints.clone());
-    }
+	public TrainPositionOnMap(ImInts xs, ImInts ys) {
+		this.xpoints = xs;
+		this.ypoints = ys;
+		this.acceleration = 0d;
+		this.speed = 0d;
+		this.activity = SpeedTimeAndStatus.Activity.READY;
 
-    public TrainPositionOnMap addToHead(TrainPositionOnMap b) {
-        TrainPositionOnMap a = this;
+	}
 
-        return addBtoHeadOfA(b, a);
-    }
+	private TrainPositionOnMap(int[] xs, int[] ys, double speed,
+			double acceleration, SpeedTimeAndStatus.Activity activity) {
+		if (xs.length != ys.length) {
+			throw new IllegalArgumentException();
+		}
 
-    private TrainPositionOnMap addBtoHeadOfA(TrainPositionOnMap b,
-        TrainPositionOnMap a) {
-        if (aHeadEqualsBTail(a, b)) {
-            int newLength = a.getLength() + b.getLength() - 2;
+		xpoints = new ImInts(xs);
+		ypoints = new ImInts(ys);
+		this.acceleration = acceleration;
+		this.speed = speed;
+		this.activity = activity;
+	}
 
-            int[] newXpoints = new int[newLength];
-            int[] newYpoints = new int[newLength];
+	public static TrainPositionOnMap createInstance(int[] xpoints, int[] ypoints) {
+		return new TrainPositionOnMap(xpoints, ypoints, 0d, 0d,
+				SpeedTimeAndStatus.Activity.READY);
+	}
 
-            int aLength = a.getLength();
-            int bLength = b.getLength();
+	public TrainPositionOnMap addToHead(TrainPositionOnMap b) {
+		TrainPositionOnMap a = this;
 
-            //First copy the points from B
-            for (int i = 0; i < bLength - 1; i++) {
-                newXpoints[i] = b.getX(i);
-                newYpoints[i] = b.getY(i);
-            }
+		return addBtoHeadOfA(b, a);
+	}
 
-            //Second copy the points from A.
-            for (int i = 1; i < aLength; i++) {
-                newXpoints[i + bLength - 2] = a.getX(i);
-                newYpoints[i + bLength - 2] = a.getY(i);
-            }
+	private TrainPositionOnMap addBtoHeadOfA(TrainPositionOnMap b,
+			TrainPositionOnMap a) {
+		if (aHeadEqualsBTail(a, b)) {
+			int newLength = a.getLength() + b.getLength() - 2;
 
-            return new TrainPositionOnMap(newXpoints, newYpoints);
-        }
-		throw new IllegalArgumentException("Tried to add " + b.toString() +
-		    " to the head of " + a.toString());
-    }
+			int[] newXpoints = new int[newLength];
+			int[] newYpoints = new int[newLength];
 
-    public boolean canAddToHead(TrainPositionOnMap b) {
-        return aHeadEqualsBTail(this, b);
-    }
+			int aLength = a.getLength();
+			int bLength = b.getLength();
 
-    public TrainPositionOnMap addToTail(TrainPositionOnMap a) {
-        TrainPositionOnMap b = this;
+			// First copy the points from B
+			for (int i = 0; i < bLength - 1; i++) {
+				newXpoints[i] = b.getX(i);
+				newYpoints[i] = b.getY(i);
+			}
 
-        return addBtoHeadOfA(b, a);
-    }
+			// Second copy the points from A.
+			for (int i = 1; i < aLength; i++) {
+				newXpoints[i + bLength - 2] = a.getX(i);
+				newYpoints[i + bLength - 2] = a.getY(i);
+			}
 
-    public boolean canAddToTail(TrainPositionOnMap b) {
-        return aHeadEqualsBTail(b, this);
-    }
+			return new TrainPositionOnMap(newXpoints, newYpoints,
+					b.acceleration, b.speed, b.activity);
+		}
+		throw new IllegalArgumentException("Tried to add " + b.toString()
+				+ " to the head of " + a.toString());
+	}
 
-    public TrainPositionOnMap removeFromHead(TrainPositionOnMap b) {
-        if (headsAreEqual(this, b)) {
-            int newLength = this.getLength() - b.getLength() + 2;
+	public boolean canAddToHead(TrainPositionOnMap b) {
+		return aHeadEqualsBTail(this, b);
+	}
 
-            int[] newXpoints = new int[newLength];
-            int[] newYpoints = new int[newLength];
+	public TrainPositionOnMap addToTail(TrainPositionOnMap a) {
+		TrainPositionOnMap b = this;
 
-            int bLength = b.getLength();
+		return addBtoHeadOfA(b, a);
+	}
 
-            //copy head from b
-            int bHeadPosition = b.getLength() - 1;
-            newXpoints[0] = b.getX(bHeadPosition);
-            newYpoints[0] = b.getY(bHeadPosition);
+	public boolean canAddToTail(TrainPositionOnMap b) {
+		return aHeadEqualsBTail(b, this);
+	}
 
-            //Copy rest from this
-            for (int i = 1; i < newLength; i++) {
-                int position = bLength + i - 2;
+	public TrainPositionOnMap removeFromHead(TrainPositionOnMap b) {
+		if (headsAreEqual(this, b)) {
+			int newLength = this.getLength() - b.getLength() + 2;
 
-                newXpoints[i] = this.getX(position);
-                newYpoints[i] = this.getY(position);
-            }
+			int[] newXpoints = new int[newLength];
+			int[] newYpoints = new int[newLength];
 
-            return new TrainPositionOnMap(newXpoints, newYpoints);
-        }
+			int bLength = b.getLength();
+
+			// copy head from b
+			int bHeadPosition = b.getLength() - 1;
+			newXpoints[0] = b.getX(bHeadPosition);
+			newYpoints[0] = b.getY(bHeadPosition);
+
+			// Copy rest from this
+			for (int i = 1; i < newLength; i++) {
+				int position = bLength + i - 2;
+
+				newXpoints[i] = this.getX(position);
+				newYpoints[i] = this.getY(position);
+			}
+
+			return new TrainPositionOnMap(newXpoints, newYpoints, speed,
+					acceleration, activity);
+		}
 		throw new IllegalArgumentException();
-    }
+	}
 
-    public boolean canRemoveFromHead(TrainPositionOnMap b) {
-        if (headsAreEqual(this, b)) {
-            FreerailsPathIterator path = b.path();
-            int i = 0;
-            IntLine line = new IntLine();
+	public boolean canRemoveFromHead(TrainPositionOnMap b) {
+		if (headsAreEqual(this, b)) {
+			FreerailsPathIterator path = b.path();
+			int i = 0;
+			IntLine line = new IntLine();
 
-            while (path.hasNext()) {
-                path.nextSegment(line);
+			while (path.hasNext()) {
+				path.nextSegment(line);
 
-                if (this.getX(i) != line.x1 || this.getY(i) != line.y1) {
-                    return false;
-                }
+				if (this.getX(i) != line.x1 || this.getY(i) != line.y1) {
+					return false;
+				}
 
-                i++;
-            }
+				i++;
+			}
 
-            return true;
-        }
+			return true;
+		}
 		return false;
-    }
+	}
 
-    public TrainPositionOnMap removeFromTail(TrainPositionOnMap b) {
-        if (tailsAreEqual(this, b)) {
-            int newLength = this.getLength() - b.getLength() + 2;
+	public TrainPositionOnMap removeFromTail(TrainPositionOnMap b) {
+		if (tailsAreEqual(this, b)) {
+			int newLength = this.getLength() - b.getLength() + 2;
 
-            int[] newXpoints = new int[newLength];
-            int[] newYpoints = new int[newLength];
+			int[] newXpoints = new int[newLength];
+			int[] newYpoints = new int[newLength];
 
-            //Copy from this
-            for (int i = 0; i < newLength - 1; i++) {
-                newXpoints[i] = this.getX(i);
-                newYpoints[i] = this.getY(i);
-            }
+			// Copy from this
+			for (int i = 0; i < newLength - 1; i++) {
+				newXpoints[i] = this.getX(i);
+				newYpoints[i] = this.getY(i);
+			}
 
-            //Copy tail from b
-            newXpoints[newLength - 1] = b.getX(0);
-            newYpoints[newLength - 1] = b.getY(0);
+			// Copy tail from b
+			newXpoints[newLength - 1] = b.getX(0);
+			newYpoints[newLength - 1] = b.getY(0);
 
-            return new TrainPositionOnMap(newXpoints, newYpoints);
-        }
+			return new TrainPositionOnMap(newXpoints, newYpoints, speed,
+					acceleration, activity);
+		}
 		throw new IllegalArgumentException();
-    }
+	}
 
-    public boolean canRemoveFromTail(TrainPositionOnMap b) {
-        if (tailsAreEqual(this, b)) {
-            FreerailsPathIterator path = b.reversePath();
-            int i = this.getLength() - 1;
-            IntLine line = new IntLine();
+	public boolean canRemoveFromTail(TrainPositionOnMap b) {
+		if (tailsAreEqual(this, b)) {
+			FreerailsPathIterator path = b.reversePath();
+			int i = this.getLength() - 1;
+			IntLine line = new IntLine();
 
-            while (path.hasNext()) {
-                path.nextSegment(line);
+			while (path.hasNext()) {
+				path.nextSegment(line);
 
-                if (this.getX(i) != line.x1 || this.getY(i) != line.y1) {
-                    return false;
-                }
+				if (this.getX(i) != line.x1 || this.getY(i) != line.y1) {
+					return false;
+				}
 
-                i--;
-            }
+				i--;
+			}
 
-            return true;
-        }
+			return true;
+		}
 		return false;
-    }
+	}
 
-    public static TrainPositionOnMap createInSameDirectionAsPath(
-        FreerailsPathIterator path) {
-        IntArray xPointsIntArray = new IntArray();
-        IntArray yPointsIntArray = new IntArray();
-        IntLine line = new IntLine();
-        int i = 0;
+	public static TrainPositionOnMap createInSameDirectionAsPath(
+			FreerailsPathIterator path) {
+		return createInSameDirectionAsPath(path, 0d, 0d,
+				SpeedTimeAndStatus.Activity.READY);
+	}
 
-        while (path.hasNext()) {
-            path.nextSegment(line);
-            xPointsIntArray.add(i, line.x1);
-            yPointsIntArray.add(i, line.y1);
-            i++;
+	public static TrainPositionOnMap createInSameDirectionAsPath(
+			FreerailsPathIterator path, double speed, double acceleration,
+			SpeedTimeAndStatus.Activity activity) {
+		IntArray xPointsIntArray = new IntArray();
+		IntArray yPointsIntArray = new IntArray();
+		IntLine line = new IntLine();
+		int i = 0;
 
-            if (i > 10000) {
-                throw new IllegalStateException(
-                    "The TrainPosition has more than 10,000 points, which suggests that something is wrong.");
-            }
-        }
+		while (path.hasNext()) {
+			path.nextSegment(line);
+			xPointsIntArray.add(i, line.x1);
+			yPointsIntArray.add(i, line.y1);
+			i++;
 
-        xPointsIntArray.add(i, line.x2);
-        yPointsIntArray.add(i, line.y2);
+			if (i > 10000) {
+				throw new IllegalStateException(
+						"The TrainPosition has more than 10,000 points, which suggests that something is wrong.");
+			}
+		}
 
-        int[] xPoints;
-        int[] yPoints;
+		xPointsIntArray.add(i, line.x2);
+		yPointsIntArray.add(i, line.y2);
 
-        xPoints = xPointsIntArray.toArray();
-        yPoints = yPointsIntArray.toArray();
+		int[] xPoints;
+		int[] yPoints;
 
-        return new TrainPositionOnMap(xPoints, yPoints);
-    }
+		xPoints = xPointsIntArray.toArray();
+		yPoints = yPointsIntArray.toArray();
 
-    public static boolean headsAreEqual(TrainPositionOnMap a,
-        TrainPositionOnMap b) {
-        int aHeadX = a.getX(0);
-        int aHeadY = a.getY(0);
-        int bHeadX = b.getX(0);
-        int bHeadY = b.getY(0);
+		return new TrainPositionOnMap(xPoints, yPoints, speed, acceleration,
+				activity);
+	}
 
-        if (aHeadX == bHeadX && aHeadY == bHeadY) {
-            return true;
-        }
+	public static boolean headsAreEqual(TrainPositionOnMap a,
+			TrainPositionOnMap b) {
+		int aHeadX = a.getX(0);
+		int aHeadY = a.getY(0);
+		int bHeadX = b.getX(0);
+		int bHeadY = b.getY(0);
+
+		if (aHeadX == bHeadX && aHeadY == bHeadY) {
+			return true;
+		}
 		return false;
-    }
+	}
 
-    public static boolean tailsAreEqual(TrainPositionOnMap a,
-        TrainPositionOnMap b) {
-        int aTailX = a.getX(a.getLength() - 1);
-        int aTailY = a.getY(a.getLength() - 1);
-        int bTailX = b.getX(b.getLength() - 1);
-        int bTailY = b.getY(b.getLength() - 1);
+	public static boolean tailsAreEqual(TrainPositionOnMap a,
+			TrainPositionOnMap b) {
+		int aTailX = a.getX(a.getLength() - 1);
+		int aTailY = a.getY(a.getLength() - 1);
+		int bTailX = b.getX(b.getLength() - 1);
+		int bTailY = b.getY(b.getLength() - 1);
 
-        if (aTailX == bTailX && aTailY == bTailY) {
-            return true;
-        }
+		if (aTailX == bTailX && aTailY == bTailY) {
+			return true;
+		}
 		return false;
-    }
+	}
 
-    public static boolean aHeadEqualsBTail(TrainPositionOnMap a,
-        TrainPositionOnMap b) {
-        int aHeadX = a.getX(0);
-        int aHeadY = a.getY(0);
+	public static boolean aHeadEqualsBTail(TrainPositionOnMap a,
+			TrainPositionOnMap b) {
+		int aHeadX = a.getX(0);
+		int aHeadY = a.getY(0);
 
-        int bTailX = b.getX(b.getLength() - 1);
-        int bTailY = b.getY(b.getLength() - 1);
+		int bTailX = b.getX(b.getLength() - 1);
+		int bTailY = b.getY(b.getLength() - 1);
 
-        if (aHeadX == bTailX && aHeadY == bTailY) {
-            return true;
-        }
+		if (aHeadX == bTailX && aHeadY == bTailY) {
+			return true;
+		}
 		return false;
-    }
+	}
 
-    public static boolean bHeadEqualsATail(TrainPositionOnMap a,
-        TrainPositionOnMap b) {
-        return aHeadEqualsBTail(b, a);
-    }
+	public static boolean bHeadEqualsATail(TrainPositionOnMap a,
+			TrainPositionOnMap b) {
+		return aHeadEqualsBTail(b, a);
+	}
 
-    public String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append("TrainPosition {");
+	public String toString() {
+		StringBuffer sb = new StringBuffer();
+		sb.append("TrainPosition {");
 
-        for (int i = 0; i < m_xpoints.length; i++) {
-            sb.append("(");
-            sb.append(m_xpoints[i]);
-            sb.append(", ");
-            sb.append(m_ypoints[i]);
-            sb.append("), ");
-        }
+		for (int i = 0; i < xpoints.size(); i++) {
+			sb.append("(");
+			sb.append(xpoints.get(i));
+			sb.append(", ");
+			sb.append(ypoints.get(i));
+			sb.append("), ");
+		}
 
-        sb.append("}");
+		sb.append("}");
 
-        return sb.toString();
-    }
+		return sb.toString();
+	}
+
+	public double getAcceleration() {
+		return acceleration;
+	}
+
+	public SpeedTimeAndStatus.Activity getActivity() {
+		return activity;
+	}
+
+	public double getSpeed() {
+		return speed;
+	}
 }

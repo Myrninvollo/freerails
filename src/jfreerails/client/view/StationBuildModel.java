@@ -12,20 +12,23 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ImageIcon;
 
-import jfreerails.client.common.ModelRoot;
 import jfreerails.client.renderer.TrackPieceRenderer;
 import jfreerails.client.renderer.TrackPieceRendererList;
 import jfreerails.client.renderer.ViewLists;
+import jfreerails.controller.ModelRoot;
 import jfreerails.controller.StationBuilder;
 import jfreerails.move.MoveStatus;
+import jfreerails.util.Utils;
+import jfreerails.world.common.ImPoint;
+import jfreerails.world.common.Money;
+import jfreerails.world.top.ReadOnlyWorld;
 import jfreerails.world.top.SKEY;
 import jfreerails.world.track.TrackConfiguration;
 import jfreerails.world.track.TrackRule;
 
-
 /**
- * This class provides the UI model for building a station.
- * The mode of operation is as follows:
+ * This class provides the UI model for building a station. The mode of
+ * operation is as follows:
  * <ol>
  * <li>Select a station to build by calling ActionPerformed() on the choose
  * Action.
@@ -33,148 +36,169 @@ import jfreerails.world.track.TrackRule;
  * <li>call actionPerformed on the build Action
  * <li> alternatively, call actionPerformed on the cancel Action
  * </ol>
+ * 
  * @author rob
  */
 public class StationBuildModel {
-    /*
-     * 100 010 001 = 0x111
-     */
-    private static final int trackTemplate = TrackConfiguration.from9bitTemplate(0x111)
-                                                               .get9bitTemplate();
+	/*
+	 * 100 010 001 = 0x111
+	 */
+	private static final int trackTemplate = TrackConfiguration
+			.from9bitTemplate(0x111).get9bitTemplate();
 
-    /**
-     * Vector of StationBuildAction.
-     * Actions which represent stations which can be built
-     */
-    private final Vector<Action> stationChooseActions = new Vector<Action>();
+	/**
+	 * Vector of StationBuildAction. Actions which represent stations which can
+	 * be built
+	 */
+	private final Vector<Action> stationChooseActions = new Vector<Action>();
 
-    /**
-     * Whether the station's position can should change when the mouse moves.
-     */
-    private boolean positionFollowsMouse = true;
-    private final StationBuildAction stationBuildAction = new StationBuildAction();
-    private final StationCancelAction stationCancelAction = new StationCancelAction();
-    private final StationBuilder stationBuilder;
-    private final ModelRoot modelRoot;
-    private final HashMap<Integer, Action> id2Action = new HashMap<Integer, Action>(); 
+	/**
+	 * Whether the station's position can should change when the mouse moves.
+	 */
+	private boolean positionFollowsMouse = true;
 
-    public StationBuildModel(StationBuilder sb, ViewLists vl, ModelRoot mr) {
-        stationBuilder = sb;
-        modelRoot = mr;
+	private final StationBuildAction stationBuildAction = new StationBuildAction();
 
-        TrackPieceRendererList trackPieceRendererList = vl.getTrackPieceViewList();
+	private final StationCancelAction stationCancelAction = new StationCancelAction();
 
-        for (int i = 0; i < modelRoot.getWorld().size(SKEY.TRACK_RULES); i++) {
-            TrackRule trackRule = (TrackRule)modelRoot.getWorld().get(SKEY.TRACK_RULES,
-                    i);
+	private final StationBuilder stationBuilder;
 
-            if (trackRule.isStation()) {
-                TrackPieceRenderer renderer = trackPieceRendererList.getTrackPieceView(i);
-                StationChooseAction action = new StationChooseAction(i);
-                String trackType = trackRule.getTypeName();
-                action.putValue(Action.SHORT_DESCRIPTION,
-                    trackType + " \n $" + trackRule.getPrice());
-                action.putValue(Action.NAME, "Build " + trackType);
+	private final ModelRoot modelRoot;
 
-                action.putValue(Action.SMALL_ICON,
-                    new ImageIcon(renderer.getTrackPieceIcon(trackTemplate)));
-                stationChooseActions.add(action);
-                id2Action.put(new Integer(i), action);
-            }
-        }
-    }
-    
-    public Action getStationChooseAction(Integer ruleID ){
-    	return id2Action.get(ruleID);
-    }
+	private final HashMap<Integer, Action> id2Action = new HashMap<Integer, Action>();
 
-    public Action[] getStationChooseActions() {
-        return stationChooseActions.toArray(new Action[0]);
-    }
+	public StationBuildModel(StationBuilder sb, ViewLists vl, ModelRoot mr) {
+		stationBuilder = sb;
+		modelRoot = mr;
 
-    private class StationChooseAction extends AbstractAction {
-        private final int actionId;
+		TrackPieceRendererList trackPieceRendererList = vl
+				.getTrackPieceViewList();
 
-        public StationChooseAction(int actionId) {
-            this.actionId = actionId;
-        }
+		ReadOnlyWorld world = modelRoot.getWorld();
+		for (int i = 0; i < world.size(SKEY.TRACK_RULES); i++) {
+			final TrackRule trackRule = (TrackRule) world.get(
+					SKEY.TRACK_RULES, i);
 
-        public void actionPerformed(ActionEvent e) {
-            stationBuilder.setStationType(actionId);
+			if (trackRule.isStation()) {
+				TrackPieceRenderer renderer = trackPieceRendererList
+						.getTrackPieceView(i);
+				StationChooseAction action = new StationChooseAction(i);
+				String trackType = trackRule.getTypeName();
+				Money price = trackRule.getFixedCost();				
+				String shortDescrpt = Utils.capitalizeEveryWord(trackType)
+				+ " $" + price.toString();								
+				action.putValue(Action.SHORT_DESCRIPTION, shortDescrpt);
+				action.putValue(Action.NAME, "Build " + trackType);
 
-            TrackRule trackRule = (TrackRule)modelRoot.getWorld().get(SKEY.TRACK_RULES,
-                    actionId);
+				action.putValue(Action.SMALL_ICON, new ImageIcon(renderer
+						.getTrackPieceIcon(trackTemplate)));
+				stationChooseActions.add(action);
+				id2Action.put(new Integer(i), action);
+			}
+		}
+	}
 
-            //Show the relevant station radius when the station type's menu item
-            //gets focus.
-            stationBuildAction.putValue(StationBuildAction.STATION_RADIUS_KEY,
-                new Integer(trackRule.getStationRadius()));
-            stationBuildAction.setEnabled(true);
-        }
-    }
+	public Action getStationChooseAction(Integer ruleID) {
+		return id2Action.get(ruleID);
+	}
 
-    private class StationCancelAction extends AbstractAction {
-        public void actionPerformed(ActionEvent e) {
-        	
-        	stationBuildAction.setEnabled(false);
-        }
-    }
+	public Action[] getStationChooseActions() {
+		return stationChooseActions.toArray(new Action[0]);
+	}
 
-    /**
-     * This action builds the station.
-     */
-    public class StationBuildAction extends AbstractAction {
-        /**
-         * This key can be used to set the position where the station is to be
-         * built as a Point object.
-         */
-        public final static String STATION_POSITION_KEY = "STATION_POSITION_KEY";
+	private class StationChooseAction extends AbstractAction {
+		private static final long serialVersionUID = 3257290240279458098L;
 
-        /**
-         * This key can be used to retrieve the radius of the currently selected
-         * station as an Integer value. Don't bother writing to it!
-         */
-        public final static String STATION_RADIUS_KEY = "STATION_RADIUS_KEY";
+		private final int actionId;
 
-        StationBuildAction() {
-            setEnabled(false);
-        }
+		public StationChooseAction(int actionId) {
+			this.actionId = actionId;
+		}
 
-        public void actionPerformed(ActionEvent e) {
-            MoveStatus ms = stationBuilder.buildStation((Point)stationBuildAction.getValue(
-                        StationBuildAction.STATION_POSITION_KEY));
-            String message = null;
+		public void actionPerformed(ActionEvent e) {
+			stationBuilder.setStationType(actionId);
 
-            if (ms.isOk()) {
-            	stationBuildAction.setEnabled(false);         	
-            }else{
-            	message = ms.message;            	
-            }
+			TrackRule trackRule = (TrackRule) modelRoot.getWorld().get(
+					SKEY.TRACK_RULES, actionId);
 
-            modelRoot.setProperty(ModelRoot.Property.CURSOR_MESSAGE, message);
-            
-        }
-    }
+			// Show the relevant station radius when the station type's menu
+			// item
+			// gets focus.
+			stationBuildAction.putValue(StationBuildAction.STATION_RADIUS_KEY,
+					new Integer(trackRule.getStationRadius()));
+			stationBuildAction.setEnabled(true);
+		}
+	}
 
-    public boolean canBuildStationHere() {
-        Point p = (Point)stationBuildAction.getValue(StationBuildAction.STATION_POSITION_KEY);
+	private class StationCancelAction extends AbstractAction {
+		private static final long serialVersionUID = 3256441421581203252L;
 
-        return stationBuilder.tryBuildingStation(p).ok;
-    }
+		public void actionPerformed(ActionEvent e) {
 
-    public Action getStationCancelAction() {
-        return stationCancelAction;
-    }
+			stationBuildAction.setEnabled(false);
+		}
+	}
 
-    public StationBuildAction getStationBuildAction() {
-        return stationBuildAction;
-    }
+	/**
+	 * This action builds the station.
+	 */
+	public class StationBuildAction extends AbstractAction {
+		private static final long serialVersionUID = 3905236827739926833L;
 
-    public boolean isPositionFollowsMouse() {
-        return positionFollowsMouse;
-    }
+		/**
+		 * This key can be used to set the position where the station is to be
+		 * built as a Point object.
+		 */
+		public final static String STATION_POSITION_KEY = "STATION_POSITION_KEY";
 
-    public void setPositionFollowsMouse(boolean positionFollowsMouse) {
-        this.positionFollowsMouse = positionFollowsMouse;
-    }
+		/**
+		 * This key can be used to retrieve the radius of the currently selected
+		 * station as an Integer value. Don't bother writing to it!
+		 */
+		public final static String STATION_RADIUS_KEY = "STATION_RADIUS_KEY";
+
+		StationBuildAction() {
+			setEnabled(false);
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			Point value = (Point) stationBuildAction
+					.getValue(StationBuildAction.STATION_POSITION_KEY);
+			MoveStatus ms = stationBuilder.buildStation(new ImPoint(value.x,
+					value.y));
+			String message = null;
+
+			if (ms.isOk()) {
+				stationBuildAction.setEnabled(false);
+			} else {
+				message = ms.message;
+			}
+
+			modelRoot.setProperty(ModelRoot.Property.CURSOR_MESSAGE, message);
+
+		}
+	}
+
+	public boolean canBuildStationHere() {
+		Point p = (Point) stationBuildAction
+				.getValue(StationBuildAction.STATION_POSITION_KEY);
+
+		return stationBuilder.tryBuildingStation(new ImPoint(p.x, p.y)).ok;
+	}
+
+	public Action getStationCancelAction() {
+		return stationCancelAction;
+	}
+
+	public StationBuildAction getStationBuildAction() {
+		return stationBuildAction;
+	}
+
+	public boolean isPositionFollowsMouse() {
+		return positionFollowsMouse;
+	}
+
+	public void setPositionFollowsMouse(boolean positionFollowsMouse) {
+		this.positionFollowsMouse = positionFollowsMouse;
+	}
 }

@@ -2,162 +2,172 @@ package jfreerails.world.common;
 
 import java.text.DecimalFormat;
 
-
-/** This class converts time measured in ticks since the game began into time represented
- * as <i>Month, Year</i> and <i>hour:minute</i>.
+/**
+ * This class converts time measured in ticks since the game began into time
+ * represented as <i>Month, Year</i> and <i>hour:minute</i>.
+ * 
  * @author Luke
  */
 final public class GameCalendar implements FreerailsSerializable {
-    private static final DecimalFormat decimalFormat = new DecimalFormat("00");
-    private final int ticksPerYear;
-    private final int startYear;
+	private static final long serialVersionUID = 3257568421033226805L;
 
-    public int hashCode() {
-        int result;
-        result = ticksPerYear;
-        result = 29 * result + startYear;
+	private static final DecimalFormat decimalFormat = new DecimalFormat("00");
 
-        return result;
-    }
+	private final int ticksPerYear;
 
-    public GameTime getStartOfYear(GameTime t) {
-        int year = getYear(t.getTime());
-        int ticks = getTicks(year);
+	private final int startYear;
 
-        return new GameTime(ticks);
-    }
+	public int hashCode() {
+		int result;
+		result = ticksPerYear;
+		result = 29 * result + startYear;
 
-    public String getYearAsString(int ticks) {
-        int i = getYear(ticks);
+		return result;
+	}
 
-        return String.valueOf(i);
-    }
+	public GameTime getStartOfYear(GameTime t) {
+		int year = getYear(t.getTicks());
+		int ticks = getTicks(year);
 
-    public int getYear(int ticks) {
-        return startYear + (ticks / ticksPerYear);
-    }
+		return new GameTime(ticks);
+	}
 
-    public int getTicks(int year) {
-        int deltaYear = year - startYear;
+	public String getYearAsString(int ticks) {
+		int i = getYear(ticks);
 
-        return deltaYear * ticksPerYear;
-    }
+		return String.valueOf(i);
+	}
 
-    /** Returns the time of day as a string, note that a year is made
-     * up of a representative day, so 1st June is equilavent to 12 noon.
-     */
-    public String getTimeOfDay(int i) {
-        int ticksPerHour = ticksPerYear / 24;
-        int hour = ticksPerHour == 0 ? 0 : (i % ticksPerYear) / ticksPerHour;
-        int ticksPerMinute = ticksPerYear / (24 * 60);
-        int minute = ticksPerMinute == 0 ? 0 : (i % (ticksPerMinute * 60));
+	public int getYear(int ticks) {
+		return startYear + (ticks / ticksPerYear);
+	}
 
-        return decimalFormat.format(hour) + ":" + decimalFormat.format(minute);
-    }
+	public int getTicks(int year) {
+		int deltaYear = year - startYear;
 
-    public String getYearAndMonth(int i) {
-        int month = getMonth(i);
-        String monthAbrev = null;
+		return deltaYear * ticksPerYear;
+	}
 
-        switch (month) {
-        case 0: {
-            monthAbrev = "Jan";
+	/**
+	 * Returns the time of day as a string, note that a year is made up of a
+	 * representative day, so 1st June is equilavent to 12 noon.
+	 */
+	public String getTimeOfDay(int i) {
+		int ticksPerHour = ticksPerYear / 24;
+		int hour = ticksPerHour == 0 ? 0 : (i % ticksPerYear) / ticksPerHour;
+		int ticksPerMinute = ticksPerYear / (24 * 60);
+		int minute = ticksPerMinute == 0 ? 0 : (i % (ticksPerMinute * 60));
 
-            break;
-        }
+		return decimalFormat.format(hour) + ":" + decimalFormat.format(minute);
+	}
 
-        case 1: {
-            monthAbrev = "Feb";
+	public String getYearAndMonth(int i) {
+		int month = getMonth(i);
+		String monthAbrev = null;
 
-            break;
-        }
+		switch (month) {
+		case 0: {
+			monthAbrev = "Jan";
 
-        case 2: {
-            monthAbrev = "Mar";
+			break;
+		}
 
-            break;
-        }
+		case 1: {
+			monthAbrev = "Feb";
 
-        case 3: {
-            monthAbrev = "Apr";
+			break;
+		}
 
-            break;
-        }
+		case 2: {
+			monthAbrev = "Mar";
 
-        case 4: {
-            monthAbrev = "May";
+			break;
+		}
 
-            break;
-        }
+		case 3: {
+			monthAbrev = "Apr";
 
-        case 5: {
-            monthAbrev = "Jun";
+			break;
+		}
 
-            break;
-        }
+		case 4: {
+			monthAbrev = "May";
 
-        case 6: {
-            monthAbrev = "Jul";
+			break;
+		}
 
-            break;
-        }
+		case 5: {
+			monthAbrev = "Jun";
 
-        case 7: {
-            monthAbrev = "Aug";
+			break;
+		}
 
-            break;
-        }
+		case 6: {
+			monthAbrev = "Jul";
 
-        case 8: {
-            monthAbrev = "Sep";
+			break;
+		}
 
-            break;
-        }
+		case 7: {
+			monthAbrev = "Aug";
 
-        case 9: {
-            monthAbrev = "Oct";
+			break;
+		}
 
-            break;
-        }
+		case 8: {
+			monthAbrev = "Sep";
 
-        case 10: {
-            monthAbrev = "Nov";
+			break;
+		}
 
-            break;
-        }
+		case 9: {
+			monthAbrev = "Oct";
 
-        case 11: {
-            monthAbrev = "Dec";
+			break;
+		}
 
-            break;
-        }
-        }
+		case 10: {
+			monthAbrev = "Nov";
 
-        return monthAbrev + " " + getYearAsString(i);
-    }
+			break;
+		}
 
-    /** Returns the month, 0=Jan, 1=Feb, etc.*/
-    public int getMonth(int i) {
-        int ticksPerMonth = ticksPerYear / 12;
+		case 11: {
+			monthAbrev = "Dec";
 
-        return (i % ticksPerYear) / ticksPerMonth;
-    }
+			break;
+		}
+		}
 
-    public GameCalendar(int ticksPerYear, int startYear) {
-        this.ticksPerYear = ticksPerYear;
-        this.startYear = startYear;
-    }
+		return monthAbrev + " " + getYearAsString(i);
+	}
 
-    public boolean equals(Object o) {
-        if (o instanceof GameCalendar) {
-            GameCalendar test = (GameCalendar)o;
+	/** Returns the month, 0=Jan, 1=Feb, etc. */
+	public int getMonth(int i) {
+		int ticksPerMonth = ticksPerYear / 12;
 
-            if (this.startYear != test.startYear ||
-                    this.ticksPerYear != test.ticksPerYear) {
-                return false;
-            }
+		return (i % ticksPerYear) / ticksPerMonth;
+	}
+
+	public GameCalendar(int ticksPerYear, int startYear) {
+		this.ticksPerYear = ticksPerYear;
+		this.startYear = startYear;
+	}
+
+	public boolean equals(Object o) {
+		if (o instanceof GameCalendar) {
+			GameCalendar test = (GameCalendar) o;
+
+			if (this.startYear != test.startYear
+					|| this.ticksPerYear != test.ticksPerYear) {
+				return false;
+			}
 			return true;
-        }
+		}
 		return false;
-    }
+	}
+
+	public int getTicksPerYear() {
+		return ticksPerYear;
+	}
 }

@@ -10,14 +10,14 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Image;
-import java.awt.event.ActionListener;
 
+import javax.swing.Action;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.ListCellRenderer;
 
-import jfreerails.client.common.ModelRoot;
 import jfreerails.client.renderer.ViewLists;
+import jfreerails.controller.ModelRoot;
 import jfreerails.world.player.FreerailsPrincipal;
 import jfreerails.world.top.KEY;
 import jfreerails.world.top.NonNullElements;
@@ -27,177 +27,196 @@ import jfreerails.world.train.ImmutableSchedule;
 import jfreerails.world.train.TrainModel;
 import jfreerails.world.train.TrainOrdersModel;
 
-
 /**
- *  This JPanel displays an engine and a number of wagons.
- * @author  Luke Lindsay
+ * This JPanel displays an engine and a number of wagons.
+ * 
+ * @author Luke Lindsay
  */
-public class TrainListCellRenderer extends JPanel implements View, ListCellRenderer,
-    WorldListListener {
-    private ReadOnlyWorld w;
-    private ViewLists vl;
-    private int trainNumber = -1;
-    private int scheduleOrderNumber;
-    private int scheduleID = -1;
-    private int height = 100;
-    private FreerailsPrincipal principal;
-    private Image[] images = new Image[0];
+public class TrainListCellRenderer extends JPanel implements View,
+		ListCellRenderer, WorldListListener {
+	private static final long serialVersionUID = 3546076964969591093L;
 
-    /** Whether this JPanel should one of the trains orders from the schedule instead of the trains current formation.*/
-    private boolean showingOrder = false;
+	private ReadOnlyWorld w;
 
-    /** If true, the train is drawn in the center to the JPanel; if false,
-     *the train is drawn left aligned.
-     */
-    private boolean centerTrain = false;
-    private int trainWidth = 0;
-    private boolean selected = false;
-    private final Color backgoundColor = (java.awt.Color)javax.swing.UIManager.getDefaults()
-                                                                              .get("List.background");
-    private final Color selectedColor = (java.awt.Color)javax.swing.UIManager.getDefaults()
-                                                                             .get("List.selectionBackground");
-    private final Color selectedColorNotFocused = Color.LIGHT_GRAY;
+	private ViewLists vl;
 
-    public TrainListCellRenderer() {
-        this.setOpaque(false);
-    }
+	private int trainNumber = -1;
 
-    public TrainListCellRenderer(ModelRoot mr, ViewLists vl) {
-        setup(mr, vl, null);
-        this.setBackground(backgoundColor);
-    }
+	private int scheduleOrderNumber;
 
-    public void setCenterTrain(boolean b) {
-        this.centerTrain = b;
-    }
+	private int scheduleID = -1;
 
-    public void display(int newTrainNumber) {
-        showingOrder = false;
-        this.trainNumber = newTrainNumber;
+	private int height = 100;
 
-        TrainModel train = (TrainModel)w.get(KEY.TRAINS, trainNumber, principal);
+	private FreerailsPrincipal principal;
 
-        //Set up the array of images.
-        images = new Image[1 + train.getNumberOfWagons()];
-        images[0] = vl.getTrainImages().getSideOnEngineImage(train.getEngineType(),
-                height);
+	private Image[] images = new Image[0];
 
-        for (int i = 0; i < train.getNumberOfWagons(); i++) {
-            images[i + 1] = vl.getTrainImages().getSideOnWagonImage(train.getWagon(
-                        i), height);
-        }
+	/**
+	 * Whether this JPanel should one of the trains orders from the schedule
+	 * instead of the trains current formation.
+	 */
+	private boolean showingOrder = false;
 
-        resetPreferredSize();
-    }
+	/**
+	 * If true, the train is drawn in the center to the JPanel; if false, the
+	 * train is drawn left aligned.
+	 */
+	private boolean centerTrain = false;
 
-    public void display(int newTrainNumber, int newScheduleOrderID) {
-        showingOrder = true;
-        this.trainNumber = newTrainNumber;
-        this.scheduleOrderNumber = newScheduleOrderID;
+	private int trainWidth = 0;
 
-        TrainModel train = (TrainModel)w.get(KEY.TRAINS, trainNumber, principal);
-        this.scheduleID = train.getScheduleID();
+	private boolean selected = false;
 
-        ImmutableSchedule s = (ImmutableSchedule)w.get(KEY.TRAIN_SCHEDULES,
-                scheduleID, principal);
-        TrainOrdersModel order = s.getOrder(newScheduleOrderID);
+	private final Color backgoundColor = (java.awt.Color) javax.swing.UIManager
+			.getDefaults().get("List.background");
 
-        //Set up the array of images.
-        if (null != order.consist) {
-            images = new Image[1 + order.consist.length];
-            images[0] = vl.getTrainImages().getSideOnEngineImage(train.getEngineType(),
-                    height);
+	private final Color selectedColor = (java.awt.Color) javax.swing.UIManager
+			.getDefaults().get("List.selectionBackground");
 
-            for (int i = 0; i < order.consist.length; i++) {
-                images[i + 1] = vl.getTrainImages().getSideOnWagonImage(order.consist[i],
-                        height);
-            }
-        } else {
-            images = new Image[0];
-        }
+	private final Color selectedColorNotFocused = Color.LIGHT_GRAY;
 
-        resetPreferredSize();
-    }
+	public TrainListCellRenderer() {
+		this.setOpaque(false);
+	}
 
-    private void resetPreferredSize() {
-        int width = 0;
+	public TrainListCellRenderer(ModelRoot mr, ViewLists vl) {
+		setup(mr, vl, null);
+		this.setBackground(backgoundColor);
+	}
 
-        for (int i = 0; i < images.length; i++) {
-            width += images[i].getWidth(null);
-        }
+	public void setCenterTrain(boolean b) {
+		this.centerTrain = b;
+	}
 
-        this.trainWidth = width;
-        this.setPreferredSize(new Dimension(width, height));
-    }
+	public void display(int newTrainNumber) {
+		showingOrder = false;
+		this.trainNumber = newTrainNumber;
 
-    public void setup(ModelRoot mr, ViewLists vl,
-        ActionListener submitButtonCallBack) {
-        this.w = mr.getWorld();
-        this.vl = vl;
-        this.principal = mr.getPrincipal();
-    }
+		TrainModel train = (TrainModel) w.get(principal, KEY.TRAINS,
+				trainNumber);
 
-    public Component getListCellRendererComponent(JList list, Object value,
-    		int index, boolean isSelected, boolean cellHasFocus) {
-    	
-    	int trainID = NonNullElements.row2index(w, KEY.TRAINS, principal, index);
-    	display(trainID);
-    	
-    	
-    	selected = isSelected;
-    	
-    	if (selected) {
-    		if(list.isFocusOwner()){
-    			setBackground(selectedColor);
-    		}else{
-    			setBackground(selectedColorNotFocused);
-    		}
-    	} else {
-    		setBackground(backgoundColor);
-    	}
-    	
-    	
-    	return this;
-    }
+		// Set up the array of images.
+		images = new Image[1 + train.getNumberOfWagons()];
+		images[0] = vl.getTrainImages().getSideOnEngineImage(
+				train.getEngineType(), height);
 
-    public int getHeight() {
-        return height;
-    }
+		for (int i = 0; i < train.getNumberOfWagons(); i++) {
+			images[i + 1] = vl.getTrainImages().getSideOnWagonImage(
+					train.getWagon(i), height);
+		}
 
-    public void setHeight(int i) {
-        height = i;
-    }
+		resetPreferredSize();
+	}
 
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
+	public void display(int newTrainNumber, int newScheduleOrderID) {
+		showingOrder = true;
+		this.trainNumber = newTrainNumber;
+		this.scheduleOrderNumber = newScheduleOrderID;
 
-        int x = 0;
+		TrainModel train = (TrainModel) w.get(principal, KEY.TRAINS,
+				trainNumber);
+		this.scheduleID = train.getScheduleID();
 
-        if (this.centerTrain) {
-            x = (this.getWidth() - this.trainWidth) / 2;
-        }
+		ImmutableSchedule s = (ImmutableSchedule) w.get(principal,
+				KEY.TRAIN_SCHEDULES, scheduleID);
+		TrainOrdersModel order = s.getOrder(newScheduleOrderID);
 
-        for (int i = 0; i < images.length; i++) {
-            g.drawImage(images[i], x, 0, null);
-            x += images[i].getWidth(null);
-        }
-    }
+		// Set up the array of images.
+		if (null != order.consist) {
+			images = new Image[1 + order.consist.size()];
+			images[0] = vl.getTrainImages().getSideOnEngineImage(
+					train.getEngineType(), height);
 
-    public void listUpdated(KEY key, int index, FreerailsPrincipal p) {
-        if (showingOrder) {
-            if (KEY.TRAIN_SCHEDULES == key && this.scheduleID == index) {
-                this.display(this.trainNumber, this.scheduleOrderNumber);
-            }
-        } else {
-            if (KEY.TRAINS == key && this.trainNumber == index) {
-                this.display(this.trainNumber);
-            }
-        }
-    }
+			for (int i = 0; i < order.consist.size(); i++) {
+				images[i + 1] = vl.getTrainImages().getSideOnWagonImage(
+						order.consist.get(i), height);
+			}
+		} else {
+			images = new Image[0];
+		}
 
-    public void itemAdded(KEY key, int index, FreerailsPrincipal p) {
-    }
+		resetPreferredSize();
+	}
 
-    public void itemRemoved(KEY key, int index, FreerailsPrincipal p) {
-    }
+	private void resetPreferredSize() {
+		int width = 0;
+
+		for (int i = 0; i < images.length; i++) {
+			width += images[i].getWidth(null);
+		}
+
+		this.trainWidth = width;
+		this.setPreferredSize(new Dimension(width, height));
+	}
+
+	public void setup(ModelRoot mr, ViewLists vl,
+			Action closeAction) {
+		this.w = mr.getWorld();
+		this.vl = vl;
+		this.principal = mr.getPrincipal();
+	}
+
+	public Component getListCellRendererComponent(JList list, Object value,
+			int index, boolean isSelected, boolean cellHasFocus) {
+
+		int trainID = NonNullElements
+				.row2index(w, KEY.TRAINS, principal, index);
+		display(trainID);
+
+		selected = isSelected;
+
+		if (selected) {
+			if (list.isFocusOwner()) {
+				setBackground(selectedColor);
+			} else {
+				setBackground(selectedColorNotFocused);
+			}
+		} else {
+			setBackground(backgoundColor);
+		}
+
+		return this;
+	}
+
+	public int getHeight() {
+		return height;
+	}
+
+	public void setHeight(int i) {
+		height = i;
+	}
+
+	protected void paintComponent(Graphics g) {
+		super.paintComponent(g);
+
+		int x = 0;
+
+		if (this.centerTrain) {
+			x = (this.getWidth() - this.trainWidth) / 2;
+		}
+
+		for (int i = 0; i < images.length; i++) {
+			g.drawImage(images[i], x, 0, null);
+			x += images[i].getWidth(null);
+		}
+	}
+
+	public void listUpdated(KEY key, int index, FreerailsPrincipal p) {
+		if (showingOrder) {
+			if (KEY.TRAIN_SCHEDULES == key && this.scheduleID == index) {
+				this.display(this.trainNumber, this.scheduleOrderNumber);
+			}
+		} else {
+			if (KEY.TRAINS == key && this.trainNumber == index) {
+				this.display(this.trainNumber);
+			}
+		}
+	}
+
+	public void itemAdded(KEY key, int index, FreerailsPrincipal p) {
+	}
+
+	public void itemRemoved(KEY key, int index, FreerailsPrincipal p) {
+	}
 }

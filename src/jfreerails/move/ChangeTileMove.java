@@ -6,6 +6,7 @@ package jfreerails.move;
 
 import java.awt.Point;
 import java.awt.Rectangle;
+
 import jfreerails.world.player.FreerailsPrincipal;
 import jfreerails.world.terrain.TerrainType;
 import jfreerails.world.top.ReadOnlyWorld;
@@ -13,76 +14,109 @@ import jfreerails.world.top.SKEY;
 import jfreerails.world.top.World;
 import jfreerails.world.track.FreerailsTile;
 
-
 /**
  * Move that changes a single tile.
- *
+ * 
  * @author Luke
- *
+ * 
  */
 public class ChangeTileMove implements Move, MapUpdateMove {
-    private final int m_x;
-    private final int m_y;
-    private final FreerailsTile m_before;
-    private final FreerailsTile m_after;
+	private static final long serialVersionUID = 3256726169272662320L;
 
-    public ChangeTileMove(ReadOnlyWorld w, Point p, int terrainTypeAfter) {
-        m_x = p.x;
-        m_y = p.y;
-        m_before = (FreerailsTile)w.getTile(m_x, m_y);
-        m_after = FreerailsTile.getInstance(terrainTypeAfter,
-                m_before.getTrackPiece());
-    }
+	private final int x;
 
-    public MoveStatus tryDoMove(World w, FreerailsPrincipal p) {
-        FreerailsTile before = (FreerailsTile)w.getTile(m_x, m_y);
-        TerrainType type = (TerrainType)w.get(SKEY.TERRAIN_TYPES,
-                before.getTerrainTypeID());
+	private final int y;
 
-        if (!type.getCategory().equals(TerrainType.Category.Country)) {
-            return MoveStatus.moveFailed("Can only build on clear terrain.");
-        }
+	private final FreerailsTile before;
 
-        if (before.equals(m_before)) {
-            return MoveStatus.MOVE_OK;
-        }
-		return MoveStatus.moveFailed("Expected " + m_before +
-		    " but found " + before);
-    }
+	private final FreerailsTile after;
 
-    public MoveStatus tryUndoMove(World w, FreerailsPrincipal p) {
-        FreerailsTile after = (FreerailsTile)w.getTile(m_x, m_y);
+	public ChangeTileMove(ReadOnlyWorld w, Point p, int terrainTypeAfter) {
+		this.x = p.x;
+		this.y = p.y;
+		this.before = (FreerailsTile) w.getTile(x, y);
+		this.after = FreerailsTile.getInstance(terrainTypeAfter, before
+				.getTrackPiece());
+	}
 
-        if (after.equals(m_after)) {
-            return MoveStatus.MOVE_OK;
-        }
-		return MoveStatus.moveFailed("Expected " + m_after + " but found " +
-		    after);
-    }
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (!(o instanceof ChangeTileMove))
+			return false;
 
-    public MoveStatus doMove(World w, FreerailsPrincipal p) {
-        MoveStatus ms = tryDoMove(w, p);
+		final ChangeTileMove changeTileMove = (ChangeTileMove) o;
 
-        if (ms.isOk()) {
-            w.setTile(m_x, m_y, m_after);
-        }
+		if (x != changeTileMove.x)
+			return false;
+		if (y != changeTileMove.y)
+			return false;
+		if (!after.equals(changeTileMove.after))
+			return false;
+		if (!before.equals(changeTileMove.before))
+			return false;
 
-        return ms;
-    }
+		return true;
+	}
 
-    public MoveStatus undoMove(World w, FreerailsPrincipal p) {
-        MoveStatus ms = tryUndoMove(w, p);
+	public int hashCode() {
+		int result;
+		result = x;
+		result = 29 * result + y;
+		result = 29 * result + before.hashCode();
+		result = 29 * result + after.hashCode();
+		return result;
+	}
 
-        if (ms.isOk()) {
-            w.setTile(m_x, m_y, m_before);
-        }
+	public MoveStatus tryDoMove(World w, FreerailsPrincipal p) {
+		FreerailsTile actual = (FreerailsTile) w.getTile(x, y);
+		TerrainType type = (TerrainType) w.get(SKEY.TERRAIN_TYPES, actual
+				.getTerrainTypeID());
 
-        return ms;
-    }
+		if (!type.getCategory().equals(TerrainType.Category.Country)) {
+			return MoveStatus.moveFailed("Can only build on clear terrain.");
+		}
 
-    public /*=const*/ Rectangle getUpdatedTiles() {
-        Rectangle r = new Rectangle(m_x, m_y, 1, 1);
+		if (actual.equals(before)) {
+			return MoveStatus.MOVE_OK;
+		}
+		return MoveStatus.moveFailed("Expected " + before + " but found "
+				+ actual);
+	}
 
-        return r;
-    }
+	public MoveStatus tryUndoMove(World w, FreerailsPrincipal p) {
+		FreerailsTile actual = (FreerailsTile) w.getTile(x, y);
+
+		if (actual.equals(after)) {
+			return MoveStatus.MOVE_OK;
+		}
+		return MoveStatus.moveFailed("Expected " + after + " but found "
+				+ actual);
+	}
+
+	public MoveStatus doMove(World w, FreerailsPrincipal p) {
+		MoveStatus ms = tryDoMove(w, p);
+
+		if (ms.isOk()) {
+			w.setTile(x, y, after);
+		}
+
+		return ms;
+	}
+
+	public MoveStatus undoMove(World w, FreerailsPrincipal p) {
+		MoveStatus ms = tryUndoMove(w, p);
+
+		if (ms.isOk()) {
+			w.setTile(x, y, before);
+		}
+
+		return ms;
+	}
+
+	public Rectangle getUpdatedTiles() {
+		Rectangle r = new Rectangle(x, y, 1, 1);
+
+		return r;
+	}
 }

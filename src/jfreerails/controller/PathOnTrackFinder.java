@@ -4,14 +4,13 @@
  */
 package jfreerails.controller;
 
-import java.awt.Point;
 import java.util.logging.Logger;
 
-import jfreerails.world.common.OneTileMoveVector;
+import jfreerails.world.common.ImPoint;
 import jfreerails.world.common.PositionOnTrack;
+import jfreerails.world.common.Step;
 import jfreerails.world.top.ReadOnlyWorld;
 import jfreerails.world.track.FreerailsTile;
-import jfreerails.world.track.NullTrackType;
 
 /**
  * Finds a path along existing track. Used for upgrading or removing track
@@ -25,32 +24,32 @@ public class PathOnTrackFinder implements IncrementalPathFinder {
 	private static final Logger logger = Logger
 			.getLogger(IncrementalPathFinder.class.getName());
 
-	private SimpleAStarPathFinder m_pathFinder = new SimpleAStarPathFinder();
+	private SimpleAStarPathFinder pathFinder = new SimpleAStarPathFinder();
 
-	private Point m_startPoint;
+	private ImPoint startPoint;
 
-	private final ReadOnlyWorld m_world;
+	private final ReadOnlyWorld world;
 
 	public PathOnTrackFinder(ReadOnlyWorld world) {
-		m_world = world;
+		this.world = world;
 	}
 
 	public void abandonSearch() {
-		m_pathFinder.abandonSearch();
+		pathFinder.abandonSearch();
 	}
 
 	public int getStatus() {
-		return m_pathFinder.getStatus();
+		return pathFinder.getStatus();
 	}
 
-	public OneTileMoveVector[] pathAsVectors() {
-		int[] pathAsInts = m_pathFinder.retrievePath().toArray();
-		OneTileMoveVector[] vectors = new  OneTileMoveVector[pathAsInts.length];
-		int x = m_startPoint.x;
-		int y = m_startPoint.y;
-		for(int i = 0; i < pathAsInts.length; i++){
+	public Step[] pathAsVectors() {
+		int[] pathAsInts = pathFinder.retrievePath().toArray();
+		Step[] vectors = new Step[pathAsInts.length];
+		int x = startPoint.x;
+		int y = startPoint.y;
+		for (int i = 0; i < pathAsInts.length; i++) {
 			PositionOnTrack p2 = new PositionOnTrack(pathAsInts[i]);
-			vectors[i] = OneTileMoveVector.getInstance(p2.getX() - x, p2.getY()- y);
+			vectors[i] = Step.getInstance(p2.getX() - x, p2.getY() - y);
 			x = p2.getX();
 			y = p2.getY();
 		}
@@ -58,29 +57,36 @@ public class PathOnTrackFinder implements IncrementalPathFinder {
 	}
 
 	public void search(long maxDuration) throws PathNotFoundException {
-		m_pathFinder.search(maxDuration);
+		pathFinder.search(maxDuration);
 	}
 
-	public void setupSearch(Point startPoint, Point targetPoint,
-			BuildTrackStrategy bts) throws PathNotFoundException {
-		m_startPoint = new Point(startPoint);
+	public void setupSearch(ImPoint from, ImPoint target) throws PathNotFoundException {
+		startPoint = from;
 		logger
-				.fine("Find track path from " + startPoint + " to "
-						+ targetPoint);
-		/* Check there is track at both the points.*/
-		FreerailsTile tileA = (FreerailsTile)m_world.getTile(startPoint.x, startPoint.y);
-		FreerailsTile tileB = (FreerailsTile)m_world.getTile(targetPoint.x, targetPoint.y);
-		if(tileA.getTrackTypeID() == NullTrackType.NULL_TRACK_TYPE_RULE_NUMBER){
-			throw new PathNotFoundException("No track at "+startPoint.x+", "+startPoint.y+".");
+				.fine("Find track path from " + from + " to "
+						+ target);
+		/* Check there is track at both the points. */
+		FreerailsTile tileA = (FreerailsTile) world.getTile(from.x,
+				from.y);
+		FreerailsTile tileB = (FreerailsTile) world.getTile(target.x,
+				target.y);
+		if (!tileA.hasTrack()) {
+			throw new PathNotFoundException("No track at " + from.x
+					+ ", " + from.y + ".");
 		}
-		if(tileB.getTrackTypeID() == NullTrackType.NULL_TRACK_TYPE_RULE_NUMBER){
-			throw new PathNotFoundException("No track at "+targetPoint.x+", "+targetPoint.y+".");
+		if (!tileB.hasTrack()) {
+			throw new PathNotFoundException("No track at " + target.x
+					+ ", " + target.y + ".");
 		}
-		
-		PositionOnTrack[] startPoints = FlatTrackExplorer.getPossiblePositions(m_world, startPoint);
-		PositionOnTrack[] targetPoints = FlatTrackExplorer.getPossiblePositions(m_world, targetPoint);
-		FlatTrackExplorer explorer = new FlatTrackExplorer(m_world, startPoints[0]);
-		m_pathFinder.setupSearch(PositionOnTrack.toInts(startPoints), PositionOnTrack.toInts(targetPoints), explorer);		
+
+		PositionOnTrack[] startPoints = FlatTrackExplorer.getPossiblePositions(
+				world, from);
+		PositionOnTrack[] targetPoints = FlatTrackExplorer
+				.getPossiblePositions(world, target);
+		FlatTrackExplorer explorer = new FlatTrackExplorer(world,
+				startPoints[0]);
+		pathFinder.setupSearch(PositionOnTrack.toInts(startPoints),
+				PositionOnTrack.toInts(targetPoints), explorer);
 	}
 
 }

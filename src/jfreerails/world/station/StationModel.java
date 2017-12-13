@@ -1,181 +1,184 @@
 package jfreerails.world.station;
 
-import java.util.Arrays;
 import jfreerails.world.common.FreerailsSerializable;
-
+import jfreerails.world.common.ImList;
 
 /**
  * This class represents a station.
- *
+ * 
  * @author Luke
- *
+ * 
  */
 public class StationModel implements FreerailsSerializable {
-    public final int x;
-    public final int y;
-    private final String name;
-    private final SupplyAtStation supply;
-    private final DemandAtStation demand;
-    private final ConvertedAtStation converted;
-    private final int cargoBundleNumber;
+	private static final long serialVersionUID = 3256442503979874355L;
 
-    /** What this station is building. */
-    private final ProductionAtEngineShop[] production;
+	public final int x;
 
-    public ConvertedAtStation getConverted() {
-        return converted;
-    }
+	public final int y;
 
-    public int hashCode() {
-        int result;
-        result = x;
-        result = 29 * result + y;
-        result = 29 * result + (name != null ? name.hashCode() : 0);
-        result = 29 * result + (supply != null ? supply.hashCode() : 0);
-        result = 29 * result + (demand != null ? demand.hashCode() : 0);
-        result = 29 * result + (converted != null ? converted.hashCode() : 0);
-        result = 29 * result + cargoBundleNumber;
-        result = 29 * result + production.length;
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (!(o instanceof StationModel))
+			return false;
 
-        return result;
-    }
+		final StationModel stationModel = (StationModel) o;
 
-    public StationModel(StationModel s, ConvertedAtStation converted) {
-        this.converted = converted;
+		if (cargoBundleNumber != stationModel.cargoBundleNumber)
+			return false;
+		if (x != stationModel.x)
+			return false;
+		if (y != stationModel.y)
+			return false;
+		if (converted != null ? !converted.equals(stationModel.converted)
+				: stationModel.converted != null)
+			return false;
+		if (demand != null ? !demand.equals(stationModel.demand)
+				: stationModel.demand != null)
+			return false;
+		if (!name.equals(stationModel.name))
+			return false;
+		if (production != null ? !production.equals(stationModel.production)
+				: stationModel.production != null)
+			return false;
+		if (supply != null ? !supply.equals(stationModel.supply)
+				: stationModel.supply != null)
+			return false;
 
-        this.cargoBundleNumber = s.cargoBundleNumber;
+		return true;
+	}
 
-        this.demand = s.demand;
-        this.name = s.name;
-        this.production = s.production;
-        this.supply = s.supply;
-        this.x = s.x;
-        this.y = s.y;
-    }
+	private final String name;
 
-    public StationModel(int x, int y, String stationName,
-        int numberOfCargoTypes, int cargoBundle) {
-        this.name = stationName;
-        this.x = x;
-        this.y = y;
-        production = new ProductionAtEngineShop[0];
+	private final SupplyAtStation supply;
 
-        supply = new SupplyAtStation(new int[numberOfCargoTypes]);
-        demand = new DemandAtStation(new boolean[numberOfCargoTypes]);
-        converted = ConvertedAtStation.emptyInstance(numberOfCargoTypes);
-        cargoBundleNumber = cargoBundle;
-    }
+	private final DemandAtStation demand;
 
-    public StationModel() {
-        this.name = "No name";
-        x = 0;
-        y = 0;
-        this.demand = new DemandAtStation(new boolean[0]);
-        this.supply = new SupplyAtStation(new int[0]);
-        this.converted = new ConvertedAtStation(new int[0]);
-        production = new ProductionAtEngineShop[0];
-        this.cargoBundleNumber = 0;
-    }
+	private final ConvertedAtStation converted;
 
-    public String getStationName() {
-        return name;
-    }
+	private final int cargoBundleNumber;
 
-    public int getStationX() {
-        return x;
-    }
+	/** What this station is building. */
+	private final ImList<PlannedTrain> production;
 
-    public int getStationY() {
-        return y;
-    }
+	public ConvertedAtStation getConverted() {
+		return converted;
+	}
 
-    public ProductionAtEngineShop[] getProduction() {
-        return production.clone();
-    }
+	public int hashCode() {
+		int result;
+		result = x;
+		result = 29 * result + y;
+		result = 29 * result + (name != null ? name.hashCode() : 0);
+		result = 29 * result + (supply != null ? supply.hashCode() : 0);
+		result = 29 * result + (demand != null ? demand.hashCode() : 0);
+		result = 29 * result + (converted != null ? converted.hashCode() : 0);
+		result = 29 * result + cargoBundleNumber;
+		result = 29 * result + production.size();
 
-    public StationModel(StationModel s, /*=const*/
-        ProductionAtEngineShop[] production) {
-        this.production = production;
-        this.demand = s.demand;
-        this.cargoBundleNumber = s.cargoBundleNumber;
-        this.converted = s.converted;
-        this.name = s.name;
-        this.supply = s.supply;
-        this.x = s.x;
-        this.y = s.y;
-    }
+		return result;
+	}
 
-    public DemandAtStation getDemand() {
-        return demand;
-    }
+	public StationModel(StationModel s, ConvertedAtStation converted) {
+		this.converted = converted;
 
-    public SupplyAtStation getSupply() {
-        return supply;
-    }
+		this.cargoBundleNumber = s.cargoBundleNumber;
 
-    public StationModel(StationModel s, DemandAtStation demand) {
-        this.demand = demand;
+		this.demand = s.demand;
+		this.name = s.name;
+		this.production = s.production;
+		this.supply = s.supply;
+		this.x = s.x;
+		this.y = s.y;
+	}
 
-        this.cargoBundleNumber = s.cargoBundleNumber;
-        this.converted = s.converted;
+	public StationModel(int x, int y, String stationName,
+			int numberOfCargoTypes, int cargoBundle) {
+		this.name = stationName;
+		this.x = x;
+		this.y = y;
+		production = new ImList<PlannedTrain>();
 
-        this.name = s.name;
-        this.production = s.production;
-        this.supply = s.supply;
-        this.x = s.x;
-        this.y = s.y;
-    }
+		supply = new SupplyAtStation(new int[numberOfCargoTypes]);
+		demand = new DemandAtStation(new boolean[numberOfCargoTypes]);
+		converted = ConvertedAtStation.emptyInstance(numberOfCargoTypes);
+		cargoBundleNumber = cargoBundle;
+	}
 
-    public StationModel(StationModel s, SupplyAtStation supply) {
-        this.supply = supply;
-        this.demand = s.demand;
+	public StationModel() {
+		this.name = "No name";
+		x = 0;
+		y = 0;
+		this.demand = new DemandAtStation(new boolean[0]);
+		this.supply = new SupplyAtStation(new int[0]);
+		this.converted = new ConvertedAtStation(new int[0]);
+		production = new ImList<PlannedTrain>();
+		this.cargoBundleNumber = 0;
+	}
 
-        this.cargoBundleNumber = s.cargoBundleNumber;
-        this.converted = s.converted;
-        this.name = s.name;
-        this.production = s.production;
-        this.x = s.x;
-        this.y = s.y;
-    }
+	public String getStationName() {
+		return name;
+	}
 
-    public int getCargoBundleID() {
-        return cargoBundleNumber;
-    }
+	public int getStationX() {
+		return x;
+	}
 
-    public boolean equals(Object o) {
-        if (o instanceof StationModel) {
-            StationModel test = (StationModel)o;
+	public int getStationY() {
+		return y;
+	}
 
-            if (this.cargoBundleNumber != test.cargoBundleNumber) {
-                return false;
-            }
+	public ImList<PlannedTrain> getProduction() {
+		return production;
+	}
 
-            if (!this.demand.equals(test.demand)) {
-                return false;
-            }
+	public StationModel(StationModel s,
+			ImList<PlannedTrain> production) {
+		this.production = production;
+		this.demand = s.demand;
+		this.cargoBundleNumber = s.cargoBundleNumber;
+		this.converted = s.converted;
+		this.name = s.name;
+		this.supply = s.supply;
+		this.x = s.x;
+		this.y = s.y;
+	}
 
-            if (!this.converted.equals(test.converted)) {
-                return false;
-            }
+	public DemandAtStation getDemand() {
+		return demand;
+	}
 
-            if (!this.name.equals(test.name)) {
-                return false;
-            }
+	public SupplyAtStation getSupply() {
+		return supply;
+	}
 
-            if (!Arrays.equals(this.production, test.production)) {
-                return false;
-            }
+	public StationModel(StationModel s, DemandAtStation demand) {
+		this.demand = demand;
 
-            if (!this.supply.equals(test.supply)) {
-                return false;
-            }
+		this.cargoBundleNumber = s.cargoBundleNumber;
+		this.converted = s.converted;
 
-            if (this.x != test.x || this.y != test.y) {
-                return false;
-            }
+		this.name = s.name;
+		this.production = s.production;
+		this.supply = s.supply;
+		this.x = s.x;
+		this.y = s.y;
+	}
 
-            return true;
-        }
-		return false;
-    }
+	public StationModel(StationModel s, SupplyAtStation supply) {
+		this.supply = supply;
+		this.demand = s.demand;
+
+		this.cargoBundleNumber = s.cargoBundleNumber;
+		this.converted = s.converted;
+		this.name = s.name;
+		this.production = s.production;
+		this.x = s.x;
+		this.y = s.y;
+	}
+
+	public int getCargoBundleID() {
+		return cargoBundleNumber;
+	}
+
 }

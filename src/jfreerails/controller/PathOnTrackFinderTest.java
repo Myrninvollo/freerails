@@ -4,18 +4,22 @@
  */
 package jfreerails.controller;
 
-import java.awt.Point;
+import static jfreerails.world.common.Step.EAST;
+import static jfreerails.world.common.Step.NORTH_EAST;
+import static jfreerails.world.common.Step.SOUTH_EAST;
+
 import java.util.Arrays;
 
+import jfreerails.client.common.ModelRootImpl;
 import jfreerails.server.MapFixtureFactory2;
-import jfreerails.world.common.OneTileMoveVector;
-import static jfreerails.world.common.OneTileMoveVector.*;
+import jfreerails.world.common.ImPoint;
+import jfreerails.world.common.Step;
 import jfreerails.world.top.World;
 import junit.framework.TestCase;
 
 /**
  * @author Luke
- *
+ * 
  */
 public class PathOnTrackFinderTest extends TestCase {
 
@@ -24,51 +28,54 @@ public class PathOnTrackFinderTest extends TestCase {
 	TrackMoveProducer producer;
 
 	PathOnTrackFinder pathFinder;
-	
+
 	StationBuilder stationBuilder;
-	BuildTrackStrategy bts ;
+
+	BuildTrackStrategy bts;
 
 	protected void setUp() throws Exception {
 		super.setUp();
 		w = MapFixtureFactory2.getCopy();
 		MoveExecutor me = new SimpleMoveExecutor(w, 0);
-		producer = new TrackMoveProducer(me, w);
+		ModelRoot mr = new ModelRootImpl();
+		producer = new TrackMoveProducer(me, w, mr);
 		pathFinder = new PathOnTrackFinder(w);
 		stationBuilder = new StationBuilder(me);
 		bts = BuildTrackStrategy.getDefault(w);
 	}
 
-	
 	protected void tearDown() throws Exception {
 		super.tearDown();
 	}
 
 	public void testPathAsVectors1() {
-		OneTileMoveVector[] path = {EAST, EAST, SOUTH_EAST};
-		Point start = new Point(5,5);
-		Point end = OneTileMoveVector.move(start, path);
+		Step[] path = { EAST, EAST, SOUTH_EAST };
+		ImPoint start = new ImPoint(5, 5);
+		ImPoint end = Step.move(start, path);
 		producer.buildTrack(start, path);
 		try {
-			pathFinder.setupSearch(start, end, bts);
+			pathFinder.setupSearch(start, end);
 			pathFinder.search(-1);
-			assertEquals(IncrementalPathFinder.PATH_FOUND, pathFinder.getStatus());
-			OneTileMoveVector[] pathFound = pathFinder.pathAsVectors();
+			assertEquals(IncrementalPathFinder.PATH_FOUND, pathFinder
+					.getStatus());
+			Step[] pathFound = pathFinder.pathAsVectors();
 			assertTrue(Arrays.equals(path, pathFound));
 		} catch (PathNotFoundException e) {
 			fail();
 		}
 	}
-	
+
 	public void testPathAsVectors2() {
-		OneTileMoveVector[] path = {EAST, EAST, SOUTH_EAST, EAST, EAST, NORTH_EAST};
-		Point start = new Point(5,5);
-		Point end = OneTileMoveVector.move(start, path);
+		Step[] path = { EAST, EAST, SOUTH_EAST, EAST, EAST, NORTH_EAST };
+		ImPoint start = new ImPoint(5, 5);
+		ImPoint end = Step.move(start, path);
 		producer.buildTrack(start, path);
 		try {
-			pathFinder.setupSearch(start, end, bts);
+			pathFinder.setupSearch(start, end);
 			pathFinder.search(-1);
-			assertEquals(IncrementalPathFinder.PATH_FOUND, pathFinder.getStatus());
-			OneTileMoveVector[] pathFound = pathFinder.pathAsVectors();
+			assertEquals(IncrementalPathFinder.PATH_FOUND, pathFinder
+					.getStatus());
+			Step[] pathFound = pathFinder.pathAsVectors();
 			assertTrue(Arrays.equals(path, pathFound));
 		} catch (PathNotFoundException e) {
 			fail();
@@ -76,26 +83,26 @@ public class PathOnTrackFinderTest extends TestCase {
 	}
 
 	public void testSetupSearch() {
-		OneTileMoveVector[] path = {EAST, EAST, SOUTH_EAST};
-		Point start = new Point(5,5);
-		Point end = OneTileMoveVector.move(start, path);
+		Step[] path = { EAST, EAST, SOUTH_EAST };
+		ImPoint start = new ImPoint(5, 5);
+		ImPoint end = Step.move(start, path);
 		producer.buildTrack(start, path);
 		try {
-			pathFinder.setupSearch(start, end, bts);			
+			pathFinder.setupSearch(start, end);
 		} catch (PathNotFoundException e) {
 			fail("Track at both of the points so no excepton should be thrown");
 		}
 		try {
-			pathFinder.setupSearch(start, new Point(10, 10), bts);	
+			pathFinder.setupSearch(start, new ImPoint(10, 10));
 			fail("No track at one of the points so an excepton should be thrown");
 		} catch (PathNotFoundException e) {
-			
+
 		}
 		try {
-			pathFinder.setupSearch(new Point(10, 10), end, bts);	
+			pathFinder.setupSearch(new ImPoint(10, 10), end);
 			fail("No track at one of the points so an excepton should be thrown");
 		} catch (PathNotFoundException e) {
-			
+
 		}
 	}
 

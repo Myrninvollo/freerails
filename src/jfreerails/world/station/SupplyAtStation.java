@@ -1,51 +1,46 @@
 package jfreerails.world.station;
 
 import jfreerails.world.common.FreerailsSerializable;
+import jfreerails.world.common.ImInts;
 
-
-/** This class represents the supply at a station.
+/**
+ * This class represents the supply at a station.
+ * 
  * @author Luke
  */
 public class SupplyAtStation implements FreerailsSerializable {
-    private final int[] supply;
+	private static final long serialVersionUID = 4049918272826847286L;
 
-    public SupplyAtStation(int[] cargoWaiting) {
-        supply = cargoWaiting.clone();
-    }
+	private final ImInts supply;
 
-    /** Returns the number of car loads of the specified cargo that the station
-     * supplies per year.
-     */
-    public int getSupply(int cargoType) {
-        return supply[cargoType];
-    }
+	public SupplyAtStation(int[] cargoWaiting) {
+		supply = new ImInts(cargoWaiting);
+	}
 
-    public int hashCode() {
-        int result = 0;
+	/**
+	 * Returns the number of car loads of the specified cargo that the station
+	 * supplies per year.
+	 */
+	public int getSupply(int cargoType) {
+		return supply.get(cargoType);
+	}
 
-        for (int i = 0; i < supply.length; i++) {
-            result = 29 * result + supply[i];
-        }
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (!(o instanceof SupplyAtStation))
+			return false;
 
-        return result;
-    }
+		final SupplyAtStation supplyAtStation = (SupplyAtStation) o;
 
-    public boolean equals(Object o) {
-        if (o instanceof SupplyAtStation) {
-            SupplyAtStation test = (SupplyAtStation)o;
+		if (!supply.equals(supplyAtStation.supply))
+			return false;
 
-            if (this.supply.length != test.supply.length) {
-                return false;
-            }
+		return true;
+	}
 
-            for (int i = 0; i < supply.length; i++) {
-                if (supply[i] != test.supply[i]) {
-                    return false;
-                }
-            }
+	public int hashCode() {
+		return supply.hashCode();
+	}
 
-            return true;
-        }
-		return false;
-    }
 }

@@ -33,13 +33,68 @@
 
 
 		<mkdir dir="${doc}" />
+		<mkdir dir="${datafiles}" />
+
+	</target>
+	<!-- Copies html etc and sets last modified date in html files.-->
+	<target name="html2docs" depends="mkdirs">
+		<copy todir="${doc}" preservelastmodified="true" overwrite="true">
+					<fileset dir="${src}">
+						<include name="**/*.html" />
+						<include name="**/*.css" />
+						<include name="**/*.htm" />
+
+						<!--Copy the images used by the functional specification but don't copy all the tile graphics etc.-->
+						<include name="docs/*.png" />
+
+
+						<!--Don't copy these since the javadoc tool processes them -->
+						<exclude name="**/overview.html" />
+						<exclude name="**/package.html" />
+					</fileset>
+				</copy>
+				<replace file="${doc}/jfreerails/client/view/about.htm" token="@version@" value="${DSTAMP}-${TSTAMP}" />
+		
+		
+		<taskdef resource="net/sf/antcontrib/antlib.xml" />
+		<for param="file">
+			<fileset dir="${doc}/docs">
+				<include name="**/*.html" />
+				<include name="**/*.htm" />
+				
+			</fileset>
+
+			<sequential>
+				<script language="jython">
+					<![CDATA[
+from java.io import File
+from java.util import Date
+from java.text import SimpleDateFormat
+					
+file = File("@{file}")
+
+if file.lastModified() == 0:
+	project.setProperty("date", "unknown" )					
+else:
+	date = Date(file.lastModified())				
+	sdf = SimpleDateFormat("dd MMM yyyy") 				
+	project.setProperty("date", sdf.format(date) )					
+]]>
+				</script>
+				<echo>@{file}  ${date}</echo>
+				
+				<replace file="@{file}" token="@lastModified@" value="${date}"/>
+						
+			</sequential>
+
+		</for>
 
 	</target>
 
 	<!-- Used by other targets, copies data files to a temporary directory. -->
 	<target name="data2temp" depends="mkdirs">
-		<delete dir="${datafiles}" />
-		<mkdir dir="${datafiles}" />
+
+
 		<copy todir="${datafiles}/src">
 			<fileset dir="${src}">
 				<include name="**/*.xml" />
@@ -51,6 +106,7 @@
 				<include name="**/*.html" />
 				<include name="**/*.css" />
 				<include name="**/*.wav" />
+				<include name="**/*.properties" />
 			</fileset>
 		</copy>
 
@@ -59,7 +115,7 @@
 				<include name="**/*.png" />
 				<include name="**/*.jnlp" />
 				<include name="**/*.html" />
-				<include name="**/*.css" />
+				<include name="**/*.css" />				
 				<exclude name="javadoc/**/*" />
 			</fileset>
 		</copy>
@@ -74,6 +130,8 @@
 
 		<replace file="${datafiles}/README" token="@version@" value="${DSTAMP}-${TSTAMP}" />
 		<replace file="${datafiles}/src/jfreerails/client/view/about.htm" token="@version@" value="${DSTAMP}-${TSTAMP}" />
+		<replace file="${datafiles}/src/build.properties" token="@version@" value="${DSTAMP}-${TSTAMP}" />
+		<replace file="${datafiles}/src/build.properties" token="@freerails.built.by@" value="${user.name}" />
 
 	</target>
 
@@ -84,22 +142,25 @@
 				<include name="**/*" />
 			</fileset>
 		</copy>
+		<copy todir="${build}" file="${datafiles}/src/build.properties"/>					
 	</target>
 
 
 	<target name="compile" depends="data2build" description="Build everything except JUnit test-classes">
-		<javac destdir="${build}" debug="true" fork="true" source="1.5" srcdir="${src}">
+		<javac destdir="${build}" debug="true" debuglevel="lines,vars,source" fork="true" source="1.5" srcdir="${src}">
 			<exclude name="**/*Test.java" />
 			<exclude name="**/*TestCase.java" />
-		</javac>
+		</javac>		
 	</target>
 
 	<target name="debugcompile" depends="data2build" description="Build everything including JUnit    test-classes. Include debugging symbols">
-		<javac debug="true" destdir="${build}" fork="true" source="1.5" srcdir="${src}" classpath="jars/junit.jar" />
+		<javac debug="true" destdir="${build}" fork="true" debuglevel="lines,vars,source" source="1.5" srcdir="${src}" classpath="jars/junit.jar" />
 	</target>
 
 	<target name="test" depends="debugcompile" description="Run all junit tests">
-		<junit haltonfailure="yes" printsummary="yes">
+		
+		 
+		<junit haltonfailure="yes" printsummary="yes" >
 			<classpath>
 				<pathelement location="${build}" />
 
@@ -126,9 +187,16 @@
 		</jar>
 		<!-- Replace current latest with the jar file we have just created. -->
 		<delete>
-			<fileset dir="${dist}/latest/" includes="jfreerails-*.jar" />			
+			<fileset dir="${dist}/latest/" includes="jfreerails-*.jar" />
 		</delete>
 		<copy file="${dist}/lib/jfreerails-${DSTAMP}-${TSTAMP}.jar" todir="${dist}/latest" />
+	</target>
+	
+	<target name="beansjar" depends="compile, mkdirs" >
+
+			<jar basedir="${build}" destfile="${dist}/lib/jfreerails-beans.jar">					
+				<include name="**/CopyableTextJPanel.class" />
+			</jar>
 	</target>
 
 	<target name="srcdist" depends="data2temp" description="Generate source distribution">
@@ -164,7 +232,7 @@
 
 		<delete dir="${datafiles}" />
 
-		<delete file="website.tar.gz"/>
+		<delete file="website.tar.gz" />
 
 		<!-- also delete any .class etc under the src directory -->
 		<delete>
@@ -197,14 +265,14 @@
 		<java fork="true" jar="${dist}/lib/jfreerails-${DSTAMP}-${TSTAMP}.jar" />
 	</target>
 
-	<target name="javadoc" depends="mkdirs" description="Generate javadoc">
+	<target name="javadoc" depends="mkdirs, html2docs" description="Generate javadoc">
 		<javadoc Private="true" author="true" destdir="${doc}" overview="${src}/overview.html" source="1.5" use="true" version="true" windowtitle="JFreerails API - build ${DSTAMP}-${TSTAMP}">
 			<fileset defaultexcludes="yes" dir="${src}">
 				<include name="**/*.java" />
 				<exclude name="**/*Test.java" />
 			</fileset>
 		</javadoc>
-		<!-- now copy the html	-->
+		
 		<copy todir="${doc}">
 			<fileset dir="${src}">
 				<include name="**/*.html" />
@@ -238,12 +306,13 @@
 	<target name="alldist" depends="docdist, bindist, srcdist" description="Create binary jar, and source and javadoc zips">
 	</target>
 
-	<!-- Requires that jsch-0.1.19.jar is in ant/lib -->
+	<!-- depends=""-->
 	<target name="upload" depends="alldist" description="Upload source, binary, and javadocs jar files to sourcforge">
-		<ftp binary="yes" password="me@myorg.com" remotedir="/incoming" server="upload.sourceforge.net" userid="anonymous">
+		<ftp binary="yes" password="me@myorg.com" remotedir="/incoming" server="upload.sourceforge.net" userid="anonymous" verbose="yes">
 			<fileset dir="${dist}/latest">
-				<include name="*.jar" />
-				<include name="*.zip" />
+				<include name="jfreerails-${DSTAMP}-${TSTAMP}.jar" />
+				<include name="jfreerails-${DSTAMP}-${TSTAMP}-src.zip" />
+				<include name="jfreerails-${DSTAMP}-${TSTAMP}-javadoc.zip" />
 			</fileset>
 		</ftp>
 	</target>
@@ -257,7 +326,7 @@
 
 
 	<!-- Requires that jsch-0.1.19.jar is in ant/lib -->
-	<target name="deploysite" description="Upload website to sourceforge" depends="webdist, check_username_and_password">
+	<target name="deploysite" description="Upload website to sourceforge" depends="webdist, check_username_and_password, srcdist">
 
 		<fail unless="u" message="Usage: ant -Du=me -Dp=mypassword target" />
 		<fail unless="p" message="Usage: ant -Du=me -Dp=mypassword target" />
@@ -272,15 +341,20 @@
 	</target>
 
 	<!-- Requires that jsch-0.1.19.jar is in ant/lib -->
-	<target name="updatesite" description="Uploads modified files to website, skips javadoc." depends="check_username_and_password">
+	<target name="updatesite" description="Uploads modified files to website, skips javadoc and jar files." depends="check_username_and_password">
 		<scp todir="${u}:${p}@shell.sourceforge.net:/home/groups/f/fr/freerails/htdocs" trust="yes">
 			<fileset dir="www">
+				<include name="functional_specification.pdf" />
 				<include name="**/*.html" />
+				<include name="**/*.shtml" />
 				<include name="**/*.css" />
 				<include name="**/*.png" />
 				<include name="**/*.jnpl" />
-				<include name="signed_jfreerails.jar" />
-				<exclude name="javadoc/**/*" />
+				<exclude name="signed_jfreerails.jar" />
+				<exclude name="javadoc/jfreerails/**/*" />
+				<exclude name="javadoc/experimental/**/*" />
+				<exclude name="javadoc/experimental/**/*" />
+				<exclude name="javadoc/it/**/*" />
 				<modified />
 			</fileset>
 		</scp>
@@ -295,8 +369,8 @@
 	</target>
 
 	<target name="check_username_and_password">
-		<input  message="Please enter username:" addproperty="u" />
-		<input  message="Please enter password:" addproperty="p" />
+		<input message="Please enter username:" addproperty="u" />
+		<input message="Please enter password:" addproperty="p" />
 	</target>
 
 

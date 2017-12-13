@@ -7,11 +7,14 @@ package jfreerails.client.top;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
+import javax.swing.Action;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
-import jfreerails.client.common.ModelRoot;
+
 import jfreerails.client.renderer.ViewLists;
 import jfreerails.client.view.View;
+import jfreerails.controller.ModelRoot;
 import jfreerails.move.AddTransactionMove;
 import jfreerails.move.ChangeTileMove;
 import jfreerails.move.CompositeMove;
@@ -24,60 +27,62 @@ import jfreerails.world.terrain.TerrainType;
 import jfreerails.world.top.NonNullElements;
 import jfreerails.world.top.SKEY;
 
-
 /**
- * A JPopupMenu that displays the list of industries that can be built.  This
+ * A JPopupMenu that displays the list of industries that can be built. This
  * class contains the code that generates and dispatches a ChangeTileMove when
  * the player clicks on the menu.
- *
+ * 
  * @author Luke
- *
+ * 
  */
 public class BuildIndustryJPopupMenu extends JPopupMenu implements View {
-    private final Point cursorLocation = new Point();
+	private static final long serialVersionUID = 3689636912575165749L;
 
-    public void setCusorLocation(Point p) {
-        cursorLocation.x = p.x;
-        cursorLocation.y = p.y;
-    }
+	private final Point cursorLocation = new Point();
 
-    public void setup(final ModelRoot modelRoot, ViewLists vl,
-        ActionListener submitButtonCallBack) {
-        this.removeAll();
+	public void setCusorLocation(Point p) {
+		cursorLocation.x = p.x;
+		cursorLocation.y = p.y;
+	}
 
-        final NonNullElements it = new NonNullElements(SKEY.TERRAIN_TYPES,
-                modelRoot.getWorld());
+	public void setup(final ModelRoot modelRoot, ViewLists vl,
+			Action closeAction) {
+		this.removeAll();
 
-        while (it.next()) {
-            TerrainType type = (TerrainType)it.getElement();
-            final Money price = type.getBuildCost();
+		final NonNullElements it = new NonNullElements(SKEY.TERRAIN_TYPES,
+				modelRoot.getWorld());
 
-            if (null != price) {
-                JMenuItem item = new JMenuItem(type.getDisplayName() + " " +
-                        price);
-                item.addActionListener(new ActionListener() {
-                        private final int terrainType = it.getIndex();
+		while (it.next()) {
+			TerrainType type = (TerrainType) it.getElement();
+			final Money price = type.getBuildCost();
 
-                        public void actionPerformed(ActionEvent arg0) {
-                            Move m1 = new ChangeTileMove(modelRoot.getWorld(),
-                                    cursorLocation, terrainType);
-                            Transaction t = new AddItemTransaction(Transaction.Category.INDUSTRIES,
-                                    terrainType, 1, price.changeSign());
-                            Move m2 = new AddTransactionMove(modelRoot.getPrincipal(),
-                                    t);
-                            CompositeMove m3 = new CompositeMove(new Move[] {
-                                        m1, m2
-                                    });
-                            MoveStatus ms = modelRoot.doMove(m3);
+			if (null != price) {
+				JMenuItem item = new JMenuItem(type.getDisplayName() + " "
+						+ price);
+				item.addActionListener(new ActionListener() {
+					private final int terrainType = it.getIndex();
 
-                            if (!ms.ok) {
-                                modelRoot.setProperty(ModelRoot.Property.CURSOR_MESSAGE,
-                                    ms.message);
-                            }
-                        }
-                    });
-                add(item);
-            }
-        }
-    }
+					public void actionPerformed(ActionEvent arg0) {
+						Move m1 = new ChangeTileMove(modelRoot.getWorld(),
+								cursorLocation, terrainType);
+						Transaction t = new AddItemTransaction(
+								Transaction.Category.INDUSTRIES, terrainType,
+								1, price.changeSign());
+						Move m2 = new AddTransactionMove(modelRoot
+								.getPrincipal(), t);
+						CompositeMove m3 = new CompositeMove(new Move[] { m1,
+								m2 });
+						MoveStatus ms = modelRoot.doMove(m3);
+
+						if (!ms.ok) {
+							modelRoot.setProperty(
+									ModelRoot.Property.CURSOR_MESSAGE,
+									ms.message);
+						}
+					}
+				});
+				add(item);
+			}
+		}
+	}
 }

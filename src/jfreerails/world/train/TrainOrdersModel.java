@@ -5,77 +5,98 @@
  */
 package jfreerails.world.train;
 
-import java.util.Arrays;
 import jfreerails.world.common.FreerailsSerializable;
-
+import jfreerails.world.common.ImInts;
 
 /**
  * This class encapsulates the orders for a train.
- * @author  Luke
+ * 
+ * @author Luke
  */
 public class TrainOrdersModel implements FreerailsSerializable {
-    private static final int MAXIMUM_NUMBER_OF_WAGONS = 6;
-    public final boolean waitUntilFull;
-    public final boolean autoConsist;
-    public final int[] consist; //The wagon types to add; if null, then no change.
-    public final int m_station; //The number of the station to goto.
+	private static final long serialVersionUID = 3616453397155559472L;
 
-    public int hashCode() {
-        int result;
-        result = (waitUntilFull ? 1 : 0);
-        result = 29 * result + m_station;
+	private static final int MAXIMUM_NUMBER_OF_WAGONS = 6;
 
-        return result;
-    }
+	public final boolean waitUntilFull;
 
-    public TrainOrdersModel(int station, int[] newConsist, boolean wait,
-        boolean auto) {
-        //If there are no wagons, set wait = false.
-        wait = (null == newConsist || 0 == newConsist.length) ? false : wait;
+	public final boolean autoConsist;
 
-        waitUntilFull = wait;
-        consist = newConsist;
-        m_station = station;
-        autoConsist = auto;
-    }
+	public final ImInts consist; // The wagon types to add; if null, then no
 
-    public /*=const */ int[] getConsist() {
-        return this.consist;
-    }
+	// change.
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (!(o instanceof TrainOrdersModel))
+			return false;
 
-    public int getStationID() {
-        return m_station;
-    }
+		final TrainOrdersModel trainOrdersModel = (TrainOrdersModel) o;
 
-    public boolean isNoConsistChange() {
-        return null == consist;
-    }
+		if (autoConsist != trainOrdersModel.autoConsist)
+			return false;
+		if (stationId != trainOrdersModel.stationId)
+			return false;
+		if (waitUntilFull != trainOrdersModel.waitUntilFull)
+			return false;
+		if (consist != null ? !consist.equals(trainOrdersModel.consist)
+				: trainOrdersModel.consist != null)
+			return false;
 
-    public boolean getWaitUntilFull() {
-        return waitUntilFull;
-    }
+		return true;
+	}
 
-    public boolean orderHasWagons() {
-        return null != consist && 0 != consist.length;
-    }
+	public int hashCode() {
+		int result;
+		result = (waitUntilFull ? 1 : 0);
+		result = 29 * result + (autoConsist ? 1 : 0);
+		result = 29 * result + (consist != null ? consist.hashCode() : 0);
+		result = 29 * result + stationId;
+		return result;
+	}
 
-    public boolean hasLessThanMaxiumNumberOfWagons() {
-        return null == consist || consist.length < MAXIMUM_NUMBER_OF_WAGONS;
-    }
+	public final int stationId; // The number of the station to goto.
 
-    public boolean equals(Object obj) {
-        if (obj instanceof TrainOrdersModel) {
-            TrainOrdersModel test = (TrainOrdersModel)obj;
+	public TrainOrdersModel(int station, ImInts newConsist, boolean wait,
+			boolean auto) {
+		// If there are no wagons, set wait = false.
+		wait = (null == newConsist || 0 == newConsist.size()) ? false : wait;
 
-            return this.waitUntilFull == test.waitUntilFull &&
-            this.m_station == test.m_station &&
-            autoConsist == test.autoConsist &&
-            Arrays.equals(this.consist, test.consist);
-        }
-		return false;
-    }
+		this.waitUntilFull = wait;
+		this.consist = newConsist;
+		this.stationId = station;
+		this.autoConsist = auto;
+	}
 
-    public boolean isAutoConsist() {
-        return autoConsist;
-    }
+	/**
+	 * @return either (1) an array of cargo type ids or (2) null to represent
+	 *         'no change'.
+	 */
+	public ImInts getConsist() {
+		return this.consist;
+	}
+
+	public int getStationID() {
+		return stationId;
+	}
+
+	public boolean isNoConsistChange() {
+		return null == consist;
+	}
+
+	public boolean getWaitUntilFull() {
+		return waitUntilFull;
+	}
+
+	public boolean orderHasWagons() {
+		return null != consist && 0 != consist.size();
+	}
+
+	public boolean hasLessThanMaxiumNumberOfWagons() {
+		return null == consist || consist.size() < MAXIMUM_NUMBER_OF_WAGONS;
+	}
+
+	public boolean isAutoConsist() {
+		return autoConsist;
+	}
 }

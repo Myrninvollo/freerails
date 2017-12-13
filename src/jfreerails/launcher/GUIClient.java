@@ -6,18 +6,20 @@ package jfreerails.launcher;
 
 import java.awt.DisplayMode;
 import java.io.IOException;
-import java.util.logging.Logger;
+import java.io.Serializable;
 
 import javax.swing.JFrame;
 
-import jfreerails.client.common.ModelRoot;
 import jfreerails.client.common.ModelRootImpl;
-import jfreerails.client.common.ScreenHandler;
 import jfreerails.client.renderer.ViewLists;
 import jfreerails.client.top.GUIComponentFactoryImpl;
 import jfreerails.client.top.GameLoop;
 import jfreerails.client.top.ViewListsImpl;
 import jfreerails.client.view.ActionRoot;
+import jfreerails.controller.ModelRoot;
+import jfreerails.controller.ReportBugTextGenerator;
+import jfreerails.controller.ScreenHandler;
+import jfreerails.controller.ModelRoot.Property;
 import jfreerails.network.FreerailsClient;
 import jfreerails.network.FreerailsGameServer;
 import jfreerails.network.SavedGamesManager;
@@ -25,7 +27,11 @@ import jfreerails.server.SavedGamesManagerImpl;
 import jfreerails.server.ServerGameModelImpl;
 import jfreerails.util.FreerailsProgressMonitor;
 import jfreerails.util.GameModel;
+import jfreerails.world.common.GameSpeed;
+import jfreerails.world.common.GameTime;
 import jfreerails.world.player.Player;
+import jfreerails.world.top.ITEM;
+import jfreerails.world.top.ReadOnlyWorld;
 import jfreerails.world.top.World;
 
 /**
@@ -37,9 +43,6 @@ import jfreerails.world.top.World;
 public class GUIClient extends FreerailsClient implements
 		FreerailsProgressMonitor {
 
-	private static final Logger logger = Logger.getLogger(GUIClient.class
-			.getName());
-
 	public static void main(String[] args) {
 		try {
 			GUIClient client = new GUIClient("Test", null,
@@ -50,17 +53,17 @@ public class GUIClient extends FreerailsClient implements
 		}
 	}
 
-	private ActionRoot actionRoot;
+	private final ActionRoot actionRoot;
 
-	private GUIComponentFactoryImpl factory;
+	private final GUIComponentFactoryImpl factory;
 
-	private ModelRootImpl modelRoot;
+	private final ModelRootImpl modelRoot;
 
 	private final FreerailsProgressMonitor monitor;
 
 	private final String name;
 
-	private ScreenHandler screenHandler;
+	private final ScreenHandler screenHandler;
 
 	private ViewLists vl;
 
@@ -73,7 +76,7 @@ public class GUIClient extends FreerailsClient implements
 		modelRoot.setMoveFork(this.getMoveFork());
 		modelRoot.setMoveReceiver(this);
 		modelRoot.setServerCommandReceiver(this);
-		actionRoot = new ActionRoot();
+		actionRoot = new ActionRoot(modelRoot);
 
 		// Create GUI components
 		factory = new GUIComponentFactoryImpl(modelRoot, actionRoot);
@@ -85,9 +88,25 @@ public class GUIClient extends FreerailsClient implements
 	}
 
 	protected void clientUpdates() {
-		if(factory.isSetup()){
+		if (factory.isSetup()) {
 			factory.getBuildTrackController().update();
+//			Update sub tick time.
+			long currentTime = System.currentTimeMillis();
+			long lastTick = getLastTickTime();
+			double dt = currentTime - lastTick;
+			ReadOnlyWorld world2 = modelRoot.getWorld();
+			GameSpeed gameSpeed = (GameSpeed) world2.get(ITEM.GAME_SPEED);
+			GameTime currentGameTime  = world2.currentTime();
+			double ticks = currentGameTime.getTicks();
+			if(!gameSpeed.isPaused()){			
+				double milliSecondsPerTick = 1000/ gameSpeed.getSpeed();			
+				double subTicks = dt / milliSecondsPerTick;			
+				subTicks = Math.min(dt, 1d);				
+				ticks += subTicks;		
+			}
+			modelRoot.setProperty(Property.TIME, new Double(ticks));
 		}
+		
 	}
 
 	public void finished() {
@@ -125,13 +144,11 @@ public class GUIClient extends FreerailsClient implements
 
 			factory.setup(vl, w);
 		} catch (Exception e) {
-			logger.severe("Unexpected exception, can't recover");
-			e.printStackTrace();
-			System.exit(1);
+			ReportBugTextGenerator.unexpectedException(e);	
 		}
 	}
 
-	public void setMax(int max) {
+	public void nextStep(int max) {
 		// TODO Auto-generated method stub
 	}
 
@@ -141,6 +158,19 @@ public class GUIClient extends FreerailsClient implements
 
 	public void setValue(int i) {
 		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void setProperty(ClientProperty propertyName, Serializable value) {		
+		super.setProperty(propertyName, value);
+		switch (propertyName) {
+		case SAVED_GAMES:
+			modelRoot.setProperty(Property.SAVED_GAMES_LIST, value);
+			break;
+
+		default:
+			break;
+		}
 	}
 
 	void start() {

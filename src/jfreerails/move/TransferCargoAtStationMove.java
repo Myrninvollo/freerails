@@ -1,102 +1,112 @@
 package jfreerails.move;
 
 import java.util.ArrayList;
+
 import jfreerails.world.accounts.DeliverCargoReceipt;
 import jfreerails.world.cargo.CargoBatch;
+import jfreerails.world.common.ImList;
 import jfreerails.world.common.Money;
 import jfreerails.world.player.FreerailsPrincipal;
 import jfreerails.world.player.Player;
 
-
 /**
- * This {@link CompositeMove} transfers cargo from a train to a station and vice-versa.
- *
+ * This {@link CompositeMove} transfers cargo from a train to a station and
+ * vice-versa.
+ * 
  * @author Luke Lindsay
- *
- *
+ * 
+ * 
  */
 public class TransferCargoAtStationMove extends CompositeMove {
-    public static final int CHANGE_ON_TRAIN_INDEX = 1;
-    public static final int CHANGE_AT_STATION_INDEX = 0;
-    private final boolean m_waitingForFullLoad;
+	private static final long serialVersionUID = 3257291318215456563L;
 
-    private TransferCargoAtStationMove(Move[] moves, boolean waiting) {
-        super(moves);
-        m_waitingForFullLoad = waiting;
-    }
+	public static final int CHANGE_ON_TRAIN_INDEX = 1;
 
-    public static TransferCargoAtStationMove generateMove(
-        ChangeCargoBundleMove changeAtStation,
-        ChangeCargoBundleMove changeOnTrain, CompositeMove payment,
-        boolean waiting) {
-        return new TransferCargoAtStationMove(new Move[] {
-                changeAtStation, changeOnTrain, payment
-            }, waiting);
-    }
+	public static final int CHANGE_AT_STATION_INDEX = 0;
 
-    public ChangeCargoBundleMove getChangeAtStation() {
-        return (ChangeCargoBundleMove)super.getMoves()[CHANGE_AT_STATION_INDEX];
-    }
+	private final boolean waitingForFullLoad;
 
-    public ChangeCargoBundleMove getChangeOnTrain() {
-        return (ChangeCargoBundleMove)super.getMoves()[CHANGE_ON_TRAIN_INDEX];
-    }
+	private TransferCargoAtStationMove(Move[] moves, boolean waiting) {
+		super(moves);
+		waitingForFullLoad = waiting;
+	}
 
-    public Money getRevenue() {
-        /*=const*/ Move[] moves = super.getMoves();
-        long amount = CHANGE_AT_STATION_INDEX;
+	public static TransferCargoAtStationMove generateMove(
+			ChangeCargoBundleMove changeAtStation,
+			ChangeCargoBundleMove changeOnTrain, CompositeMove payment,
+			boolean waiting) {
+		return new TransferCargoAtStationMove(new Move[] { changeAtStation,
+				changeOnTrain, payment }, waiting);
+	}
 
-        for (int i = CHANGE_AT_STATION_INDEX; i < moves.length; i++) {
-            if (moves[i] instanceof AddTransactionMove) {
-                AddTransactionMove move = (AddTransactionMove)moves[i];
-                DeliverCargoReceipt receipt = (DeliverCargoReceipt)move.getTransaction();
-                amount += receipt.getValue().getAmount();
-            }
-        }
+	public ChangeCargoBundleMove getChangeAtStation() {
+		return (ChangeCargoBundleMove) super.getMoves().get(
+				CHANGE_AT_STATION_INDEX);
+	}
 
-        return new Money(amount);
-    }
+	public ChangeCargoBundleMove getChangeOnTrain() {
+		return (ChangeCargoBundleMove) super.getMoves().get(
+				CHANGE_ON_TRAIN_INDEX);
+	}
 
-    public int getQuantityOfCargo(int cargoType) {
-        /*=const*/ Move[] moves = super.getMoves();
-        int quantity = CHANGE_AT_STATION_INDEX;
+	public Money getRevenue() {
+		ImList<Move> moves = super.getMoves();
+		long amount = CHANGE_AT_STATION_INDEX;
 
-        for (int i = CHANGE_AT_STATION_INDEX; i < moves.length; i++) {
-            if (moves[i] instanceof AddTransactionMove) {
-                AddTransactionMove move = (AddTransactionMove)moves[i];
-                DeliverCargoReceipt receipt = (DeliverCargoReceipt)move.getTransaction();
-                CargoBatch cb = receipt.getCb();
+		for (int i = CHANGE_AT_STATION_INDEX; i < moves.size(); i++) {
+			if (moves.get(i) instanceof AddTransactionMove) {
+				AddTransactionMove move = (AddTransactionMove) moves.get(i);
+				DeliverCargoReceipt receipt = (DeliverCargoReceipt) move
+						.getTransaction();
+				amount += receipt.deltaCash().getAmount();
+			}
+		}
 
-                if (cb.getCargoType() == cargoType) {
-                    quantity += receipt.getQuantity();
-                }
-            }
-        }
+		return new Money(amount);
+	}
 
-        return quantity;
-    }
+	public int getQuantityOfCargo(int cargoType) {
+		ImList<Move> moves = super.getMoves();
+		int quantity = CHANGE_AT_STATION_INDEX;
 
-    /** The player who is getting paid for the delivery.*/
-    public FreerailsPrincipal getPrincipal() {
-        /*=const*/ Move[] moves = super.getMoves();
+		for (int i = CHANGE_AT_STATION_INDEX; i < moves.size(); i++) {
+			if (moves.get(i) instanceof AddTransactionMove) {
+				AddTransactionMove move = (AddTransactionMove) moves.get(i);
+				DeliverCargoReceipt receipt = (DeliverCargoReceipt) move
+						.getTransaction();
+				CargoBatch cb = receipt.getCb();
 
-        for (int i = CHANGE_AT_STATION_INDEX; i < moves.length; i++) {
-            if (moves[i] instanceof AddTransactionMove) {
-                AddTransactionMove move = (AddTransactionMove)moves[i];
+				if (cb.getCargoType() == cargoType) {
+					quantity += receipt.getQuantity();
+				}
+			}
+		}
 
-                return move.getPrincipal();
-            }
-        }
+		return quantity;
+	}
 
-        return Player.NOBODY;
-    }
+	/** The player who is getting paid for the delivery. */
+	public FreerailsPrincipal getPrincipal() {
+		ImList<Move> moves = super.getMoves();
 
-    public TransferCargoAtStationMove(ArrayList<Move> movesArrayList, boolean waiting) {
-        super(movesArrayList);
-        this.m_waitingForFullLoad = waiting;
-    }
+		for (int i = CHANGE_AT_STATION_INDEX; i < moves.size(); i++) {
+			if (moves.get(i) instanceof AddTransactionMove) {
+				AddTransactionMove move = (AddTransactionMove) moves.get(i);
 
-    public boolean isWaitingForFullLoad() {
-        return m_waitingForFullLoad;
-    }
+				return move.getPrincipal();
+			}
+		}
+
+		return Player.NOBODY;
+	}
+
+	public TransferCargoAtStationMove(ArrayList<Move> movesArrayList,
+			boolean waiting) {
+		super(movesArrayList);
+		this.waitingForFullLoad = waiting;
+	}
+
+	public boolean isWaitingForFullLoad() {
+		return waitingForFullLoad;
+	}
 }

@@ -6,6 +6,7 @@
 package jfreerails.client.view;
 
 import javax.swing.AbstractListModel;
+
 import jfreerails.world.player.FreerailsPrincipal;
 import jfreerails.world.top.KEY;
 import jfreerails.world.top.ReadOnlyWorld;
@@ -14,82 +15,105 @@ import jfreerails.world.train.Schedule;
 import jfreerails.world.train.TrainModel;
 import jfreerails.world.train.TrainOrdersModel;
 
-
 /**
- * AbstractListModel used by {@link TrainScheduleJPanel} to display the orders making up a train schedule.
- * @author  Luke Lindsay
+ * AbstractListModel used by {@link TrainScheduleJPanel} to display the orders
+ * making up a train schedule.
+ * 
+ * @author Luke Lindsay
  */
 public class TrainOrdersListModel extends AbstractListModel {
-    private final int trainNumber;
-    private final ReadOnlyWorld w;
-    private final FreerailsPrincipal principal;
-    public static final int DONT_GOTO = 0;
-    public static final int GOTO_NOW = 1;
-    public static final int GOTO_AFTER_PRIORITY_ORDERS = 2;
+	private static final long serialVersionUID = 3762537827703009847L;
 
-    /** This class holds the values that are needed by the ListCellRender. TrainOrdersListModel.getElementAt(int index) returns
-     an instance of this class. */
-    public static class TrainOrdersListElement {
-        public final boolean isPriorityOrder;       
-        public final int gotoStatus;
-        public final TrainOrdersModel order;
-        public final int trainNumber;
+	private final int trainNumber;
 
-        public TrainOrdersListElement(boolean isPriorityOrder, int gotoStatus,
-            TrainOrdersModel order, int trainNumber) {
-            this.isPriorityOrder = isPriorityOrder;
-            this.gotoStatus = gotoStatus;
-            this.order = order;
-            this.trainNumber = trainNumber;            
-        }
-    }
+	private final ReadOnlyWorld w;
 
-    public TrainOrdersListModel(ReadOnlyWorld w, int trainNumber,
-        FreerailsPrincipal p) {
-        this.trainNumber = trainNumber;
-        this.w = w;
-        this.principal = p;
-        assert(null != getSchedule());
-    }
+	private final FreerailsPrincipal principal;
 
-    public Object getElementAt(int index) {
-        Schedule s = getSchedule();
-        int gotoStatus;
+	public static final int DONT_GOTO = 0;
 
-        if (s.getNextScheduledOrder() == index) {
-            if (s.hasPriorityOrders()) {
-                gotoStatus = GOTO_AFTER_PRIORITY_ORDERS;
-            } else {
-                gotoStatus = GOTO_NOW;
-            }
-        } else {
-            if (s.hasPriorityOrders() && 0 == index) {
-                //These orders are the priority orders.
-                gotoStatus = GOTO_NOW;
-            } else {
-                gotoStatus = DONT_GOTO;
-            }
-        }
+	public static final int GOTO_NOW = 1;
 
-        boolean isPriorityOrders = 0 == index && s.hasPriorityOrders();
-        TrainOrdersModel order = getSchedule().getOrder(index);
+	public static final int GOTO_AFTER_PRIORITY_ORDERS = 2;
 
-        return new TrainOrdersListElement(isPriorityOrders, gotoStatus, order,
-            trainNumber);
-    }
+	/**
+	 * This class holds the values that are needed by the ListCellRender.
+	 * TrainOrdersListModel.getElementAt(int index) returns an instance of this
+	 * class.
+	 */
+	public static class TrainOrdersListElement {
+		public final boolean isPriorityOrder;
 
-    public int getSize() {
-        return getSchedule().getNumOrders();
-    }
+		public final int gotoStatus;
 
-    public void fireRefresh() {
-        super.fireContentsChanged(this, 0, getSize());
-    }
+		public final TrainOrdersModel order;
 
-    private Schedule getSchedule() {
-        TrainModel train = (TrainModel)w.get(KEY.TRAINS, trainNumber, principal);
+		public final int trainNumber;
 
-        return (ImmutableSchedule)w.get(KEY.TRAIN_SCHEDULES,
-            train.getScheduleID(), principal);
-    }
+		public TrainOrdersListElement(boolean isPriorityOrder, int gotoStatus,
+				TrainOrdersModel order, int trainNumber) {
+			this.isPriorityOrder = isPriorityOrder;
+			this.gotoStatus = gotoStatus;
+			this.order = order;
+			this.trainNumber = trainNumber;
+		}
+	}
+
+	public TrainOrdersListModel(ReadOnlyWorld w, int trainNumber,
+			FreerailsPrincipal p) {
+		this.trainNumber = trainNumber;
+		this.w = w;
+		this.principal = p;
+		assert (null != getSchedule());
+	}
+
+	public Object getElementAt(int index) {
+		Schedule s = getSchedule();
+		int gotoStatus;
+
+		if (s.getNextScheduledOrder() == index) {
+			if (s.hasPriorityOrders()) {
+				gotoStatus = GOTO_AFTER_PRIORITY_ORDERS;
+			} else {
+				gotoStatus = GOTO_NOW;
+			}
+		} else {
+			if (s.hasPriorityOrders() && 0 == index) {
+				// These orders are the priority orders.
+				gotoStatus = GOTO_NOW;
+			} else {
+				gotoStatus = DONT_GOTO;
+			}
+		}
+
+		boolean isPriorityOrders = 0 == index && s.hasPriorityOrders();
+		TrainOrdersModel order = getSchedule().getOrder(index);
+
+		return new TrainOrdersListElement(isPriorityOrders, gotoStatus, order,
+				trainNumber);
+	}
+
+	public int getSize() {
+		Schedule s = getSchedule();
+		int size = 0;
+		if (s != null) {
+			size = s.getNumOrders();
+		}
+		return size;
+	}
+
+	public void fireRefresh() {
+		super.fireContentsChanged(this, 0, getSize());
+	}
+
+	private Schedule getSchedule() {
+		TrainModel train = (TrainModel) w.get(principal, KEY.TRAINS,
+				trainNumber);
+		ImmutableSchedule sched = null;
+		if (train != null) {
+			sched = (ImmutableSchedule) w.get(principal, KEY.TRAIN_SCHEDULES, train
+							.getScheduleID());
+		}
+		return sched;
+	}
 }

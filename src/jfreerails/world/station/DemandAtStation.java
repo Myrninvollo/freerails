@@ -1,49 +1,48 @@
 package jfreerails.world.station;
 
 import jfreerails.world.common.FreerailsSerializable;
+import jfreerails.world.common.ImInts;
 
-
-/** This class represents the demand for cargo at a station.
+/**
+ * This class represents the demand for cargo at a station.
+ * 
  * @author Luke
  */
 public class DemandAtStation implements FreerailsSerializable {
-    private final boolean[] m_demand;
+	private static final long serialVersionUID = 3257565088071038009L;
 
-    public DemandAtStation( /*=const*/
-        boolean[] demand) {
-        m_demand = demand;
-    }
+	private final ImInts demand;
 
-    public boolean isCargoDemanded(int cargoNumber) {
-        return m_demand[cargoNumber];
-    }
+	public DemandAtStation(boolean[] demandArray) {
+		demand = ImInts.fromBoolean(demandArray);
+	}
 
-    public int hashCode() {
-        int result = 0;
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (!(o instanceof DemandAtStation))
+			return false;
 
-        for (int i = 0; i < m_demand.length; i++) {
-            result = 29 * result + (m_demand[i] ? 1 : 0);
-        }
+		final DemandAtStation demandAtStation = (DemandAtStation) o;
 
-        return result;
-    }
+		if (!demand.equals(demandAtStation.demand))
+			return false;
 
-    public boolean equals(Object o) {
-        if (o instanceof DemandAtStation) {
-            DemandAtStation test = (DemandAtStation)o;
+		return true;
+	}
 
-            if (this.m_demand.length != test.m_demand.length) {
-                return false;
-            }
+	public int hashCode() {
+		int result = 0;
 
-            for (int i = 0; i < m_demand.length; i++) {
-                if (m_demand[i] != test.m_demand[i]) {
-                    return false;
-                }
-            }
+		for (int i = 0; i < demand.size(); i++) {
+			result = 29 * result + demand.get(i);
+		}
 
-            return true;
-        }
-		return false;
-    }
+		return result;
+	}
+
+	public boolean isCargoDemanded(int cargoNumber) {
+		return demand.get(cargoNumber) == 1;
+	}
+
 }

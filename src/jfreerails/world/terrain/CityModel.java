@@ -9,30 +9,66 @@ package jfreerails.world.terrain;
 
 import jfreerails.world.common.FreerailsSerializable;
 
-
-/** A city.
+/**
+ * A city.
+ * 
  * @author Luke
  */
 public class CityModel implements FreerailsSerializable {
-    private final String name;
-    private final int x;
-    private final int y;
+	private static final long serialVersionUID = 3256720697500709428L;
 
-    public CityModel(String s, int xx, int yy) {
-        name = s;
-        x = xx;
-        y = yy;
-    }
+	private final String name;
 
-    public String getCityName() {
-        return name;
-    }
+	private final int x;
 
-    public int getCityX() {
-        return x;
-    }
+	private final int y;
 
-    public int getCityY() {
-        return y;
-    }
+	public CityModel(String s, int xx, int yy) {
+		name = s;
+		x = xx;
+		y = yy;
+	}
+
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (!(o instanceof CityModel))
+			return false;
+
+		final CityModel cityModel = (CityModel) o;
+
+		if (x != cityModel.x)
+			return false;
+		if (y != cityModel.y)
+			return false;
+		if (!name.equals(cityModel.name))
+			return false;
+
+		return true;
+	}
+
+	public int hashCode() {
+		int result;
+		result = name.hashCode();
+		result = 29 * result + x;
+		result = 29 * result + y;
+		return result;
+	}
+
+	public String getCityName() {
+		return name;
+	}
+
+	public int getCityX() {
+		return x;
+	}
+
+	public int getCityY() {
+		return y;
+	}
+
+	@Override
+	public String toString() {		
+		return name+" "+x+", "+y;
+	}
 }

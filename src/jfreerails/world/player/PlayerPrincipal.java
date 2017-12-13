@@ -1,43 +1,46 @@
 package jfreerails.world.player;
 
-
 /**
  * FreerailsPrincipal that is a player in the game.
+ * 
  * @author rob
  */
 public class PlayerPrincipal extends FreerailsPrincipal {
-    private final int id;
-    private final String name;
+	private static final long serialVersionUID = 3257563997099537459L;
 
-    public PlayerPrincipal(int id, String name) {
-        this.id = id;
-        this.name = name;
-    }
+	private final int id;
 
-    public String getName() {
-        return name;
-    }
+	private final String name;
 
-    public int hashCode() {
-        return id;
-    }
+	public PlayerPrincipal(int id, String name) {
+		this.id = id;
+		this.name = name;
+	}
 
-    public String toString() {
-        return "Player " + id;
-    }
+	public String getName() {
+		return name;
+	}
 
-    /**
-     * @return an integer unique to this PlayerPrincipal
-     */
-    public int getId() {
-        return id;
-    }
+	public int hashCode() {
+		return id;
+	}
 
-    public boolean equals(Object o) {
-        if (!(o instanceof PlayerPrincipal)) {
-            return false;
-        }
+	public String toString() {
+		return "Player " + id;
+	}
 
-        return id == ((PlayerPrincipal)o).id;
-    }
+	/**
+	 * @return an integer unique to this PlayerPrincipal
+	 */
+	public int getId() {
+		return id;
+	}
+
+	public boolean equals(Object o) {
+		if (!(o instanceof PlayerPrincipal)) {
+			return false;
+		}
+
+		return id == ((PlayerPrincipal) o).id;
+	}
 }

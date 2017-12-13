@@ -6,40 +6,46 @@ package jfreerails.world.common;
 
 
 /**
- * This class represents actual game speed.
- * If the game speed <code>speed</code> is lesser then zero, game is paused. After
- * unpausing, the speed should be <code>-speed</code>.
- *
+ * This class represents actual game speed. If the game speed <code>speed</code>
+ * is lesser then zero, game is paused. After unpausing, the speed should be
+ * <code>-speed</code>.
+ * 
  * I.e. pausing/unpausing is equal to multiply the speed by -1.
- *
+ * 
  * @author MystiqueAgent
- *
+ * 
  */
 public class GameSpeed implements FreerailsSerializable {
-    private final int speed;
+	private static final long serialVersionUID = 3257562901983081783L;
 
-    public String toString() {
-        return "GameSpeed:" + String.valueOf(speed);
-    }
+	private final int speed;
 
-    public GameSpeed(int speed) {
-        this.speed = speed;
-    }
+	public String toString() {
+		return "GameSpeed:" + String.valueOf(speed);
+	}
 
-    public int getSpeed() {
-        return speed;
-    }
+	public GameSpeed(int speed) {
+		this.speed = speed;
+	}
 
-    public boolean equals(Object o) {
-        if (o instanceof GameSpeed) {
-            GameSpeed test = (GameSpeed)o;
+	public int getSpeed() {
+		return speed;
+	}
 
-            return this.speed == test.speed;
-        }
+	public boolean isPaused(){
+		return speed < 1;
+	}
+	
+	public boolean equals(Object o) {
+		if (o instanceof GameSpeed) {
+			GameSpeed test = (GameSpeed) o;
+
+			return this.speed == test.speed;
+		}
 		return false;
-    }
+	}
 
-    public int hashCode() {
-        return speed;
-    }
+	public int hashCode() {
+		return speed;
+	}
 }

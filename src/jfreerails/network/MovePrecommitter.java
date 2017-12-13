@@ -15,192 +15,228 @@ import jfreerails.world.common.FreerailsSerializable;
 import jfreerails.world.player.Player;
 import jfreerails.world.top.World;
 
-
 /**
- * The class pre-commits moves we intend to send to the server and either fully commits or undoes
- * them depending on the server's response. Note, this class does not actually send
- * or receive moves, instead you should call <code>toServer(.)</code> when a move has been sent
- * to the server and <code>fromServer(.)</code> when a Move or MoveStatus has been received from
+ * The class pre-commits moves we intend to send to the server and either fully
+ * commits or undoes them depending on the server's response. Note, this class
+ * does not actually send or receive moves, instead you should call
+ * <code>toServer(.)</code> when a move has been sent to the server and
+ * <code>fromServer(.)</code> when a Move or MoveStatus has been received from
  * the server.
- *
+ * 
  * @author Luke
- *
+ * 
  */
 public class MovePrecommitter {
-    private class PreMoveAndMove implements FreerailsSerializable{
-        final Move m;
-        final PreMove pm;
+	private static class PreMoveAndMove implements FreerailsSerializable {
+		private static final long serialVersionUID = 3256443607635342897L;
 
-        PreMoveAndMove(PreMove preMove, Move move) {
-            m = move;
-            pm = preMove;
-        }
-    }
+		final Move m;
 
-    private static final Logger logger = Logger.getLogger(MovePrecommitter.class.getName());
+		final PreMove pm;
 
-    /** Whether the first move on the uncommitted list failed to go through on the last try.*/
-    boolean blocked = false;
+		PreMoveAndMove(PreMove preMove, Move move) {
+			m = move;
+			pm = preMove;
+		}
 
-    /** List of moves and premoves that have been sent to the server and
-     * executed on the local world object.
-     */
-    final LinkedList<FreerailsSerializable> precomitted = new LinkedList<FreerailsSerializable>();
+		public boolean equals(Object o) {
+			if (this == o)
+				return true;
+			if (!(o instanceof PreMoveAndMove))
+				return false;
 
-    /** List of moves and premoves that have been sent to the server but not
-     * executed on the local world object.
-     */
-    final LinkedList<FreerailsSerializable> uncomitted = new LinkedList<FreerailsSerializable>();
-    private final World w;
+			final PreMoveAndMove preMoveAndMove = (PreMoveAndMove) o;
 
-    MovePrecommitter(World w) {
-        this.w = w;
-    }
+			if (m != null ? !m.equals(preMoveAndMove.m)
+					: preMoveAndMove.m != null)
+				return false;
+			if (pm != null ? !pm.equals(preMoveAndMove.pm)
+					: preMoveAndMove.pm != null)
+				return false;
 
-    void fromServer(Move m) {
-    	logger.finest("Move from server: " + m.toString());
-        rollBackPrecommittedMoves();
+			return true;
+		}
 
-        MoveStatus ms = m.doMove(w, Player.AUTHORITATIVE);
+		public int hashCode() {
+			int result;
+			result = (m != null ? m.hashCode() : 0);
+			result = 29 * result + (pm != null ? pm.hashCode() : 0);
+			return result;
+		}
+	}
 
-        if (!ms.ok) {
-            throw new IllegalStateException(ms.message);
-        }
-    }
+	private static final Logger logger = Logger
+			.getLogger(MovePrecommitter.class.getName());
 
-    /** Indicates that the server has processed a move we sent.*/
-    void fromServer(MoveStatus ms) {
-        precommitMoves();
+	/**
+	 * Whether the first move on the uncommitted list failed to go through on
+	 * the last try.
+	 */
+	boolean blocked = false;
 
-        if (precomitted.size() > 0) {
-            Move m = (Move)precomitted.removeFirst();
+	/**
+	 * List of moves and premoves that have been sent to the server and executed
+	 * on the local world object.
+	 */
+	final LinkedList<FreerailsSerializable> precomitted = new LinkedList<FreerailsSerializable>();
 
-            if (!ms.ok) {
-                logger.info("Move rejected by server: " + ms.message);
+	/**
+	 * List of moves and premoves that have been sent to the server but not
+	 * executed on the local world object.
+	 */
+	final LinkedList<FreerailsSerializable> uncomitted = new LinkedList<FreerailsSerializable>();
 
-                MoveStatus undoStatus = m.undoMove(w, Player.AUTHORITATIVE);
+	private final World w;
 
-                if (!undoStatus.ok) {
-                    throw new IllegalStateException();
-                }
-            }else{
-            	logger.finest("Move accepted by server: " + m.toString());
-            }
-        } else {
-            if (!ms.ok) {                
-            	logger.fine("Clear the blockage " + ms.message);
-                uncomitted.removeFirst();
-                precommitMoves();
-            } else {
-                throw new IllegalStateException();
-            }
-        }
-    }
+	MovePrecommitter(World w) {
+		this.w = w;
+	}
 
-    Move fromServer(PreMove pm) {
-        Move generatedMove = pm.generateMove(w);
-        fromServer(generatedMove);
+	void fromServer(Move m) {
+		logger.finest("Move from server: " + m.toString());
+		rollBackPrecommittedMoves();
 
-        return generatedMove;
-    }
+		MoveStatus ms = m.doMove(w, Player.AUTHORITATIVE);
 
-    void fromServer(PreMoveStatus pms) {
-        rollBackPrecommittedMoves();
+		if (!ms.ok) {
+			throw new IllegalStateException(ms.message);
+		}
+	}
 
-        PreMove pm = (PreMove)uncomitted.removeFirst();
+	/** Indicates that the server has processed a move we sent. */
+	void fromServer(MoveStatus ms) {
+		precommitMoves();
 
-        if (pms.ms.ok) {
-        	logger.finest("PreMove accepted by server: " + pms.toString());
-            Move m = pm.generateMove(w);
-            MoveStatus ms = m.doMove(w, Player.AUTHORITATIVE);
+		if (precomitted.size() > 0) {
+			Move m = (Move) precomitted.removeFirst();
 
-            if (!ms.ok) {
-                throw new IllegalStateException();
-            }
-        } else {
-            logger.info("PreMove rejected by server: " + pms.ms.message);
-        }
+			if (!ms.ok) {
+				logger.info("Move rejected by server: " + ms.message);
 
-        precommitMoves();
-    }
+				MoveStatus undoStatus = m.undoMove(w, Player.AUTHORITATIVE);
 
-    void precommitMoves() {
-        blocked = false;
+				if (!undoStatus.ok) {
+					throw new IllegalStateException();
+				}
+			} else {
+				logger.finest("Move accepted by server: " + m.toString());
+			}
+		} else {
+			if (!ms.ok) {
+				logger.fine("Clear the blockage " + ms.message);
+				uncomitted.removeFirst();
+				precommitMoves();
+			} else {
+				throw new IllegalStateException();
+			}
+		}
+	}
 
-        while (uncomitted.size() > 0 && !blocked) {
-            Object first = uncomitted.getFirst();
+	Move fromServer(PreMove pm) {
+		Move generatedMove = pm.generateMove(w);
+		fromServer(generatedMove);
 
-            if (first instanceof Move) {
-                Move m = (Move)first;
-                MoveStatus ms = m.doMove(w, Player.AUTHORITATIVE);
+		return generatedMove;
+	}
 
-                if (ms.ok) {
-                    uncomitted.removeFirst();
-                    precomitted.addLast(m);
-                } else {
-                    blocked = true;
-                }
-            } else if (first instanceof PreMove) {
-                PreMove pm = (PreMove)first;
-                Move m = pm.generateMove(w);
-                MoveStatus ms = m.doMove(w, Player.AUTHORITATIVE);
+	void fromServer(PreMoveStatus pms) {
+		rollBackPrecommittedMoves();
 
-                if (ms.ok) {
-                    uncomitted.removeFirst();
+		PreMove pm = (PreMove) uncomitted.removeFirst();
 
-                    PreMoveAndMove pmam = new PreMoveAndMove(pm, m);
-                    precomitted.addLast(pmam);
-                } else {
-                    blocked = true;
-                }
-            }
-        }
-    }
+		if (pms.ms.ok) {
+			logger.finest("PreMove accepted by server: " + pms.toString());
+			Move m = pm.generateMove(w);
+			MoveStatus ms = m.doMove(w, Player.AUTHORITATIVE);
 
-    /** Undoes each of the precommitted moves and puts them back on the
-     * uncommitted list.
-     */
-    private void rollBackPrecommittedMoves() {
-        while (precomitted.size() > 0) {
-            Object last = precomitted.removeLast();
-            Move move2undo;
-            FreerailsSerializable obj2add2uncomitted;
+			if (!ms.ok) {
+				throw new IllegalStateException();
+			}
+		} else {
+			logger.info("PreMove rejected by server: " + pms.ms.message);
+		}
 
-            if (last instanceof Move) {
-                move2undo = (Move)last;
-                obj2add2uncomitted = move2undo;
-            } else if (last instanceof PreMoveAndMove) {
-                PreMoveAndMove pmam = (PreMoveAndMove)last;
-                move2undo = pmam.m;
-                obj2add2uncomitted = pmam.pm;
-            } else {
-                throw new IllegalStateException();
-            }
+		precommitMoves();
+	}
 
-            MoveStatus ms = move2undo.undoMove(w, Player.AUTHORITATIVE);
+	void precommitMoves() {
+		blocked = false;
 
-            if (!ms.ok) {
-                throw new IllegalStateException(ms.message);
-            }
+		while (uncomitted.size() > 0 && !blocked) {
+			Object first = uncomitted.getFirst();
 
-            uncomitted.addFirst(obj2add2uncomitted);
-        }
-    }
+			if (first instanceof Move) {
+				Move m = (Move) first;
+				MoveStatus ms = m.doMove(w, Player.AUTHORITATIVE);
 
-    void toServer(Move m) {
-        uncomitted.addLast(m);
-        precommitMoves();
-    }
+				if (ms.ok) {
+					uncomitted.removeFirst();
+					precomitted.addLast(m);
+				} else {
+					blocked = true;
+				}
+			} else if (first instanceof PreMove) {
+				PreMove pm = (PreMove) first;
+				Move m = pm.generateMove(w);
+				MoveStatus ms = m.doMove(w, Player.AUTHORITATIVE);
 
-    Move toServer(PreMove pm) {
-        uncomitted.addLast(pm);
-        precommitMoves();
+				if (ms.ok) {
+					uncomitted.removeFirst();
 
-        if (blocked) {
-            return pm.generateMove(w);
-        }
-		PreMoveAndMove pmam = (PreMoveAndMove)precomitted.getLast();
+					PreMoveAndMove pmam = new PreMoveAndMove(pm, m);
+					precomitted.addLast(pmam);
+				} else {
+					blocked = true;
+				}
+			}
+		}
+	}
+
+	/**
+	 * Undoes each of the precommitted moves and puts them back on the
+	 * uncommitted list.
+	 */
+	private void rollBackPrecommittedMoves() {
+		while (precomitted.size() > 0) {
+			Object last = precomitted.removeLast();
+			Move move2undo;
+			FreerailsSerializable obj2add2uncomitted;
+
+			if (last instanceof Move) {
+				move2undo = (Move) last;
+				obj2add2uncomitted = move2undo;
+			} else if (last instanceof PreMoveAndMove) {
+				PreMoveAndMove pmam = (PreMoveAndMove) last;
+				move2undo = pmam.m;
+				obj2add2uncomitted = pmam.pm;
+			} else {
+				throw new IllegalStateException();
+			}
+
+			MoveStatus ms = move2undo.undoMove(w, Player.AUTHORITATIVE);
+
+			if (!ms.ok) {
+				throw new IllegalStateException(ms.message);
+			}
+
+			uncomitted.addFirst(obj2add2uncomitted);
+		}
+	}
+
+	void toServer(Move m) {
+		uncomitted.addLast(m);
+		precommitMoves();
+	}
+
+	Move toServer(PreMove pm) {
+		uncomitted.addLast(pm);
+		precommitMoves();
+
+		if (blocked) {
+			return pm.generateMove(w);
+		}
+		PreMoveAndMove pmam = (PreMoveAndMove) precomitted.getLast();
 
 		return pmam.m;
-    }
+	}
 }

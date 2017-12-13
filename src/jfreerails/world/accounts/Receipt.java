@@ -6,45 +6,51 @@ package jfreerails.world.accounts;
 
 import jfreerails.world.common.Money;
 
-
 /**
  * A credit.
- *
+ * 
  * @author Luke Lindsay
- *
+ * 
  */
 public class Receipt implements Transaction {
-    private final Money m_amount;
-    private final Category m_category;
+	private static final long serialVersionUID = 3617576007066924596L;
 
-    public Receipt(Money m, Category category) {
-        m_amount = m;
-        m_category = category;
-    }
+	private final Money amount;
 
-    public int hashCode() {
-        int result;
-        result = m_amount.hashCode();
-        result = 29 * result + m_category.hashCode();
+	private final Category category;
 
-        return result;
-    }
+	public Receipt(Money m, Category category) {
+		this.amount = m;
+		this.category = category;
+	}
 
-    public Money getValue() {
-        return m_amount;
-    }
+	public Money deltaAssets() {		
+		return amount.changeSign();
+	}
 
-    public boolean equals(Object o) {
-        if (o instanceof Receipt) {
-            Receipt test = (Receipt)o;
+	public Money deltaCash() {
+		return amount;
+	}
 
-            return test.m_amount.equals(m_amount) &&
-            m_category == test.m_category;
-        }
+	public boolean equals(Object o) {
+		if (o instanceof Receipt) {
+			Receipt test = (Receipt) o;
+
+			return test.amount.equals(amount)
+					&& category == test.category;
+		}
 		return false;
-    }
+	}
 
-    public Category getCategory() {
-        return m_category;
-    }
+	public Category getCategory() {
+		return category;
+	}
+
+	public int hashCode() {
+		int result;
+		result = amount.hashCode();
+		result = 29 * result + category.hashCode();
+
+		return result;
+	}
 }

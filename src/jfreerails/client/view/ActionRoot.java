@@ -17,83 +17,85 @@ import jfreerails.controller.TrackMoveProducer;
 import jfreerails.world.top.ReadOnlyWorld;
 import jfreerails.world.top.SKEY;
 
-
 /**
  * Provides access to Actions change the game state and the GUI.
- *  @author Luke
- *
+ * 
+ * @author Luke
+ * 
  */
 public class ActionRoot {
-    private TrackBuildModel trackBuildModel;
-    private TrackMoveProducer trackMoveProducer;
-    private StationBuildModel stationBuildModel;
-    private DialogueBoxController dialogueBoxController = null;
-    private final BuildTrainDialogAction buildTrainDialogAction = new BuildTrainDialogAction();
-    private final ServerControlModel serverControls = new ServerControlModel( null);
 
-    private class BuildTrainDialogAction extends AbstractAction {
-        public BuildTrainDialogAction() {
-            super("Build Train");
-            putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F7, 0));
-            putValue(SHORT_DESCRIPTION, "Build a new train");
-        }
+	private class BuildTrainDialogAction extends AbstractAction {
+		private static final long serialVersionUID = 3257853173002416948L;
 
-        public void actionPerformed(ActionEvent e) {
-            if (dialogueBoxController != null) {
-                dialogueBoxController.showSelectEngine();
-            }
-        }
-    }
+		public BuildTrainDialogAction() {
+			super("Build Train");
+			putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F7, 0));
+			putValue(SHORT_DESCRIPTION, "Build a new train");
+		}
 
-    /**
-     *  Call this method when a new game is started or a game is loaded.
-     */
-    public void setup(ModelRootImpl modelRoot, ViewLists vl) {
-    	serverControls.setModelRoot(modelRoot);
-        if (!modelRoot.hasBeenSetup)
-            throw new IllegalStateException();
+		public void actionPerformed(ActionEvent e) {
+			if (dialogueBoxController != null) {
+				dialogueBoxController.showSelectEngine();
+			}
+		}
+	}
 
-        ReadOnlyWorld world = modelRoot.getWorld();
+	private final BuildTrainDialogAction buildTrainDialogAction = new BuildTrainDialogAction();
 
-        if (world.size(SKEY.TRACK_RULES) > 0) {
-            trackMoveProducer = new TrackMoveProducer(modelRoot);           
-            stationBuildModel = new StationBuildModel(new StationBuilder(
-                        modelRoot), vl, modelRoot);
-            trackBuildModel = new TrackBuildModel(trackMoveProducer, modelRoot, vl, stationBuildModel);
-        }
-    }
+	private DialogueBoxController dialogueBoxController = null;
 
-    public DialogueBoxController getDialogueBoxController() {
-        return dialogueBoxController;
-    }
+	private final ServerControlModel serverControls;
 
-    public TrackBuildModel getTrackBuildModel() {
-        return trackBuildModel;
-    }
+	private StationBuildModel stationBuildModel;
 
-    public StationBuildModel getStationBuildModel() {
-        return stationBuildModel;
-    }
+	private TrackMoveProducer trackMoveProducer;
 
-    public Action getBuildTrainDialogAction() {
-        return buildTrainDialogAction;
-    }
+	public ActionRoot(ModelRootImpl mr) {
+		 this.serverControls= new ServerControlModel(
+					mr);
+	}
+
+	public Action getBuildTrainDialogAction() {
+		return buildTrainDialogAction;
+	}
+
+	public DialogueBoxController getDialogueBoxController() {
+		return dialogueBoxController;
+	}
+
+	public ServerControlModel getServerControls() {
+		return serverControls;
+	}
+
+	public StationBuildModel getStationBuildModel() {
+		return stationBuildModel;
+	}
 
     public TrackMoveProducer getTrackMoveProducer() {
         return trackMoveProducer;
     }
 
-    public ActionRoot() {
-    }
+	public void setDialogueBoxController(
+			DialogueBoxController dialogueBoxController) {
+		this.dialogueBoxController = dialogueBoxController;
+	}
 
-    public void setDialogueBoxController(
-        DialogueBoxController dialogueBoxController) {
-        this.dialogueBoxController = dialogueBoxController;
-    }
+	/**
+	 * Call this method when a new game is started or a game is loaded.
+	 */
+	public void setup(ModelRootImpl modelRoot, ViewLists vl) {
+		serverControls.setup(modelRoot, dialogueBoxController);                
+		if (!modelRoot.hasBeenSetup)
+			throw new IllegalStateException();
 
-    public ServerControlModel getServerControls() {
-        return serverControls;
-    }
+		ReadOnlyWorld world = modelRoot.getWorld();
 
-    
+		if (world.size(SKEY.TRACK_RULES) > 0) {
+			trackMoveProducer = new TrackMoveProducer(modelRoot);
+			stationBuildModel = new StationBuildModel(new StationBuilder(
+					modelRoot), vl, modelRoot);
+	}
+	}
+
 }

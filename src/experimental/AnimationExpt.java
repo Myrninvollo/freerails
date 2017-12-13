@@ -1,39 +1,47 @@
 package experimental;
 
 import java.awt.Graphics;
+
 import javax.swing.JComponent;
 import javax.swing.JFrame;
-import jfreerails.client.common.ScreenHandler;
+import javax.swing.WindowConstants;
+
 import jfreerails.client.top.GameLoop;
+import jfreerails.controller.ScreenHandler;
 
-
-/** This class tests that the game loop and screen handler are working correctly.  All it does is display
- * the current time in ms and display the number of frames per second.
- *
+/**
+ * This class tests that the game loop and screen handler are working correctly.
+ * All it does is display the current time in ms and display the number of
+ * frames per second.
+ * 
  * @author Luke Lindsay
- *
+ * 
  */
 public class AnimationExpt extends JComponent {
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
 
-        long l = System.currentTimeMillis();
-        String str = String.valueOf(l);
-        g.drawString(str, 100, 100);
-    }
+	private static final long serialVersionUID = 3690191057862473264L;
 
-    public static void main(String[] args) {
-        System.setProperty("SHOWFPS", "true");
+	protected void paintComponent(Graphics g) {
+		super.paintComponent(g);
 
-        JFrame f = new JFrame();
-        f.getContentPane().add(new AnimationExpt());
+		long l = System.currentTimeMillis();
+		String str = String.valueOf(l);
+		g.drawString(str, 100, 100);
+	}
 
-        ScreenHandler screenHandler = new ScreenHandler(f,
-                ScreenHandler.WINDOWED_MODE);
-        screenHandler.apply();
+	public static void main(String[] args) {
+		System.setProperty("SHOWFPS", "true");
 
-        GameLoop gameLoop = new GameLoop(screenHandler);
-        Thread t = new Thread(gameLoop);
-        t.start();
-    }
+		JFrame f = new JFrame();
+		f.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+		f.getContentPane().add(new AnimationExpt());
+
+		ScreenHandler screenHandler = new ScreenHandler(f,
+				ScreenHandler.WINDOWED_MODE);
+		screenHandler.apply();
+
+		GameLoop gameLoop = new GameLoop(screenHandler);
+		Thread t = new Thread(gameLoop);
+		t.start();
+	}
 }

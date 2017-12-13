@@ -11,35 +11,42 @@ import jfreerails.world.top.ReadOnlyWorld;
 import jfreerails.world.train.ImmutableSchedule;
 import jfreerails.world.train.TrainModel;
 
-
 /**
- * This Move removes a train from the list of trains, and the corresponding CargoBundle and Schedule.
+ * This Move removes a train from the list of trains, and the corresponding
+ * CargoBundle and Schedule.
+ * 
  * @author Luke
- *
+ * 
  */
 public class RemoveTrainMove extends CompositeMove {
-    private RemoveTrainMove(Move[] moves) {
-        super(moves);
-    }
+	private static final long serialVersionUID = 3979265867567544114L;
 
-    public static RemoveTrainMove getInstance(int index, FreerailsPrincipal p,
-        ReadOnlyWorld world) {
-        TrainModel train = (TrainModel)world.get(KEY.TRAINS, index, p);
-        int scheduleId = train.getScheduleID();
-        ImmutableSchedule schedule = (ImmutableSchedule)world.get(KEY.TRAIN_SCHEDULES,
-                scheduleId, p);
-        int cargoBundleId = train.getCargoBundleID();
-        ImmutableCargoBundle cargoBundle = (ImmutableCargoBundle)world.get(KEY.CARGO_BUNDLES,
-                cargoBundleId, p);
-        Move removeTrain = new RemoveItemFromListMove(KEY.TRAINS, index, train,
-                p);
-        Move removeCargobundle = new RemoveItemFromListMove(KEY.CARGO_BUNDLES,
-                cargoBundleId, cargoBundle, p);
-        Move removeSchedule = new RemoveItemFromListMove(KEY.TRAIN_SCHEDULES,
-                scheduleId, schedule, p);
+	private RemoveTrainMove(Move[] moves) {
+		super(moves);
+	}
 
-        return new RemoveTrainMove(new Move[] {
-                removeTrain, removeCargobundle, removeSchedule
-            });
-    }
+	public static RemoveTrainMove getInstance(int index, FreerailsPrincipal p,
+			ReadOnlyWorld world) {
+		TrainModel train = (TrainModel) world.get(p, KEY.TRAINS, index);
+		int scheduleId = train.getScheduleID();
+		ImmutableSchedule schedule = (ImmutableSchedule) world.get(
+				p, KEY.TRAIN_SCHEDULES, scheduleId);
+		int cargoBundleId = train.getCargoBundleID();
+		ImmutableCargoBundle cargoBundle = (ImmutableCargoBundle) world.get(
+				p, KEY.CARGO_BUNDLES, cargoBundleId);
+		// TrainPositionOnMap position =
+		// (TrainPositionOnMap)world.get(KEY.TRAIN_POSITIONS, index, p);
+		Move removeTrain = new RemoveItemFromListMove(KEY.TRAINS, index, train,
+				p);
+		Move removeCargobundle = new RemoveItemFromListMove(KEY.CARGO_BUNDLES,
+				cargoBundleId, cargoBundle, p);
+		Move removeSchedule = new RemoveItemFromListMove(KEY.TRAIN_SCHEDULES,
+				scheduleId, schedule, p);
+		// Move removePosition = new RemoveItemFromListMove(KEY.TRAIN_POSITIONS,
+		// index, position, p);
+
+		return new RemoveTrainMove(new Move[] { removeTrain, removeCargobundle,
+				removeSchedule /* , removePosition */
+		});
+	}
 }

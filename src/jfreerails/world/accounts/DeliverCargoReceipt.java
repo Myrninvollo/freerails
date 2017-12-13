@@ -6,34 +6,45 @@ package jfreerails.world.accounts;
 import jfreerails.world.cargo.CargoBatch;
 import jfreerails.world.common.Money;
 
-
 /**
- *  A credit for delivering cargo.
- *  @author Luke
- *
+ * A credit for delivering cargo.
+ * 
+ * @author Luke
+ * 
  */
 public class DeliverCargoReceipt extends Receipt {
-    private final CargoBatch m_cb;
-    private final int m_quantity;
-    private final int m_stationId;
+	private static final long serialVersionUID = 3257009851963160372L;
 
-    public DeliverCargoReceipt(Money m, int quantity, int stationId,
-        CargoBatch cb) {
-        super(m, Category.CARGO_DELIVERY);
-        m_stationId = stationId;
-        m_quantity = quantity;
-        m_cb = cb;
-    }
+	private final CargoBatch cb;
 
-    public CargoBatch getCb() {
-        return m_cb;
-    }
+	private final int quantity;
 
-    public int getQuantity() {
-        return m_quantity;
-    }
+	private final int stationId;
 
-    public int getStationId() {
-        return m_stationId;
-    }
+	private final int trainId;
+
+	public DeliverCargoReceipt(Money m, int quantity, int stationId,
+			CargoBatch cb, int trainId) {
+		super(m, Category.CARGO_DELIVERY);
+		this.stationId = stationId;
+		this.quantity = quantity;
+		this.cb = cb;
+		this.trainId = trainId;
+	}
+
+	public int getTrainId() {
+		return trainId;
+	}
+
+	public CargoBatch getCb() {
+		return cb;
+	}
+
+	public int getQuantity() {
+		return quantity;
+	}
+
+	public int getStationId() {
+		return stationId;
+	}
 }
