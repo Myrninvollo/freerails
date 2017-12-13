@@ -4,6 +4,8 @@
  */
 package jfreerails.world.top;
 
+import java.util.NoSuchElementException;
+
 import jfreerails.world.common.FreerailsSerializable;
 
 /**
@@ -14,51 +16,56 @@ import jfreerails.world.common.FreerailsSerializable;
  * 
  */
 public interface WorldIterator {
-	public static final int BEFORE_FIRST = -1;
+    public static final int BEFORE_FIRST = -1;
 
-	/**
-	 * Moves the cursor down one row from its current position.
-	 */
-	boolean next();
+    /**
+     * Moves the cursor down one row from its current position.
+     */
+    boolean next();
 
-	/**
-	 * Moves the cursor up one row from its current position.
-	 */
-	boolean previous();
+    /**
+     * Moves the cursor up one row from its current position.
+     */
+    boolean previous();
 
-	/**
-	 * Moves the cursor to before the first element and updates any cached
-	 * values.
-	 */
-	void reset();
+    /**
+     * Moves the cursor to before the first element and updates any cached
+     * values.
+     */
+    void reset();
 
-	/** Returns the element the curor is pointing to. */
-	FreerailsSerializable getElement();
+    /** Returns the element the curor is pointing to. */
+    FreerailsSerializable getElement();
 
-	/**
-	 * Returns the index of the element the cursor is pointing to. The value
-	 * returned is index you would need to use in
-	 * <code>World.get(KEY key, int index)</code> to retrieve the same element
-	 * as is returned by <code>getElement()</code>
-	 */
-	int getIndex();
+    /**
+     * Returns the index of the element the cursor is pointing to. The value
+     * returned is index you would need to use in
+     * <code>World.get(KEY key, int index)</code> to retrieve the same element
+     * as is returned by <code>getElement()</code>
+     */
+    int getIndex();
 
-	/**
-	 * Returns the number of the row where the cursor is (the first row is 0).
-	 */
-	int getRowID();
+    /**
+     * Returns the number of the row where the cursor is (the first row is 0).
+     */
+    int getRowID();
 
-	/** Returns the number of rows. */
-	int size();
+    /** Returns the number of rows. */
+    int size();
 
-	/** Moves the cursor to the specified index. */
-	void gotoIndex(int i);
+    /**
+     * Moves the cursor to the specified index.
+     * 
+     * @throws NoSuchElementException
+     *             if index out of range
+     */
+    void gotoIndex(int i);
 
-	/** Moves the cursor to the specified index. */
-	void gotoRow(int row);
+    /** Moves the cursor to the specified index. */
+    void gotoRow(int row);
 
-	/**
-	 * Returns the number of the row where the cursor is (the first row is 1).
-	 */
-	int getNaturalNumber();
+    /**
+     * Returns the number of the row where the cursor is (the first row is 1).
+     */
+    int getNaturalNumber();
 }

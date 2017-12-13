@@ -3,11 +3,11 @@
 <HEAD>
 <META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=windows-1252">
 <TITLE>Freerails</TITLE>
-<META NAME="GENERATOR" CONTENT="OpenOffice.org 1.1.1  (Win32)">
-<META NAME="CREATED" CONTENT="20040530;23574224">
-<META NAME="CHANGED" CONTENT="20040530;23581553">
 </HEAD>
 <BODY LANG="en-US" DIR="LTR">
+This is the Homepage of the freerails2 project. It's based on the freerails project, but has many speed improvements.
+Look in the <a href="http://freerails2.wiki.sourceforge.net/">Wiki</a> for the latest informations.
+<br>
 <H1><img src="FreeRails.png" width="242" height="149"></H1>
 <P> 
   <!--#config timefmt="%d  %B  %Y" -->
@@ -16,40 +16,31 @@
 </P>
 
  
-<P>Freerails is a real time multi player strategy game where players compete to 
-  build the most powerful railroad empire. It is written in java. Development 
+<P>Freerails2 is a real time multi player strategy game where players compete to 
+  build the most powerful railroad empire. It is written in Java. Development 
   is not yet complete.</P>
 
 <P><IMG SRC="screenshots/jfreerails_0_2_6_320x240.png" NAME="Graphic1" ALIGN=BOTTOM WIDTH=320 HEIGHT=240 BORDER=0></P>
-<P><A HREF="jfreerails.jnlp">Play now</A><font size="-1"> 
+<P><A HREF="jfreerails2-0.4.0.jnlp">Play now (V0.4.0 for jdk1.6)</A><font size="-1"> 
 (Size 
   <!--#fsize file="signed_jfreerails.jar"-->;
    updated 
   <!--#config timefmt="%d  %b"   -->
   <!--#flastmod file="signed_jfreerails.jar" -->; 
-  requires <A HREF="http://java.sun.com/j2se/1.5.0/download.jsp">Java 1.5</A>)</font></P>
-<P>If you are interested in getting involved in the Freerails project, post a 
-  message to the mailing list. Before writing any code, have a look at the <a href="javadoc/docs/coding_guidelines.html">coding 
-  guidelines</a>.</P>
-<P><STRONG>Links</STRONG></P>
-<P><A HREF="http://sourceforge.net/projects/freerails/">Freerails Sourceforge 
-  page</A><BR>
-  <A HREF="http://sourceforge.net/project/showfiles.php?group_id=9495">Download</A><BR>
-  <A HREF="http://sourceforge.net/mail/?group_id=9495">Mailing List</A><BR>
-  <A HREF="http://cvs.sourceforge.net/viewcvs.py/*checkout*/freerails/jfreerails/ChangeLog">Change 
-  Log</A><BR>
-  <A HREF="http://sourceforge.net/cvs/?group_id=9495">CVS</A><BR>
-  <A HREF="http://sourceforge.net/tracker/?atid=109495&amp;group_id=9495&amp;func=browse">Bugs</A><BR>
-  <A HREF="http://sourceforge.net/tracker/?atid=359495&amp;group_id=9495&amp;func=browse">Feature 
-  Requests</A><BR>
-  <A HREF="javadoc/index.html">JFreerails Javadoc</A><BR>
-   <A HREF="functional_specification.pdf">Functional Specification </A>
-<font size="-1"> (PDF; size 
-  <!--#fsize file="functional_specification.pdf"-->;
-   updated  
+  requires Java 1.6)</font></P>
+  
+ <P><A HREF="jfreerails2-opengl-0.4.0.jnlp">Play now (V0.4.0 for jdk1.6 and OpenGL)</A><font size="-1"> 
+(Size 
+  <!--#fsize file="signed_jfreerails-1.6.0.jar"-->;
+   updated 
   <!--#config timefmt="%d  %b"   -->
-  <!--#flastmod file="functional_specification.pdf" -->)
-</font>   <BR>
+  <!--#flastmod file="signed_jfreerails-1.6.0.jar" -->; 
+  requires Java 1.6)</font></P>
+  
+<P>If you are interested in getting involved in the Freerails2 project, go to the sourceforge web page</a>.</P>
+<P><STRONG>Links</STRONG></P>
+<P><A HREF="http://sourceforge.net/projects/freerails2/">Freerails2 Sourceforge 
+  page</A><BR>
   <A HREF="screenshots/index.shtml">Screenshots</A></P>
 
 <P><A HREF="http://sourceforge.net/"><IMG SRC="http://sourceforge.net/sflogo.php?group_id=9495&amp;type=1" NAME="Graphic2" ALT="SourceForge Logo" ALIGN=BOTTOM BORDER=0></A> 

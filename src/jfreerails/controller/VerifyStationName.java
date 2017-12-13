@@ -1,6 +1,6 @@
 package jfreerails.controller;
 
-import java.util.Vector;
+import java.util.LinkedList;
 
 import jfreerails.world.player.FreerailsPrincipal;
 import jfreerails.world.station.StationModel;
@@ -20,82 +20,76 @@ import jfreerails.world.top.WorldIterator;
  * 
  */
 public class VerifyStationName {
-	private final ReadOnlyWorld w;
+    private final ReadOnlyWorld w;
 
-	private final String nameToVerify;
+    private final String nameToVerify;
 
-	private final Vector<String> stationAlternatives;
+    private final LinkedList<String> stationAlternatives;
 
-	public VerifyStationName(ReadOnlyWorld world, String name) {
-		this.w = world;
-		this.nameToVerify = name;
-		this.stationAlternatives = new Vector<String>();
+    public VerifyStationName(ReadOnlyWorld world, String name) {
+        this.w = world;
+        this.nameToVerify = name;
+        this.stationAlternatives = new LinkedList<String>();
 
-		stationAlternatives.addElement("Junction");
-		stationAlternatives.addElement("Siding");
-		stationAlternatives.addElement("North");
-		stationAlternatives.addElement("East");
-		stationAlternatives.addElement("South");
-		stationAlternatives.addElement("West");
-	}
+        stationAlternatives.add("Junction");
+        stationAlternatives.add("Siding");
+        stationAlternatives.add("North");
+        stationAlternatives.add("East");
+        stationAlternatives.add("South");
+        stationAlternatives.add("West");
+    }
 
-	public String getName() {
-		String appropriateName = nameToVerify;
-		boolean found = false;
-		String tempName = null;
+    public String getName() {
+        String appropriateName = nameToVerify;
+        boolean found = false;
+        String tempName = null;
 
-		// if (w.size(KEY.STATIONS) <= 0) {
-		// //if there are no stations, then obviously the name isn't taken
-		// return appropriateName;
-		// }
-		found = checkStationExists(appropriateName);
+        found = checkStationExists(appropriateName);
 
-		if (!found) {
-			return appropriateName;
-		}
-		// a station with that name already exists, so we need to find another
-		// name
-		for (int i = 0; i < stationAlternatives.size(); i++) {
-			tempName = appropriateName + " " + stationAlternatives.elementAt(i);
+        if (!found) {
+            return appropriateName;
+        }
+        // a station with that name already exists, so we need to find another
+        // name
+        for (String stationAlternative : stationAlternatives) {
+            tempName = appropriateName + " " + stationAlternative;
+            found = checkStationExists(tempName);
+            if (!found) {
+                return tempName;
+            }
+        }
 
-			found = checkStationExists(tempName);
+        int j = 7; // for number of names that have already been used
 
-			if (!found) {
-				return tempName;
-			}
-		}
+        while (found) {
+            j++;
+            tempName = appropriateName + "Station #" + j;
+            found = checkStationExists(tempName);
+        }
 
-		int j = 7; // for number of names that have already been used
+        return tempName;
+    }
 
-		while (found) {
-			j++;
-			tempName = appropriateName + "Station #" + j;
-			found = checkStationExists(tempName);
-		}
+    private boolean checkStationExists(String name) {
+        String testName = name;
+        StationModel tempStation;
 
-		return tempName;
-	}
+        for (int i = 0; i < w.getNumberOfPlayers(); i++) {
+            FreerailsPrincipal principal = w.getPlayer(i).getPrincipal();
 
-	private boolean checkStationExists(String name) {
-		String testName = name;
-		StationModel tempStation;
+            WorldIterator wi = new NonNullElements(KEY.STATIONS, w, principal);
 
-		for (int i = 0; i < w.getNumberOfPlayers(); i++) {
-			FreerailsPrincipal principal = w.getPlayer(i).getPrincipal();
+            while (wi.next()) { // loop over non null stations
+                tempStation = (StationModel) wi.getElement();
 
-			WorldIterator wi = new NonNullElements(KEY.STATIONS, w, principal);
+                if ((testName).equals(tempStation.getStationName())) {
+                    // station already exists with that name
+                    return true;
+                }
+            }
+        }
 
-			while (wi.next()) { // loop over non null stations
-				tempStation = (StationModel) wi.getElement();
-
-				if ((testName).equals(tempStation.getStationName())) {
-					// station already exists with that name
-					return true;
-				}
-			}
-		}
-
-		// no stations exist with that name
-		return false;
-	}
+        // no stations exist with that name
+        return false;
+    }
 }
