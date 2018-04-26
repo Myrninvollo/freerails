@@ -197,7 +197,7 @@ public class TrackMoveProducer {
         }
 
         FreerailsPrincipal principal = executor.getPrincipal();
-        int owner = ChangeTrackPieceCompositeMove.getOwner(principal, world);
+        int owner = ReadOnlyWorld.getPlayerIndex(world, principal);
         TrackRule trackRule = (TrackRule) world.get(SharedKey.TrackRules, trackRuleID);
         TrackPiece after = new TrackPieceImpl(before.getTrackConfiguration(), trackRule, owner, trackRuleID);
 

@@ -27,7 +27,6 @@ import freerails.model.station.VerifyStationName;
 import freerails.move.*;
 import freerails.move.listmove.AddItemToListMove;
 import freerails.move.listmove.AddStationMove;
-import freerails.move.mapupdatemove.ChangeTrackPieceCompositeMove;
 import freerails.move.mapupdatemove.ChangeTrackPieceMove;
 import freerails.util.Vec2D;
 import freerails.model.world.PlayerKey;
@@ -105,7 +104,7 @@ public class AddStationMoveGenerator implements MoveGenerator {
         TrackPiece before = ft.getTrackPiece();
         TrackRule trackRule = (TrackRule) world.get(SharedKey.TrackRules, ruleNumber);
 
-        int owner = ChangeTrackPieceCompositeMove.getOwner(principal, world);
+        int owner = ReadOnlyWorld.getPlayerIndex(world, principal);
         TrackPiece after = new TrackPieceImpl(before.getTrackConfiguration(), trackRule, owner, ruleNumber);
         Move upgradeTrackMove = new ChangeTrackPieceMove(before, after, location);
 

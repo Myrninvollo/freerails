@@ -29,15 +29,13 @@ import freerails.model.player.FreerailsPrincipal;
 import freerails.model.station.CalculateCargoSupplyRateAtStation;
 import freerails.model.station.Station;
 import freerails.model.station.StationSupply;
-import freerails.model.terrain.CityTilePositioner;
 import freerails.model.world.*;
+import freerails.move.GrowCitiesMove;
 import freerails.move.Move;
 import freerails.move.TimeTickMove;
 import freerails.move.generator.BondInterestMoveGenerator;
 import freerails.move.listmove.ChangeCargoBundleMove;
 import freerails.move.listmove.ChangeStationMove;
-import freerails.move.mapupdatemove.WorldDiffMove;
-import freerails.move.WorldDiffMoveCause;
 import freerails.move.receiver.MoveReceiver;
 import freerails.model.game.GameCalendar;
 import freerails.model.game.GameSpeed;
@@ -233,12 +231,8 @@ public class FullServerGameModel implements ServerGameModel {
         BondInterestMoveGenerator bondInterestMoveGenerator = new BondInterestMoveGenerator(moveReceiver);
         bondInterestMoveGenerator.update(world);
 
-        // Grow cities.
-        FullWorldDiffs fullWorldDiffs = new FullWorldDiffs(world);
-        CityTilePositioner cityTilePositioner = new CityTilePositioner(fullWorldDiffs);
-        cityTilePositioner.growCities();
-
-        Move move = new WorldDiffMove(world, fullWorldDiffs, WorldDiffMoveCause.YearEnd);
+        // Grow cities
+        Move move = new GrowCitiesMove();
         moveReceiver.process(move);
     }
 
